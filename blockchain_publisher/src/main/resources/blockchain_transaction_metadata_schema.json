@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "creation_slot": {
+          "type": "integer"
+        }
+      },
+      "required": ["creation_slot"]
+    },
+    "organisation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": ["id"]
+    },
+    "transactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "base_currency": {
+            "type": "object",
+            "properties": {
+              "internal_number": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": ["internal_code", "id"]
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "type": "string"
+                },
+                "vat": {
+                  "type": "object",
+                  "properties": {
+                    "rate": {
+                      "type": "string"
+                    },
+                    "internal_code": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "counterparty": {
+                  "type": "object",
+                  "properties": {
+                    "internal_code": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "cost_center": {
+            "type": "string"
+          },
+          "project_code": {
+            "type": "string"
+          },
+          "target_currency": {
+            "type": "object",
+            "properties": {
+              "internal_code": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": ["internal_code", "id"]
+          },
+          "internal_number": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "fx_rate": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": ["amount", "id"]
+            }
+          }
+        },
+        "required": ["date", "base_currency", "target_currency", "internal_number", "id", "type", "fx_rate", "items"]
+      }
+    }
+  },
+  "required": ["metadata", "organisation", "transactions"]
+}

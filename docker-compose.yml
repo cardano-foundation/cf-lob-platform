@@ -1,0 +1,57 @@
+services:
+
+  postgres:
+    image: postgres:16.3
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+#    volumes:
+#      - /tmp/lob-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - lob
+
+  app:
+    build:
+      context: .
+    environment:
+      SPRING_CONFIG_LOCATIONS: classpath:/application.yml,classpath:/application-dev--yaci-dev-kit.yml
+      SPRING_PROFILES_ACTIVE: dev--yaci-dev-kit
+    entrypoint: ${ENTRYPOINT:-java -jar app.jar}
+    networks:
+      - lob
+    ports:
+      - "9000:9000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backendhttp.entrypoints=web"
+      - "traefik.http.routers.backendhttp.rule=Host(`${APP_HOSTNAME:-dev.api.cf-lob.metadata.dev.cf-deployments.org}`)"
+      - "traefik.http.routers.backend.rule=Host(`${APP_HOSTNAME:-dev.api.cf-lob.metadata.dev.cf-deployments.org}`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      - "traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Forwarded-Proto=https"
+    
+    volumes:
+      - ./:/app/
+#  rabbitmq:
+#    image: rabbitmq:3-management-alpine
+#    container_name: 'rabbitmq'
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    environment:
+#      RABBITMQ_DEFAULT_USER: 'guest'
+#      RABBITMQ_DEFAULT_PASS: 'guest'
+
+#    volumes:
+#      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+#      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+
+#volumes:
+#    postgres-data:
+
+networks:
+  lob:
+    name: lob

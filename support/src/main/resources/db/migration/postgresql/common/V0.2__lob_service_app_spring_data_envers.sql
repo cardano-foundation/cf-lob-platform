@@ -1,0 +1,8 @@
+-- Spring Data Envers
+CREATE SEQUENCE IF NOT EXISTS revinfo_seq START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE revinfo (
+   rev BIGINT NOT NULL,
+   rev_timestamp TIMESTAMP WITHOUT TIME ZONE,
+   CONSTRAINT pk_revinfo PRIMARY KEY (rev)
+);

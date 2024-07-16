@@ -1,0 +1,75 @@
+package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
+
+
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionBatchService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+@RestController
+@RequestMapping("/api/core")
+@Slf4j
+@RequiredArgsConstructor
+public class ExperimentalAccountingCoreResource {
+
+    private final AccountingCoreService accountingCoreService;
+    private final TransactionBatchService transactionBatchService;
+
+    @PostConstruct
+    public void init() {
+        log.info("AccountingCoreResource init.");
+    }
+
+    @RequestMapping(value = "/schedule/new", method = POST, produces = "application/json")
+    public ResponseEntity<?> schedule() {
+        val userExtractionParameters = UserExtractionParameters.builder()
+                .from(LocalDate.now().minusYears(20))
+                .to(LocalDate.now())
+                .organisationId("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
+                //.transactionTypes(List.of(TransactionType.CardCharge, TransactionType.FxRevaluation))
+                //.transactionNumbers(List.of("JOURNAL226", "JOURNAL227"))
+                .build();
+
+        accountingCoreService.scheduleIngestion(userExtractionParameters);
+
+        return ResponseEntity.ok()
+                .build();
+    }
+
+    @RequestMapping(value = "/reschedule/failed/{batch_id}", method = POST, produces = "application/json")
+    public ResponseEntity<?> reprocessFailed(@Valid @PathVariable("batch_id") String batchId) {
+        return accountingCoreService.scheduleReIngestionForFailed(batchId)
+                .fold(problem -> {
+                    return ResponseEntity.status(problem.getStatus().getStatusCode()).body(problem);
+                }, success -> {
+                    return ResponseEntity.ok().build();
+                });
+    }
+
+    @RequestMapping(value = "/reschedule/last-failed", method = POST, produces = "application/json")
+    public ResponseEntity<?> reprocessFailedForLastBatch() {
+
+        // q: sort by creation time, most recent first and take the most recent
+        val lastBatchM = transactionBatchService.findAll().stream().min((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+
+        return accountingCoreService.scheduleReIngestionForFailed(lastBatchM.orElseThrow().getId())
+                .fold(problem -> {
+                    return ResponseEntity.status(problem.getStatus().getStatusCode()).body(problem);
+                }, success -> {
+                    return ResponseEntity.ok().build();
+                });
+    }
+
+}
