@@ -1,6 +1,5 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 
-
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

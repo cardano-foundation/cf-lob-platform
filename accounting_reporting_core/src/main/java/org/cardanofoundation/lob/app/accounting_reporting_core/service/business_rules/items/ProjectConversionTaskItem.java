@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.items;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
@@ -13,6 +14,7 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.PROJECT_DATA_NOT_FOUND;
 
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectConversionTaskItem implements PipelineTaskItem {
 
     private final OrganisationPublicApiIF organisationPublicApi;
@@ -31,7 +33,11 @@ public class ProjectConversionTaskItem implements PipelineTaskItem {
             val organisationId = tx.getOrganisation().getId();
             val customerCode = projectM.orElseThrow().getCustomerCode();
 
+            log.info("Looking for project mapping for organisationId:{}, customerCode:{}", organisationId, customerCode);
+
             val projectMappingM = organisationPublicApi.findProject(organisationId, customerCode);
+
+            log.info("Project mapping found: {}", projectMappingM);
 
             if (projectMappingM.isEmpty()) {
                 val v = Violation.builder()

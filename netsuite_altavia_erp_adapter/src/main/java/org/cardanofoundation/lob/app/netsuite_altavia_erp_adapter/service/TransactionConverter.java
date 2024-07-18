@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service;
 
 import io.vavr.control.Either;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.FinancialPeriodSource;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.Transactions;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.TxLine;
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity.CodeMappingType;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreBigDecimal;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreString;
 import org.cardanofoundation.lob.app.support.collections.Optionals;
@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError.Code.ADAPTER_ERROR;
 import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.FieldType.*;
+import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity.CodeMappingType.ORGANISATION;
 import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreString.normaliseString;
 
 @RequiredArgsConstructor
@@ -105,7 +106,8 @@ public class TransactionConverter {
                 val bag = Map.<String, Object>of(
                         "organisationId", organisationId,
                         "txId", txId,
-                        "internalTransactionNumber", txLine.transactionNumber()
+                        "internalTransactionNumber", txLine.transactionNumber(),
+                        "validationIssues", humanReadable(validationIssues)
                 );
 
                 log.error("Validation failed for transaction: {}", bag);
@@ -169,6 +171,17 @@ public class TransactionConverter {
                 .items(txItems)
                 .build())
         );
+    }
+
+    private static List<Map<String, Object>> humanReadable(Set<ConstraintViolation<TxLine>> validationIssues) {
+        return validationIssues.stream().map(c -> {
+            return Map.<String, Object>of(
+                    "bean", c.getRootBean().getClass().getName(),
+                    "msg", c.getMessage(),
+                    "property", c.getPropertyPath().toString(),
+                    "invalidValue", c.getInvalidValue()
+            );
+        }).toList();
     }
 
     private YearMonth financialPeriod(TxLine txLine) {
@@ -240,10 +253,10 @@ public class TransactionConverter {
     }
 
     private static Optional<Counterparty> convertCounterparty(TxLine txLine) {
-        return normaliseString(txLine.id()).map(customerCode -> Counterparty.builder()
+        return normaliseString(txLine.counterPartyId()).map(customerCode -> Counterparty.builder()
                 .customerCode(customerCode)
                 .type(VENDOR) // TODO CF hardcoded for now
-                .name(normaliseString(txLine.companyName()))
+                .name(normaliseString(txLine.counterPartyName()))
                 .build());
     }
 
@@ -293,7 +306,7 @@ public class TransactionConverter {
     }
 
     private Either<FatalError, String> organisationId(TxLine txLine) {
-        val organisationIdM = codesMappingService.getCodeMapping(netsuiteInstanceId, txLine.subsidiary(), CodeMappingType.ORGANISATION);
+        val organisationIdM = codesMappingService.getCodeMapping(netsuiteInstanceId, txLine.subsidiary(), ORGANISATION);
 
         if (organisationIdM.isEmpty()) {
             val bag = Map.<String, Object>of(
