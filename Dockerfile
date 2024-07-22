@@ -1,10 +1,8 @@
 FROM openjdk:21-jdk-slim AS build
 WORKDIR /app
 COPY . /app
+RUN ./gradlew clean build publishMavenJavaPublicationToLocalM2Repository
 
-RUN ./gradlew clean -x test build
-FROM openjdk:21-jdk-slim AS backend
-WORKDIR /app
-COPY --from=build /app/build/libs/*SNAPSHOT.jar /app/app.jar
+FROM scratch AS m2-cache
+COPY --from=build /root/.m2 /root/.m2
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
