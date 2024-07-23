@@ -9,6 +9,7 @@ CREATE TABLE organisation (
    admin_email VARCHAR(255) NOT NULL,
    pre_approve_transactions BOOLEAN,
    pre_approve_transactions_dispatch BOOLEAN,
+   logo text,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),

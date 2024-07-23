@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.organisation.domain.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,6 +48,10 @@ public class Organisation {
 
     @Column(name = "admin_email", nullable = false)
     private String adminEmail;
+
+    @Lob
+    @Column(name = "logo")
+    private String logo;
 
     public static String id(String countryCode, String taxIdNumber) {
         return digestAsHex(STR."\{countryCode}::\{taxIdNumber}");
