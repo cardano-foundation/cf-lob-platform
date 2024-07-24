@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface CustomTransactionBatchRepository {
     List<TransactionBatchEntity> findByFilter(BatchSearchRequest body);
+
+    Long findByFilterCount(BatchSearchRequest body);
 }

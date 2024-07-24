@@ -32,4 +32,8 @@ public class TransactionBatchRepositoryGateway {
     public List<TransactionBatchEntity> findByFilter(BatchSearchRequest body) {
         return transactionBatchRepository.findByFilter(body);
     }
+
+    public Long findByFilterCount(BatchSearchRequest body) {
+        return transactionBatchRepository.findByFilterCount(body);
+    }
 }

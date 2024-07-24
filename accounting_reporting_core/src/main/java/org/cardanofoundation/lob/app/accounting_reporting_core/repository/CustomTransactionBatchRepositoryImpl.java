@@ -16,8 +16,10 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.DISPATCHED;
@@ -34,6 +36,50 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<TransactionBatchEntity> criteriaQuery = builder.createQuery(TransactionBatchEntity.class);
         Root<TransactionBatchEntity> rootEntry = criteriaQuery.from(TransactionBatchEntity.class);
+
+        Collection<Predicate> andPredicates = queryCriteria(rootEntry, builder, body);
+
+        criteriaQuery.select(rootEntry);
+        criteriaQuery.where(andPredicates.toArray(new Predicate[0]));
+        criteriaQuery.orderBy(builder.desc(rootEntry.get("createdAt")));
+        // Without this line the query only returns one row.
+        criteriaQuery.groupBy(rootEntry.get("id"));
+
+        TypedQuery<TransactionBatchEntity> theQuery = em.createQuery(criteriaQuery);
+
+        theQuery.setMaxResults(body.getLimit());
+
+        if (null != body.getPage() && 0 < body.getPage()) {
+            theQuery.setFirstResult(body.getPage() * body.getLimit());
+        }
+
+        return theQuery.getResultList();
+
+    }
+
+    @Override
+    public Long findByFilterCount(BatchSearchRequest body) {
+
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+        Root<TransactionBatchEntity> rootEntry = criteriaQuery.from(TransactionBatchEntity.class);
+        Collection<Predicate> andPredicates = queryCriteria(rootEntry, builder, body);
+
+
+        criteriaQuery.select(builder.count(rootEntry));
+        criteriaQuery.where(andPredicates.toArray(new Predicate[0]));
+        criteriaQuery.orderBy(builder.desc(rootEntry.get("createdAt")));
+        // Without this line the query only returns one row.
+        criteriaQuery.groupBy(rootEntry.get("id"));
+
+        TypedQuery<Long> theQuery = em.createQuery(criteriaQuery);
+
+
+        return theQuery.getResultList().stream().count();
+
+    }
+
+    private Collection<Predicate> queryCriteria(Root<TransactionBatchEntity> rootEntry, CriteriaBuilder builder, BatchSearchRequest body) {
         List<Predicate> andPredicates = new ArrayList<>();
 
         andPredicates.add(builder.equal(rootEntry.get("filteringParameters").get("organisationId"), body.getOrganisationId()));
@@ -72,11 +118,14 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
         }
 
         if (null != body.getFrom()) {
-            andPredicates.add(builder.greaterThanOrEqualTo(rootEntry.get("filteringParameters").get("from"), body.getFrom()));
+            LocalDateTime localDateTime1 = body.getFrom().atStartOfDay();
+            andPredicates.add(builder.greaterThanOrEqualTo(rootEntry.get("createdAt"), localDateTime1));
+
         }
 
         if (null != body.getTo()) {
-            andPredicates.add(builder.lessThanOrEqualTo(rootEntry.get("filteringParameters").get("to"), body.getTo()));
+            LocalDateTime localDateTime2 = body.getTo().atTime(23,59, 59);
+            andPredicates.add(builder.lessThanOrEqualTo(rootEntry.get("createdAt"), localDateTime2));
         }
 
         if (!body.getTxStatus().isEmpty()) {
@@ -84,23 +133,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
             andPredicates.add(builder.in(transactionEntityJoin.get("status")).value(body.getTxStatus()));
         }
 
-        criteriaQuery.select(rootEntry);
-        criteriaQuery.where(andPredicates.toArray(new Predicate[0]));
-        criteriaQuery.orderBy(builder.desc(rootEntry.get("createdAt")));
-        // Without this line the query only returns one row.
-        criteriaQuery.groupBy(rootEntry.get("id"));
-
-        TypedQuery<TransactionBatchEntity> theQuery = em.createQuery(criteriaQuery);
-
-        theQuery.setMaxResults(body.getLimit());
-
-        if (null != body.getPage() && 0 < body.getPage()) {
-            body.setPage(body.getPage() - 1);
-            theQuery.setFirstResult(body.getPage() * body.getLimit());
-        }
-
-        return theQuery.getResultList();
-
+        return andPredicates;
     }
 
 }
