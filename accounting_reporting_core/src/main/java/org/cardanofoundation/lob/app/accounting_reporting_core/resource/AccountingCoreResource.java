@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rejection;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.model.AccountingCorePresentationViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.model.AccountingCoreResourceService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
@@ -98,6 +100,18 @@ public class AccountingCoreResource {
         }
 
         return ResponseEntity.ok().body(jsonArray.toString());
+    }
+
+    @Tag(name = "Transactions", description = "Transactions API")
+    @Operation(description = "Rejection types", responses = {
+            @ApiResponse(content =
+                    {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,  array = @ArraySchema(schema = @Schema(implementation = RejectionCode.class)))}
+            )
+    })
+    @GetMapping(value = "/rejection-types", produces = MediaType.APPLICATION_JSON_VALUE, name = "Rejection types")
+    public ResponseEntity<?> rejectionTypes() {
+
+        return ResponseEntity.ok().body(RejectionCode.values());
     }
 
     @Tag(name = "Transactions", description = "Transactions API")
