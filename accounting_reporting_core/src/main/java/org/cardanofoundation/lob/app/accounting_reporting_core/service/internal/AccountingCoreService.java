@@ -11,6 +11,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.repository.Transa
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.problem.Problem;
 
@@ -83,7 +84,7 @@ public class AccountingCoreService {
         return Either.right(true);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Either<Problem, Boolean> approveTransaction(String txId) {
         return transactionRepositoryGateway.approveTransaction(txId);
     }

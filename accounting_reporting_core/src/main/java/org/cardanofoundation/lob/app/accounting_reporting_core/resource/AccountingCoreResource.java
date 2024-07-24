@@ -12,15 +12,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rejection;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.model.AccountingCorePresentationViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.model.AccountingCoreResourceService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ExtractionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.SearchRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsApprove;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.BatchView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.BatchsDetailView;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.TransactionProcessView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.TransactionView;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,14 +64,14 @@ public class AccountingCoreResource {
                     {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionView.class))}
             )
     })
-    @GetMapping(value = "/transactions/{transactionId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> transactionDetailSpecific(@Valid @PathVariable("transactionId") @Parameter(example = "7e9e8bcbb38a283b41eab57add98278561ab51d23a16f3e3baf3daa461b84ab4") String transactionId) {
+    @GetMapping(value = "/transactions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> transactionDetailSpecific(@Valid @PathVariable("id") @Parameter(example = "7e9e8bcbb38a283b41eab57add98278561ab51d23a16f3e3baf3daa461b84ab4") String id) {
 
-        val transactionEntity = accountingCorePresentationService.transactionDetailSpecific(transactionId);
+        val transactionEntity = accountingCorePresentationService.transactionDetailSpecific(id);
         if (transactionEntity.isEmpty()) {
             val issue = Problem.builder()
                     .withTitle("TX_NOT_FOUND")
-                    .withDetail(STR."Transaction with id: {\{transactionId}} could not be found")
+                    .withDetail(STR."Transaction with id: {\{id}} could not be found")
                     .withStatus(Status.NOT_FOUND)
                     .build();
 
@@ -105,7 +106,7 @@ public class AccountingCoreResource {
     @Tag(name = "Transactions", description = "Transactions API")
     @Operation(description = "Rejection types", responses = {
             @ApiResponse(content =
-                    {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,  array = @ArraySchema(schema = @Schema(implementation = RejectionCode.class)))}
+                    {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = RejectionCode.class)))}
             )
     })
     @GetMapping(value = "/rejection-types", produces = MediaType.APPLICATION_JSON_VALUE, name = "Rejection types")
@@ -156,6 +157,29 @@ public class AccountingCoreResource {
         return ResponseEntity
                 .status(HttpStatusCode.valueOf(202))
                 .body(response.toString());
+    }
+
+    @Tag(name = "Transactions", description = "Transactions API")
+    @PostMapping(value = "/transactions/approve", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(description = "Approve transactions",
+            responses = {
+                    @ApiResponse(content = {
+                            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TransactionProcessView.class)))
+                    })
+            }
+    )
+    public ResponseEntity<?> approveTransaction(@Valid @RequestBody TransactionsApprove transactionsApprove) {
+        val resul = accountingCorePresentationService.approveTransactions(transactionsApprove.getTransactionApproves());
+
+        if (resul.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatusCode.valueOf(404))
+                    .body(resul);
+        }
+
+        return ResponseEntity
+                .status(HttpStatusCode.valueOf(202))
+                .body(resul);
     }
 
     @Tag(name = "Batchs", description = "Batchs API")
