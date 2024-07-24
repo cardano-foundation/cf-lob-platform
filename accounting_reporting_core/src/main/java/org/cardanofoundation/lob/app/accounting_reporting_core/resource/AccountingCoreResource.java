@@ -154,7 +154,7 @@ public class AccountingCoreResource {
             }
     )
     public ResponseEntity<?> listAllBatch(@Valid @RequestBody BatchSearchRequest body,
-                                          @RequestParam(name = "page", defaultValue = "1") int page,
+                                          @RequestParam(name = "page", defaultValue = "0") int page,
                                           @RequestParam(name = "limit", defaultValue = "10") int limit) {
         body.setLimit(limit);
         body.setPage(page);

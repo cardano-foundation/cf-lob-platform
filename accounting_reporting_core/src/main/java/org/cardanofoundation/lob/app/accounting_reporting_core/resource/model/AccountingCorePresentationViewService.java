@@ -117,8 +117,9 @@ public class AccountingCorePresentationViewService {
                         Set.of()
                 )
         ).toList();
+
         batchDetail.setBatchs(batches);
-        batchDetail.setTotal(batchDetail.getBatchs().stream().count());
+        batchDetail.setTotal(Long.valueOf(transactionBatchRepositoryGateway.findByFilterCount(body)));
         return batchDetail;
     }
 

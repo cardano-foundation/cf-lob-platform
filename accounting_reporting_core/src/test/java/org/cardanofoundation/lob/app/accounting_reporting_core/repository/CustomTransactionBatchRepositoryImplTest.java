@@ -40,7 +40,7 @@ class CustomTransactionBatchRepositoryImplTest {
 
         BatchSearchRequest body = new BatchSearchRequest();
         body.setLimit(10);
-        body.setPage(2);
+        body.setPage(1);
         body.setOrganisationId("TestOrgId");
         body.setBatchStatistics(Set.of(LedgerDispatchStatusView.APPROVE, LedgerDispatchStatusView.PENDING, LedgerDispatchStatusView.INVALID, LedgerDispatchStatusView.PUBLISH, LedgerDispatchStatusView.PUBLISHED));
         body.setTxStatus(Set.of(TransactionStatus.OK));
@@ -84,7 +84,7 @@ class CustomTransactionBatchRepositoryImplTest {
 
         BatchSearchRequest body = new BatchSearchRequest();
         body.setLimit(10);
-        body.setPage(2);
+        body.setPage(1);
         body.setOrganisationId("TestOrgId");
 
         Mockito.when(em.getCriteriaBuilder()).thenReturn(builder);

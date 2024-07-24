@@ -30,10 +30,9 @@ public class AccountingCoreResourceService {
         LocalDate dateToObj = LocalDate.parse(dateTo);
 
         LocalDate today = LocalDate.now();
-        LocalDate monthsAgo = today.minusMonths(org.getAccountPeriodMonths());
-        LocalDate yesterday = today.minusDays(1);
+        LocalDate monthsAgo = today.minusMonths(org.getAccountPeriodMonths()).minusDays(1);
 
-        return dateFromObj.isAfter(monthsAgo) && dateToObj.isBefore(yesterday);
+        return dateFromObj.isAfter(monthsAgo) && dateToObj.isBefore(today);
     }
 
 }
