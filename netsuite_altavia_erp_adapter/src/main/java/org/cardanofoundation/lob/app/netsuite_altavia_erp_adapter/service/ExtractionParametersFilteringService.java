@@ -18,23 +18,26 @@ public class ExtractionParametersFilteringService {
                                                       SystemExtractionParameters systemExtractionParameters,
                                                       Set<Transaction> txs) {
         return txs.stream()
+                // this is for sanity reasons since actually we should be filtering out the transactions in the adapter layer and more specifically while making an HTTP call via NetSuiteClient
                 .filter(tx -> {
                     val txAccountingPeriod = tx.getAccountingPeriod();
 
-                    return txAccountingPeriod.equals(systemExtractionParameters.getAccountPeriodFrom()) || txAccountingPeriod.isAfter(systemExtractionParameters.getAccountPeriodFrom())
+                    return (txAccountingPeriod.equals(systemExtractionParameters.getAccountPeriodFrom()) || txAccountingPeriod.isAfter(systemExtractionParameters.getAccountPeriodFrom()))
                             &&
                             (txAccountingPeriod.equals(systemExtractionParameters.getAccountPeriodTo()) || txAccountingPeriod.isBefore(systemExtractionParameters.getAccountPeriodTo()));
                 })
                 .filter(tx -> userExtractionParameters.getOrganisationId().equals(tx.getOrganisation().getId()))
+                // this is for sanity reasons since actually we should be filtering out the transactions in the adapter layer and more specifically while making an HTTP call via NetSuiteClient
                 .filter(tx -> {
                     val from = userExtractionParameters.getFrom();
 
-                    return tx.getEntryDate().isEqual(from) ||  tx.getEntryDate().isAfter(from);
+                    return tx.getEntryDate().isEqual(from) || tx.getEntryDate().isAfter(from);
                 })
+                // this is for sanity reasons since actually we should be filtering out the transactions in the adapter layer and more specifically while making an HTTP call via NetSuiteClient
                 .filter(tx -> {
-                    val to = userExtractionParameters.getFrom();
+                    val to = userExtractionParameters.getTo();
 
-                    return tx.getEntryDate().isEqual(to) ||  tx.getEntryDate().isAfter(to);
+                    return tx.getEntryDate().isEqual(to) || tx.getEntryDate().isBefore(to);
                 })
                 .filter(tx -> {
                     val txTypes = userExtractionParameters.getTransactionTypes();
@@ -42,9 +45,9 @@ public class ExtractionParametersFilteringService {
                     return txTypes.isEmpty() || txTypes.contains(tx.getTransactionType());
                 })
                 .filter(tx -> {
-                    val transactionNumber = userExtractionParameters.getTransactionNumbers();
+                    val transactionNumbers = userExtractionParameters.getTransactionNumbers();
 
-                    return transactionNumber.isEmpty() || transactionNumber.contains(tx.getInternalTransactionNumber());
+                    return transactionNumbers.isEmpty() || transactionNumbers.contains(tx.getInternalTransactionNumber());
                 })
                 .collect(Collectors.toSet());
     }

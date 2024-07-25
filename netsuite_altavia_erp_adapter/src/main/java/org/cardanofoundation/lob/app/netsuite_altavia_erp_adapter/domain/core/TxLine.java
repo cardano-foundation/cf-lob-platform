@@ -3,107 +3,118 @@ package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import jakarta.validation.constraints.*;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.Dates.ISO_8601_FORMAT_QUASI;
 
 // https://docs.google.com/spreadsheets/d/1iGo1t2bLuWSONOYo6kG9uXSzt7laCrM8gluKkx8tmn0/edit#gid=501685631
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record TxLine(
 
-        @JsonProperty("Line ID")
+        @JsonProperty("line")
         @PositiveOrZero
+        @NotNull
         Integer lineID,
 
-        @JsonProperty("Subsidiary (no hierarchy)")
+        @JsonProperty("subsidiarynohierarchy")
         @PositiveOrZero
+        @NotNull
         Long subsidiary,
 
-        @JsonProperty("Type")
+        @JsonProperty("type")
+        @NotNull
         String type,
 
-        @JsonProperty("Date")
-        @JsonDeserialize(using = LocalDateDeserializer.class)
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+        @JsonProperty("trandate")
+        @JsonFormat(shape = STRING, pattern = ISO_8601_FORMAT_QUASI)
+        @NotNull
         LocalDate date,
 
-        @JsonProperty("ID")
-        String id,
+        @JsonProperty("vendor.entityid")
+        @Nullable
+        String counterPartyId,
 
-        @JsonProperty("Company Name")
-        String companyName,
+        @JsonProperty("vendor.companyname")
+        String counterPartyName,
 
-        @JsonProperty("Tax Item")
+        @JsonProperty("taxcode")
         String taxItem,
 
-        @JsonProperty("Cost Center (no hierarchy)")
         @Nullable
+        @JsonProperty("departmentnohierarchy")
         String costCenter,
 
-        @JsonProperty("Transaction Number")
+        @JsonProperty("transactionnumber")
         @NotBlank
         String transactionNumber,
 
-        @JsonProperty("Document Number")
+        @JsonProperty("tranid")
         @Nullable
         String documentNumber,
 
-        @JsonProperty("Number")
+        @JsonProperty("account.number")
         String number,
 
-        @JsonProperty("Name")
+        @JsonProperty("account.name")
         @Nullable
         String name,
 
-        @JsonProperty("Project (no hierarchy)")
+        @JsonProperty("classnohierarchy")
         String project,
 
-        @JsonProperty("Account (Main)")
+        @JsonProperty("accountmain")
         String accountMain,
 
-        @JsonProperty("Memo (Main)")
-        String memo,
-
-        @JsonProperty("Currency")
+        @JsonProperty("currency")
         @NotNull
         String currency,
 
-        @JsonProperty("Symbol")
+        @JsonProperty("Currency.symbol")
         @NotNull
         String currencySymbol,
 
         // this is accounting period date
-        @JsonProperty("End Date")
-        @JsonSerialize(using = LocalDateSerializer.class)
-        @JsonDeserialize(using = LocalDateDeserializer.class)
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+        @JsonProperty("enddate")
+        @JsonFormat(shape = STRING, pattern = ISO_8601_FORMAT_QUASI)
         LocalDate endDate,
 
+        @JsonProperty("datecreated")
+        @JsonFormat(shape = STRING, pattern = ISO_8601_FORMAT_QUASI)
         @NotNull
-        @JsonProperty("Exchange Rate")
+        LocalDateTime dateCreated,
+
+        @JsonProperty("lastmodifieddate")
+        @JsonFormat(shape = STRING, pattern = ISO_8601_FORMAT_QUASI)
+        @NotNull
+        LocalDateTime lastModifiedDate,
+
+        @NotNull
+        @JsonProperty("exchangerate")
         @Positive
         BigDecimal exchangeRate,
 
         @DecimalMin(value = "0.0")
         @Nullable
-        @JsonProperty("Amount (Debit) (Foreign Currency)") BigDecimal amountDebitForeignCurrency,
+        @JsonProperty("debitfxamount") BigDecimal amountDebitForeignCurrency,
 
         @DecimalMin(value = "0.0")
         @Nullable
-        @JsonProperty("Amount (Credit) (Foreign Currency)") BigDecimal amountCreditForeignCurrency,
+        @JsonProperty("creditfxamount") BigDecimal amountCreditForeignCurrency,
 
         @DecimalMin(value = "0.0")
         @Nullable
-        @JsonProperty("Amount (Debit)") BigDecimal amountDebit,
+        @JsonProperty("debitamount") BigDecimal amountDebit,
 
         @DecimalMin(value = "0.0")
         @Nullable
-        @JsonProperty("Amount (Credit)") BigDecimal amountCredit
+        @JsonProperty("creditamount") BigDecimal amountCredit
 
-) { }
+) {
+
+}

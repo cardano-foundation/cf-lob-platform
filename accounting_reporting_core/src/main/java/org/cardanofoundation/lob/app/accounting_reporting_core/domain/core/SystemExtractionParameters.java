@@ -7,7 +7,7 @@ import lombok.*;
 import java.time.YearMonth;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString

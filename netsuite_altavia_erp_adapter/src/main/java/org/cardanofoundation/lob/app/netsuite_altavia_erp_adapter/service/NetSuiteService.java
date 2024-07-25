@@ -6,9 +6,9 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.TransactionBatchChunkEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.TransactionBatchFailedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.TransactionBatchStartedEvent;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.TransactionBatchChunkEvent;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.NetSuiteClient;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity.NetSuiteIngestionEntity;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.repository.IngestionRepository;
@@ -67,7 +67,10 @@ public class NetSuiteService {
         try {
             log.info("Running ingestion...");
 
-            val netSuiteJsonE = netSuiteClient.retrieveLatestNetsuiteTransactionLines();
+            val fromExtractionDate = userExtractionParameters.getFrom();
+            val toExtractionDate = userExtractionParameters.getTo();
+
+            val netSuiteJsonE = netSuiteClient.retrieveLatestNetsuiteTransactionLines(fromExtractionDate, toExtractionDate);
 
             if (netSuiteJsonE.isLeft()) {
                 log.error("Error retrieving data from NetSuite API: {}", netSuiteJsonE.getLeft().getDetail());
@@ -76,7 +79,7 @@ public class NetSuiteService {
 
                 val bag = Map.<String, Object>of(
                         "adapterInstanceId", netsuiteInstanceId,
-                        "netsuiteUrl", netSuiteClient.netsuiteUrl(),
+                        "netsuiteUrl", netSuiteClient.getBaseUrl(),
                         "technicalErrorTitle", problem.getTitle(),
                         "technicalErrorDetail", problem.getDetail()
                 );
@@ -101,7 +104,7 @@ public class NetSuiteService {
 
                 val bag = Map.<String, Object>of(
                         "adapterInstanceId", netsuiteInstanceId,
-                        "netsuiteUrl", netSuiteClient.netsuiteUrl(),
+                        "netsuiteUrl", netSuiteClient.getBaseUrl(),
                         "technicalErrorTitle", problem.getTitle(),
                         "technicalErrorDetail", problem.getDetail()
                 );
