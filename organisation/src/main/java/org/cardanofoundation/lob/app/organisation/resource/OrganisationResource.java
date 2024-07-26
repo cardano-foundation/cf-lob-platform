@@ -50,7 +50,8 @@ public class OrganisationResource {
                             organisation.getCurrencyId(),
                             monthsAgo,
                             yesterday,
-                            organisation.getAdminEmail()
+                            organisation.getAdminEmail(),
+                            organisation.getLogo()
                     );
                 }).toList()
         );
@@ -80,7 +81,8 @@ public class OrganisationResource {
                     organisation1.getCurrencyId(),
                     monthsAgo,
                     yesterday,
-                    organisation1.getAdminEmail()
+                    organisation1.getAdminEmail(),
+                    organisation1.getLogo()
             );
         });
         if (organisation.isEmpty()) {
