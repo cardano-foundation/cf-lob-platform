@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.BatchStatistics;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.FilteringParameters;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionBatchEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
@@ -18,11 +15,14 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.
 import org.jmolecules.ddd.annotation.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.AMOUNT_FCY_IS_ZERO;
 
 @Service
 @org.springframework.stereotype.Service
@@ -152,6 +152,7 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getAutomatedValidationStatus(),
                 transactionEntity.getTransactionApproved(),
                 transactionEntity.getLedgerDispatchApproved(),
+                getAmountLcy(transactionEntity),
                 getTransactionItemView(transactionEntity),
                 getViolation(transactionEntity),
                 transactionEntity.getStatus()
@@ -159,13 +160,38 @@ public class AccountingCorePresentationViewService {
     }
 
     private Set<TransactionItemView> getTransactionItemView(TransactionEntity transaction) {
-        return transaction.getItems().stream().map(item -> new TransactionItemView(
-                item.getId(),
-                item.getAccountDebit(),
-                item.getAccountCredit(),
-                item.getAmountFcy(),
-                item.getAmountLcy()
-        )).collect(Collectors.toSet());
+        return transaction.getItems().stream().map(item -> {
+
+            return new TransactionItemView(
+                    item.getId(),
+                    item.getAccountDebit().map(account -> account.getCode()).orElse(""),
+                    item.getAccountDebit().flatMap(account -> account.getName()).orElse(""),
+                    item.getAccountDebit().flatMap(account -> account.getRefCode()).orElse(""),
+                    item.getAccountCredit().map(account -> account.getCode()).orElse(""),
+                    item.getAccountCredit().flatMap(account -> account.getName()).orElse(""),
+                    item.getAccountCredit().flatMap(account -> account.getRefCode()).orElse(""),
+                    item.getAmountFcy(),
+                    item.getAmountLcy(),
+                    item.getFxRate(),
+                    item.getCostCenter().map(CostCenter::getCustomerCode).orElse(""),
+                    item.getCostCenter().flatMap(CostCenter::getExternalCustomerCode).orElse(""),
+                    item.getCostCenter().flatMap(CostCenter::getName).orElse(""),
+                    item.getProject().map(Project::getCustomerCode).orElse(""),
+                    item.getProject().flatMap(Project::getName).orElse(""),
+                    item.getProject().flatMap(Project::getExternalCustomerCode).orElse(""),
+                    item.getAccountEvent().map(AccountEvent::getCode).orElse(""),
+                    item.getAccountEvent().map(AccountEvent::getName).orElse(""),
+                    item.getDocument().map(Document::getNum).orElse(""),
+                    item.getDocument().map(document -> document.getCurrency().getCustomerCode()).orElse(""),
+                    item.getDocument().flatMap(document -> document.getVat().map(Vat::getCustomerCode)).orElse(""),
+                    item.getDocument().flatMap(document -> document.getVat().flatMap(Vat::getRate)).orElse(BigDecimal.ZERO),
+                    item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getCustomerCode)).orElse(""),
+                    item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).orElse(org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR),
+                    item.getDocument().flatMap(document -> document.getCounterparty().flatMap(Counterparty::getName)).orElse("")
+
+
+            );
+        }).collect(Collectors.toSet());
     }
 
     private Set<ViolationView> getViolation(TransactionEntity transaction) {
@@ -177,6 +203,14 @@ public class AccountingCorePresentationViewService {
                 violation.getCode(),
                 violation.getBag()
         )).collect(Collectors.toSet());
+    }
+
+    private BigDecimal getAmountLcy(TransactionEntity tx) {
+        BigDecimal total = BigDecimal.ZERO;
+        for (val txItem : tx.getItems()) {
+            total = total.add(txItem.getAmountLcy());
+        }
+        return total;
     }
 
 }

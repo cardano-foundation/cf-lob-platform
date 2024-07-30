@@ -117,8 +117,8 @@ class AccountingCorePresentationConverterTest {
 
         assertEquals(BigDecimal.valueOf(1000), result.get(0).getItems().stream().findFirst().get().getAmountFcy());
         assertEquals(BigDecimal.valueOf(1000), result.get(0).getItems().stream().findFirst().get().getAmountLcy());
-        assertEquals("debit-code", result.get(0).getItems().stream().findFirst().get().getAccountDebit().get().getCode());
-        assertEquals("credit-code", result.get(0).getItems().stream().findFirst().get().getAccountCredit().get().getCode());
+        assertEquals("debit-code", result.get(0).getItems().stream().findFirst().get().getAccountDebitCode());
+        assertEquals("credit-code", result.get(0).getItems().stream().findFirst().get().getAccountCreditCode());
 
         assertEquals(Optional.of("tx-item-id"), result.get(0).getViolations().stream().findFirst().get().getTransactionItemId());
 
@@ -147,6 +147,7 @@ class AccountingCorePresentationConverterTest {
 
         TransactionItemEntity transactionItem = new TransactionItemEntity();
         transactionItem.setId("txItemId");
+        transactionItem.setAmountLcy(BigDecimal.valueOf(100));
         Violation violation = new Violation();
         violation.setTxItemId(Optional.of("txItemId"));
         LocalDate from = LocalDate.now();
