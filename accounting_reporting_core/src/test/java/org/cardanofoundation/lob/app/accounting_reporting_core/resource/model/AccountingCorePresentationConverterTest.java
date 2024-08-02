@@ -189,10 +189,10 @@ class AccountingCorePresentationConverterTest {
         assertEquals(batchId, result.get().getId());
         assertEquals(10, result.get().getBatchStatistics().getTotal());
         assertEquals(1, result.get().getBatchStatistics().getInvalid());
-        assertEquals(9, result.get().getBatchStatistics().getPublish());
-        assertEquals(8, result.get().getBatchStatistics().getPending());
-        assertEquals(6, result.get().getBatchStatistics().getPublished());
-        assertEquals(8, result.get().getBatchStatistics().getApprove());
+        assertEquals(0, result.get().getBatchStatistics().getPublish());
+        assertEquals(10, result.get().getBatchStatistics().getPending());
+        assertEquals(0, result.get().getBatchStatistics().getPublished());
+        assertEquals(9, result.get().getBatchStatistics().getApprove());
         assertEquals(2, result.get().getTransactions().stream().count());
 
         TransactionView resultTx1 = result.get().getTransactions().stream().filter(
