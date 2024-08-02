@@ -77,11 +77,11 @@ public class AccountingCorePresentationViewService {
         Optional<BatchStatistics> statistics = batchStatistics.stream().findFirst();
 
         return new BatchStatisticsView(
-                statistics.flatMap(BatchStatistics::getProcessedTransactionsCount).orElse(0),
-                Math.abs(statistics.flatMap(BatchStatistics::getFailedTransactionsCount).orElse(0) - statistics.flatMap(BatchStatistics::getApprovedTransactionsCount).orElse(0)),
-                statistics.flatMap(BatchStatistics::getFailedTransactionsCount).orElse(0),
                 statistics.flatMap(BatchStatistics::getApprovedTransactionsCount).orElse(0),
-                statistics.flatMap(BatchStatistics::getFinalizedTransactionsCount).orElse(0),
+                Math.abs(statistics.flatMap(BatchStatistics::getTotalTransactionsCount).orElse(0) - statistics.flatMap(BatchStatistics::getDispatchedTransactionsCount).orElse(0)),
+                statistics.flatMap(BatchStatistics::getFailedTransactionsCount).orElse(0),
+                statistics.flatMap(BatchStatistics::getDispatchedTransactionsCount).orElse(0),
+                statistics.flatMap(BatchStatistics::getCompletedTransactionsCount).orElse(0),
                 statistics.flatMap(BatchStatistics::getTotalTransactionsCount).orElse(0)
         );
 
