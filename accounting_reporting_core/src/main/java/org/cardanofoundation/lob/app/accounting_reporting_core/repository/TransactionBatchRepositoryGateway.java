@@ -22,10 +22,8 @@ public class TransactionBatchRepositoryGateway {
         return transactionBatchRepository.findById(batchId);
     }
 
+    // TODO: Pagination need to be implemented
     public List<TransactionBatchEntity> findByOrganisationId(String organisationId) {
-        /**
-         * Todo: Pagination need to be implemented.
-         */
         return transactionBatchRepository.findAllByFilteringParametersOrganisationId(organisationId);
     }
 
@@ -36,4 +34,5 @@ public class TransactionBatchRepositoryGateway {
     public Long findByFilterCount(BatchSearchRequest body) {
         return transactionBatchRepository.findByFilterCount(body);
     }
+
 }

@@ -18,7 +18,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.model.Ac
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ExtractionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.SearchRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsApprove;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.BatchView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.BatchsDetailView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.TransactionProcessView;
@@ -27,13 +27,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
 import java.util.List;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.zalando.problem.Status.OK;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -48,10 +50,10 @@ public class AccountingCoreResource {
     @Tag(name = "Transactions", description = "Transactions API")
     @Operation(description = "Transaction list", responses = {
             @ApiResponse(content =
-                    {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TransactionView.class)))}
+                    {@Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TransactionView.class)))}
             )
     })
-    @PostMapping(value = "/transactions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/transactions", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> listAllAction(@Valid @RequestBody SearchRequest body) {
         List<TransactionView> transactions = accountingCorePresentationService.allTransactions(body);
 
@@ -61,10 +63,10 @@ public class AccountingCoreResource {
     @Tag(name = "Transactions", description = "Transactions API")
     @Operation(description = "Transaction detail", responses = {
             @ApiResponse(content =
-                    {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionView.class))}
+                    {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionView.class))}
             )
     })
-    @GetMapping(value = "/transactions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/transactions/{id}", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> transactionDetailSpecific(@Valid @PathVariable("id") @Parameter(example = "7e9e8bcbb38a283b41eab57add98278561ab51d23a16f3e3baf3daa461b84ab4") String id) {
 
         val transactionEntity = accountingCorePresentationService.transactionDetailSpecific(id);
@@ -84,10 +86,10 @@ public class AccountingCoreResource {
     @Tag(name = "Transactions", description = "Transactions API")
     @Operation(description = "Transaction types", responses = {
             @ApiResponse(content =
-                    {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(example = "[{\"id\":\"CardCharge\",\"title\":\"Card Charge\"},{\"id\":\"VendorBill\",\"title\":\"Vendor Bill\"},{\"id\":\"CardRefund\",\"title\":\"Card Refund\"},{\"id\":\"Journal\",\"title\":\"Journal\"},{\"id\":\"FxRevaluation\",\"title\":\"Fx Revaluation\"},{\"id\":\"Transfer\",\"title\":\"Transfer\"},{\"id\":\"CustomerPayment\",\"title\":\"Customer Payment\"},{\"id\":\"ExpenseReport\",\"title\":\"Expense Report\"},{\"id\":\"VendorPayment\",\"title\":\"Vendor Payment\"},{\"id\":\"BillCredit\",\"title\":\"Bill Credit\"}]"))}
+                    {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(example = "[{\"id\":\"CardCharge\",\"title\":\"Card Charge\"},{\"id\":\"VendorBill\",\"title\":\"Vendor Bill\"},{\"id\":\"CardRefund\",\"title\":\"Card Refund\"},{\"id\":\"Journal\",\"title\":\"Journal\"},{\"id\":\"FxRevaluation\",\"title\":\"Fx Revaluation\"},{\"id\":\"Transfer\",\"title\":\"Transfer\"},{\"id\":\"CustomerPayment\",\"title\":\"Customer Payment\"},{\"id\":\"ExpenseReport\",\"title\":\"Expense Report\"},{\"id\":\"VendorPayment\",\"title\":\"Vendor Payment\"},{\"id\":\"BillCredit\",\"title\":\"Bill Credit\"}]"))}
             )
     })
-    @GetMapping(value = "/transaction-types", produces = MediaType.APPLICATION_JSON_VALUE, name = "Transaction types")
+    @GetMapping(value = "/transaction-types", produces = APPLICATION_JSON_VALUE, name = "Transaction types")
     public ResponseEntity<?> transactionType() throws JSONException {
 
         JSONArray jsonArray = new JSONArray();
@@ -106,20 +108,20 @@ public class AccountingCoreResource {
     @Tag(name = "Transactions", description = "Transactions API")
     @Operation(description = "Rejection types", responses = {
             @ApiResponse(content =
-                    {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = RejectionCode.class)))}
+                    {@Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = RejectionCode.class)))}
             )
     })
-    @GetMapping(value = "/rejection-types", produces = MediaType.APPLICATION_JSON_VALUE, name = "Rejection types")
+    @GetMapping(value = "/rejection-types", produces = APPLICATION_JSON_VALUE, name = "Rejection types")
     public ResponseEntity<?> rejectionTypes() {
 
         return ResponseEntity.ok().body(RejectionCode.values());
     }
 
     @Tag(name = "Transactions", description = "Transactions API")
-    @PostMapping(value = "/extraction", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/extraction", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(description = "Trigger the extraction from the ERP system(s)", responses = {
             @ApiResponse(content =
-                    {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    {@Content(mediaType = APPLICATION_JSON_VALUE,
                             schema = @Schema(example = "{\"event\": \"EXTRACTION\",\"message\":\"We have received your extraction request now. Please review imported transactions from the batch list.\"}"))},
                     responseCode = "202"
             )
@@ -159,35 +161,46 @@ public class AccountingCoreResource {
                 .body(response.toString());
     }
 
-    @Tag(name = "Transactions", description = "Transactions API")
-    @PostMapping(value = "/transactions/approve", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(description = "Approve transactions",
+    @Tag(name = "Transactions Approval", description = "Transactions Approval API")
+    @PostMapping(value = "/transactions/approve", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @Operation(description = "Approve one or more transactions",
             responses = {
                     @ApiResponse(content = {
-                            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TransactionProcessView.class)))
+                            @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TransactionProcessView.class)))
                     })
             }
     )
-    public ResponseEntity<?> approveTransaction(@Valid @RequestBody TransactionsApprove transactionsApprove) {
-        val resul = accountingCorePresentationService.approveTransactions(transactionsApprove.getTransactionApproves());
-
-        if (resul.isEmpty()) {
-            return ResponseEntity
-                    .status(HttpStatusCode.valueOf(404))
-                    .body(resul);
-        }
+    public ResponseEntity<?> approveTransactions(@Valid @RequestBody TransactionsRequest transactionsRequest) {
+        val transactionProcessViewsResult = accountingCorePresentationService.approveTransactions(transactionsRequest);
 
         return ResponseEntity
-                .status(HttpStatusCode.valueOf(202))
-                .body(resul);
+                .status(HttpStatusCode.valueOf(OK.getStatusCode()))
+                .body(transactionProcessViewsResult);
+    }
+
+    @Tag(name = "Transactions Publish / Dispatch Approval", description = "Transactions Publish / Dispatch Approval API")
+    @PostMapping(value = "/transactions/approve", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @Operation(description = "Approve one or more transactions",
+            responses = {
+                    @ApiResponse(content = {
+                            @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TransactionProcessView.class)))
+                    })
+            }
+    )
+    public ResponseEntity<?> approveTransactionsPublish(@Valid @RequestBody TransactionsRequest transactionsRequest) {
+        val transactionProcessViewsResult = accountingCorePresentationService.approveTransactionsPublish(transactionsRequest);
+
+        return ResponseEntity
+                .status(HttpStatusCode.valueOf(OK.getStatusCode()))
+                .body(transactionProcessViewsResult);
     }
 
     @Tag(name = "Batchs", description = "Batchs API")
-    @PostMapping(value = "/batchs", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/batchs", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Batch list",
             responses = {
                     @ApiResponse(content = {
-                            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = BatchsDetailView.class)))
+                            @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = BatchsDetailView.class)))
                     })
             }
     )
@@ -203,13 +216,13 @@ public class AccountingCoreResource {
     }
 
     @Tag(name = "Batchs", description = "Batchs API")
-    @GetMapping(value = "/batchs/{batchId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/batchs/{batchId}", produces = APPLICATION_JSON_VALUE)
     @Operation(description = "Batch detail",
             responses = {
                     @ApiResponse(content = {
-                            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BatchView.class))
+                            @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = BatchView.class))
                     }),
-                    @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(example = "{\"title\": \"BATCH_NOT_FOUND\",\"status\": 404,\"detail\": \"Batch with id: {batchId} could not be found\"" +
+                    @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(example = "{\"title\": \"BATCH_NOT_FOUND\",\"status\": 404,\"detail\": \"Batch with id: {batchId} could not be found\"" +
                             "}"))})
             }
     )

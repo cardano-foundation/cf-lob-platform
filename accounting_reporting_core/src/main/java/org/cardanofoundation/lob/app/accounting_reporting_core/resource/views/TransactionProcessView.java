@@ -26,4 +26,5 @@ public class TransactionProcessView {
     public static TransactionProcessView createFail(String id, Problem error) {
         return new TransactionProcessView(id, false, Optional.of(error));
     }
+
 }
