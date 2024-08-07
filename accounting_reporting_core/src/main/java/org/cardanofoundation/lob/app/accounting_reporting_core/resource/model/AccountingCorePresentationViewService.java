@@ -1,5 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.model;
 
+import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -10,19 +11,20 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.repository.Transa
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ExtractionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.SearchRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionApprove;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
 import org.jmolecules.ddd.annotation.Service;
+import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
+import org.zalando.problem.ThrowableProblem;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.AMOUNT_FCY_IS_ZERO;
 
 @Service
 @org.springframework.stereotype.Service
@@ -135,6 +137,36 @@ public class AccountingCorePresentationViewService {
 
         accountingCoreService.scheduleIngestion(fp);
 
+    }
+
+    public List<TransactionProcessView> approveTransactions(List<TransactionApprove> transactionApproves) {
+
+        val transactionProcessViews = new ArrayList<TransactionProcessView>(List.of());
+        for (val transactionAp : transactionApproves) {
+
+            try {
+                Either<Problem, Boolean> approveTransactionE = accountingCoreService.approveTransaction(transactionAp.getId());
+                val resu = approveTransactionE.fold(problem -> {
+                    return TransactionProcessView.createFail(transactionAp.getId(), problem);
+                }, success -> {
+                    return TransactionProcessView.createSucess(transactionAp.getId());
+                });
+
+                transactionProcessViews.add(resu);
+            } catch (DataAccessException exception) {
+                val problem = Problem.builder()
+                        .withTitle("TRANSACTION_DB_ERROR")
+                        .withDetail(STR."DAtabse serialsation problem for the ID: \{transactionAp.getId()}")
+                        .with("transactionId", transactionAp.getId())
+                        .withStatus(Status.INTERNAL_SERVER_ERROR)
+                        .with("cause", exception.getMessage())
+                        .build();
+                transactionProcessViews.add(TransactionProcessView.createFail(transactionAp.getId(), problem));
+            }
+
+        }
+
+        return transactionProcessViews;
     }
 
     private Set<TransactionView> getTransaction(TransactionBatchEntity transactionBatchEntity) {
