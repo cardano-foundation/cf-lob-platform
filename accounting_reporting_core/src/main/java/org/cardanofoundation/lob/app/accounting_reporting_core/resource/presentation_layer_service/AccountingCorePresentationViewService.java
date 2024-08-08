@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.resource.model;
+package org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,13 +7,10 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserE
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepositoryGateway;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ExtractionRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.SearchRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
-import org.jmolecules.ddd.annotation.Service;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -27,6 +24,7 @@ import static java.math.BigDecimal.ZERO;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 
 @Service
+@org.jmolecules.ddd.annotation.Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -146,7 +144,7 @@ public class AccountingCorePresentationViewService {
                 .map(txEntityE -> txEntityE.fold(txProblem -> {
                     return TransactionProcessView.createFail(txProblem.getId(), txProblem.getProblem());
                 }, success -> {
-                    return TransactionProcessView.createSucess(success.getId());
+                    return TransactionProcessView.createSuccess(success.getId());
                 }))
                 .toList();
     }
@@ -157,7 +155,20 @@ public class AccountingCorePresentationViewService {
                 .map(txEntityE -> txEntityE.fold(txProblem -> {
                     return TransactionProcessView.createFail(txProblem.getId(), txProblem.getProblem());
                 }, success -> {
-                    return TransactionProcessView.createSucess(success.getId());
+                    return TransactionProcessView.createSuccess(success.getId());
+                }))
+                .toList();
+    }
+
+    public List<TransactionItemsProcessView> rejectTransactionItems(TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
+        val transactionId = transactionItemsRejectionRequest.getTransactionId();
+
+        return transactionRepositoryGateway.rejectTransactionItems(transactionItemsRejectionRequest)
+                .stream()
+                .map(txItemEntityE -> txItemEntityE.fold(txProblem -> {
+                    return TransactionItemsProcessView.createFail(transactionId, txProblem.getId(), txProblem.getProblem());
+                }, success -> {
+                    return TransactionItemsProcessView.createSuccess(transactionId, success.getId());
                 }))
                 .toList();
     }
@@ -188,12 +199,12 @@ public class AccountingCorePresentationViewService {
         return transaction.getItems().stream().map(item -> {
             return new TransactionItemView(
                     item.getId(),
-                    item.getAccountDebit().map(account -> account.getCode()).orElse(""),
-                    item.getAccountDebit().flatMap(account -> account.getName()).orElse(""),
-                    item.getAccountDebit().flatMap(account -> account.getRefCode()).orElse(""),
-                    item.getAccountCredit().map(account -> account.getCode()).orElse(""),
-                    item.getAccountCredit().flatMap(account -> account.getName()).orElse(""),
-                    item.getAccountCredit().flatMap(account -> account.getRefCode()).orElse(""),
+                    item.getAccountDebit().map(Account::getCode).orElse(""),
+                    item.getAccountDebit().flatMap(Account::getName).orElse(""),
+                    item.getAccountDebit().flatMap(Account::getRefCode).orElse(""),
+                    item.getAccountCredit().map(Account::getCode).orElse(""),
+                    item.getAccountCredit().flatMap(Account::getName).orElse(""),
+                    item.getAccountCredit().flatMap(Account::getRefCode).orElse(""),
                     item.getAmountFcy(),
                     item.getAmountLcy(),
                     item.getFxRate(),

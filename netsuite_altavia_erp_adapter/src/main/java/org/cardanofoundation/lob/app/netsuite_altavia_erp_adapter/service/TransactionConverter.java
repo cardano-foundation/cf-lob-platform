@@ -175,7 +175,7 @@ public class TransactionConverter {
 
     private static List<Map<String, Object>> humanReadable(Set<ConstraintViolation<TxLine>> validationIssues) {
         return validationIssues.stream().map(c -> {
-            return Map.<String, Object>of(
+            return Map.of(
                     "bean", c.getRootBean().getClass().getName(),
                     "msg", c.getMessage(),
                     "property", c.getPropertyPath().toString(),

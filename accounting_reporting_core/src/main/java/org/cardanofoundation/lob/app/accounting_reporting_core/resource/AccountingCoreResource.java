@@ -13,16 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.model.AccountingCorePresentationViewService;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.model.AccountingCoreResourceService;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ExtractionRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.SearchRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.BatchView;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.BatchsDetailView;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.TransactionProcessView;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.TransactionView;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCoreResourceService;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -171,11 +165,11 @@ public class AccountingCoreResource {
             }
     )
     public ResponseEntity<?> approveTransactions(@Valid @RequestBody TransactionsRequest transactionsRequest) {
-        val transactionProcessViewsResult = accountingCorePresentationService.approveTransactions(transactionsRequest);
+        val transactionProcessViews = accountingCorePresentationService.approveTransactions(transactionsRequest);
 
         return ResponseEntity
                 .status(HttpStatusCode.valueOf(OK.getStatusCode()))
-                .body(transactionProcessViewsResult);
+                .body(transactionProcessViews);
     }
 
     @Tag(name = "Transactions Publish / Dispatch Approval", description = "Transactions Publish / Dispatch Approval API")
@@ -188,7 +182,24 @@ public class AccountingCoreResource {
             }
     )
     public ResponseEntity<?> approveTransactionsPublish(@Valid @RequestBody TransactionsRequest transactionsRequest) {
-        val transactionProcessViewsResult = accountingCorePresentationService.approveTransactionsPublish(transactionsRequest);
+        val transactionProcessViewList = accountingCorePresentationService.approveTransactionsPublish(transactionsRequest);
+
+        return ResponseEntity
+                .status(HttpStatusCode.valueOf(OK.getStatusCode()))
+                .body(transactionProcessViewList);
+    }
+
+    @Tag(name = "Transaction Items Rejection", description = "Transaction Items Rejection API")
+    @PostMapping(value = "/transactions/reject", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @Operation(description = "Reject one or more transaction items per a given transaction",
+            responses = {
+                    @ApiResponse(content = {
+                            @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TransactionItemsProcessView.class)))
+                    })
+            }
+    )
+    public ResponseEntity<?> rejectTransactionItems(@Valid @RequestBody TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
+        val transactionProcessViewsResult = accountingCorePresentationService.rejectTransactionItems(transactionItemsRejectionRequest);
 
         return ResponseEntity
                 .status(HttpStatusCode.valueOf(OK.getStatusCode()))

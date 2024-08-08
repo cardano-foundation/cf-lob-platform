@@ -22,6 +22,7 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 public class JournalAccountCreditEnrichmentTaskItem implements PipelineTaskItem {
 
     public static final String DUMMY_ACCOUNT = "Dummy Account";
+
     private final OrganisationPublicApiIF organisationPublicApiIF;
 
     @Override
@@ -55,10 +56,10 @@ public class JournalAccountCreditEnrichmentTaskItem implements PipelineTaskItem 
             val operationTypeM = txItem.getOperationType();
 
             if (operationTypeM.isEmpty()) {
-                txItem.setAccountCredit(Account.builder()
+                txItem.setAccountCredit(Optional.of(Account.builder()
                         .code(dummyAccount)
                         .name(DUMMY_ACCOUNT)
-                        .build());
+                        .build()));
                 continue;
             }
 
@@ -66,23 +67,23 @@ public class JournalAccountCreditEnrichmentTaskItem implements PipelineTaskItem 
 
             if (txItem.getAccountCredit().isEmpty() && operationType == CREDIT) {
                 val accountDebit = txItem.getAccountDebit().orElseThrow();
-                txItem.setAccountCredit(accountDebit);
+                txItem.setAccountCredit(Optional.of(accountDebit));
 
                 txItem.clearAccountCodeDebit();
             }
 
             if (txItem.getAccountCredit().isEmpty()) {
-                txItem.setAccountCredit(Account.builder()
+                txItem.setAccountCredit(Optional.of(Account.builder()
                         .code(dummyAccount)
                         .name(DUMMY_ACCOUNT)
-                        .build());
+                        .build()));
             }
 
             if (txItem.getAccountDebit().isEmpty()) {
-                txItem.setAccountDebit(Account.builder()
+                txItem.setAccountDebit(Optional.of(Account.builder()
                         .code(dummyAccount)
                         .name(DUMMY_ACCOUNT)
-                        .build());
+                        .build()));
             }
         }
     }

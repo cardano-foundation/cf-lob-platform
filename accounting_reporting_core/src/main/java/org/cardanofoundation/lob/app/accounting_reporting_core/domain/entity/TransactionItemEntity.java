@@ -12,8 +12,6 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-@Getter
-@Setter
 @Entity(name = "accounting_reporting_core.TransactionItemEntity")
 @Table(name = "accounting_core_transaction_item")
 @NoArgsConstructor
@@ -26,6 +24,7 @@ public class TransactionItemEntity extends AuditEntity implements Persistable<St
     @Id
     @Column(name = "transaction_item_id", nullable = false)
     @LOB_ERPSourceVersionRelevant
+    @Setter
     private String id;
 
     @Override
@@ -60,10 +59,14 @@ public class TransactionItemEntity extends AuditEntity implements Persistable<St
 
     @Column(name = "amount_fcy", nullable = false)
     @LOB_ERPSourceVersionRelevant
+    @Getter
+    @Setter
     private BigDecimal amountFcy;
 
     @Column(name = "amount_lcy", nullable = false)
     @LOB_ERPSourceVersionRelevant
+    @Getter
+    @Setter
     private BigDecimal amountLcy;
 
     @Embedded
@@ -75,10 +78,14 @@ public class TransactionItemEntity extends AuditEntity implements Persistable<St
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "transaction_id")
+    @Getter
+    @Setter
     private TransactionEntity transaction;
 
     @Column(name = "fx_rate", nullable = false)
     @LOB_ERPSourceVersionRelevant
+    @Getter
+    @Setter
     private BigDecimal fxRate;
 
     @Embedded
@@ -153,6 +160,35 @@ public class TransactionItemEntity extends AuditEntity implements Persistable<St
 
     public Optional<Rejection> getRejection() {
         return Optional.ofNullable(rejection);
+    }
+
+    // setters
+    public void setAccountDebit(Optional<Account> account) {
+        this.accountDebit = account.orElse(null);
+    }
+
+    public void setAccountCredit(Optional<Account> account) {
+        this.accountCredit = account.orElse(null);
+    }
+
+    public void setAccountEvent(Optional<AccountEvent> accountEvent) {
+        this.accountEvent = accountEvent.orElse(null);
+    }
+
+    public void setProject(Optional<Project> project) {
+        this.project = project.orElse(null);
+    }
+
+    public void setCostCenter(Optional<CostCenter> costCenter) {
+        this.costCenter = costCenter.orElse(null);
+    }
+
+    public void setDocument(Optional<Document> document) {
+        this.document = document.orElse(null);
+    }
+
+    public void setRejection(Optional<Rejection> rejection) {
+        this.rejection = rejection.orElse(null);
     }
 
     public Optional<OperationType> getOperationType() {

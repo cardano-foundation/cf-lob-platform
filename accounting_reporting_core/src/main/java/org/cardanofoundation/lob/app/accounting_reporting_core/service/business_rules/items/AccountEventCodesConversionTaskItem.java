@@ -68,12 +68,12 @@ public class AccountEventCodesConversionTaskItem implements PipelineTaskItem {
 
         switch (type) {
             case DEBIT:
-                item.setAccountDebit(account.toBuilder()
+                item.setAccountDebit(Optional.of(account.toBuilder()
                         .refCode(chartOfAccount.getEventRefCode())
-                        .build());
+                        .build()));
                 break;
             case CREDIT:
-                item.setAccountCredit(account.toBuilder().refCode(chartOfAccount.getEventRefCode()).build());
+                item.setAccountCredit(Optional.of(account.toBuilder().refCode(chartOfAccount.getEventRefCode()).build()));
                 break;
         }
     }
@@ -136,10 +136,10 @@ public class AccountEventCodesConversionTaskItem implements PipelineTaskItem {
 
             organisationPublicApi.findEventCode(organisationId, eventCode)
                     .ifPresentOrElse(
-                            event -> item.setAccountEvent(AccountEvent.builder()
+                            event -> item.setAccountEvent(Optional.of(AccountEvent.builder()
                                     .code(eventCode)
                                     .name(event.getName())
-                                    .build()
+                                    .build())
                             ),
                             () -> addMissingEventViolation(eventCode, item, tx));
         }

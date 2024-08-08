@@ -98,33 +98,33 @@ public class TransactionConverter {
                     val txItemEntity = new TransactionItemEntity();
 
                     txItemEntity.setId(txItem.getId());
-                    txItemEntity.setDocument(doc);
+                    txItemEntity.setDocument(Optional.of(doc));
                     txItemEntity.setAmountLcy(txItem.getAmountLcy());
                     txItemEntity.setAmountFcy(txItem.getAmountFcy());
-                    txItemEntity.setCostCenter(convertCostCenter(txItem.getCostCenter()));
-                    txItemEntity.setProject(convertProject(txItem.getProject()));
+                    txItemEntity.setCostCenter(Optional.of(convertCostCenter(txItem.getCostCenter())));
+                    txItemEntity.setProject(Optional.of(convertProject(txItem.getProject())));
                     txItemEntity.setFxRate(txItem.getFxRate());
                     txItem.getAccountCredit().ifPresent(creditAccount -> {
-                        txItemEntity.setAccountCredit(Account.builder()
+                        txItemEntity.setAccountCredit(Optional.of(Account.builder()
                                 .code(creditAccount.getCode())
                                 .refCode(creditAccount.getRefCode().orElse(null))
                                 .name(creditAccount.getName().orElse(null))
-                                .build());
+                                .build()));
                     });
 
                     txItem.getAccountDebit().ifPresent(debitAccount -> {
-                        txItemEntity.setAccountDebit(Account.builder()
+                        txItemEntity.setAccountDebit(Optional.of(Account.builder()
                                 .code(debitAccount.getCode())
                                 .refCode(debitAccount.getRefCode().orElse(null))
                                 .name(debitAccount.getName().orElse(null))
-                                .build());
+                                .build()));
                     });
 
                     txItem.getAccountEvent().ifPresent(accountEvent -> {
-                        txItemEntity.setAccountEvent(AccountEvent.builder()
+                        txItemEntity.setAccountEvent(Optional.of(AccountEvent.builder()
                                 .code(accountEvent.getCode())
                                 .name(accountEvent.getName())
-                                .build());
+                                .build()));
                     });
 
                     return txItemEntity;

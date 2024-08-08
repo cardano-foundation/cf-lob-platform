@@ -58,7 +58,7 @@ public class DocumentConversionTaskItemTest {
 
         val txItem = new TransactionItemEntity();
         txItem.setId(TransactionItem.id(txId, "0"));
-        txItem.setDocument(document);
+        txItem.setDocument(Optional.of(document));
 
         val items = new LinkedHashSet<TransactionItemEntity>();
         items.add(txItem);
@@ -95,7 +95,7 @@ public class DocumentConversionTaskItemTest {
 
         val txItem = new TransactionItemEntity();
         txItem.setId(TransactionItem.id(txId, "0"));
-        txItem.setDocument(document);
+        txItem.setDocument(Optional.of(document));
 
         val items = new LinkedHashSet<TransactionItemEntity>();
         items.add(txItem);
@@ -135,7 +135,7 @@ public class DocumentConversionTaskItemTest {
                 .build();
 
         val txItem = new TransactionItemEntity();
-        txItem.setDocument(document);
+        txItem.setDocument(Optional.of(document));
 
         val items = new LinkedHashSet<TransactionItemEntity>();
         items.add(txItem);
@@ -188,7 +188,7 @@ public class DocumentConversionTaskItemTest {
                 .build();
 
         val txItem = new TransactionItemEntity();
-        txItem.setDocument(document);
+        txItem.setDocument(Optional.of(document));
 
         val items = new LinkedHashSet<TransactionItemEntity>();
         items.add(txItem);

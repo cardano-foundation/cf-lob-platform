@@ -59,15 +59,15 @@ class AccountAccountEventCodesConversionTaskItemTest {
         val txItem = new TransactionItemEntity();
         txItem.setId(TransactionItem.id(txId, "0"));
 
-        txItem.setAccountDebit(Account.builder()
+        txItem.setAccountDebit(Optional.of(Account.builder()
                 .code(accountCodeDebit)
                 .build()
-        );
+        ));
 
-        txItem.setAccountCredit(Account.builder()
+        txItem.setAccountCredit(Optional.of(Account.builder()
                 .code(accountCodeCredit)
                 .build()
-        );
+        ));
 
         val tx = new TransactionEntity();
         tx.setId(txId);
@@ -98,10 +98,10 @@ class AccountAccountEventCodesConversionTaskItemTest {
         val txItem = new TransactionItemEntity();
         txItem.setId(TransactionItem.id(txId, "1"));
 
-        txItem.setAccountDebit(Account.builder()
+        txItem.setAccountDebit(Optional.of(Account.builder()
                 .code(accountCodeDebit)
                 .build()
-        );
+        ));
 
         val tx = new TransactionEntity();
         tx.setId(txId);
@@ -129,10 +129,10 @@ class AccountAccountEventCodesConversionTaskItemTest {
         val txItem = new TransactionItemEntity();
         txItem.setId(TransactionItem.id(txId, "2"));
 
-        txItem.setAccountCredit(Account.builder()
+        txItem.setAccountCredit(Optional.of(Account.builder()
                 .code(accountCodeCredit)
                 .build()
-        );
+        ));
 
         val tx = new TransactionEntity();
         tx.setId(txId);

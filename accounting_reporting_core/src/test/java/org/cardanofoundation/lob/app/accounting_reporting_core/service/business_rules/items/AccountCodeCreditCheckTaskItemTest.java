@@ -9,6 +9,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +35,7 @@ public class AccountCodeCreditCheckTaskItemTest {
         val txItem = new TransactionItemEntity();
         txItem.setId(TransactionItem.id(txId, "0"));
 
-        txItem.setAccountCredit(Account.builder().code("1").build());
+        txItem.setAccountCredit(Optional.of(Account.builder().code("1").build()));
 
         val tx = new TransactionEntity();
         tx.setId(txId);
@@ -100,7 +101,7 @@ public class AccountCodeCreditCheckTaskItemTest {
         val txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "0"));
 
-        txItem1.setAccountCredit(Account.builder().code("100").build());
+        txItem1.setAccountCredit(Optional.of(Account.builder().code("100").build()));
 
         val txItem2 = new TransactionItemEntity();
         txItem2.setId(TransactionItem.id(txId, "2"));
@@ -149,7 +150,7 @@ public class AccountCodeCreditCheckTaskItemTest {
 
         val txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "0"));
-        txItem1.setAccountCredit(Account.builder().code(" ").build());
+        txItem1.setAccountCredit(Optional.of(Account.builder().code(" ").build()));
 
         val tx = new TransactionEntity();
         tx.setId(txId);
@@ -188,7 +189,7 @@ public class AccountCodeCreditCheckTaskItemTest {
 
         val txItem = new TransactionItemEntity();
         txItem.setId(TransactionItem.id(txId, "0"));
-        txItem.setAccountCredit(Account.builder().code(" 100 ").build());
+        txItem.setAccountCredit(Optional.of(Account.builder().code(" 100 ").build()));
 
         val tx = new TransactionEntity();
         tx.setId(txId);
