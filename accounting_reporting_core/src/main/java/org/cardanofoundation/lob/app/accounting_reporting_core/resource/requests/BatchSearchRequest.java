@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,6 +32,7 @@ import java.util.Set;
 public class BatchSearchRequest {
 
     @Schema(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
+    @NotBlank
     private String organisationId;
 
     @ArraySchema(arraySchema = @Schema(example = "[\"APPROVE\", \"PENDING\", \"INVALID\", \"PUBLISH\", \"PUBLISHED\"]", implementation = LedgerDispatchStatusView.class))
@@ -46,8 +48,8 @@ public class BatchSearchRequest {
     @Nullable
     private LocalDate from;
 
-    @Nullable
     @Schema(example = "2024-12-31")
+    @Nullable
     private LocalDate To;
 
     @JsonIgnore

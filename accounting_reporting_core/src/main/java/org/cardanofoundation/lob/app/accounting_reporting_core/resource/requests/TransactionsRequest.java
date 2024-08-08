@@ -2,7 +2,12 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.request
 
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Set;
 
@@ -20,20 +25,10 @@ public class TransactionsRequest {
             "{\"id\": \"8b346f4d914fe652bde477fa3f6b630fbcf7ffd9859daf8df4fc63cdd1562e5c\"}," +
             "{\"id\": \"48335c2b63cffcef2a3cd0678b65c4fb16420f51110033024209957fbd58ec4e\"}" +
             "]"))
+    @NotBlank
     private String organisationId;
 
-    private Set<TransactionId> transactionIds;
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @EqualsAndHashCode
-    public static class TransactionId {
-
-        @Schema(example = "7e9e8bcbb38a283b41eab57add98278561ab51d23a16f3e3baf3daa461b84ab4")
-        private String id;
-
-    }
+    @Size(min = 1)
+    private Set<String> transactionIds;
 
 }

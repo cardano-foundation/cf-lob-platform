@@ -35,9 +35,11 @@ public class TransactionItemsRejectionRequest {
     public static class TxItemRejectionRequest {
 
         @Schema(example = "12f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020caaa")
+        @NotBlank
         private String txItemId;
 
         @Schema(example = "INCORRECT_VAT_CODE")
+        @NotNull
         private RejectionCode rejectionCode;
 
     }

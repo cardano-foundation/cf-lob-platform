@@ -9,6 +9,8 @@ import java.util.List;
 @Setter
 //@AllArgsConstructor
 public class BatchsDetailView {
+
     private Long total;
     private List<BatchView> batchs;
+
 }

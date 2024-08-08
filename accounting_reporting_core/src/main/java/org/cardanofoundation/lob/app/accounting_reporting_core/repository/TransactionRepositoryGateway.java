@@ -11,7 +11,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest.TransactionId;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.LedgerService;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
 import org.springframework.dao.DataAccessException;
@@ -126,10 +125,7 @@ public class TransactionRepositoryGateway {
     public List<Either<IdentifiableProblem, TransactionEntity>> approveTransactions(TransactionsRequest transactionsRequest) {
         val organisationId = transactionsRequest.getOrganisationId();
 
-        val transactionIds = transactionsRequest.getTransactionIds()
-                .stream()
-                .map(TransactionId::getId)
-                .collect(Collectors.toSet());
+        val transactionIds = transactionsRequest.getTransactionIds();
 
         val transactionsApprovalResponseListE = new ArrayList<Either<IdentifiableProblem, TransactionEntity>>();
         for (val transactionId : transactionIds) {
@@ -159,10 +155,7 @@ public class TransactionRepositoryGateway {
     public List<Either<IdentifiableProblem, TransactionEntity>> approveTransactionsDispatch(TransactionsRequest transactionsRequest) {
         val organisationId = transactionsRequest.getOrganisationId();
 
-        val transactionIds = transactionsRequest.getTransactionIds()
-                .stream()
-                .map(TransactionId::getId)
-                .collect(Collectors.toSet());
+        val transactionIds = transactionsRequest.getTransactionIds();
 
         val transactionsApprovalResponseListE = new ArrayList<Either<IdentifiableProblem, TransactionEntity>>();
         for (val transactionId : transactionIds) {
