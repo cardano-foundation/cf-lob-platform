@@ -11,13 +11,13 @@ import java.util.Optional;
 @Embeddable
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @EqualsAndHashCode
 @Builder(toBuilder = true)
 public class Account {
 
     @NotBlank
     @LOB_ERPSourceVersionRelevant
+    @Getter
     private String code;
 
     @Nullable
@@ -32,6 +32,14 @@ public class Account {
 
     public Optional<String> getName() {
         return Optional.ofNullable(name);
+    }
+
+    public void setRefCode(Optional<String> refCode) {
+        this.refCode = refCode.orElse(null);
+    }
+
+    public void setName(Optional<String> name) {
+        this.name = name.orElse(null);
     }
 
 }

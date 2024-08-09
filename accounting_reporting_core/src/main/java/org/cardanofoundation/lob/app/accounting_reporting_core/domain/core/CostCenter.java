@@ -11,6 +11,7 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString
+@NoArgsConstructor
 public class CostCenter {
 
     @LOB_ERPSourceVersionRelevant

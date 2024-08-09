@@ -96,13 +96,12 @@ public class TransactionConverter {
                     val doc = convertToDbDetached(txItem.getDocument());
 
                     val txItemEntity = new TransactionItemEntity();
-
                     txItemEntity.setId(txItem.getId());
-                    txItemEntity.setDocument(Optional.of(doc));
+                    txItemEntity.setDocument(doc);
                     txItemEntity.setAmountLcy(txItem.getAmountLcy());
                     txItemEntity.setAmountFcy(txItem.getAmountFcy());
-                    txItemEntity.setCostCenter(Optional.of(convertCostCenter(txItem.getCostCenter())));
-                    txItemEntity.setProject(Optional.of(convertProject(txItem.getProject())));
+                    txItemEntity.setCostCenter(convertCostCenter(txItem.getCostCenter()));
+                    txItemEntity.setProject(convertProject(txItem.getProject()));
                     txItemEntity.setFxRate(txItem.getFxRate());
                     txItem.getAccountCredit().ifPresent(creditAccount -> {
                         txItemEntity.setAccountCredit(Optional.of(Account.builder()
@@ -153,22 +152,20 @@ public class TransactionConverter {
         return txEntity;
     }
 
-    private Project convertProject(Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Project> projectM) {
+    private Optional<Project> convertProject(Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Project> projectM) {
         return projectM.map(p -> Project.builder()
                         .customerCode(p.getCustomerCode())
                         .externalCustomerCode(p.getExternalCustomerCode().orElse(null))
                         .name(p.getName().orElse(null))
-                        .build())
-                .orElse(null);
+                        .build());
     }
 
-    private CostCenter convertCostCenter(Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CostCenter> costCenter) {
+    private Optional<CostCenter> convertCostCenter(Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CostCenter> costCenter) {
         return costCenter.map(cc -> CostCenter.builder()
                         .customerCode(cc.getCustomerCode())
                         .externalCustomerCode(cc.getExternalCustomerCode().orElse(null))
                         .name(cc.getName().orElse(null))
-                        .build())
-                .orElse(null);
+                        .build());
     }
 
     private static Organisation convertOrganisation(Transaction transaction) {
@@ -182,7 +179,7 @@ public class TransactionConverter {
                 .build();
     }
 
-    private org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Document convertToDbDetached(Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Document> docM) {
+    private Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Document> convertToDbDetached(Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Document> docM) {
         return docM.map(doc -> Document.builder()
                         .num(doc.getNumber())
 
@@ -202,8 +199,7 @@ public class TransactionConverter {
                                 .name(counterparty.getName().orElse(null))
                                 .build()).orElse(null)))
 
-                .map(Document.DocumentBuilder::build)
-                .orElse(null);
+                .map(Document.DocumentBuilder::build);
     }
 
     private Transaction convertToDbDetached(TransactionEntity transactionEntity) {
@@ -292,11 +288,7 @@ public class TransactionConverter {
                 .build();
     }
 
-    private Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Document> convertToDbDetached(@Nullable Document doc) {
-        if (doc == null) {
-            return Optional.empty();
-        }
-
+    private Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Document> convertToDbDetached(Document doc) {
         return Optional.of(org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Document.builder()
                 .number(doc.getNum())
                 .currency(org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Currency.builder()

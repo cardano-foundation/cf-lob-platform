@@ -13,6 +13,7 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString
+@NoArgsConstructor
 public class Vat {
 
     @LOB_ERPSourceVersionRelevant

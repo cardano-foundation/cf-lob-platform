@@ -10,6 +10,7 @@ import java.util.Optional;
 @Builder
 @EqualsAndHashCode
 @ToString
+@NoArgsConstructor
 public class CoreCurrency {
 
     private IsoStandard currencyISOStandard;
