@@ -17,6 +17,10 @@ import java.util.Set;
 @NoArgsConstructor
 public class TransactionsRequest {
 
+    @Schema(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
+    @NotBlank
+    private String organisationId;
+
     @ArraySchema(arraySchema = @Schema(example = "[ {" +
             "\"id\": \"7e9e8bcbb38a283b41eab57add98278561ab51d23a16f3e3baf3daa461b84ab4\"}," +
             "{\"id\": \"7bce71783ff8e6501b33ce9797097f5633c069f17e4731d96467cdb311693fcb\"}," +
@@ -25,10 +29,18 @@ public class TransactionsRequest {
             "{\"id\": \"8b346f4d914fe652bde477fa3f6b630fbcf7ffd9859daf8df4fc63cdd1562e5c\"}," +
             "{\"id\": \"48335c2b63cffcef2a3cd0678b65c4fb16420f51110033024209957fbd58ec4e\"}" +
             "]"))
-    @NotBlank
-    private String organisationId;
-
     @Size(min = 1)
-    private Set<String> transactionIds;
+    private Set<TransactionId> transactionIds;
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class TransactionId {
+
+        @Schema(example = "7e9e8bcbb38a283b41eab57add98278561ab51d23a16f3e3baf3daa461b84ab4")
+        @NotBlank
+        private String id;
+
+    }
 
 }

@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
 import io.vavr.control.Either;
+import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rejection;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode;
@@ -10,6 +11,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.repository.Transa
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest.TransactionId;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,7 +84,7 @@ class TransactionRepositoryGatewayTest {
         // Arrange
         String transactionId = "valid_tx_id";
         TransactionEntity validTransaction = new TransactionEntity();
-        validTransaction.setStatus(OK); // Assuming SUCCESS is a valid status for approval
+        validTransaction.setStatus(OK);
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(validTransaction));
         when(transactionRepository.save(validTransaction)).thenReturn(validTransaction);
 
@@ -98,16 +100,16 @@ class TransactionRepositoryGatewayTest {
     @Test
     void approveTransactions_shouldApproveValidTransactionsAndHandleErrors() {
         // Arrange
-        String validTransactionId = "valid_tx_id";
-        String failedTransactionId = "failed_tx_id";
+        val validTransactionId = new TransactionId("valid_tx_id");
+        val failedTransactionId = new TransactionId("failed_tx_id");
 
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setTransactionIds(Set.of(validTransactionId, failedTransactionId));
 
         TransactionEntity validTransaction = new TransactionEntity();
         validTransaction.setStatus(OK);
-        when(transactionRepository.findById(validTransactionId)).thenReturn(Optional.of(validTransaction));
-        when(transactionRepository.findById(failedTransactionId)).thenReturn(Optional.empty()); // Simulating not found
+        when(transactionRepository.findById(validTransactionId.getId())).thenReturn(Optional.of(validTransaction));
+        when(transactionRepository.findById(failedTransactionId.getId())).thenReturn(Optional.empty()); // Simulating not found
 
         when(transactionRepository.save(validTransaction)).thenReturn(validTransaction);
 
@@ -130,14 +132,14 @@ class TransactionRepositoryGatewayTest {
     @Test
     void approveTransactionsDispatch_shouldApproveDispatchForValidTransactions() {
         // Arrange
-        String transactionId = "valid_tx_id";
+        val transactionId = new TransactionId("valid_tx_id");
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
         TransactionEntity validTransaction = new TransactionEntity();
         validTransaction.setStatus(OK);
         validTransaction.setTransactionApproved(true);
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(validTransaction));
+        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(validTransaction));
         when(transactionRepository.save(validTransaction)).thenReturn(validTransaction);
 
         // Act
@@ -242,14 +244,14 @@ class TransactionRepositoryGatewayTest {
     @Test
     void approveTransactionsDispatch_shouldReturnError_whenDispatchingUnapprovedTransaction() {
         // Arrange
-        String transactionId = "unapproved_tx_id";
+        val transactionId = new TransactionId("unapproved_tx_id");
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
         TransactionEntity unapprovedTransaction = new TransactionEntity();
         unapprovedTransaction.setStatus(OK);
         unapprovedTransaction.setTransactionApproved(false); // Not approved
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(unapprovedTransaction));
+        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(unapprovedTransaction));
 
         // Act
         List<Either<IdentifiableProblem, TransactionEntity>> results = transactionRepositoryGateway.approveTransactionsDispatch(transactionsRequest);
@@ -321,11 +323,11 @@ class TransactionRepositoryGatewayTest {
     @Test
     void approveTransactions_shouldHandleDataAccessExceptionDuringApproval() {
         // Arrange
-        String transactionId = "tx_id";
+        val transactionId = new TransactionId("tx_id");
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(new TransactionEntity()));
+        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(new TransactionEntity()));
         when(transactionRepository.save(any(TransactionEntity.class))).thenThrow(new DataAccessException("Database error") {});
 
         // Act
@@ -343,14 +345,14 @@ class TransactionRepositoryGatewayTest {
     @Test
     void approveTransactionsDispatch_shouldHandleDataAccessExceptionDuringDispatchApproval() {
         // Arrange
-        String transactionId = "tx_id";
+        val transactionId = new TransactionId("tx_id");
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
         TransactionEntity validTransaction = new TransactionEntity();
         validTransaction.setStatus(OK);
         validTransaction.setTransactionApproved(true);
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(validTransaction));
+        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(validTransaction));
         when(transactionRepository.save(validTransaction)).thenThrow(new DataAccessException("Database error") {});
 
         // Act
@@ -431,7 +433,7 @@ class TransactionRepositoryGatewayTest {
     @Test
     void approveTransactionsDispatch_shouldReturnError_whenAnyTransactionItemHasRejection() {
         // Arrange
-        String transactionId = "tx_id";
+        val transactionId = new TransactionId("tx_id");
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
@@ -445,7 +447,7 @@ class TransactionRepositoryGatewayTest {
 
         transaction.setItems(Set.of(itemWithRejection));
 
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(transaction));
 
         // Act
         List<Either<IdentifiableProblem, TransactionEntity>> results = transactionRepositoryGateway.approveTransactionsDispatch(transactionsRequest);
@@ -461,7 +463,7 @@ class TransactionRepositoryGatewayTest {
     @Test
     void approveTransactionsDispatch_shouldApproveDispatch_whenAllTransactionItemsAreValid() {
         // Arrange
-        String transactionId = "valid_tx_id";
+        val transactionId = new TransactionId("valid_tx_id");
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
@@ -475,7 +477,7 @@ class TransactionRepositoryGatewayTest {
 
         transaction.setItems(Set.of(validItem));
 
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(transaction));
         when(transactionRepository.save(transaction)).thenReturn(transaction);
 
         // Act

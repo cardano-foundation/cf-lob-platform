@@ -24,7 +24,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
 
 import java.util.List;
 
@@ -240,7 +239,6 @@ public class AccountingCoreResource {
     )
 
     public ResponseEntity<?> batchDetail(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
-
         val txBatchM = accountingCorePresentationService.batchDetail(batchId);
         if (txBatchM.isEmpty()) {
             val issue = Problem.builder()
@@ -249,12 +247,14 @@ public class AccountingCoreResource {
                     .withStatus(NOT_FOUND)
                     .build();
 
-            return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
+            return ResponseEntity
+                    .status(issue.getStatus().getStatusCode())
+                    .body(issue);
         }
 
-        return ResponseEntity.ok().
-
-                body(txBatchM.orElseThrow());
+        return ResponseEntity
+                .ok()
+                .body(txBatchM.orElseThrow());
     }
 
 }

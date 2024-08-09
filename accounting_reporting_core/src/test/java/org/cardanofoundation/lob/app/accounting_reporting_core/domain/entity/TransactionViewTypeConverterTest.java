@@ -9,7 +9,7 @@ import java.util.List;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.*;
 
-public class TransactionViewIdTypeConverterTest {
+public class TransactionViewTypeConverterTest {
 
     private final TransactionTypeConverter converter = new TransactionTypeConverter();
 

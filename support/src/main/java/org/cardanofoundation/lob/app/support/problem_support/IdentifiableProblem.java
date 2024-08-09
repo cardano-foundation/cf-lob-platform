@@ -8,8 +8,6 @@ import org.zalando.problem.Problem;
 @RequiredArgsConstructor
 @ToString
 @Getter
-
-// TODO move to utils package???, it is not really specific to business domain but utility class
 public class IdentifiableProblem {
 
     private final String id;

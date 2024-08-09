@@ -116,15 +116,15 @@ public class TransactionRepositoryGateway {
         val transactionsApprovalResponseListE = new ArrayList<Either<IdentifiableProblem, TransactionEntity>>();
         for (val transactionId : transactionIds) {
             try {
-                val transactionEntities = approveTransaction(transactionId);
+                val transactionEntities = approveTransaction(transactionId.getId());
 
                 transactionsApprovalResponseListE.add(transactionEntities);
             } catch (DataAccessException dae) {
                 log.error("Error approving transaction: {}", transactionId, dae);
 
-                val problem = FailureResponses.createTransactionDBError(transactionId, dae);
+                val problem = FailureResponses.createTransactionDBError(transactionId.getId(), dae);
 
-                transactionsApprovalResponseListE.add(Either.left(new IdentifiableProblem(transactionId, problem, TRANSACTION)));
+                transactionsApprovalResponseListE.add(Either.left(new IdentifiableProblem(transactionId.getId(), problem, TRANSACTION)));
             }
         }
 
@@ -146,15 +146,15 @@ public class TransactionRepositoryGateway {
         val transactionsApprovalResponseListE = new ArrayList<Either<IdentifiableProblem, TransactionEntity>>();
         for (val transactionId : transactionIds) {
             try {
-                val transactionEntities = approveTransactionsDispatch(transactionId);
+                val transactionEntities = approveTransactionsDispatch(transactionId.getId());
 
                 transactionsApprovalResponseListE.add(transactionEntities);
             } catch (DataAccessException dae) {
                 log.error("Error approving transaction publish / dispatch: {}", transactionId, dae);
 
-                val problem = createTransactionDBError(transactionId, dae);
+                val problem = createTransactionDBError(transactionId.getId(), dae);
 
-                transactionsApprovalResponseListE.add(Either.left(new IdentifiableProblem(transactionId, problem, TRANSACTION)));
+                transactionsApprovalResponseListE.add(Either.left(new IdentifiableProblem(transactionId.getId(), problem, TRANSACTION)));
             }
         }
 
