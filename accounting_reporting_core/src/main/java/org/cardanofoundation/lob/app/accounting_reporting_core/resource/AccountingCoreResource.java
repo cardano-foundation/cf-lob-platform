@@ -29,6 +29,7 @@ import org.zalando.problem.Status;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.zalando.problem.Status.NOT_FOUND;
 import static org.zalando.problem.Status.OK;
 
 @RestController
@@ -68,7 +69,7 @@ public class AccountingCoreResource {
             val issue = Problem.builder()
                     .withTitle("TX_NOT_FOUND")
                     .withDetail(STR."Transaction with id: {\{id}} could not be found")
-                    .withStatus(Status.NOT_FOUND)
+                    .withStatus(NOT_FOUND)
                     .build();
 
             return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
@@ -127,7 +128,7 @@ public class AccountingCoreResource {
             val issue = Problem.builder()
                     .withTitle("ORGANISATION_NOT_FOUND")
                     .withDetail(STR."Unable to find Organisation by Id: \{body.getOrganisationId()}")
-                    .withStatus(Status.NOT_FOUND)
+                    .withStatus(NOT_FOUND)
                     .build();
 
             return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
@@ -139,7 +140,7 @@ public class AccountingCoreResource {
             val issue = Problem.builder()
                     .withTitle("ORGANISATION_DATE_MISMATCH")
                     .withDetail(STR."the requested data is outside of accounting period for \{body.getOrganisationId()}")
-                    .withStatus(Status.NOT_FOUND)
+                    .withStatus(NOT_FOUND)
                     .build();
 
             return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
@@ -155,7 +156,7 @@ public class AccountingCoreResource {
                 .body(response.toString());
     }
 
-    @Tag(name = "Transactions Approval", description = "Transactions Approval API")
+    @Tag(name = "Transactions", description = "Transactions Approval API")
     @PostMapping(value = "/transactions/approve", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Approve one or more transactions",
             responses = {
@@ -172,7 +173,7 @@ public class AccountingCoreResource {
                 .body(transactionProcessViews);
     }
 
-    @Tag(name = "Transactions Publish / Dispatch Approval", description = "Transactions Publish / Dispatch Approval API")
+    @Tag(name = "Transactions", description = "Transactions Publish / Dispatch Approval API")
     @PostMapping(value = "/transactions/approve-dispatch", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Approve one or more transactions",
             responses = {
@@ -189,7 +190,7 @@ public class AccountingCoreResource {
                 .body(transactionProcessViewList);
     }
 
-    @Tag(name = "Transaction Items Rejection", description = "Transaction Items Rejection API")
+    @Tag(name = "Transactions", description = "Transaction Items Rejection API")
     @PostMapping(value = "/transactions/reject", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Reject one or more transaction items per a given transaction",
             responses = {
@@ -245,7 +246,7 @@ public class AccountingCoreResource {
             val issue = Problem.builder()
                     .withTitle("BATCH_NOT_FOUND")
                     .withDetail(STR."Batch with id: {\{batchId}} could not be found")
-                    .withStatus(Status.NOT_FOUND)
+                    .withStatus(NOT_FOUND)
                     .build();
 
             return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);

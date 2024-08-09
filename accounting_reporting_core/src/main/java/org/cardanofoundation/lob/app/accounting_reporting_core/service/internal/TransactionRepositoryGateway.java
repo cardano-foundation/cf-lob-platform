@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.FAIL;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.*;
 import static org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem.IdType.TRANSACTION;
@@ -44,7 +44,7 @@ public class TransactionRepositoryGateway {
 
     @Transactional(propagation = REQUIRES_NEW)
     // TODO optimise performance because we have to load transaction from db each time and we don't save it in bulk
-    private Either<IdentifiableProblem, TransactionEntity> approveTransaction(String transactionId) {
+    protected Either<IdentifiableProblem, TransactionEntity> approveTransaction(String transactionId) {
         log.info("Approving transaction: {}", transactionId);
 
         val txM = transactionRepository.findById(transactionId);
@@ -131,7 +131,7 @@ public class TransactionRepositoryGateway {
         val transactionSuccesses = transactionsApprovalResponseListE.stream()
                 .filter(Either::isRight)
                 .map(Either::get)
-                .collect(Collectors.toSet());
+                .collect(toSet());
 
         ledgerService.checkIfThereAreTransactionsToDispatch(organisationId, transactionSuccesses);
 
@@ -150,7 +150,7 @@ public class TransactionRepositoryGateway {
 
                 transactionsApprovalResponseListE.add(transactionEntities);
             } catch (DataAccessException dae) {
-                log.error("Error approving transaction publish: {}", transactionId, dae);
+                log.error("Error approving transaction publish / dispatch: {}", transactionId, dae);
 
                 val problem = createTransactionDBError(transactionId, dae);
 
@@ -161,7 +161,7 @@ public class TransactionRepositoryGateway {
         val transactionSuccesses = transactionsApprovalResponseListE.stream()
                 .filter(Either::isRight)
                 .map(Either::get)
-                .collect(Collectors.toSet());
+                .collect(toSet());
 
         ledgerService.checkIfThereAreTransactionsToDispatch(organisationId, transactionSuccesses);
 

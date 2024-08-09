@@ -12,25 +12,21 @@ import java.util.Optional;
 @AllArgsConstructor
 public class TransactionItemsProcessView {
 
-    private String transactionId;
     private String transactionItemId;
     private Boolean success;
     private Optional<Problem> error;
 
-    public static TransactionItemsProcessView createSuccess(String transactionId,
-                                                            String transactionItemId) {
+    public static TransactionItemsProcessView createSuccess(String transactionItemId) {
         return new TransactionItemsProcessView(
-                transactionId,
                 transactionItemId,
                 true,
                 Optional.empty()
         );
     }
 
-    public static TransactionItemsProcessView createFail(String transactionId,
-                                                         String transactionItemId,
+    public static TransactionItemsProcessView createFail(String transactionItemId,
                                                          Problem error) {
-        return new TransactionItemsProcessView(transactionId, transactionItemId, false, Optional.of(error));
+        return new TransactionItemsProcessView(transactionItemId, false, Optional.of(error));
     }
 
 }

@@ -6,10 +6,10 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,9 +18,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.math.BigDecimal.ZERO;
+import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 
 @Service
@@ -161,14 +161,12 @@ public class AccountingCorePresentationViewService {
     }
 
     public List<TransactionItemsProcessView> rejectTransactionItems(TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
-        val transactionId = transactionItemsRejectionRequest.getTransactionId();
-
         return transactionRepositoryGateway.rejectTransactionItems(transactionItemsRejectionRequest)
                 .stream()
                 .map(txItemEntityE -> txItemEntityE.fold(txProblem -> {
-                    return TransactionItemsProcessView.createFail(transactionId, txProblem.getId(), txProblem.getProblem());
+                    return TransactionItemsProcessView.createFail(txProblem.getId(), txProblem.getProblem());
                 }, success -> {
-                    return TransactionItemsProcessView.createSuccess(transactionId, success.getId());
+                    return TransactionItemsProcessView.createSuccess(success.getId());
                 }))
                 .toList();
     }
@@ -176,7 +174,7 @@ public class AccountingCorePresentationViewService {
     private Set<TransactionView> getTransaction(TransactionBatchEntity transactionBatchEntity) {
         return transactionBatchEntity.getTransactions().stream()
                 .map(this::getTransactionView)
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     private TransactionView getTransactionView(TransactionEntity transactionEntity) {
@@ -224,7 +222,7 @@ public class AccountingCorePresentationViewService {
                     item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).orElse(VENDOR),
                     item.getDocument().flatMap(document -> document.getCounterparty().flatMap(Counterparty::getName)).orElse("")
             );
-        }).collect(Collectors.toSet());
+        }).collect(toSet());
     }
 
     private Set<ViolationView> getViolations(TransactionEntity transaction) {
@@ -234,7 +232,7 @@ public class AccountingCorePresentationViewService {
                 violation.getTxItemId(),
                 violation.getCode(),
                 violation.getBag()
-        )).collect(Collectors.toSet());
+        )).collect(toSet());
     }
 
     public BigDecimal getAmountLcyTotalForAllItems(TransactionEntity tx) {
