@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
+package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
 import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
@@ -9,15 +9,15 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Valid
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rejection;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.LedgerService;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.problem.Problem;
-import org.zalando.problem.ThrowableProblem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +26,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.FAIL;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.*;
 import static org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem.IdType.TRANSACTION;
-import static org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem.IdType.TRANSACTION_ITEM;
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 import static org.zalando.problem.Status.METHOD_NOT_ALLOWED;
-import static org.zalando.problem.Status.NOT_FOUND;
 
 @Service
+@org.jmolecules.ddd.annotation.Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -50,7 +50,7 @@ public class TransactionRepositoryGateway {
         val txM = transactionRepository.findById(transactionId);
 
         if (txM.isEmpty()) {
-            return txNotFoundResponse(transactionId);
+            return transactionNotFoundResponse(transactionId);
         }
 
         val tx = txM.orElseThrow();
@@ -77,31 +77,17 @@ public class TransactionRepositoryGateway {
         val txM = transactionRepository.findById(transactionId);
 
         if (txM.isEmpty()) {
-            val problem = Problem.builder()
-                    .withTitle("TX_NOT_FOUND")
-                    .withDetail(STR."Transaction with id \{transactionId} not found")
-                    .withStatus(NOT_FOUND)
-                    .with("transactionId", transactionId)
-                    .build();
-
-            return Either.left(new IdentifiableProblem(transactionId, problem, TRANSACTION));
+            return transactionNotFoundResponse(transactionId);
         }
 
         val tx = txM.orElseThrow();
 
         if (tx.getStatus() == FAIL) {
-            val problem = Problem.builder()
-                    .withTitle("CANNOT_APPROVE_FAILED_TX")
-                    .withDetail(STR."Cannot approve a failed transaction, transactionId: \{transactionId}")
-                    .withStatus(METHOD_NOT_ALLOWED)
-                    .with("transactionId", transactionId)
-                    .build();
+            return transactionFailedResponse(transactionId);
+        }
 
-            if (tx.hasAnyRejection()) {
-                return transactionRejectedResponse(transactionId);
-            }
-
-            return Either.left(new IdentifiableProblem(transactionId, problem, TRANSACTION));
+        if (tx.hasAnyRejection()) {
+            return transactionRejectedResponse(transactionId);
         }
 
         if (!tx.getTransactionApproved()) {
@@ -136,7 +122,7 @@ public class TransactionRepositoryGateway {
             } catch (DataAccessException dae) {
                 log.error("Error approving transaction: {}", transactionId, dae);
 
-                val problem = createDBError(transactionId, dae);
+                val problem = FailureResponses.createTransactionDBError(transactionId, dae);
 
                 transactionsApprovalResponseListE.add(Either.left(new IdentifiableProblem(transactionId, problem, TRANSACTION)));
             }
@@ -166,7 +152,7 @@ public class TransactionRepositoryGateway {
             } catch (DataAccessException dae) {
                 log.error("Error approving transaction publish: {}", transactionId, dae);
 
-                val problem = createDBError(transactionId, dae);
+                val problem = createTransactionDBError(transactionId, dae);
 
                 transactionsApprovalResponseListE.add(Either.left(new IdentifiableProblem(transactionId, problem, TRANSACTION)));
             }
@@ -194,7 +180,7 @@ public class TransactionRepositoryGateway {
         val transactionItemEntitiesE = new ArrayList<Either<IdentifiableProblem, TransactionItemEntity>>();
 
         if (txM.isEmpty()) {
-            return notFoundTransactionResponse(transactionItemsRejectionRequest, transactionId);
+            return transactionNotFoundResponse(transactionItemsRejectionRequest, transactionId);
         }
 
         val tx = txM.orElseThrow();
@@ -206,26 +192,13 @@ public class TransactionRepositoryGateway {
             val txItemM = transactionItemRepository.findById(txItemId);
 
             if (txItemM.isEmpty()) {
-                val problem = Problem.builder()
-                        .withTitle("TX_ITEM_NOT_FOUND")
-                        .withDetail(STR."Transaction item with id \{txItemId} not found")
-                        .with("txItemId", txItemId)
-                        .build();
-
-                transactionItemEntitiesE.add(Either.left(new IdentifiableProblem(txItemId, problem, TRANSACTION_ITEM)));
+                transactionItemEntitiesE.add(transactionItemNotFoundResponse(transactionId, txItemId));
                 continue;
             }
 
             val txItem = txItemM.orElseThrow();
             if (tx.getLedgerDispatchApproved()) {
-                val problem = Problem.builder()
-                        .withTitle("TX_ALREADY_APPROVED")
-                        .withDetail(STR."Cannot reject transaction item \{txItemId} because transaction \{transactionId} has already been approved for dispatch")
-                        .with("transactionId", transactionId)
-                        .with("txItemId", txItemId)
-                        .build();
-
-                transactionItemEntitiesE.add(Either.left(new IdentifiableProblem(txItemId, problem, TRANSACTION_ITEM)));
+                transactionItemEntitiesE.add(transactionItemCannotRejectAlreadyApprovedResponse(transactionId, txItemId));
                 continue;
             }
 
@@ -239,23 +212,7 @@ public class TransactionRepositoryGateway {
         return transactionItemEntitiesE;
     }
 
-    private static List<Either<IdentifiableProblem, TransactionItemEntity>> notFoundTransactionResponse(TransactionItemsRejectionRequest transactionItemsRejectionRequest,
-                                                                                                        String transactionId) {
-        return transactionItemsRejectionRequest.getTransactionItemsRejections()
-                .stream()
-                .map(txItemRejectionRequest -> {
-                    val problem = Problem.builder()
-                            .withTitle("TX_NOT_FOUND")
-                            .withDetail(STR."Transaction with id \{transactionId} not found")
-                            .with("transactionId", transactionId)
-                            .build();
-
-                    return Either.<IdentifiableProblem, TransactionItemEntity>left(new IdentifiableProblem(transactionId, problem, TRANSACTION));
-                }).toList();
-    }
-
     public Optional<TransactionEntity> findById(String transactionId) {
-
         return transactionRepository.findById(transactionId);
     }
 
@@ -271,47 +228,6 @@ public class TransactionRepositoryGateway {
 
     public List<TransactionEntity> listAll() {
         return transactionRepository.findAll();
-    }
-
-    private static Either<IdentifiableProblem, TransactionEntity> transactionFailedResponse(String transactionId) {
-        val problem = Problem.builder()
-                .withTitle("CANNOT_APPROVE_FAILED_TX")
-                .withDetail(STR."Cannot approve a failed transaction, transactionId: \{transactionId}")
-                .with("transactionId", transactionId)
-                .build();
-
-        return Either.left(new IdentifiableProblem(transactionId, problem, TRANSACTION));
-    }
-
-    private static Either<IdentifiableProblem, TransactionEntity> transactionRejectedResponse(String transactionId) {
-        val problem = Problem.builder()
-                .withTitle("CANNOT_APPROVE_REJECTED_TX")
-                .withDetail(STR."Cannot approve a rejected transaction, transactionId: \{transactionId}")
-                .withStatus(METHOD_NOT_ALLOWED)
-                .with("transactionId", transactionId)
-                .build();
-
-        return Either.left(new IdentifiableProblem(transactionId, problem, TRANSACTION));
-    }
-
-    private static Either<IdentifiableProblem, TransactionEntity> txNotFoundResponse(String txId) {
-        val problem = Problem.builder()
-                .withTitle("TX_NOT_FOUND")
-                .withDetail(STR."Transaction with id \{txId} not found")
-                .with("txId", txId)
-                .build();
-
-        return Either.left(new IdentifiableProblem(txId, problem, TRANSACTION));
-    }
-
-    private static ThrowableProblem createDBError(String transactionId, DataAccessException dae) {
-        val problem = Problem.builder()
-                .withTitle("DB_ERROR")
-                .withDetail(STR."DB error approving transaction publish:\{transactionId}")
-                .with("transactionId", transactionId)
-                .with("error", dae.getMessage())
-                .build();
-        return problem;
     }
 
 }
