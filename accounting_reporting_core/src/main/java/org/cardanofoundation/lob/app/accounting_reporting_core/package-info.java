@@ -4,6 +4,7 @@
         "notification_gateway", "notification_gateway::domain_core", "notification_gateway::domain_event",
         "organisation", "organisation::domain_core", "organisation::domain_entity",
         "support::audit",
+        "support::problem_support",
         "support::crypto",
         "support::collections",
         "support::reactive"

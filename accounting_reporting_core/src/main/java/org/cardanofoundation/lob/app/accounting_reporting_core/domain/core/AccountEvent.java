@@ -8,6 +8,7 @@ import lombok.*;
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString
+@NoArgsConstructor
 public class AccountEvent {
 
     private @Size(min = 1, max =  255) String code;

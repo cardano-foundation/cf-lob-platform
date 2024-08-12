@@ -104,7 +104,7 @@ public class DocumentConversionTaskItem implements PipelineTaskItem {
                 .vat(getUpdatedVat(document, enrichedVatM))
                 .build();
 
-        txItem.setDocument(updatedDocument);
+        txItem.setDocument(Optional.of(updatedDocument));
     }
 
     @Nullable

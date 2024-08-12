@@ -7,10 +7,11 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Vio
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 
 import java.util.Map;
+import java.util.Optional;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.COST_CENTER_DATA_NOT_FOUND;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.COST_CENTER_DATA_NOT_FOUND;
 
 @RequiredArgsConstructor
 public class CostCenterConversionTaskItem implements PipelineTaskItem {
@@ -55,11 +56,11 @@ public class CostCenterConversionTaskItem implements PipelineTaskItem {
 
             val costCenterMapping = costCenterMappingM.orElseThrow();
 
-            txItem.setCostCenter(costCenter.toBuilder()
+            txItem.setCostCenter(Optional.of(costCenter.toBuilder()
                     .customerCode(customerCode)
                     .externalCustomerCode(costCenterMapping.getExternalCustomerCode())
                     .name(costCenterMapping.getName())
-                    .build()
+                    .build())
             );
         }
 

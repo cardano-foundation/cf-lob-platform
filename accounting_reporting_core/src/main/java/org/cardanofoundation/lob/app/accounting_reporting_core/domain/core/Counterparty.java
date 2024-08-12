@@ -14,6 +14,7 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString
+@NoArgsConstructor
 public class Counterparty {
 
     @LOB_ERPSourceVersionRelevant

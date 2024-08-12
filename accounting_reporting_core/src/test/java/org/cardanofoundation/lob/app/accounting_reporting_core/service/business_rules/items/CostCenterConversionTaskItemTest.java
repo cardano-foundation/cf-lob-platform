@@ -71,7 +71,7 @@ class CostCenterConversionTaskItemTest {
 
         val txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "0"));
-        txItem1.setCostCenter(new CostCenter("1", "2", "Cost Center 1"));
+        txItem1.setCostCenter(Optional.of(new CostCenter("1", "2", "Cost Center 1")));
 
         val tx = new TransactionEntity();
         tx.setId(txId);
@@ -92,7 +92,7 @@ class CostCenterConversionTaskItemTest {
 
         val txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "0"));
-        txItem1.setCostCenter(CostCenter.builder().customerCode("1").build());
+        txItem1.setCostCenter(Optional.of(CostCenter.builder().customerCode("1").build()));
 
         val tx = new TransactionEntity();
         tx.setId(txId);
@@ -117,11 +117,11 @@ class CostCenterConversionTaskItemTest {
 
         val txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "0"));
-        txItem1.setCostCenter(new CostCenter("1", "2", "Cost Center 1"));
+        txItem1.setCostCenter(Optional.of(new CostCenter("1", "2", "Cost Center 1")));
 
         val txItem2 = new TransactionItemEntity();
         txItem2.setId(TransactionItem.id(txId, "1"));
-        txItem2.setCostCenter(CostCenter.builder().customerCode("UNKNOWN").build());
+        txItem2.setCostCenter(Optional.of(CostCenter.builder().customerCode("UNKNOWN").build()));
 
         val items = new LinkedHashSet<>();
         items.add(txItem1);

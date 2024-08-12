@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +30,7 @@ class DocumentMustBePresentTaskItemTest {
 
         val itemWithDocument = new TransactionItemEntity();
         itemWithDocument.setId("itemWithDocument");
-        itemWithDocument.setDocument(document);
+        itemWithDocument.setDocument(Optional.of(document));
 
         val items = new HashSet<TransactionItemEntity>();
         items.add(itemWithDocument);
@@ -49,7 +50,7 @@ class DocumentMustBePresentTaskItemTest {
     void shouldAddViolationWhenDocumentIsMissing() {
         val itemWithoutDocument = new TransactionItemEntity();
         itemWithoutDocument.setId("itemWithoutDocument");
-        itemWithoutDocument.setDocument(null);
+        itemWithoutDocument.setDocument(Optional.empty());
 
         val items = new HashSet<TransactionItemEntity>();
         items.add(itemWithoutDocument);
@@ -71,11 +72,11 @@ class DocumentMustBePresentTaskItemTest {
 
         val itemWithDocument = new TransactionItemEntity();
         itemWithDocument.setId("itemWithDocument");
-        itemWithDocument.setDocument(document);
+        itemWithDocument.setDocument(Optional.of(document));
 
         val itemWithoutDocument = new TransactionItemEntity();
         itemWithoutDocument.setId("itemWithoutDocument");
-        itemWithoutDocument.setDocument(null);
+        itemWithoutDocument.setDocument(Optional.empty());
 
         Set<TransactionItemEntity> items = new LinkedHashSet<>();
         items.add(itemWithDocument);

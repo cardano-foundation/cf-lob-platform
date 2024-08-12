@@ -2,10 +2,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
 
 import java.util.Optional;
@@ -14,6 +11,7 @@ import java.util.Optional;
 @Getter
 @AllArgsConstructor
 @EqualsAndHashCode
+@NoArgsConstructor
 public class Organisation {
 
     @LOB_ERPSourceVersionRelevant

@@ -5,7 +5,8 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Acc
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
-import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepositoryGateway;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ExtractionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.SearchRequest;
@@ -27,6 +28,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.CORE_CURRENCY_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -42,9 +44,6 @@ class AccountingCorePresentationConverterTest {
 
     @Mock
     private TransactionBatchRepositoryGateway transactionBatchRepositoryGateway;
-
-    @Mock
-    private AccountingCoreResourceService accountingCoreResourceService;
 
     @InjectMocks
     private AccountingCorePresentationViewService accountingCorePresentationConverter;
@@ -76,13 +75,13 @@ class AccountingCorePresentationConverterTest {
         violation.setTxItemId(Optional.of(transactionItem.getId().toString()));
         violation.setSource(Source.ERP);
         violation.setSeverity(org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.WARN);
-        violation.setCode(ViolationCode.CORE_CURRENCY_NOT_FOUND);
+        violation.setCode(CORE_CURRENCY_NOT_FOUND);
 
         transactionEntity.setItems(Set.of(transactionItem));
         transactionEntity.setViolations(Set.of(violation));
 
-        transactionItem.setAccountDebit(accountDebit);
-        transactionItem.setAccountCredit(accountCredit);
+        transactionItem.setAccountDebit(Optional.of(accountDebit));
+        transactionItem.setAccountCredit(Optional.of(accountCredit));
         transactionItem.setTransaction(transactionEntity);
         transactionItem.setAmountFcy(BigDecimal.valueOf(1000));
         transactionItem.setAmountLcy(BigDecimal.valueOf(1000));
@@ -124,7 +123,7 @@ class AccountingCorePresentationConverterTest {
 
         assertEquals(Source.ERP, result.get(0).getViolations().stream().findFirst().get().getSource());
         assertEquals(org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.WARN, result.get(0).getViolations().stream().findFirst().get().getSeverity());
-        assertEquals(ViolationCode.CORE_CURRENCY_NOT_FOUND, result.get(0).getViolations().stream().findFirst().get().getCode());
+        assertEquals(CORE_CURRENCY_NOT_FOUND, result.get(0).getViolations().stream().findFirst().get().getCode());
     }
 
     @Test

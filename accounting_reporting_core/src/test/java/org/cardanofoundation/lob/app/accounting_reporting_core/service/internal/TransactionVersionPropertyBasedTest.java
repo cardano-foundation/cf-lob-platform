@@ -10,6 +10,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -60,19 +61,19 @@ class TransactionVersionPropertyBasedTest {
         val txItem1 = new TransactionItemEntity();
         txItem1.setId("1");
         txItem1.setAmountFcy(amountFcy1);
-        txItem1.setAccountDebit(Account.builder()
+        txItem1.setAccountDebit(Optional.of(Account.builder()
                 .code("1000")
                 .name("Cash")
                 .refCode("r1000")
                 .build()
-        );
-        txItem1.setAccountCredit(Account.builder()
+        ));
+        txItem1.setAccountCredit(Optional.of(Account.builder()
                 .code("2000")
                 .name("Bank")
                 .refCode("r2000")
                 .build()
-        );
-        txItem1.setDocument(Document.builder()
+        ));
+        txItem1.setDocument(Optional.of(Document.builder()
                 .num("doc-1")
                 .vat(Vat.builder()
                         .customerCode("C100")
@@ -86,7 +87,7 @@ class TransactionVersionPropertyBasedTest {
                         .type(VENDOR)
                         .build())
                 .build()
-        );
+        ));
 
         val t1 = new TransactionEntity();
         t1.setTransactionType(transactionType1);

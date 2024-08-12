@@ -40,7 +40,7 @@ public class ProjectConversionTaskItemTest {
 
         val txItem = new TransactionItemEntity();
         txItem.setId("1:0");
-        txItem.setProject(project);
+        txItem.setProject(Optional.of(project));
 
         Set<TransactionItemEntity> items = new HashSet<>();
         items.add(txItem);
@@ -68,7 +68,7 @@ public class ProjectConversionTaskItemTest {
     public void testMissingProjectResultsInConversionSuccess() {
         val txItem = new TransactionItemEntity();
         txItem.setId("1:0");
-        txItem.setProject(null);
+        txItem.setProject(Optional.empty());
 
         Set<TransactionItemEntity> items = new HashSet<>();
         items.add(txItem);
@@ -92,7 +92,7 @@ public class ProjectConversionTaskItemTest {
 
         val txItem = new TransactionItemEntity();
         txItem.setId("1:0");
-        txItem.setProject(project);
+        txItem.setProject(Optional.of(project));
 
         Set<TransactionItemEntity> items = new HashSet<>();
         items.add(txItem);

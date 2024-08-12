@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,21 +46,21 @@ class TransactionVersionCalculatorTest {
         txItem1.setAmountFcy(BigDecimal.valueOf(100.10));
         txItem1.setAmountLcy(BigDecimal.valueOf(100.20));
 
-        txItem1.setAccountDebit(Account.builder()
+        txItem1.setAccountDebit(Optional.of(Account.builder()
                 .code("1000")
                 .name("Cash")
                 .refCode("r1000")
                 .build()
-        );
+        ));
 
-        txItem1.setAccountCredit(Account.builder()
+        txItem1.setAccountCredit(Optional.of(Account.builder()
                 .code("2000")
                 .name("Bank")
                 .refCode("r2000")
                 .build()
-        );
+        ));
 
-        txItem1.setDocument(Document.builder()
+        txItem1.setDocument(Optional.of(Document.builder()
                         .num("doc-1")
                         .vat(Vat.builder()
                                 .customerCode("C100")
@@ -71,28 +72,29 @@ class TransactionVersionCalculatorTest {
                         .counterparty(Counterparty.builder()
                                 .customerCode("C100")
                                 .build())
-                .build());
+                .build())
+        );
 
         val txItem2 = new TransactionItemEntity();
         txItem2.setId("2");
         txItem2.setAmountFcy(BigDecimal.valueOf(100.10));
         txItem2.setAmountLcy(BigDecimal.valueOf(100.20));
 
-        txItem2.setAccountDebit(Account.builder()
+        txItem2.setAccountDebit(Optional.of(Account.builder()
                 .code("2000")
                 .name("Cash")
                 .refCode("21000")
-                .build()
+                .build())
         );
 
-        txItem2.setAccountCredit(Account.builder()
+        txItem2.setAccountCredit(Optional.of(Account.builder()
                 .code("4000")
                 .name("Bank")
                 .refCode("r3000")
-                .build()
+                .build())
         );
 
-        txItem2.setDocument(Document.builder()
+        txItem2.setDocument(Optional.of(Document.builder()
                 .num("doc-2")
                 .vat(Vat.builder()
                         .customerCode("C200")
@@ -104,7 +106,8 @@ class TransactionVersionCalculatorTest {
                 .counterparty(Counterparty.builder()
                         .customerCode("C200")
                         .build())
-                .build());
+                .build())
+        );
 
         t.setItems(Set.of(txItem1, txItem2));
 

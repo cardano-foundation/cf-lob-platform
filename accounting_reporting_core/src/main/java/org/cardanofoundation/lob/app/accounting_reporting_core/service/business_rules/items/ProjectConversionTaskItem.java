@@ -8,6 +8,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Vio
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
@@ -60,13 +61,11 @@ public class ProjectConversionTaskItem implements PipelineTaskItem {
 
             val projectMapping = projectMappingM.orElseThrow();
 
-            val p = project.toBuilder()
+            txItem.setProject(Optional.of(project.toBuilder()
                     .customerCode(projectMapping.getId().getCustomerCode())
                     .externalCustomerCode(projectMapping.getExternalCustomerCode())
                     .name(projectMapping.getName())
-                    .build();
-
-            txItem.setProject(p);
+                    .build()));
         }
     }
 

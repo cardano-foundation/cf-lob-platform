@@ -28,17 +28,19 @@ class TxItemsCollapsingTaskItemTest {
     void shouldNotCollapseItems() {
         val txItem1 = new TransactionItemEntity();
         txItem1.setId("1:0");
-        txItem1.setAccountEvent(AccountEvent.builder()
+        txItem1.setAccountEvent(Optional.of(AccountEvent.builder()
                 .code("e12")
-                .build());
+                .build())
+        );
         txItem1.setAmountLcy(BigDecimal.ONE);
         txItem1.setAmountFcy(BigDecimal.TEN);
 
         val txItem2 = new TransactionItemEntity();
         txItem2.setId("1:1");
-        txItem2.setAccountEvent(AccountEvent.builder()
+        txItem2.setAccountEvent(Optional.of(AccountEvent.builder()
                 .code("e1212")
-                .build());
+                .build())
+        );
 
         txItem2.setAmountLcy(BigDecimal.ONE);
         txItem2.setAmountFcy(BigDecimal.TEN);
@@ -61,17 +63,21 @@ class TxItemsCollapsingTaskItemTest {
     void shouldCollapseItems() {
         val txItem1 = new TransactionItemEntity();
         txItem1.setId("1:0");
-        txItem1.setAccountEvent(AccountEvent.builder()
+        txItem1.setAccountEvent(Optional.of(AccountEvent.builder()
                 .code("e12")
-                .build());
+                .build())
+        );
+
         txItem1.setAmountLcy(BigDecimal.ONE);
         txItem1.setAmountFcy(BigDecimal.TEN);
 
         val txItem2 = new TransactionItemEntity();
         txItem2.setId("1:1");
-        txItem2.setAccountEvent(AccountEvent.builder()
+        txItem2.setAccountEvent(Optional.of(AccountEvent.builder()
                 .code("e12")
-                .build());
+                .build())
+        );
+
         txItem2.setAmountLcy(BigDecimal.ONE);
         txItem2.setAmountFcy(BigDecimal.TEN);
 
@@ -100,9 +106,10 @@ class TxItemsCollapsingTaskItemTest {
         TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId("1:0");
 
-        txItem1.setAccountEvent(AccountEvent.builder()
+        txItem1.setAccountEvent(Optional.of(AccountEvent.builder()
                 .code("e12")
-                .build());
+                .build())
+        );
 
         txItem1.setAmountLcy(BigDecimal.ONE);
         txItem1.setAmountFcy(BigDecimal.TEN);
@@ -115,9 +122,10 @@ class TxItemsCollapsingTaskItemTest {
         TransactionItemEntity txItem2 = new TransactionItemEntity();
         txItem2.setId("2:0");
 
-        txItem2.setAccountEvent(AccountEvent.builder()
+        txItem2.setAccountEvent(Optional.of(AccountEvent.builder()
                 .code("e34")
-                .build());
+                .build())
+        );
 
         txItem2.setAmountLcy(BigDecimal.ONE);
         txItem2.setAmountFcy(BigDecimal.TEN);
@@ -144,9 +152,10 @@ class TxItemsCollapsingTaskItemTest {
         TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId("1:0");
 
-        txItem1.setAccountEvent(AccountEvent.builder()
+        txItem1.setAccountEvent(Optional.of(AccountEvent.builder()
                 .code("e12")
-                .build());
+                .build())
+        );
 
         txItem1.setAmountLcy(BigDecimal.ONE);
         txItem1.setAmountFcy(BigDecimal.TEN);
@@ -154,9 +163,10 @@ class TxItemsCollapsingTaskItemTest {
         TransactionItemEntity txItem2 = new TransactionItemEntity();
         txItem2.setId("1:1");
 
-        txItem2.setAccountEvent(AccountEvent.builder()
+        txItem2.setAccountEvent(Optional.of(AccountEvent.builder()
                 .code("e12")
-                .build());
+                .build())
+        );
 
         txItem2.setAmountLcy(BigDecimal.ONE);
         txItem2.setAmountFcy(BigDecimal.TEN);

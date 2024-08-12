@@ -7,20 +7,17 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ScheduledIngestionEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepository;
-import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.problem.Problem;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.FAIL;
 import static org.zalando.problem.Status.NOT_FOUND;
 
 @Service
@@ -31,7 +28,6 @@ public class AccountingCoreService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TransactionBatchRepository transactionBatchRepository;
     private final ERPIncomingDataProcessor erpIncomingDataProcessor;
-    private final TransactionRepositoryGateway transactionRepositoryGateway;
 
     @Transactional
     public void scheduleIngestion(UserExtractionParameters userExtractionParameters) {
@@ -60,7 +56,7 @@ public class AccountingCoreService {
         val txBatch = txBatchM.get();
 
         val txs =  txBatch.getTransactions().stream()
-                .filter(tx -> tx.getAutomatedValidationStatus() == FAILED)
+                .filter(tx -> tx.getStatus() == FAIL)
                 // reprocess only the ones that have not been approved to dispatch yet, actually it is just a sanity check because it should never happen
                 // and we should never allow approving failed transactions
                 .filter(tx -> !tx.allApprovalsPassedForTransactionDispatch())
@@ -82,30 +78,6 @@ public class AccountingCoreService {
         erpIncomingDataProcessor.continueIngestion(organisationId, batchId, size, txs, processorFlags);
 
         return Either.right(true);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Either<Problem, Boolean> approveTransaction(String txId) {
-        return transactionRepositoryGateway.approveTransaction(txId);
-    }
-
-    @Transactional
-    public Either<Problem, Boolean> approveTransactionDispatch(String txId) {
-        return transactionRepositoryGateway.approveTransactionDispatch(txId);
-    }
-
-    @Transactional
-    public Set<String> approveTransactions(String organisationId, Set<String> transactionIds) {
-        log.info("approveTransactions, transactionIds: {}", transactionIds);
-
-        return transactionRepositoryGateway.approveTransactions(organisationId, transactionIds);
-    }
-
-    @Transactional
-    public Set<String> approveTransactionsDispatch(String organisationId, Set<String> transactionIds) {
-        log.info("approveTransactionsDispatch, transactionIds: {}", transactionIds);
-
-        return transactionRepositoryGateway.approveTransactionsDispatch(organisationId, transactionIds);
     }
 
 }
