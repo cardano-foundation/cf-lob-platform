@@ -3,17 +3,18 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service;
 import com.bloxbean.cardano.client.metadata.MetadataMap;
 import com.bloxbean.cardano.client.metadata.cbor.CBORMetadataList;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.*;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.FxRevaluation;
+import static org.cardanofoundation.lob.app.blockchain_publisher.service.MetadataSerialiser.VERSION;
 
 class MetadataSerialiserTest {
 
@@ -44,7 +45,7 @@ class MetadataSerialiserTest {
         transaction.setId("tx123");
         transaction.setInternalNumber("1");
         transaction.setBatchId("batch1");
-        transaction.setTransactionType(TransactionType.FxRevaluation);
+        transaction.setTransactionType(FxRevaluation);
         transaction.setEntryDate(LocalDate.now(fixedClock));
         transaction.setAccountingPeriod(accountingPeriod);
         transaction.setOrganisation(organisation);
@@ -57,7 +58,28 @@ class MetadataSerialiserTest {
                 .num("doc1")
                 .currency(Currency.builder()
                         .customerCode("USD")
-                        .build()).build()
+                        .build())
+                .counterparty(Counterparty.builder()
+                        .customerCode("CP 000001")
+                        .type(VENDOR)
+                        .build()
+                )
+                .vat(Vat.builder()
+                        .customerCode("CH-VH-3.8")
+                        .rate(BigDecimal.valueOf(0.038))
+                        .build()
+                )
+                .build()
+        );
+        item1.setProject(Project.builder()
+                .customerCode("AN 000001 2023")
+                .name("Summit")
+                .build()
+        );
+        item1.setCostCenter(CostCenter.builder()
+                .customerCode("CC 000001")
+                .name("Cost Center")
+                .build()
         );
 
         TransactionItemEntity item2 = new TransactionItemEntity();
@@ -96,9 +118,9 @@ class MetadataSerialiserTest {
         assertThat(result.get("metadata")).isInstanceOf(MetadataMap.class);
         MetadataMap metadata = (MetadataMap) result.get("metadata");
 
-        assertThat(metadata.get("creation_slot")).isEqualTo(BigInteger.valueOf(creationSlot));
+        assertThat(metadata.get("creation_slot")).isEqualTo(String.valueOf(creationSlot));
         assertThat(metadata.get("timestamp")).isEqualTo("2023-06-01T10:15:30Z");
-        assertThat(metadata.get("version")).isEqualTo(MetadataSerialiser.VERSION);
+        assertThat(metadata.get("version")).isEqualTo(VERSION);
 
         assertThat(result.get("org")).isInstanceOf(MetadataMap.class);
         MetadataMap orgMap = (MetadataMap) result.get("org");
@@ -147,6 +169,29 @@ class MetadataSerialiserTest {
         assertThat(itemMap1.get("amount")).isEqualTo(item1.getAmountFcy().toEngineeringString());
         assertThat(itemMap1.get("fx_rate")).isEqualTo(item1.getFxRate().toEngineeringString());
         assertThat(itemMap1.get("document")).isInstanceOf(MetadataMap.class);
+        assertThat(itemMap1.get("project")).isInstanceOf(MetadataMap.class); // only for item 1
+        assertThat(itemMap1.get("cost_center")).isInstanceOf(MetadataMap.class); // only for item 1
+
+        val documentMap = (MetadataMap) itemMap1.get("document");
+        assertThat(documentMap.get("number")).isEqualTo("doc1");
+        assertThat(documentMap.get("currency")).isInstanceOf(MetadataMap.class);
+        assertThat(documentMap.get("counterparty")).isInstanceOf(MetadataMap.class);
+        assertThat(documentMap.get("vat")).isInstanceOf(MetadataMap.class);
+        val counterParty = (MetadataMap) documentMap.get("counterparty");
+        assertThat(counterParty.get("cust_code")).isEqualTo("CP 000001");
+        assertThat(counterParty.get("type")).isEqualTo("VENDOR");
+
+        val vat = (MetadataMap) documentMap.get("vat");
+        assertThat(vat.get("cust_code")).isEqualTo("CH-VH-3.8");
+        assertThat(vat.get("rate")).isEqualTo("0.038");
+
+        val projectMap = (MetadataMap) itemMap1.get("project");
+        assertThat(projectMap.get("cust_code")).isEqualTo("AN 000001 2023");
+        assertThat(projectMap.get("name")).isEqualTo("Summit");
+
+        val costCenterMap = (MetadataMap) itemMap1.get("cost_center");
+        assertThat(costCenterMap.get("cust_code")).isEqualTo("CC 000001");
+        assertThat(costCenterMap.get("name")).isEqualTo("Cost Center");
 
         assertThat(itemMap2.get("id")).isEqualTo(item2.getId());
         assertThat(itemMap2.get("amount")).isEqualTo(item2.getAmountFcy().toEngineeringString());

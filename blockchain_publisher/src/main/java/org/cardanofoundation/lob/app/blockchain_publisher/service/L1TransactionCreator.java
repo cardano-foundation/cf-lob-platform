@@ -3,9 +3,11 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service;
 import com.bloxbean.cardano.client.account.Account;
 import com.bloxbean.cardano.client.api.model.Amount;
 import com.bloxbean.cardano.client.backend.api.BackendService;
+import com.bloxbean.cardano.client.common.cbor.CborSerializationUtil;
 import com.bloxbean.cardano.client.function.helper.SignerProviders;
 import com.bloxbean.cardano.client.metadata.Metadata;
 import com.bloxbean.cardano.client.metadata.MetadataBuilder;
+import com.bloxbean.cardano.client.metadata.helper.MetadataToJsonNoSchemaConverter;
 import com.bloxbean.cardano.client.quicktx.QuickTxBuilder;
 import com.bloxbean.cardano.client.quicktx.Tx;
 import com.bloxbean.cardano.client.transaction.util.TransactionUtil;
@@ -129,29 +131,37 @@ public class L1TransactionCreator {
     private Either<Problem, byte[]> serialiseTransactionChunk(String organisationId,
                                                               Set<TransactionEntity> transactionsBatch,
                                                               long creationSlot) {
-        val metadataMap =
-                metadataSerialiser.serialiseToMetadataMap(organisationId, transactionsBatch, creationSlot);
+        try {
+            val metadataMap =
+                    metadataSerialiser.serialiseToMetadataMap(organisationId, transactionsBatch, creationSlot);
 
-//        try {
-//            System.out.println(metadataMap.toJson());
-//        } catch (CborException e) {
-//            throw new RuntimeException(e);
-//        }
+            val data = metadataMap.getMap();
+            val bytes = CborSerializationUtil.serialize(data);
 
-        val metadata = MetadataBuilder.createMetadata();
-        metadata.put(metadataLabel, metadataMap);
+            val json = MetadataToJsonNoSchemaConverter.cborBytesToJson(bytes);
 
-        val isValid = jsonSchemaMetadataChecker.checkTransactionMetadata(metadataMap);
+            val metadata = MetadataBuilder.createMetadata();
+            metadata.put(metadataLabel, metadataMap);
 
-        if (!isValid) {
+            val isValid = jsonSchemaMetadataChecker.checkTransactionMetadata(json);
+
+            if (!isValid) {
+                return Either.left(Problem.builder()
+                        .withTitle("INVALID_TRANSACTION_METADATA")
+                        .withDetail("Metadata is not valid according to the transaction schema, we will not create a transaction!")
+                        .build()
+                );
+            }
+
+            return Either.right(serialiseTransaction(metadata));
+        } catch (Exception e) {
+            log.error("Error serialising metadata to cbor", e);
             return Either.left(Problem.builder()
-                    .withTitle("INVALID_TRANSACTION_METADATA")
-                    .withDetail("Metadata is not valid according to the transaction schema!")
+                    .withTitle("ERROR_SERIALISING_METADATA")
+                    .withDetail("Error serialising metadata to cbor")
                     .build()
             );
         }
-
-        return Either.right(serialiseTransaction(metadata));
     }
 
     @SneakyThrows
