@@ -3,7 +3,9 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.present
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
@@ -183,14 +185,41 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getTransactionInternalNumber(),
                 transactionEntity.getEntryDate(),
                 transactionEntity.getTransactionType(),
+                transactionEntity.getStatus(),
+                getTransactionDispatchStatus(transactionEntity),
                 transactionEntity.getAutomatedValidationStatus(),
                 transactionEntity.getTransactionApproved(),
                 transactionEntity.getLedgerDispatchApproved(),
                 getAmountLcyTotalForAllItems(transactionEntity),
                 getTransactionItemView(transactionEntity),
-                getViolations(transactionEntity),
-                transactionEntity.getStatus()
+                getViolations(transactionEntity)
+
         );
+    }
+
+
+    public LedgerDispatchStatusView getTransactionDispatchStatus(TransactionEntity transactionEntity) {
+
+        if (TransactionStatus.FAIL == transactionEntity.getStatus()) {
+            return LedgerDispatchStatusView.INVALID;
+        }
+
+        switch (transactionEntity.getLedgerDispatchStatus()) {
+            case MARK_DISPATCH -> {
+                return LedgerDispatchStatusView.APPROVE;
+            }
+            case NOT_DISPATCHED -> {
+                return LedgerDispatchStatusView.PENDING;
+            }
+            case DISPATCHED -> {
+                return LedgerDispatchStatusView.PUBLISH;
+            }
+            case COMPLETED,FINALIZED -> {
+                return LedgerDispatchStatusView.PUBLISHED;
+            }
+        }
+        return LedgerDispatchStatusView.INVALID;
+
     }
 
     private Set<TransactionItemView> getTransactionItemView(TransactionEntity transaction) {
