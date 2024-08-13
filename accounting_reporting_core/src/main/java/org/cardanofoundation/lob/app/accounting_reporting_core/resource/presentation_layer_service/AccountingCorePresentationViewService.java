@@ -17,9 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.math.BigDecimal.ZERO;
 import static java.util.stream.Collectors.toSet;
@@ -46,6 +45,7 @@ public class AccountingCorePresentationViewService {
 
         return transactions.stream()
                 .map(this::getTransactionView)
+                .sorted(Comparator.comparing(TransactionView::getAmountTotalLcy).reversed())
                 .toList();
     }
 
@@ -176,7 +176,8 @@ public class AccountingCorePresentationViewService {
     private Set<TransactionView> getTransaction(TransactionBatchEntity transactionBatchEntity) {
         return transactionBatchEntity.getTransactions().stream()
                 .map(this::getTransactionView)
-                .collect(toSet());
+                .sorted(Comparator.comparing(TransactionView::getAmountTotalLcy).reversed())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private TransactionView getTransactionView(TransactionEntity transactionEntity) {
