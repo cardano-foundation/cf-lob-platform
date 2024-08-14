@@ -198,7 +198,7 @@ public class TransactionRepositoryGateway {
 
             val txItem = txItemM.orElseThrow();
             if (tx.getLedgerDispatchApproved()) {
-                transactionItemEntitiesE.add(transactionItemCannotRejectAlreadyApprovedResponse(transactionId, txItemId));
+                transactionItemEntitiesE.add(transactionItemCannotRejectAlreadyApprovedForDispatchResponse(transactionId, txItemId));
                 continue;
             }
 

@@ -3,7 +3,6 @@ package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import lombok.*;
-import lombok.experimental.Accessors;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -36,6 +35,10 @@ public class Document {
 
     public Optional<Counterparty> getCounterparty() {
         return Optional.ofNullable(counterparty);
+    }
+
+    public void setCounterparty(Optional<Counterparty> counterparty) {
+        this.counterparty = counterparty.orElse(null);
     }
 
 }

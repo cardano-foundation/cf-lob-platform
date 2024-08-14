@@ -7,7 +7,6 @@ import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.*;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +50,7 @@ public class MetadataSerialiser {
 
         val now = Instant.now(clock);
 
-        metadataMap.put("creation_slot", BigInteger.valueOf(creationSlot));
+        metadataMap.put("creation_slot", String.valueOf(creationSlot));
         metadataMap.put("timestamp", DateTimeFormatter.ISO_INSTANT.format(now));
         metadataMap.put("version", VERSION);
 

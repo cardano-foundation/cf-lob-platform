@@ -74,8 +74,8 @@ public final class FailureResponses {
                 }).toList();
     }
 
-    public static Either<IdentifiableProblem, TransactionItemEntity> transactionItemCannotRejectAlreadyApprovedResponse(String transactionId,
-                                                                                                                        String txItemId) {
+    public static Either<IdentifiableProblem, TransactionItemEntity> transactionItemCannotRejectAlreadyApprovedForDispatchResponse(String transactionId,
+                                                                                                                                   String txItemId) {
         val problem = Problem.builder()
                 .withTitle("TX_ALREADY_APPROVED_CANNOT_REJECT_TX_ITEM")
                 .withDetail(STR."Cannot reject transaction item \{txItemId} because transaction \{transactionId} has already been approved for dispatch")
