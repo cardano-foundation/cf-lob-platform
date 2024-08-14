@@ -85,28 +85,27 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
         andPredicates.add(builder.equal(rootEntry.get("filteringParameters").get("organisationId"), body.getOrganisationId()));
 
         if (!body.getBatchStatistics().isEmpty()) {
-            Join<TransactionBatchEntity, TransactionEntity> transactionEntityJoin = rootEntry.join("transactions", JoinType.INNER);
 
             List<Predicate> orPredicates = new ArrayList<>();
 
             if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.APPROVE)).count()) {
-                orPredicates.add(builder.equal(transactionEntityJoin.get("ledgerDispatchStatus"), LedgerDispatchStatus.MARK_DISPATCH));
+                orPredicates.add(builder.greaterThan(rootEntry.get("batchStatistics").get("approvedTransactionsCount"),0));
             }
 
             if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.PENDING)).count()) {
-                orPredicates.add(builder.equal(transactionEntityJoin.get("ledgerDispatchStatus"), LedgerDispatchStatus.NOT_DISPATCHED));
+                orPredicates.add(builder.greaterThan(builder.diff(rootEntry.get("batchStatistics").get("totalTransactionsCount"),rootEntry.get("batchStatistics").get("processedTransactionsCount")) ,0));
             }
 
             if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.INVALID)).count()) {
-                orPredicates.add(builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.FAILED));
+                orPredicates.add(builder.greaterThan(rootEntry.get("batchStatistics").get("failedTransactionsCount"),0));
             }
 
             if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.PUBLISH)).count()) {
-                orPredicates.add(builder.equal(transactionEntityJoin.get("ledgerDispatchStatus"), LedgerDispatchStatus.DISPATCHED));
+                orPredicates.add(builder.greaterThan(rootEntry.get("batchStatistics").get("dispatchedTransactionsCount"),0));
             }
 
             if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.PUBLISHED)).count()) {
-                orPredicates.add(builder.equal(transactionEntityJoin.get("ledgerDispatchStatus"), LedgerDispatchStatus.COMPLETED));
+                orPredicates.add(builder.greaterThan(rootEntry.get("batchStatistics").get("completedTransactionsCount"),0));
             }
 
             andPredicates.add(builder.or(orPredicates.toArray(new Predicate[0])));
