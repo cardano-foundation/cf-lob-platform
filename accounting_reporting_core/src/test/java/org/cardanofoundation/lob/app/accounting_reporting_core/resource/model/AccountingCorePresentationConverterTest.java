@@ -5,6 +5,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Acc
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
@@ -109,6 +110,8 @@ class AccountingCorePresentationConverterTest {
         assertEquals(Boolean.FALSE, result.get(1).isTransactionApproved());
         assertEquals(Boolean.TRUE, result.get(1).isLedgerDispatchApproved());
         assertEquals(ValidationStatus.FAILED, result.get(1).getValidationStatus());
+        assertEquals(LedgerDispatchStatusView.PENDING, result.get(1).getStatistic());
+        assertEquals(LedgerDispatchStatusView.INVALID, result.get(0).getStatistic());
         assertEquals("tx-id2-internal", result.get(1).getInternalTransactionNumber());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         assertEquals(localDate.format(formatter).toString(), result.get(1).getEntryDate().toString());
@@ -252,6 +255,32 @@ class AccountingCorePresentationConverterTest {
 
         accountingCorePresentationConverter.extractionTrigger(extractionRequest);
         Mockito.verify(accountingCoreService, Mockito.times(1)).scheduleIngestion(Mockito.any(UserExtractionParameters.class));
+
+    }
+
+    @Test
+    void allTransactionsDispatchStatus() {
+        TransactionEntity transaction = new TransactionEntity();
+
+        assertEquals(LedgerDispatchStatusView.PENDING, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
+
+        transaction.setLedgerDispatchStatus(LedgerDispatchStatus.MARK_DISPATCH);
+        assertEquals(LedgerDispatchStatusView.APPROVE, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
+
+        transaction.setLedgerDispatchStatus(LedgerDispatchStatus.NOT_DISPATCHED);
+        assertEquals(LedgerDispatchStatusView.PENDING, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
+
+        transaction.setLedgerDispatchStatus(LedgerDispatchStatus.DISPATCHED);
+        assertEquals(LedgerDispatchStatusView.PUBLISH, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
+
+        transaction.setLedgerDispatchStatus(LedgerDispatchStatus.COMPLETED);
+        assertEquals(LedgerDispatchStatusView.PUBLISHED, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
+
+        transaction.setLedgerDispatchStatus(LedgerDispatchStatus.FINALIZED);
+        assertEquals(LedgerDispatchStatusView.PUBLISHED, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
+
+        transaction.setStatus(TransactionStatus.FAIL);
+        assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
     }
 }

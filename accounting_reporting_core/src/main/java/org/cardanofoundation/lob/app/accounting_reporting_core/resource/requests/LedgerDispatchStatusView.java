@@ -12,6 +12,6 @@ public enum LedgerDispatchStatusView {
     
     PUBLISH, /** Dispatched */
 
-    PUBLISHED; /** Completed */
+    PUBLISHED; /** Completed or finalized */
 
 }
