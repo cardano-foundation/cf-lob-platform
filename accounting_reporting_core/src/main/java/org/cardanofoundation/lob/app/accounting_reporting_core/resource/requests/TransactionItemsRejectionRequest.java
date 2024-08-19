@@ -19,7 +19,7 @@ public class TransactionItemsRejectionRequest {
     @NotBlank
     private String organisationId;
 
-    @Schema(example = "abf95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020caff")
+    @Schema(example = "38e7e04304c86c1156128f7bdc548d51f175d5bdf83df1b3edda1832cac385dd")
     @NotBlank
     private String transactionId;
 
@@ -34,7 +34,7 @@ public class TransactionItemsRejectionRequest {
     @EqualsAndHashCode
     public static class TxItemRejectionRequest {
 
-        @Schema(example = "12f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020caaa")
+        @Schema(example = "e7a70ff49619cea765db827cc3a7e6a320d8e0859f7818ed43b6c4bc8025fc60")
         @NotBlank
         private String txItemId;
 
