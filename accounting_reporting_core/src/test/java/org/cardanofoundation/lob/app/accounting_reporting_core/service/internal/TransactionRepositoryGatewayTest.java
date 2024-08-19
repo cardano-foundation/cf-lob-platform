@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import io.vavr.control.Either;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rejection;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
@@ -68,7 +69,7 @@ class TransactionRepositoryGatewayTest {
         // Arrange
         String transactionId = "failed_tx_id";
         TransactionEntity failedTransaction = new TransactionEntity();
-        failedTransaction.setStatus(TransactionStatus.FAIL);
+        failedTransaction.setAutomatedValidationStatus(ValidationStatus.FAILED);
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(failedTransaction));
 
         // Act
