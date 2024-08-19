@@ -7,6 +7,7 @@ import lombok.*;
 @Builder(toBuilder = true)
 @EqualsAndHashCode
 @ToString
+@NoArgsConstructor
 public class Rejection {
 
     private RejectionCode rejectionCode;
