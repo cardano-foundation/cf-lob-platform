@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.blockchain_publisher.service;
+package org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain;
 
 import io.vavr.control.Either;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.ChainTip;

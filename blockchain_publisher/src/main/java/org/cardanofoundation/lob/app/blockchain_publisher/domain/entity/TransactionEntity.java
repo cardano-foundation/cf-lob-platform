@@ -10,7 +10,6 @@ import org.cardanofoundation.lob.app.support.audit.AuditEntity;
 import org.springframework.data.domain.Persistable;
 
 import javax.annotation.Nullable;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.LinkedHashSet;
@@ -67,7 +66,7 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
             @AttributeOverride(name = "transactionHash", column = @Column(name = "l1_transaction_hash")),
             @AttributeOverride(name = "absoluteSlot", column = @Column(name = "l1_absolute_slot")),
             @AttributeOverride(name = "creationSlot", column = @Column(name = "l1_creation_slot")),
-            @AttributeOverride(name = "assuranceLevel", column = @Column(name = "l1_assurance_level")),
+            @AttributeOverride(name = "finalityScore", column = @Column(name = "l1_finality_score")),
             @AttributeOverride(name = "publishStatus", column = @Column(name = "l1_publish_status"))
     })
     private L1SubmissionData l1SubmissionData;
@@ -97,6 +96,10 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
 
     public Optional<L1SubmissionData> getL1SubmissionData() {
         return Optional.ofNullable(l1SubmissionData);
+    }
+
+    public void setL1SubmissionData(Optional<L1SubmissionData> l1SubmissionData) {
+        this.l1SubmissionData = l1SubmissionData.orElse(null);
     }
 
     @Override

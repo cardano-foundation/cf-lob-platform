@@ -20,4 +20,16 @@ public enum BlockchainPublishStatus {
         return Set.of(STORED, ROLLBACKED);
     }
 
+    public static Set<BlockchainPublishStatus> notFinalised() {
+        return Set.of(SUBMITTED, VISIBLE_ON_CHAIN, COMPLETED);
+    }
+
+    public static Set<BlockchainPublishStatus> notFinalisedButVisibleOnChain() {
+        return Set.of(VISIBLE_ON_CHAIN, COMPLETED);
+    }
+
+    public static Set<BlockchainPublishStatus> onChainAndNotFinalised() {
+        return Set.of(VISIBLE_ON_CHAIN, COMPLETED);
+    }
+
 }

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.BlockchainPublisherException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class BackendServiceBlockchainTransactionSubmissionService implements Blo
             return result.getValue();
         }
 
-        throw new RuntimeException("Transaction submission failed with error: " + result.getResponse());
+        throw new BlockchainPublisherException("Transaction submission failed with error: " + result.getResponse());
     }
 
 }

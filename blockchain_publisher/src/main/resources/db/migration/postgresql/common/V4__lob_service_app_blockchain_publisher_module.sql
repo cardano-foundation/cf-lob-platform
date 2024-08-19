@@ -13,7 +13,7 @@ CREATE TABLE blockchain_publisher_transaction (
    accounting_period CHAR(7) NOT NULL,
    entry_date DATE NOT NULL,
 
-   l1_assurance_level VARCHAR(255),
+   l1_finality_score VARCHAR(255),
    l1_transaction_hash CHAR(64),
    l1_absolute_slot BIGINT,
    l1_creation_slot BIGINT,
@@ -82,7 +82,7 @@ CREATE TABLE blockchain_publisher_transaction_item (
 --   vat_internal_code VARCHAR(255),
 --   vat_rate DECIMAL,
 --   publish_status VARCHAR(255) NOT NULL,
---   l1_assurance_level VARCHAR(255),
+--   l1_finality_score VARCHAR(255),
 --   l1_transaction_hash VARCHAR(255),
 --   l1_absolute_slot BIGINT,
 --

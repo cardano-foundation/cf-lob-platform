@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.OnChainAssuranceLevel;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,22 +15,29 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 @Slf4j
 public class BlockchainPublishStatusMapper {
 
-    public LedgerDispatchStatus convert(Optional<BlockchainPublishStatus> blockchainPublishStatus,
-                                        Optional<OnChainAssuranceLevel> assuranceLevelM) {
-        return blockchainPublishStatus.map(status -> {
-            return switch (status) {
-                case STORED, ROLLBACKED -> LedgerDispatchStatus.MARK_DISPATCH;
-                case VISIBLE_ON_CHAIN, SUBMITTED -> LedgerDispatchStatus.DISPATCHED;
-                case COMPLETED -> assuranceLevelM.map(level -> {
-                    if (level.ordinal() >= OnChainAssuranceLevel.HIGH.ordinal()) {
-                        return LedgerDispatchStatus.COMPLETED;
-                    }
+    public LedgerDispatchStatus convert(BlockchainPublishStatus blockchainPublishStatus,
+                                        CardanoFinalityScore cardanoFinalityScore) {
+        return convert(Optional.of(blockchainPublishStatus), Optional.of(cardanoFinalityScore));
+    }
 
-                    return LedgerDispatchStatus.DISPATCHED;
-                }).orElse(LedgerDispatchStatus.DISPATCHED);
-                case FINALIZED -> LedgerDispatchStatus.FINALIZED;
-            };
-        }).orElse(NOT_DISPATCHED);
+    public LedgerDispatchStatus convert(BlockchainPublishStatus blockchainPublishStatus) {
+        return convert(Optional.of(blockchainPublishStatus), Optional.empty());
+    }
+
+    protected LedgerDispatchStatus convertToLedgerDispatchStatus(CardanoFinalityScore cardanoFinalityScore) {
+        return switch (cardanoFinalityScore) {
+            case VERY_LOW, LOW, MEDIUM -> LedgerDispatchStatus.DISPATCHED;
+            case HIGH, VERY_HIGH, ULTRA_HIGH -> LedgerDispatchStatus.COMPLETED;
+            case FINAL -> LedgerDispatchStatus.FINALIZED;
+        };
+    }
+
+    public BlockchainPublishStatus convert(CardanoFinalityScore cardanoFinalityScore) {
+        return switch (cardanoFinalityScore) {
+            case VERY_LOW, LOW, MEDIUM -> BlockchainPublishStatus.VISIBLE_ON_CHAIN;
+            case HIGH, VERY_HIGH, ULTRA_HIGH -> BlockchainPublishStatus.COMPLETED;
+            case FINAL -> BlockchainPublishStatus.FINALIZED;
+        };
     }
 
     public BlockchainPublishStatus convert(LedgerDispatchStatus ledgerDispatchStatus) {
@@ -43,6 +50,19 @@ public class BlockchainPublishStatusMapper {
         };
 
         return blockchainPublishStatusM.orElse(BlockchainPublishStatus.STORED);
+    }
+
+    public LedgerDispatchStatus convert(Optional<BlockchainPublishStatus> blockchainPublishStatus,
+                                        Optional<CardanoFinalityScore> cardanoFinalityScore) {
+        return blockchainPublishStatus.map(status -> {
+            return switch (status) {
+                case STORED, ROLLBACKED -> LedgerDispatchStatus.MARK_DISPATCH;
+                case VISIBLE_ON_CHAIN, SUBMITTED -> LedgerDispatchStatus.DISPATCHED;
+                case COMPLETED -> cardanoFinalityScore.map(this::convertToLedgerDispatchStatus)
+                        .orElse(LedgerDispatchStatus.DISPATCHED);
+                case FINALIZED -> LedgerDispatchStatus.FINALIZED;
+            };
+        }).orElse(NOT_DISPATCHED);
     }
 
 }
