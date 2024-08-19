@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
@@ -140,6 +139,7 @@ public class AccountingCorePresentationViewService {
         accountingCoreService.scheduleIngestion(fp);
     }
 
+    @Transactional
     public List<TransactionProcessView> approveTransactions(TransactionsRequest transactionsRequest) {
         return transactionRepositoryGateway.approveTransactions(transactionsRequest)
                 .stream()
@@ -151,6 +151,7 @@ public class AccountingCorePresentationViewService {
                 .toList();
     }
 
+    @Transactional
     public List<TransactionProcessView> approveTransactionsPublish(TransactionsRequest transactionsRequest) {
         return transactionRepositoryGateway.approveTransactionsDispatch(transactionsRequest)
                 .stream()
@@ -162,6 +163,7 @@ public class AccountingCorePresentationViewService {
                 .toList();
     }
 
+    @Transactional
     public List<TransactionItemsProcessView> rejectTransactionItems(TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
         return transactionRepositoryGateway.rejectTransactionItems(transactionItemsRejectionRequest)
                 .stream()

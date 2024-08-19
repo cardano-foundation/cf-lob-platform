@@ -26,6 +26,7 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.FAIL;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.*;
 import static org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem.IdType.TRANSACTION;
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
@@ -55,7 +56,7 @@ public class TransactionRepositoryGateway {
 
         val tx = txM.orElseThrow();
 
-        if (tx.getStatus() == FAIL) {
+        if (tx.getAutomatedValidationStatus() == FAILED) {
             return transactionFailedResponse(transactionId);
         }
         if (tx.hasAnyRejection()) {
@@ -82,7 +83,7 @@ public class TransactionRepositoryGateway {
 
         val tx = txM.orElseThrow();
 
-        if (tx.getStatus() == FAIL) {
+        if (tx.getAutomatedValidationStatus() == FAILED) {
             return transactionFailedResponse(transactionId);
         }
 
@@ -108,6 +109,7 @@ public class TransactionRepositoryGateway {
         return Either.right(savedTx);
     }
 
+    @Transactional
     public List<Either<IdentifiableProblem, TransactionEntity>> approveTransactions(TransactionsRequest transactionsRequest) {
         val organisationId = transactionsRequest.getOrganisationId();
 
@@ -138,6 +140,7 @@ public class TransactionRepositoryGateway {
         return transactionsApprovalResponseListE;
     }
 
+    @Transactional
     public List<Either<IdentifiableProblem, TransactionEntity>> approveTransactionsDispatch(TransactionsRequest transactionsRequest) {
         val organisationId = transactionsRequest.getOrganisationId();
 
