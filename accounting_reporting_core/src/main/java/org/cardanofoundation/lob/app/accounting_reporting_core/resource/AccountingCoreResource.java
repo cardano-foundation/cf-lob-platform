@@ -193,7 +193,7 @@ public class AccountingCoreResource {
     @Operation(description = "Reject one or more transaction items per a given transaction",
             responses = {
                     @ApiResponse(content = {
-                            @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TransactionItemsProcessView.class)))
+                            @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = TransactionItemsProcessRejectView.class))
                     })
             }
     )

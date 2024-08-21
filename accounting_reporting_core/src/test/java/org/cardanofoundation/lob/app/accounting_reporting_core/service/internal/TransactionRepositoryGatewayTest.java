@@ -175,7 +175,7 @@ class TransactionRepositoryGatewayTest {
         when(transactionItemRepository.save(transactionItemEntity)).thenReturn(transactionItemEntity);
 
         // Act
-        List<Either<IdentifiableProblem, TransactionItemEntity>> results = transactionRepositoryGateway.rejectTransactionItems(rejectionRequest);
+        List<Either<IdentifiableProblem, TransactionItemEntity>> results = transactionRepositoryGateway.rejectTransactionItems(transactionEntity, rejectionRequest.getTransactionItemsRejections());
 
         // Assert
         assertThat(results).isNotEmpty();
@@ -280,7 +280,7 @@ class TransactionRepositoryGatewayTest {
         when(transactionItemRepository.findById(transactionItemId)).thenReturn(Optional.empty());
 
         // Act
-        List<Either<IdentifiableProblem, TransactionItemEntity>> results = transactionRepositoryGateway.rejectTransactionItems(rejectionRequest);
+        List<Either<IdentifiableProblem, TransactionItemEntity>> results = transactionRepositoryGateway.rejectTransactionItems(transactionEntity, rejectionRequest.getTransactionItemsRejections());
 
         // Assert
         assertThat(results).isNotEmpty();
@@ -309,7 +309,7 @@ class TransactionRepositoryGatewayTest {
         when(transactionItemRepository.findById(transactionItemId)).thenReturn(Optional.of(transactionItemEntity));
 
         // Act
-        List<Either<IdentifiableProblem, TransactionItemEntity>> results = transactionRepositoryGateway.rejectTransactionItems(rejectionRequest);
+        List<Either<IdentifiableProblem, TransactionItemEntity>> results = transactionRepositoryGateway.rejectTransactionItems(transactionEntity, rejectionRequest.getTransactionItemsRejections());
 
         // Assert
         assertThat(results).isNotEmpty();
@@ -328,7 +328,8 @@ class TransactionRepositoryGatewayTest {
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
         when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(new TransactionEntity()));
-        when(transactionRepository.save(any(TransactionEntity.class))).thenThrow(new DataAccessException("Database error") {});
+        when(transactionRepository.save(any(TransactionEntity.class))).thenThrow(new DataAccessException("Database error") {
+        });
 
         // Act
         List<Either<IdentifiableProblem, TransactionEntity>> results = transactionRepositoryGateway.approveTransactions(transactionsRequest);
@@ -353,7 +354,8 @@ class TransactionRepositoryGatewayTest {
         validTransaction.setOverallStatus(OK);
         validTransaction.setTransactionApproved(true);
         when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(validTransaction));
-        when(transactionRepository.save(validTransaction)).thenThrow(new DataAccessException("Database error") {});
+        when(transactionRepository.save(validTransaction)).thenThrow(new DataAccessException("Database error") {
+        });
 
         // Act
         List<Either<IdentifiableProblem, TransactionEntity>> results = transactionRepositoryGateway.approveTransactionsDispatch(transactionsRequest);

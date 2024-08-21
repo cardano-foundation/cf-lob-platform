@@ -1,5 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service;
 
+import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -13,8 +14,11 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
+import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zalando.problem.Problem;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,6 +32,8 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.*;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.transactionNotFoundResponse;
+import static org.zalando.problem.Status.NOT_FOUND;
 
 @Service
 @org.jmolecules.ddd.annotation.Service
@@ -151,15 +157,31 @@ public class AccountingCorePresentationViewService {
     }
 
     @Transactional
-    public List<TransactionItemsProcessView> rejectTransactionItems(TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
-        return transactionRepositoryGateway.rejectTransactionItems(transactionItemsRejectionRequest)
+    public TransactionItemsProcessRejectView rejectTransactionItems(TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
+
+
+        val txM = transactionRepositoryGateway.findById(transactionItemsRejectionRequest.getTransactionId());
+        if (txM.isEmpty()) {
+            Either<IdentifiableProblem, TransactionEntity> errorE = transactionNotFoundResponse(transactionItemsRejectionRequest.getTransactionId());
+            return TransactionItemsProcessRejectView.createFail(transactionItemsRejectionRequest.getTransactionId(), errorE.getLeft().getProblem());
+
+        }
+        val tx = txM.orElseThrow();
+        Set<TransactionItemsProcessView> items = transactionRepositoryGateway.rejectTransactionItems(tx, transactionItemsRejectionRequest.getTransactionItemsRejections())
                 .stream()
                 .map(txItemEntityE -> txItemEntityE.fold(txProblem -> {
                     return TransactionItemsProcessView.createFail(txProblem.getId(), txProblem.getProblem());
                 }, success -> {
                     return TransactionItemsProcessView.createSuccess(success.getId());
                 }))
-                .toList();
+                .collect(toSet());
+
+        return TransactionItemsProcessRejectView.createSuccess(
+                tx.getId(),
+                this.getTransactionDispatchStatus(tx),
+                items
+        );
+
     }
 
     private BatchStatisticsView getStatistics(Set<TransactionView> transactions) {
