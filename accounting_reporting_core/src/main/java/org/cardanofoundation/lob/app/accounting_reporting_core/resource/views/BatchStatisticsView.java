@@ -13,13 +13,13 @@ import javax.annotation.Nullable;
 public class BatchStatisticsView {
 
     @Nullable
-    private Integer approve;
+    private Integer invalid;
 
     @Nullable
     private Integer pending;
 
     @Nullable
-    private Integer invalid;
+    private Integer approve;
 
     @Nullable
     private Integer publish;

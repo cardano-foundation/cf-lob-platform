@@ -66,4 +66,7 @@ public class TransactionItemView {
 
     private String counterpartyName;
 
+    private RejectionCode rejectionCode;
+
+
 }

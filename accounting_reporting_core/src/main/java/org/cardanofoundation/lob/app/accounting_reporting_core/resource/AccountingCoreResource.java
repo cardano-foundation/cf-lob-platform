@@ -189,7 +189,7 @@ public class AccountingCoreResource {
     }
 
     @Tag(name = "Transactions", description = "Transaction Items Rejection API")
-    @PostMapping(value = "/transactions/reject", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/transaction/reject", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Reject one or more transaction items per a given transaction",
             responses = {
                     @ApiResponse(content = {

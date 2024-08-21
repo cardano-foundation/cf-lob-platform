@@ -35,6 +35,7 @@ public class TransactionView {
     private boolean transactionApproved = false;
     private boolean ledgerDispatchApproved = false;
     private BigDecimal amountTotalLcy;
+    private boolean itemRejection = false;
     private Set<TransactionItemView> items = new LinkedHashSet<>();
     private Set<ViolationView> violations = new LinkedHashSet<>();
 
