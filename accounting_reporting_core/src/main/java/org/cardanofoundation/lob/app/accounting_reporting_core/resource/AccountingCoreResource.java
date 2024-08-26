@@ -1,5 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -17,9 +19,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presenta
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCoreResourceService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +39,7 @@ public class AccountingCoreResource {
 
     private final AccountingCorePresentationViewService accountingCorePresentationService;
     private final AccountingCoreResourceService accountingCoreResourceService;
+    private final ObjectMapper objectMapper;
 
     @Tag(name = "Transactions", description = "Transactions API")
     @Operation(description = "Transaction list", responses = {
@@ -62,7 +62,6 @@ public class AccountingCoreResource {
     })
     @GetMapping(value = "/transactions/{id}", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> transactionDetailSpecific(@Valid @PathVariable("id") @Parameter(example = "7e9e8bcbb38a283b41eab57add98278561ab51d23a16f3e3baf3daa461b84ab4") String id) {
-
         val transactionEntity = accountingCorePresentationService.transactionDetailSpecific(id);
         if (transactionEntity.isEmpty()) {
             val issue = Problem.builder()
@@ -84,19 +83,18 @@ public class AccountingCoreResource {
             )
     })
     @GetMapping(value = "/transaction-types", produces = APPLICATION_JSON_VALUE, name = "Transaction types")
-    public ResponseEntity<?> transactionType() throws JSONException {
+    public ResponseEntity<?> transactionType() throws JsonProcessingException {
+        val jsonArray = objectMapper.createArrayNode();
 
-        JSONArray jsonArray = new JSONArray();
-
-        for (TransactionType transactionType : TransactionType.values()) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("id", transactionType);
+        for (val transactionType : TransactionType.values()) {
+            val jsonObject = objectMapper.createObjectNode();
+            jsonObject.put("id", transactionType.name());
             jsonObject.put("title", transactionType.name().replaceAll("(\\p{Lower})(\\p{Upper})", "$1 $2"));
 
-            jsonArray.put(jsonObject);
+            jsonArray.add(jsonObject);
         }
 
-        return ResponseEntity.ok().body(jsonArray.toString());
+        return ResponseEntity.ok().body(objectMapper.writeValueAsString(jsonArray));
     }
 
     @Tag(name = "Transactions", description = "Transactions API")
@@ -120,7 +118,7 @@ public class AccountingCoreResource {
                     responseCode = "202"
             )
     })
-    public ResponseEntity<?> extractionTrigger(@Valid @RequestBody ExtractionRequest body) {
+    public ResponseEntity<?> extractionTrigger(@Valid @RequestBody ExtractionRequest body) throws JsonProcessingException {
         val orgM = accountingCoreResourceService.findOrganisationById(body.getOrganisationId());
 
         if (orgM.isEmpty()) {
@@ -146,13 +144,14 @@ public class AccountingCoreResource {
         }
         accountingCorePresentationService.extractionTrigger(body);
 
-        JSONObject response = new JSONObject()
-                .put("event", "EXTRACTION")
-                .put("message", "We have received your extraction request now. Please review imported transactions from the batch list.");
+        val response = objectMapper.createObjectNode();
+
+        response.put("event", "EXTRACTION");
+        response.put("message", "We have received your extraction request now. Please review imported transactions from the batch list.");
 
         return ResponseEntity
                 .status(HttpStatusCode.valueOf(202))
-                .body(response.toString());
+                .body(objectMapper.writeValueAsString(response));
     }
 
     @Tag(name = "Transactions", description = "Transactions Approval API")
