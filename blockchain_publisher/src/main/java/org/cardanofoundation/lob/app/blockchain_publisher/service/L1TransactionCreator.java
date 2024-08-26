@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainTransactions;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.BlockchainDataChainTipService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.zalando.problem.Problem;

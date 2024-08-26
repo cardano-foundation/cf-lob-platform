@@ -20,7 +20,7 @@
       "items": [
         {
           "amount": "2000000.00",
-          "event_code": {
+          "event": {
             "code": "99001100",
             "name": "Payment to Transit Clearing"
           },
@@ -62,7 +62,7 @@
       "items": [
         {
           "amount": "1000000.00",
-          "event_code": {
+          "event": {
             "code": "11001100",
             "name": "Bank Transfer"
           },

@@ -80,7 +80,7 @@
                   "type": "string",
                   "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
                 },
-                "event_code": {
+                "event": {
                   "type": "object",
                   "properties": {
                     "code": {
@@ -170,7 +170,7 @@
                   "pattern": "^[0-9]+(\\.[0-9]+)?$"
                 }
               },
-              "required": ["amount", "event_code", "document", "id", "fx_rate"]
+              "required": ["amount", "event", "document", "id", "fx_rate"]
             }
           },
           "accounting_period": {

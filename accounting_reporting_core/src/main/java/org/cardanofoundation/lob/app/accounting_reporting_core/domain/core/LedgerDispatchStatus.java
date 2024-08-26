@@ -10,7 +10,7 @@ public enum LedgerDispatchStatus {
 
     DISPATCHED, // dispatched to blockchain(s) - tx hash
 
-    COMPLETED, // tx hash
+    COMPLETED, // tx hash is ready and provided and in addition we have decent finality score to consider it completed
 
     FINALIZED; // finalised on blockchain(s) - tx hash
 

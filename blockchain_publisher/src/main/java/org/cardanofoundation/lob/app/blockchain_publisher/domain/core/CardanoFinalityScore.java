@@ -1,17 +1,13 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.core;
 
-public enum OnChainAssuranceLevel {
+public enum CardanoFinalityScore {
 
-    VERY_LOW, // pretty much on chain visible
-
+    VERY_LOW,
     LOW,
-
     MEDIUM,
-
     HIGH,
-
     VERY_HIGH,
-
-    FINAL
+    ULTRA_HIGH,
+    FINAL;
 
 }

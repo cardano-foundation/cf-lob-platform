@@ -4,7 +4,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.OnChainAssuranceLevel;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -16,7 +16,7 @@ import static jakarta.persistence.EnumType.STRING;
 @Setter
 @NoArgsConstructor
 @ToString
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class L1SubmissionData {
 
@@ -35,7 +35,7 @@ public class L1SubmissionData {
 
     @Nullable
     @Enumerated(STRING)
-    private OnChainAssuranceLevel assuranceLevel;
+    private CardanoFinalityScore finalityScore;
 
     public Optional<String> getTransactionHash() {
         return Optional.ofNullable(transactionHash);
@@ -49,12 +49,24 @@ public class L1SubmissionData {
         return Optional.ofNullable(creationSlot);
     }
 
-    public Optional<OnChainAssuranceLevel> getAssuranceLevel() {
-        return Optional.ofNullable(assuranceLevel);
+    public Optional<CardanoFinalityScore> getFinalityScore() {
+        return Optional.ofNullable(finalityScore);
     }
 
     public Optional<BlockchainPublishStatus> getPublishStatus() {
         return Optional.ofNullable(publishStatus);
+    }
+
+    public void setFinalityScore(Optional<CardanoFinalityScore> assuranceLevel) {
+        this.finalityScore = assuranceLevel.orElse(null);
+    }
+
+    public void setPublishStatus(Optional<BlockchainPublishStatus> publishStatus) {
+        this.publishStatus = publishStatus.orElse(null);
+    }
+
+    public boolean isFinalized() {
+        return finalityScore != null && finalityScore.equals(CardanoFinalityScore.FINAL);
     }
 
 }

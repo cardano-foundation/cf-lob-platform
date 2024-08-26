@@ -9,6 +9,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Trans
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.*;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
@@ -38,9 +39,9 @@ public class TransactionConverter {
         transactionEntity.setAccountingPeriod(tx.getAccountingPeriod());
 
         val publishStatus = blockchainPublishStatusMapper.convert(tx.getLedgerDispatchStatus());
-        transactionEntity.setL1SubmissionData(L1SubmissionData.builder()
+        transactionEntity.setL1SubmissionData(Optional.of(L1SubmissionData.builder()
                 .publishStatus(publishStatus)
-                .build()
+                .build())
         );
 
         transactionEntity.setItems(convertTxItems(tx, transactionEntity));
