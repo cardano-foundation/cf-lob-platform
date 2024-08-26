@@ -54,8 +54,6 @@ subprojects {
     extra["jMoleculesVersion"] = "2023.1.0"
 
     dependencies {
-        implementation("org.json:json:20211205") // TODO check if this is needed at all
-
         implementation("org.springframework.data:spring-data-envers")
 
         implementation("org.flywaydb:flyway-core")
