@@ -25,11 +25,11 @@ public class TransactionDispatcherJob {
             fixedDelayString = "${lob.blockchain.publisher.dispatcher.fixedDelay:PT10S}",
             initialDelayString = "${lob.blockchain.publisher.dispatcher.initialDelay:PT1M}")
     public void execute() {
-        log.info("Pooling for blockchain passedTransactions to be send to the blockchain...");
+        log.info("Pooling for blockchain transactions to be send to the blockchain...");
 
         blockchainTransactionsDispatcher.dispatchTransactions();
 
-        log.info("Pooling for blockchain passedTransactions to be send to the blockchain...done");
+        log.info("Pooling for blockchain transactions to be send to the blockchain...done");
     }
 
 }

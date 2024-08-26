@@ -48,9 +48,9 @@ subprojects {
         }
     }
 
-    extra["springBootVersion"] = "3.3.1"
+    extra["springBootVersion"] = "3.3.3"
     extra["springCloudVersion"] = "2023.0.0"
-    extra["springModulithVersion"] = "1.2.0"
+    extra["springModulithVersion"] = "1.2.3"
     extra["jMoleculesVersion"] = "2023.1.0"
 
     dependencies {
@@ -90,9 +90,9 @@ subprojects {
         implementation("javax.xml.bind", "jaxb-api", "2.3.0")
         implementation("org.glassfish.jaxb:jaxb-runtime:2.3.2") // needed for OAuth 1.0 for NetSuite Module
 
-        implementation("com.networknt:json-schema-validator:1.4.0")
+        implementation("com.networknt:json-schema-validator:1.5.1")
 
-        implementation("com.google.guava:guava:33.2.1-jre")
+        implementation("com.google.guava:guava:33.3.0-jre")
 
         implementation("org.apache.commons:commons-collections4:4.4")
 
@@ -101,9 +101,9 @@ subprojects {
         implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
         testCompileOnly("org.projectlombok:lombok:1.18.32")
         testAnnotationProcessor("org.projectlombok:lombok:1.18.32")
-        testImplementation("io.rest-assured:rest-assured:5.4.0")
+        testImplementation("io.rest-assured:rest-assured:5.5.0")
         testImplementation("org.wiremock:wiremock-standalone:3.6.0")
-        testImplementation("net.jqwik:jqwik:1.8.5") // Jqwik for property-based testing
+        testImplementation("net.jqwik:jqwik:1.9.0") // Jqwik for property-based testing
         testImplementation("org.assertj:assertj-core:3.26.0")
         testImplementation("org.pitest:pitest-junit5-plugin:1.2.1")
     }
