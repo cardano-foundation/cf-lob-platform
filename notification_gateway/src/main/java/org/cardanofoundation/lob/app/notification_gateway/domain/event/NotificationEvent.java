@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.notification_gateway.domain.event;
 
 import org.cardanofoundation.lob.app.notification_gateway.domain.core.NotificationSeverity;
 import org.zalando.problem.Problem;
+import org.jmolecules.event.annotation.DomainEvent;
 
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +16,7 @@ import java.util.UUID;
  * @param message
  */
 ///@Externalized("target")
+@DomainEvent
 // TODO add applicationId, organisationId and creationDate, expirationDate, acked notification?
 public record NotificationEvent(UUID id,
                                 NotificationSeverity severity,

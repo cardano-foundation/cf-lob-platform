@@ -9,7 +9,6 @@ import org.jmolecules.event.annotation.DomainEvent;
 
 import java.util.Set;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
