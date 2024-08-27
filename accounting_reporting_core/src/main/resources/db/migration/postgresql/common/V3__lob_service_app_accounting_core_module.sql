@@ -59,7 +59,7 @@ CREATE TABLE accounting_core_transaction (
    ledger_dispatch_approved BOOLEAN NOT NULL,
    ledger_dispatch_status VARCHAR(255) NOT NULL,
 
-   status VARCHAR(255) NOT NULL,
+   overall_status VARCHAR(255) NOT NULL,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),

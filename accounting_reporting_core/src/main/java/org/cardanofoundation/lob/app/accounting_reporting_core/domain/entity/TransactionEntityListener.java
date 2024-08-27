@@ -4,7 +4,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.FAIL;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.NOK;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.OK;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.VALIDATED;
 
@@ -18,13 +18,13 @@ public class TransactionEntityListener {
             return OK;
         }
 
-        return FAIL;
+        return NOK;
     }
 
     @PrePersist
     @PreUpdate
     public void update(TransactionEntity transactionEntity) {
-        transactionEntity.setStatus(calcStatus(transactionEntity));
+        transactionEntity.setOverallStatus(calcStatus(transactionEntity));
     }
 
 }

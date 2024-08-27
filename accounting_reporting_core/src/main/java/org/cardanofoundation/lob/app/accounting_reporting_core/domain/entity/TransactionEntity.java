@@ -89,9 +89,9 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
     @Column(name = "user_comment")
     private String userComment;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "overall_status", nullable = false)
     @Enumerated(STRING)
-    private TransactionStatus status;
+    private TransactionStatus overallStatus;
 
     @ElementCollection(fetch = EAGER)
     @CollectionTable(name = "accounting_core_transaction_violation", joinColumns = @JoinColumn(name = "transaction_id"))
@@ -138,7 +138,7 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
     }
 
     public boolean isDispatchable() {
-        return status == OK
+        return overallStatus == OK
                 && ledgerDispatchStatus == NOT_DISPATCHED;
     }
 
