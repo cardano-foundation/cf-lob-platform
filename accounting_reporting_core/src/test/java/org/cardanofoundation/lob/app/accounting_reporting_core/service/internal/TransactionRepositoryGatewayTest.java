@@ -2,7 +2,6 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 
 import io.vavr.control.Either;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rejection;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode;
@@ -85,7 +84,7 @@ class TransactionRepositoryGatewayTest {
         // Arrange
         String transactionId = "valid_tx_id";
         TransactionEntity validTransaction = new TransactionEntity();
-        validTransaction.setStatus(OK);
+        validTransaction.setOverallStatus(OK);
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(validTransaction));
         when(transactionRepository.save(validTransaction)).thenReturn(validTransaction);
 
@@ -108,7 +107,7 @@ class TransactionRepositoryGatewayTest {
         transactionsRequest.setTransactionIds(Set.of(validTransactionId, failedTransactionId));
 
         TransactionEntity validTransaction = new TransactionEntity();
-        validTransaction.setStatus(OK);
+        validTransaction.setOverallStatus(OK);
         when(transactionRepository.findById(validTransactionId.getId())).thenReturn(Optional.of(validTransaction));
         when(transactionRepository.findById(failedTransactionId.getId())).thenReturn(Optional.empty()); // Simulating not found
 
@@ -138,7 +137,7 @@ class TransactionRepositoryGatewayTest {
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
         TransactionEntity validTransaction = new TransactionEntity();
-        validTransaction.setStatus(OK);
+        validTransaction.setOverallStatus(OK);
         validTransaction.setTransactionApproved(true);
         when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(validTransaction));
         when(transactionRepository.save(validTransaction)).thenReturn(validTransaction);
@@ -223,7 +222,7 @@ class TransactionRepositoryGatewayTest {
         String transactionId = "rejected_tx_id";
 
         TransactionEntity rejectedTransaction = new TransactionEntity();
-        rejectedTransaction.setStatus(OK);
+        rejectedTransaction.setOverallStatus(OK);
         rejectedTransaction.setTransactionApproved(false);
 
         TransactionItemEntity transactionItemEntity = new TransactionItemEntity();
@@ -250,7 +249,7 @@ class TransactionRepositoryGatewayTest {
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
         TransactionEntity unapprovedTransaction = new TransactionEntity();
-        unapprovedTransaction.setStatus(OK);
+        unapprovedTransaction.setOverallStatus(OK);
         unapprovedTransaction.setTransactionApproved(false); // Not approved
         when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(unapprovedTransaction));
 
@@ -351,7 +350,7 @@ class TransactionRepositoryGatewayTest {
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
         TransactionEntity validTransaction = new TransactionEntity();
-        validTransaction.setStatus(OK);
+        validTransaction.setOverallStatus(OK);
         validTransaction.setTransactionApproved(true);
         when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(validTransaction));
         when(transactionRepository.save(validTransaction)).thenThrow(new DataAccessException("Database error") {});
@@ -376,7 +375,7 @@ class TransactionRepositoryGatewayTest {
         // Arrange
         String transactionId = "rejected_tx_id";
         TransactionEntity transaction = new TransactionEntity();
-        transaction.setStatus(OK);
+        transaction.setOverallStatus(OK);
 
         TransactionItemEntity itemWithRejection = new TransactionItemEntity();
         itemWithRejection.setId("rejected_item_id1");
@@ -405,7 +404,7 @@ class TransactionRepositoryGatewayTest {
         // Arrange
         String transactionId = "valid_tx_id";
         TransactionEntity transaction = new TransactionEntity();
-        transaction.setStatus(OK);
+        transaction.setOverallStatus(OK);
 
         TransactionItemEntity validItem1 = new TransactionItemEntity();
         validItem1.setId("valid_item_1");
@@ -439,7 +438,7 @@ class TransactionRepositoryGatewayTest {
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
         TransactionEntity transaction = new TransactionEntity();
-        transaction.setStatus(OK);
+        transaction.setOverallStatus(OK);
         transaction.setTransactionApproved(true);
 
         TransactionItemEntity itemWithRejection = new TransactionItemEntity();
@@ -469,7 +468,7 @@ class TransactionRepositoryGatewayTest {
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
         TransactionEntity transaction = new TransactionEntity();
-        transaction.setStatus(OK);
+        transaction.setOverallStatus(OK);
         transaction.setTransactionApproved(true);
 
         TransactionItemEntity validItem = new TransactionItemEntity();

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.FAIL;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.NOK;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.OK;
 import static org.mockito.Mockito.*;
 
@@ -41,7 +41,7 @@ public class TransactionEntityListenerTest {
 
         TransactionStatus status = listener.calcStatus(transactionEntity);
 
-        assertThat(status).isEqualTo(FAIL);
+        assertThat(status).isEqualTo(NOK);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class TransactionEntityListenerTest {
 
         TransactionStatus status = listener.calcStatus(transactionEntity);
 
-        assertThat(status).isEqualTo(FAIL);
+        assertThat(status).isEqualTo(NOK);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class TransactionEntityListenerTest {
 
         TransactionStatus status = listener.calcStatus(transactionEntity);
 
-        assertThat(status).isEqualTo(FAIL);
+        assertThat(status).isEqualTo(NOK);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class TransactionEntityListenerTest {
 
         listener.update(transactionEntity);
 
-        verify(transactionEntity).setStatus(OK);
+        verify(transactionEntity).setOverallStatus(OK);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class TransactionEntityListenerTest {
 
         listener.update(transactionEntity);
 
-        verify(transactionEntity).setStatus(FAIL);
+        verify(transactionEntity).setOverallStatus(NOK);
     }
 
 }

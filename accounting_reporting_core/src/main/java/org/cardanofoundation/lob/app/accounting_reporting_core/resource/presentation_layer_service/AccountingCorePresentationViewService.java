@@ -188,7 +188,7 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getTransactionInternalNumber(),
                 transactionEntity.getEntryDate(),
                 transactionEntity.getTransactionType(),
-                transactionEntity.getStatus(),
+                transactionEntity.getOverallStatus(),
                 getTransactionDispatchStatus(transactionEntity),
                 transactionEntity.getAutomatedValidationStatus(),
                 transactionEntity.getTransactionApproved(),
@@ -203,7 +203,7 @@ public class AccountingCorePresentationViewService {
 
     public LedgerDispatchStatusView getTransactionDispatchStatus(TransactionEntity transactionEntity) {
 
-        if (TransactionStatus.FAIL == transactionEntity.getStatus()) {
+        if (TransactionStatus.NOK == transactionEntity.getOverallStatus()) {
             return LedgerDispatchStatusView.INVALID;
         }
 

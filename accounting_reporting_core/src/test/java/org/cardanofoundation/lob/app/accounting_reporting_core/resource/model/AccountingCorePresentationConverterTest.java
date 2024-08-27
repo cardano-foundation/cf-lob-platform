@@ -71,14 +71,14 @@ class AccountingCorePresentationConverterTest {
         transactionEntity.setAutomatedValidationStatus(ValidationStatus.VALIDATED);
         transactionEntity.setTransactionApproved(Boolean.TRUE);
         transactionEntity.setLedgerDispatchApproved(Boolean.FALSE);
-        transactionEntity.setStatus(TransactionStatus.FAIL);
+        transactionEntity.setOverallStatus(TransactionStatus.NOK);
 
         transactionEntity3.setId("tx-id-3");
         transactionEntity3.setTransactionType(TransactionType.CustomerPayment);
         transactionEntity3.setAutomatedValidationStatus(ValidationStatus.VALIDATED);
         transactionEntity3.setTransactionApproved(Boolean.TRUE);
         transactionEntity3.setLedgerDispatchApproved(Boolean.TRUE);
-        transactionEntity3.setStatus(TransactionStatus.OK);
+        transactionEntity3.setOverallStatus(TransactionStatus.OK);
 
         transactionItem.setId("tx-item-id");
         transactionItem3.setId("tx-item-id-3");
@@ -113,7 +113,7 @@ class AccountingCorePresentationConverterTest {
         transactionEntity2.setAutomatedValidationStatus(ValidationStatus.FAILED);
         transactionEntity2.setTransactionApproved(Boolean.FALSE);
         transactionEntity2.setLedgerDispatchApproved(Boolean.TRUE);
-        transactionEntity2.setStatus(TransactionStatus.OK);
+        transactionEntity2.setOverallStatus(TransactionStatus.OK);
 
         when(transactionRepositoryGateway.findAllByStatus(any(), any(), any())).thenReturn(List.of(transactionEntity, transactionEntity2, transactionEntity3));
 
@@ -124,7 +124,7 @@ class AccountingCorePresentationConverterTest {
         assertEquals(TransactionType.CardCharge, result.get(0).getTransactionType());
         assertEquals(Boolean.TRUE, result.get(0).isTransactionApproved());
         assertEquals(Boolean.FALSE, result.get(0).isLedgerDispatchApproved());
-        assertEquals(TransactionStatus.FAIL, result.get(0).getStatus());
+        assertEquals(TransactionStatus.NOK, result.get(0).getStatus());
         assertEquals(Boolean.FALSE, result.get(2).isTransactionApproved());
         assertEquals(Boolean.TRUE, result.get(2).isLedgerDispatchApproved());
         assertEquals(ValidationStatus.FAILED, result.get(2).getValidationStatus());
@@ -299,7 +299,7 @@ class AccountingCorePresentationConverterTest {
         transaction.setLedgerDispatchStatus(LedgerDispatchStatus.FINALIZED);
         assertEquals(LedgerDispatchStatusView.PUBLISHED, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
-        transaction.setStatus(TransactionStatus.FAIL);
+        transaction.setOverallStatus(TransactionStatus.NOK);
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
     }
