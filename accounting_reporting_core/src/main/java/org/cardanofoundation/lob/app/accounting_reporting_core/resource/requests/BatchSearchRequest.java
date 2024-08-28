@@ -38,7 +38,7 @@ public class BatchSearchRequest {
     @ArraySchema(arraySchema = @Schema(example = "[\"APPROVE\", \"PENDING\", \"INVALID\", \"PUBLISH\", \"PUBLISHED\"]", implementation = LedgerDispatchStatusView.class))
     private Set<LedgerDispatchStatusView> batchStatistics = Set.of();
 
-    @ArraySchema(arraySchema = @Schema(example = "[\"OK\",\"FAIL\"]", implementation = TransactionStatus.class))
+    @ArraySchema(arraySchema = @Schema(example = "[\"OK\",\"NOK\"]", implementation = TransactionStatus.class))
     private Set<TransactionStatus> txStatus = Set.of();
 
     @ArraySchema(arraySchema = @Schema(example = "[\"VendorPayment\",\"BillCredit\"]", implementation = TransactionType.class))

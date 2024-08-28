@@ -1,7 +1,12 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
@@ -23,4 +28,10 @@ public enum RejectionCode {
         this.source = source;
     }
 
+    public static Set<RejectionCode> getSourceBasedRejectionCodes(Source source) {
+        return Set.of(RejectionCode.values())
+                .stream()
+                .filter(rejectionCode -> rejectionCode.getSource() == source)
+                .collect(Collectors.toSet());
+    }
 }

@@ -3,8 +3,10 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.present
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
@@ -22,6 +24,10 @@ import java.util.stream.Collectors;
 import static java.math.BigDecimal.ZERO;
 import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.*;
 
 @Service
 @org.jmolecules.ddd.annotation.Service
@@ -57,7 +63,7 @@ public class AccountingCorePresentationViewService {
     public Optional<BatchView> batchDetail(String batchId) {
         return transactionBatchRepositoryGateway.findById(batchId).map(transactionBatchEntity -> {
                     val transactions = this.getTransaction(transactionBatchEntity);
-                    val statistic = this.getStatistics(transactionBatchEntity.getBatchStatistics());
+                    val statistic = this.getStatistics(transactions);
                     val filteringParameters = this.getFilteringParameters(transactionBatchEntity.getFilteringParameters());
 
                     return new BatchView(
@@ -76,48 +82,29 @@ public class AccountingCorePresentationViewService {
         );
     }
 
-    private BatchStatisticsView getStatistics(Optional<BatchStatistics> batchStatistics) {
-        val statisticsM = batchStatistics.stream().findFirst();
-
-        return new BatchStatisticsView(
-                statisticsM.flatMap(BatchStatistics::getApprovedTransactionsCount).orElse(0),
-                Math.abs(statisticsM.flatMap(BatchStatistics::getTotalTransactionsCount).orElse(0) - statisticsM.flatMap(BatchStatistics::getProcessedTransactionsCount).orElse(0)),
-                statisticsM.flatMap(BatchStatistics::getFailedTransactionsCount).orElse(0),
-                statisticsM.flatMap(BatchStatistics::getDispatchedTransactionsCount).orElse(0),
-                statisticsM.flatMap(BatchStatistics::getCompletedTransactionsCount).orElse(0),
-                statisticsM.flatMap(BatchStatistics::getTotalTransactionsCount).orElse(0)
-        );
-    }
-
-    private FilteringParametersView getFilteringParameters(FilteringParameters filteringParameters) {
-        return new FilteringParametersView(
-                filteringParameters.getTransactionTypes(),
-                filteringParameters.getFrom(),
-                filteringParameters.getTo(),
-                filteringParameters.getAccountingPeriodFrom(),
-                filteringParameters.getAccountingPeriodTo(),
-                filteringParameters.getTransactionNumbers()
-        );
-    }
-
     public BatchsDetailView listAllBatch(BatchSearchRequest body) {
         val batchDetailView = new BatchsDetailView();
+
 
         val batches = transactionBatchRepositoryGateway.findByFilter(body)
                 .stream()
                 .map(
-                        transactionBatchEntity -> new BatchView(
-                                transactionBatchEntity.getId(),
-                                transactionBatchEntity.getCreatedAt().toString(),
-                                transactionBatchEntity.getUpdatedAt().toString(),
-                                transactionBatchEntity.getCreatedBy(),
-                                transactionBatchEntity.getUpdatedBy(),
-                                transactionBatchEntity.getOrganisationId(),
-                                transactionBatchEntity.getStatus(),
-                                this.getStatistics(transactionBatchEntity.getBatchStatistics()),
-                                this.getFilteringParameters(transactionBatchEntity.getFilteringParameters()),
-                                Set.of()
-                        )
+                        transactionBatchEntity -> {
+                            val transactions = this.getTransaction(transactionBatchEntity);
+                            val statistic = this.getStatistics(transactions);
+                            return new BatchView(
+                                    transactionBatchEntity.getId(),
+                                    transactionBatchEntity.getCreatedAt().toString(),
+                                    transactionBatchEntity.getUpdatedAt().toString(),
+                                    transactionBatchEntity.getCreatedBy(),
+                                    transactionBatchEntity.getUpdatedBy(),
+                                    transactionBatchEntity.getOrganisationId(),
+                                    transactionBatchEntity.getStatus(),
+                                    statistic,
+                                    this.getFilteringParameters(transactionBatchEntity.getFilteringParameters()),
+                                    Set.of()
+                            );
+                        }
                 ).toList();
 
         batchDetailView.setBatchs(batches);
@@ -175,6 +162,41 @@ public class AccountingCorePresentationViewService {
                 .toList();
     }
 
+    private BatchStatisticsView getStatistics(Set<TransactionView> transactions) {
+        val invalid = transactions.stream().filter(transactionView -> INVALID == transactionView.getStatistic()).count();
+
+        val pending = transactions.stream().filter(transactionView -> PENDING == transactionView.getStatistic()).count();
+
+        val approve = transactions.stream().filter(transactionView -> APPROVE == transactionView.getStatistic()).count();
+
+        val publish = transactions.stream().filter(transactionView -> PUBLISH == transactionView.getStatistic()).count();
+
+        val published = transactions.stream().filter(transactionView -> PUBLISHED == transactionView.getStatistic()).count();
+
+        val total = transactions.stream().count();
+        return new BatchStatisticsView(
+                (int) invalid,
+                (int) pending,
+                (int) approve,
+                (int) publish,
+                (int) published,
+                (int) total
+        );
+    }
+
+
+    private FilteringParametersView getFilteringParameters(FilteringParameters filteringParameters) {
+        return new FilteringParametersView(
+                filteringParameters.getTransactionTypes(),
+                filteringParameters.getFrom(),
+                filteringParameters.getTo(),
+                filteringParameters.getAccountingPeriodFrom(),
+                filteringParameters.getAccountingPeriodTo(),
+                filteringParameters.getTransactionNumbers()
+        );
+    }
+
+
     private Set<TransactionView> getTransaction(TransactionBatchEntity transactionBatchEntity) {
         return transactionBatchEntity.getTransactions().stream()
                 .map(this::getTransactionView)
@@ -194,6 +216,7 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getTransactionApproved(),
                 transactionEntity.getLedgerDispatchApproved(),
                 getAmountLcyTotalForAllItems(transactionEntity),
+                transactionEntity.hasAnyRejection(),
                 getTransactionItemView(transactionEntity),
                 getViolations(transactionEntity)
 
@@ -203,25 +226,43 @@ public class AccountingCorePresentationViewService {
 
     public LedgerDispatchStatusView getTransactionDispatchStatus(TransactionEntity transactionEntity) {
 
-        if (TransactionStatus.NOK == transactionEntity.getOverallStatus()) {
-            return LedgerDispatchStatusView.INVALID;
+        if (ValidationStatus.FAILED == transactionEntity.getAutomatedValidationStatus()) {
+
+            if (transactionEntity.getViolations().stream().anyMatch(v -> v.getSource() == ERP)) {
+                return INVALID;
+            }
+            if (transactionEntity.hasAnyRejection()) {
+                if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionCode().getSource() == ERP))) {
+                    return INVALID;
+                }
+                return PENDING;
+            }
+            return PENDING;
+        }
+
+        if (transactionEntity.hasAnyRejection()) {
+            if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionCode().getSource() == ERP))) {
+                return INVALID;
+            }
+            return PENDING;
         }
 
         switch (transactionEntity.getLedgerDispatchStatus()) {
-            case MARK_DISPATCH -> {
-                return LedgerDispatchStatusView.APPROVE;
+            case NOT_DISPATCHED, MARK_DISPATCH -> {
+                if (transactionEntity.getLedgerDispatchApproved()) {
+                    return PUBLISHED;
+                }
+
+                if (transactionEntity.getTransactionApproved()) {
+                    return PUBLISH;
+                }
             }
-            case NOT_DISPATCHED -> {
-                return LedgerDispatchStatusView.PENDING;
-            }
-            case DISPATCHED -> {
-                return LedgerDispatchStatusView.PUBLISH;
-            }
-            case COMPLETED,FINALIZED -> {
-                return LedgerDispatchStatusView.PUBLISHED;
+            case DISPATCHED, COMPLETED, FINALIZED -> {
+                return PUBLISHED;
+                //return DISPATCHED;
             }
         }
-        return LedgerDispatchStatusView.INVALID;
+        return APPROVE;
 
     }
 
@@ -252,7 +293,8 @@ public class AccountingCorePresentationViewService {
                     item.getDocument().flatMap(document -> document.getVat().flatMap(Vat::getRate)).orElse(ZERO),
                     item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getCustomerCode)).orElse(""),
                     item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).orElse(VENDOR),
-                    item.getDocument().flatMap(document -> document.getCounterparty().flatMap(Counterparty::getName)).orElse("")
+                    item.getDocument().flatMap(document -> document.getCounterparty().flatMap(Counterparty::getName)).orElse(""),
+                    item.getRejection().map(Rejection::getRejectionCode).orElse(null)
             );
         }).collect(toSet());
     }

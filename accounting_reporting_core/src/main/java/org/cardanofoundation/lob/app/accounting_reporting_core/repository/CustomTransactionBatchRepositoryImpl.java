@@ -1,29 +1,21 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
-import io.hypersistence.utils.hibernate.query.SQLExtractor;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionBatchEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
 
 import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.DISPATCHED;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.OK;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -44,9 +36,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
         criteriaQuery.orderBy(builder.desc(rootEntry.get("createdAt")));
         // Without this line the query only returns one row.
         criteriaQuery.groupBy(rootEntry.get("id"));
-
         TypedQuery<TransactionBatchEntity> theQuery = em.createQuery(criteriaQuery);
-
         theQuery.setMaxResults(body.getLimit());
 
         if (null != body.getPage() && 0 < body.getPage()) {
@@ -80,32 +70,65 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
     }
 
     private Collection<Predicate> queryCriteria(Root<TransactionBatchEntity> rootEntry, CriteriaBuilder builder, BatchSearchRequest body) {
-        List<Predicate> andPredicates = new ArrayList<>();
+        Collection<Predicate> andPredicates = new ArrayList<>();
 
         andPredicates.add(builder.equal(rootEntry.get("filteringParameters").get("organisationId"), body.getOrganisationId()));
 
         if (!body.getBatchStatistics().isEmpty()) {
+            Join<TransactionBatchEntity, TransactionEntity> transactionEntityJoin = rootEntry.join("transactions", JoinType.INNER);
 
             List<Predicate> orPredicates = new ArrayList<>();
 
-            if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.APPROVE)).count()) {
-                orPredicates.add(builder.greaterThan(rootEntry.get("batchStatistics").get("approvedTransactionsCount"),0));
+            if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.INVALID))) {
+
+                orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionCode").as(Integer.class).in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList()));
+                Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
+                Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
+                subqueryErp.select(transactionEntityRoot.get("id"));
+                Predicate whereErp = builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP");
+                subqueryErp.where(whereErp);
+                orPredicates.add((builder.in(transactionEntityJoin.get("id")).value(subqueryErp)));
+
             }
 
-            if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.PENDING)).count()) {
-                orPredicates.add(builder.greaterThan(builder.diff(rootEntry.get("batchStatistics").get("totalTransactionsCount"),rootEntry.get("batchStatistics").get("processedTransactionsCount")) ,0));
+            if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.PENDING))) {
+
+                List<Predicate> andPredicatesJoin = new ArrayList<>();
+
+                orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionCode").as(Integer.class).in(RejectionCode.getSourceBasedRejectionCodes(Source.LOB).stream().map(Enum::ordinal).toList()));
+                orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionCode").as(Integer.class).in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList()).not());
+
+                Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
+                Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
+                subqueryErp.select(transactionEntityRoot.get("id"));
+                Predicate whereErp = builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP");
+                subqueryErp.where(whereErp);
+
+                Subquery<String> subqueryLob = builder.createQuery().subquery(String.class);
+                Root<TransactionEntity> transactionEntityRootLob = subqueryLob.from(TransactionEntity.class);
+                subqueryLob.select(transactionEntityRootLob.get("id"));
+                Predicate whereLob = builder.equal(transactionEntityRootLob.get("violations").get("source"), "LOB");
+                subqueryLob.where(whereLob);
+
+                andPredicatesJoin.add(builder.not(builder.in(transactionEntityJoin.get("id")).value(subqueryErp)));
+                andPredicatesJoin.add((builder.in(transactionEntityJoin.get("id")).value(subqueryLob)));
+
+                orPredicates.add(builder.and(andPredicatesJoin.toArray(new Predicate[0])));
             }
 
-            if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.INVALID)).count()) {
-                orPredicates.add(builder.greaterThan(rootEntry.get("batchStatistics").get("failedTransactionsCount"),0));
+            if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.APPROVE))) {
+                orPredicates.add(builder.and(builder.equal(transactionEntityJoin.get("transactionApproved"), false), builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), false), builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED)));
+
             }
 
-            if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.PUBLISH)).count()) {
-                orPredicates.add(builder.greaterThan(rootEntry.get("batchStatistics").get("dispatchedTransactionsCount"),0));
+            if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.PUBLISH))) {
+                orPredicates.add(builder.and(builder.equal(transactionEntityJoin.get("transactionApproved"), true), builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), false), builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED)));
+
             }
 
-            if (0 < body.getBatchStatistics().stream().filter(s -> s.equals(LedgerDispatchStatusView.PUBLISHED)).count()) {
-                orPredicates.add(builder.greaterThan(rootEntry.get("batchStatistics").get("completedTransactionsCount"),0));
+            if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.PUBLISHED))) {
+                orPredicates.add(builder.and(builder.equal(transactionEntityJoin.get("transactionApproved"), true), builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), true), builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED)));
+
             }
 
             andPredicates.add(builder.or(orPredicates.toArray(new Predicate[0])));
@@ -123,7 +146,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
         }
 
         if (null != body.getTo()) {
-            LocalDateTime localDateTime2 = body.getTo().atTime(23,59, 59);
+            LocalDateTime localDateTime2 = body.getTo().atTime(23, 59, 59);
             andPredicates.add(builder.lessThanOrEqualTo(rootEntry.get("createdAt"), localDateTime2));
         }
 
