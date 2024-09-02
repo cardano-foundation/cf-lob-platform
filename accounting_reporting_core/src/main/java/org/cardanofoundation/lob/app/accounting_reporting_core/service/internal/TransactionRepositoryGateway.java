@@ -11,7 +11,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest.TxItemRejectionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
@@ -181,7 +180,7 @@ public class TransactionRepositoryGateway {
             val txItemId = txItemRejection.getTxItemId();
             val rejectionCode = txItemRejection.getRejectionCode();
 
-            val txItemM = transactionItemRepository.findById(txItemId);
+            val txItemM = transactionItemRepository.findByTxIdAndItemId(tx.getId(), txItemId);
 
             if (txItemM.isEmpty()) {
                 transactionItemEntitiesE.add(transactionItemNotFoundResponse(tx.getId(), txItemId));
