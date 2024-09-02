@@ -167,10 +167,12 @@ class TransactionRepositoryGatewayTest {
         rejectionRequest.setTransactionItemsRejections(Set.of(new TransactionItemsRejectionRequest.TxItemRejectionRequest(transactionItemId, INCORRECT_AMOUNT)));
 
         TransactionEntity transactionEntity = new TransactionEntity();
+        transactionEntity.setId(transactionId);
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
 
         TransactionItemEntity transactionItemEntity = new TransactionItemEntity();
-        when(transactionItemRepository.findById(transactionItemId)).thenReturn(Optional.of(transactionItemEntity));
+        transactionItemEntity.setId(transactionItemId);
+        when(transactionItemRepository.findByTxIdAndItemId(transactionId, transactionItemId)).thenReturn(Optional.of(transactionItemEntity));
 
         when(transactionItemRepository.save(transactionItemEntity)).thenReturn(transactionItemEntity);
 
@@ -302,11 +304,14 @@ class TransactionRepositoryGatewayTest {
         rejectionRequest.setTransactionItemsRejections(Set.of(new TransactionItemsRejectionRequest.TxItemRejectionRequest(transactionItemId, INCORRECT_AMOUNT)));
 
         TransactionEntity transactionEntity = new TransactionEntity();
+        transactionEntity.setId(transactionId);
         transactionEntity.setLedgerDispatchApproved(true); // Transaction already approved for dispatch
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
 
         TransactionItemEntity transactionItemEntity = new TransactionItemEntity();
-        when(transactionItemRepository.findById(transactionItemId)).thenReturn(Optional.of(transactionItemEntity));
+        transactionItemEntity.setId(transactionItemId);
+        transactionItemEntity.setTransaction(transactionEntity);
+        when(transactionItemRepository.findByTxIdAndItemId(transactionId, transactionItemId)).thenReturn(Optional.of(transactionItemEntity));
 
         // Act
         List<Either<IdentifiableProblem, TransactionItemEntity>> results = transactionRepositoryGateway.rejectTransactionItems(transactionEntity, rejectionRequest.getTransactionItemsRejections());
