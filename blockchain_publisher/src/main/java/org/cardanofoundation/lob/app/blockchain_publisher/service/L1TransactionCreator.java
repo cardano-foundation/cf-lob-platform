@@ -13,6 +13,7 @@ import com.bloxbean.cardano.client.quicktx.Tx;
 import com.bloxbean.cardano.client.transaction.util.TransactionUtil;
 import com.google.common.collect.Sets;
 import io.vavr.control.Either;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +25,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.zalando.problem.Problem;
 
+import java.nio.file.Files;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,6 +56,22 @@ public class L1TransactionCreator {
 
     @Value("${l1.transaction.metadata.label:22222}")
     private int metadataLabel;
+
+    @Value("${l1.transaction.debug.store.output.tx:false}")
+    private boolean debugStoreOutputTx = false;
+
+    private String runId;
+
+    @PostConstruct
+    public void init() {
+        log.info("L1TransactionCreator::metadata label: {}", metadataLabel);
+        log.info("L1TransactionCreator::debug store output tx: {}", debugStoreOutputTx);
+
+        runId = UUID.randomUUID().toString();
+        log.info("L1TransactionCreator::runId: {}", runId);
+
+        log.info("L1TransactionCreator is initialised.");
+    }
 
     public Either<Problem, Optional<BlockchainTransactions>> pullBlockchainTransaction(String organisationId,
                                                                                        Set<TransactionEntity> txs) {
@@ -139,10 +160,21 @@ public class L1TransactionCreator {
             val data = metadataMap.getMap();
             val bytes = CborSerializationUtil.serialize(data);
 
+            // we use json only for validation with json schema and for debugging (storing to a tmp file)
             val json = MetadataToJsonNoSchemaConverter.cborBytesToJson(bytes);
 
             val metadata = MetadataBuilder.createMetadata();
             metadata.put(metadataLabel, metadataMap);
+
+            if (debugStoreOutputTx) {
+                val timestamp = DateTimeFormatter.ISO_INSTANT.format(Instant.now());
+                val name = STR."lob-tx-metadata-\{runId}-\{timestamp}-\{creationSlot}";
+                val tmpTxFile = Files.createTempFile(name, ".json");
+
+                log.info("DebugStoreTx enabled, storing tx metadata to file: {}", tmpTxFile);
+
+                Files.writeString(tmpTxFile, json);
+            }
 
             val isValid = jsonSchemaMetadataChecker.checkTransactionMetadata(json);
 

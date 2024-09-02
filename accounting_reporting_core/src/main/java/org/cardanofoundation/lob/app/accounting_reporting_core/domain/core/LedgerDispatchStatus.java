@@ -12,7 +12,7 @@ public enum LedgerDispatchStatus {
 
     COMPLETED, // tx hash is ready and provided and in addition we have decent finality score to consider it completed
 
-    FINALIZED; // finalised on blockchain(s) - tx hash
+    FINALIZED; // finalised on blockchain(s) - tx hash (36 hours)
 
     public static Set<LedgerDispatchStatus> allDispatchedStatuses() {
         return Set.of(MARK_DISPATCH, DISPATCHED, COMPLETED, FINALIZED);
