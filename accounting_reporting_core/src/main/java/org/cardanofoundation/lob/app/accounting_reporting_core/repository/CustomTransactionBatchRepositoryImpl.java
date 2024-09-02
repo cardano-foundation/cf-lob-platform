@@ -36,6 +36,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
         criteriaQuery.orderBy(builder.desc(rootEntry.get("createdAt")));
         // Without this line the query only returns one row.
         criteriaQuery.groupBy(rootEntry.get("id"));
+
         TypedQuery<TransactionBatchEntity> theQuery = em.createQuery(criteriaQuery);
         theQuery.setMaxResults(body.getLimit());
 
@@ -95,8 +96,22 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
 
                 List<Predicate> andPredicatesJoin = new ArrayList<>();
 
-                orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionCode").as(Integer.class).in(RejectionCode.getSourceBasedRejectionCodes(Source.LOB).stream().map(Enum::ordinal).toList()));
-                orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionCode").as(Integer.class).in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList()).not());
+                Subquery<String> subqueryItemsIn = builder.createQuery(rootEntry.getClass()).subquery(String.class);
+                Root<TransactionEntity> transactionEntityRootItem = subqueryItemsIn.from(TransactionEntity.class);
+
+                subqueryItemsIn.select(transactionEntityRootItem.get("id"));
+                Predicate whereItem =
+                        transactionEntityJoin.get("items").get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.LOB).stream().map(Enum::ordinal).toList());
+                subqueryItemsIn.where(whereItem);
+
+                Subquery<String> subqueryItemsOut = builder.createQuery(rootEntry.getClass()).subquery(String.class);
+                Root<TransactionEntity> transactionEntityRootItem2 = subqueryItemsOut.from(TransactionEntity.class);
+
+
+                subqueryItemsOut.select(transactionEntityRootItem2.get("id"));
+                Predicate whereItem2 =
+                        transactionEntityJoin.get("items").get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList());
+                subqueryItemsOut.where(whereItem2);
 
                 Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
                 Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
@@ -112,6 +127,8 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
 
                 andPredicatesJoin.add(builder.not(builder.in(transactionEntityJoin.get("id")).value(subqueryErp)));
                 andPredicatesJoin.add((builder.in(transactionEntityJoin.get("id")).value(subqueryLob)));
+
+                orPredicates.add(builder.and(builder.in(transactionEntityJoin.get("id")).value(subqueryItemsOut).not(), builder.in(transactionEntityJoin.get("id")).value(subqueryItemsIn)));
 
                 orPredicates.add(builder.and(andPredicatesJoin.toArray(new Predicate[0])));
             }

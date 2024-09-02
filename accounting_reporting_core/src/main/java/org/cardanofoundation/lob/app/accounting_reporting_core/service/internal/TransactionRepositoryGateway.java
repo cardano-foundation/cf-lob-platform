@@ -12,6 +12,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest.TxItemRejectionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
 import org.springframework.dao.DataAccessException;
@@ -171,36 +172,25 @@ public class TransactionRepositoryGateway {
     }
 
     @Transactional
-    public List<Either<IdentifiableProblem, TransactionItemEntity>> rejectTransactionItems(TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
-        log.info("Rejecting transaction items: {}", transactionItemsRejectionRequest);
-
-        val organisationId = transactionItemsRejectionRequest.getOrganisationId();
-        val transactionId = transactionItemsRejectionRequest.getTransactionId();
-
-        val txM = transactionRepository.findById(transactionId);
+    public List<Either<IdentifiableProblem, TransactionItemEntity>> rejectTransactionItems(TransactionEntity tx, Set<TxItemRejectionRequest> transactionItemsRejections) {
+        log.info("Rejecting transaction items: {}", transactionItemsRejections);
 
         val transactionItemEntitiesE = new ArrayList<Either<IdentifiableProblem, TransactionItemEntity>>();
 
-        if (txM.isEmpty()) {
-            return transactionNotFoundResponse(transactionItemsRejectionRequest, transactionId);
-        }
-
-        val tx = txM.orElseThrow();
-
-        for (val txItemRejection : transactionItemsRejectionRequest.getTransactionItemsRejections()) {
+        for (val txItemRejection : transactionItemsRejections) {
             val txItemId = txItemRejection.getTxItemId();
             val rejectionCode = txItemRejection.getRejectionCode();
 
             val txItemM = transactionItemRepository.findById(txItemId);
 
             if (txItemM.isEmpty()) {
-                transactionItemEntitiesE.add(transactionItemNotFoundResponse(transactionId, txItemId));
+                transactionItemEntitiesE.add(transactionItemNotFoundResponse(tx.getId(), txItemId));
                 continue;
             }
 
             val txItem = txItemM.orElseThrow();
             if (tx.getLedgerDispatchApproved()) {
-                transactionItemEntitiesE.add(transactionItemCannotRejectAlreadyApprovedForDispatchResponse(transactionId, txItemId));
+                transactionItemEntitiesE.add(transactionItemCannotRejectAlreadyApprovedForDispatchResponse(tx.getId(), txItemId));
                 continue;
             }
 

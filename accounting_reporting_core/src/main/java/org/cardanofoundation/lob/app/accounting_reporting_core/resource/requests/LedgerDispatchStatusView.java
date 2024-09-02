@@ -4,7 +4,6 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.request
  * To create a filter useful for UI to get batches that includes transactions with specific combinations of statuses.
  */
 public enum LedgerDispatchStatusView {
-    READY,
     APPROVE, /** Ready to approve */
 
     PENDING, /** when exist a violation or a rejection related to LOB problem */
