@@ -173,7 +173,7 @@ public class AccountingCoreResource {
 
     @Tag(name = "Transactions", description = "Transactions Publish / Dispatch Approval API")
     @PostMapping(value = "/transactions/approve-dispatch", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
-    @Operation(description = "Approve one or more transactions",
+    @Operation(description = "Approve to publish one or more transactions",
             responses = {
                     @ApiResponse(content = {
                             @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = TransactionProcessView.class)))
@@ -205,7 +205,58 @@ public class AccountingCoreResource {
                 .body(transactionProcessViewsResult);
     }
 
-    @Tag(name = "Batchs", description = "Batchs API")
+    @Tag(name = "Batches", description = "Batches API")
+    @PostMapping(value = "/batches", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @Operation(description = "Batch list",
+            responses = {
+                    @ApiResponse(content = {
+                            @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = BatchsDetailView.class)))
+                    })
+            }
+    )
+    public ResponseEntity<?> listAllBatches(@Valid @RequestBody BatchSearchRequest body,
+                                          @RequestParam(name = "page", defaultValue = "0") int page,
+                                          @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        body.setLimit(limit);
+        body.setPage(page);
+
+        val batchs = accountingCorePresentationService.listAllBatch(body);
+
+        return ResponseEntity.ok().body(batchs);
+    }
+
+    @Tag(name = "Batches", description = "Batches API")
+    @GetMapping(value = "/batches/{batchId}", produces = APPLICATION_JSON_VALUE)
+    @Operation(description = "Batch detail",
+            responses = {
+                    @ApiResponse(content = {
+                            @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = BatchView.class))
+                    }),
+                    @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(example = "{\"title\": \"BATCH_NOT_FOUND\",\"status\": 404,\"detail\": \"Batch with id: {batchId} could not be found\"" +
+                            "}"))})
+            }
+    )
+    public ResponseEntity<?> batchesDetail(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
+        val txBatchM = accountingCorePresentationService.batchDetail(batchId);
+        if (txBatchM.isEmpty()) {
+            val issue = Problem.builder()
+                    .withTitle("BATCH_NOT_FOUND")
+                    .withDetail(STR."Batch with id: {\{batchId}} could not be found")
+                    .withStatus(NOT_FOUND)
+                    .build();
+
+            return ResponseEntity
+                    .status(issue.getStatus().getStatusCode())
+                    .body(issue);
+        }
+
+        return ResponseEntity
+                .ok()
+                .body(txBatchM.orElseThrow());
+    }
+
+    @Deprecated
+    @Tag(name = "Batches", description = "Batches API")
     @PostMapping(value = "/batchs", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Batch list",
             responses = {
@@ -225,7 +276,8 @@ public class AccountingCoreResource {
         return ResponseEntity.ok().body(batchs);
     }
 
-    @Tag(name = "Batchs", description = "Batchs API")
+    @Deprecated
+    @Tag(name = "Batches", description = "Batches API")
     @GetMapping(value = "/batchs/{batchId}", produces = APPLICATION_JSON_VALUE)
     @Operation(description = "Batch detail",
             responses = {
@@ -236,7 +288,6 @@ public class AccountingCoreResource {
                             "}"))})
             }
     )
-
     public ResponseEntity<?> batchDetail(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
         val txBatchM = accountingCorePresentationService.batchDetail(batchId);
         if (txBatchM.isEmpty()) {
