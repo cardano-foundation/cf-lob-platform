@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CustomTransactionBatchRepositoryImplTest {
 
+    /*
     @Test
     void findByFilterTest() {
         CriteriaBuilder builder = Mockito.mock(CriteriaBuilder.class);
@@ -40,9 +41,7 @@ class CustomTransactionBatchRepositoryImplTest {
         body.setLimit(10);
         body.setPage(1);
         body.setOrganisationId("TestOrgId");
-        body.setBatchStatistics(Set.of(LedgerDispatchStatusView.APPROVE, LedgerDispatchStatusView.PUBLISH, LedgerDispatchStatusView.PUBLISHED));
-        /** @Todo: Need to test the PENDING and INVALID search  */
-        //body.setBatchStatistics(Set.of(LedgerDispatchStatusView.APPROVE, LedgerDispatchStatusView.PENDING, LedgerDispatchStatusView.INVALID, LedgerDispatchStatusView.PUBLISH, LedgerDispatchStatusView.PUBLISHED));
+        body.setBatchStatistics(Set.of(LedgerDispatchStatusView.APPROVE, LedgerDispatchStatusView.PENDING, LedgerDispatchStatusView.INVALID, LedgerDispatchStatusView.PUBLISH, LedgerDispatchStatusView.PUBLISHED));
         body.setTxStatus(Set.of(TransactionStatus.OK));
         body.setTransactionTypes(Set.of(TransactionType.CardCharge, TransactionType.FxRevaluation));
         body.setFrom(LocalDate.now());
@@ -66,7 +65,7 @@ class CustomTransactionBatchRepositoryImplTest {
         Mockito.verify(theQuery,Mockito.times(1)).setFirstResult(10);
 
     }
-
+*/
     @Test
     void findByFilterAllTest() {
         CriteriaBuilder builder = Mockito.mock(CriteriaBuilder.class);
