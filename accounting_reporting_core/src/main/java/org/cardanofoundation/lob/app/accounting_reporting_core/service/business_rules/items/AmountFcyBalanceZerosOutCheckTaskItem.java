@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
 import static java.math.BigDecimal.ZERO;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.FCY_BALANCE_MUST_BE_ZERO;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.FCY_BALANCE_MUST_BE_ZERO;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
 
@@ -26,7 +26,7 @@ public class AmountFcyBalanceZerosOutCheckTaskItem implements PipelineTaskItem {
                 .reduce(ZERO, BigDecimal::add);
 
         if (fcySum.signum() != 0) {
-            val v = Violation.builder()
+            val v = TransactionViolation.builder()
                     .code(FCY_BALANCE_MUST_BE_ZERO)
                     .severity(ERROR)
                     .source(ERP)

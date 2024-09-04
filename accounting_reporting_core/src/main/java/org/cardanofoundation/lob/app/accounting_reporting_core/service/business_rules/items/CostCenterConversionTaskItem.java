@@ -3,7 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.business
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 
 import java.util.Map;
@@ -11,7 +11,7 @@ import java.util.Optional;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.COST_CENTER_DATA_NOT_FOUND;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.COST_CENTER_DATA_NOT_FOUND;
 
 @RequiredArgsConstructor
 public class CostCenterConversionTaskItem implements PipelineTaskItem {
@@ -35,7 +35,7 @@ public class CostCenterConversionTaskItem implements PipelineTaskItem {
             val costCenterMappingM = organisationPublicApi.findCostCenter(organisationId, customerCode);
 
             if (costCenterMappingM.isEmpty()) {
-                val v = Violation.builder()
+                val v = TransactionViolation.builder()
                         .code(COST_CENTER_DATA_NOT_FOUND)
                         .txItemId(txItem.getId())
                         .severity(ERROR)

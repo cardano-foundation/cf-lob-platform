@@ -3,7 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.business
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.CoreCurrencyRepository;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 
@@ -11,8 +11,8 @@ import java.util.Map;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.CORE_CURRENCY_NOT_FOUND;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.ORGANISATION_DATA_NOT_FOUND;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.CORE_CURRENCY_NOT_FOUND;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.ORGANISATION_DATA_NOT_FOUND;
 
 @RequiredArgsConstructor
 public class OrganisationConversionTaskItem implements PipelineTaskItem {
@@ -26,7 +26,7 @@ public class OrganisationConversionTaskItem implements PipelineTaskItem {
         val organisationM = organisationPublicApi.findByOrganisationId(organisationId);
 
         if (organisationM.isEmpty()) {
-            val v = Violation.builder()
+            val v = TransactionViolation.builder()
                     .code(ORGANISATION_DATA_NOT_FOUND)
                     .txItemId(tx.getId())
                     .severity(ERROR)
@@ -47,7 +47,7 @@ public class OrganisationConversionTaskItem implements PipelineTaskItem {
         val coreCurrencyM = coreCurrencyRepository.findByCurrencyId(organisation.getCurrencyId());
 
         if (coreCurrencyM.isEmpty()) {
-            val v = Violation.builder()
+            val v = TransactionViolation.builder()
                     .code(CORE_CURRENCY_NOT_FOUND)
                     .txItemId(tx.getId())
                     .severity(ERROR)

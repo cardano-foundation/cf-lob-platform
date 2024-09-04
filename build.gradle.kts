@@ -93,6 +93,7 @@ subprojects {
         implementation("com.google.guava:guava:33.3.0-jre")
 
         implementation("org.apache.commons:commons-collections4:4.4")
+        implementation("org.javers:javers-core:7.6.1")
 
         compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")

@@ -3,7 +3,8 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Enumerated;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+import org.javers.core.metamodel.annotation.DiffInclude;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -18,10 +19,13 @@ import static jakarta.persistence.EnumType.STRING;
 @EqualsAndHashCode
 public class Counterparty {
 
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
+    
     private String customerCode;
 
     @Enumerated(STRING)
+    @LOBVersionSourceRelevant
+    
     private org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type type;
 
     @Nullable

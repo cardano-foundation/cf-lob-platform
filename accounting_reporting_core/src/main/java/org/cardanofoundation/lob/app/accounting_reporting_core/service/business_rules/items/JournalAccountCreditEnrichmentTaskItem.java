@@ -3,10 +3,10 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.business
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Account;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 
@@ -36,8 +36,8 @@ public class JournalAccountCreditEnrichmentTaskItem implements PipelineTaskItem 
 
         if (!shouldTriggerNormalisation(tx, dummyAccountM)) {
             if (dummyAccountM.isEmpty()) {
-                val v = Violation.builder()
-                        .code(ViolationCode.JOURNAL_DUMMY_ACCOUNT_MISSING)
+                val v = TransactionViolation.builder()
+                        .code(TransactionViolationCode.JOURNAL_DUMMY_ACCOUNT_MISSING)
                         .processorModule(this.getClass().getSimpleName())
                         .source(LOB)
                         .severity(ERROR)

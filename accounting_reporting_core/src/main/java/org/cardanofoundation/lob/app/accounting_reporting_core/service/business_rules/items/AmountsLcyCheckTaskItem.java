@@ -4,11 +4,11 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.business
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 
 import java.util.Map;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.AMOUNT_LCY_IS_ZERO;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.AMOUNT_LCY_IS_ZERO;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
 
@@ -19,7 +19,7 @@ public class AmountsLcyCheckTaskItem implements PipelineTaskItem {
     public void run(TransactionEntity tx) {
         for (val txItem : tx.getItems()) {
             if (txItem.getAmountLcy().signum() == 0 && txItem.getAmountFcy().signum() != 0) {
-                val v = Violation.builder()
+                val v = TransactionViolation.builder()
                         .txItemId(txItem.getId())
                         .code(AMOUNT_LCY_IS_ZERO)
                         .severity(ERROR)

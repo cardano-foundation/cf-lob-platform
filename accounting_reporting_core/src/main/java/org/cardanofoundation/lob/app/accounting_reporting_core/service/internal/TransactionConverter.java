@@ -13,11 +13,10 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Doc
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Project;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Vat;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nullable;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -78,7 +77,7 @@ public class TransactionConverter {
         val violations = transaction.getViolations()
                 .stream()
                 .map(violation -> {
-                    val violationEntity = new Violation();
+                    val violationEntity = new TransactionViolation();
                     violationEntity.setCode(violation.code());
                     violationEntity.setTxItemId(violation.txItemId());
                     violationEntity.setSeverity(violation.severity());
@@ -143,6 +142,7 @@ public class TransactionConverter {
         txEntity.setTransactionApproved(transaction.isTransactionApproved());
         txEntity.setLedgerDispatchApproved(transaction.isLedgerDispatchApproved());
         txEntity.setUpdatedAt(LocalDateTime.now(clock));
+        txEntity.setCreatedAt(LocalDateTime.now(clock));
 
         txItems.forEach(i -> i.setTransaction(txEntity));
 
@@ -324,6 +324,8 @@ public class TransactionConverter {
         attached.setTransactionInternalNumber(detached.getTransactionInternalNumber());
         attached.setUpdatedAt(LocalDateTime.now(clock));
         attached.setUpdatedBy(detached.getUpdatedBy());
+        attached.setCreatedAt(detached.getCreatedAt());
+        attached.setCreatedBy(detached.getCreatedBy());
 
         attached.getViolations().clear();
         attached.getViolations().addAll(detached.getViolations());

@@ -3,7 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -17,7 +17,7 @@ import java.util.Optional;
 public class CostCenter {
 
     @NotBlank
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private String customerCode;
 
     @Nullable

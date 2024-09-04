@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode;
 
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +17,7 @@ public class ViolationView {
     private Violation.Severity severity;
     private Source source;
     private Optional<String> transactionItemId;
-    private ViolationCode code;
+    private TransactionViolationCode code;
     private Map<String, Object> bag;
 
 }

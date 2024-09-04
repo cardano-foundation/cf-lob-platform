@@ -18,7 +18,7 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.FxRevaluation;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.VALIDATED;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.ACCOUNT_CODE_DEBIT_IS_EMPTY;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.ACCOUNT_CODE_DEBIT_IS_EMPTY;
 
 class AccountCodeDebitCheckTaskItemTest {
 

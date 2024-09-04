@@ -35,9 +35,9 @@ CREATE TABLE blockchain_publisher_transaction_item (
 
    FOREIGN KEY (transaction_id) REFERENCES blockchain_publisher_transaction (transaction_id),
 
-   fx_rate DECIMAL NOT NULL,
+   fx_rate DECIMAL(12, 8) NOT NULL,
 
-   amount_fcy DECIMAL NOT NULL,
+   amount_fcy DECIMAL(100, 8) NOT NULL,
 
    account_event_code VARCHAR(255) NOT NULL,
    account_event_name VARCHAR(255) NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE blockchain_publisher_transaction_item (
    document_counterparty_type VARCHAR(255),
 
    document_vat_customer_code VARCHAR(255),
-   document_vat_rate DECIMAL,
+   document_vat_rate DECIMAL(12, 8),
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),

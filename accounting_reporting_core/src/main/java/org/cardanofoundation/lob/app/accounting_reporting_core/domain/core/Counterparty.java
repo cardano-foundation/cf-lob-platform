@@ -3,7 +3,8 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+import org.javers.core.metamodel.annotation.DiffInclude;
 
 import java.util.Optional;
 
@@ -17,10 +18,12 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 @NoArgsConstructor
 public class Counterparty {
 
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
+    
     private @Size(min = 1, max =  255) @NotBlank String customerCode;
 
     @Builder.Default
+    
     private Type type = VENDOR;
 
     @Builder.Default

@@ -1,25 +1,22 @@
-package org.cardanofoundation.lob.app.support.orm;
+package org.cardanofoundation.lob.app.support.modulith;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.lang.annotation.*;
 
-@Async
 @Transactional(
-        propagation = Propagation.REQUIRES_NEW,
-        isolation = Isolation.SERIALIZABLE
+        propagation = Propagation.REQUIRES_NEW
 )
 @TransactionalEventListener
 @Documented
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface StrictApplicationModuleListener {
+public @interface SyncApplicationModuleListener {
+
     @AliasFor(
             annotation = Transactional.class,
             attribute = "readOnly"
@@ -31,4 +28,11 @@ public @interface StrictApplicationModuleListener {
             attribute = "id"
     )
     String id() default "";
+
+    @AliasFor(
+            annotation = EventListener.class,
+            attribute = "condition"
+    )
+    String condition() default "";
+
 }

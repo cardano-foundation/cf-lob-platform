@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
 import lombok.val;
+import org.cardanofoundation.lob.app.blockchain_publisher.StaticSlotLengthProvider;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoNetwork;
 import org.junit.jupiter.api.Test;
@@ -16,36 +17,25 @@ class CardanoFinalityProviderTest {
     @ParameterizedTest
     @CsvSource({
             "MAIN, 0, VERY_LOW",
-            "MAIN, 4, VERY_LOW",
-            "MAIN, 5, LOW",
-            "MAIN, 9, LOW",
-            "MAIN, 10, MEDIUM",
-            "MAIN, 49, MEDIUM",
-            "MAIN, 50, HIGH",
-            "MAIN, 249, HIGH",
-            "MAIN, 250, VERY_HIGH",
-            "MAIN, 999, VERY_HIGH",
-            "MAIN, 1000, ULTRA_HIGH",
-            "MAIN, 2159, ULTRA_HIGH",
-            "MAIN, 2160, FINAL",
-            "DEV, 0, VERY_LOW",
-            "DEV, 4, VERY_LOW",
-            "DEV, 5, LOW",
-            "DEV, 9, LOW",
-            "DEV, 10, MEDIUM",
-            "DEV, 49, MEDIUM",
-            "DEV, 50, HIGH",
-            "DEV, 79, HIGH",
-            "DEV, 80, VERY_HIGH",
-            "DEV, 99, VERY_HIGH",
-            "DEV, 100, ULTRA_HIGH",
-            "DEV, 119, ULTRA_HIGH",
-            "DEV, 120, FINAL"
+            "MAIN, 80, VERY_LOW",
+            "MAIN, 100, LOW",
+            "MAIN, 180, LOW",
+            "MAIN, 280, LOW",
+            "MAIN, 300, MEDIUM",
+            "MAIN, 580, MEDIUM",
+            "MAIN, 360, MEDIUM",
+            "MAIN, 1980, HIGH",
+            "MAIN, 2000, VERY_HIGH",
+            "MAIN, 43180, ULTRA_HIGH",
+            "MAIN, 43200, FINAL"
     })
-    void getFinalityScore_shouldReturnCorrectScoreBasedOnNetworkAndSlots(String network, long slots, CardanoFinalityScore expectedScore) {
+    void getFinalityScore_shouldReturnCorrectScoreBasedOnNetworkAndSlots(String networkStr,
+                                                                         long slots,
+                                                                         CardanoFinalityScore expectedScore) {
         // Arrange
-        CardanoNetwork cardanoNetwork = CardanoNetwork.valueOf(network);
-        cardanoFinalityProvider = new CardanoFinalityProvider(cardanoNetwork);
+        val network = CardanoNetwork.valueOf(networkStr);
+        val slotLengthProvider = new StaticSlotLengthProvider(20, 1);
+        cardanoFinalityProvider = new CardanoFinalityProvider(network, slotLengthProvider);
 
         // Act
         val result = cardanoFinalityProvider.getFinalityScore(slots);
@@ -57,32 +47,26 @@ class CardanoFinalityProviderTest {
     @Test
     void getFinalityScore_shouldHandleEdgeCasesCorrectly() {
         // Arrange for MAINNET
-        cardanoFinalityProvider = new CardanoFinalityProvider(CardanoNetwork.MAIN);
+        val slotLengthProvider = new StaticSlotLengthProvider(20, 1);
+        cardanoFinalityProvider = new CardanoFinalityProvider(CardanoNetwork.MAIN, slotLengthProvider);
 
         // Act & Assert
         assertThat(cardanoFinalityProvider.getFinalityScore(0)).isEqualTo(CardanoFinalityScore.VERY_LOW);
-        assertThat(cardanoFinalityProvider.getFinalityScore(4)).isEqualTo(CardanoFinalityScore.VERY_LOW);
-        assertThat(cardanoFinalityProvider.getFinalityScore(2160)).isEqualTo(CardanoFinalityScore.FINAL);
-
-        // Arrange for DEVNET
-        cardanoFinalityProvider = new CardanoFinalityProvider(CardanoNetwork.DEV);
-
-        // Act & Assert
-        assertThat(cardanoFinalityProvider.getFinalityScore(0)).isEqualTo(CardanoFinalityScore.VERY_LOW);
-        assertThat(cardanoFinalityProvider.getFinalityScore(4)).isEqualTo(CardanoFinalityScore.VERY_LOW);
-        assertThat(cardanoFinalityProvider.getFinalityScore(120)).isEqualTo(CardanoFinalityScore.FINAL);
-    }
+        assertThat(cardanoFinalityProvider.getFinalityScore(4 * 20)).isEqualTo(CardanoFinalityScore.VERY_LOW);
+        assertThat(cardanoFinalityProvider.getFinalityScore(5 * 20)).isEqualTo(CardanoFinalityScore.LOW);
+        assertThat(cardanoFinalityProvider.getFinalityScore(10 * 20)).isEqualTo(CardanoFinalityScore.LOW); // Updated expectation
+        assertThat(cardanoFinalityProvider.getFinalityScore(15 * 20)).isEqualTo(CardanoFinalityScore.MEDIUM); // Updated threshold
+        assertThat(cardanoFinalityProvider.getFinalityScore(30 * 20)).isEqualTo(CardanoFinalityScore.HIGH);
+        assertThat(cardanoFinalityProvider.getFinalityScore(100 * 20)).isEqualTo(CardanoFinalityScore.VERY_HIGH);
+        assertThat(cardanoFinalityProvider.getFinalityScore(250 * 20)).isEqualTo(CardanoFinalityScore.ULTRA_HIGH);
+        assertThat(cardanoFinalityProvider.getFinalityScore(2160 * 20)).isEqualTo(CardanoFinalityScore.FINAL);
+   }
 
     @Test
     void getFinalityScore_shouldReturnFinalForExtremeLargeSlotValues() {
         // Arrange for MAINNET
-        cardanoFinalityProvider = new CardanoFinalityProvider(CardanoNetwork.MAIN);
-
-        // Act & Assert
-        assertThat(cardanoFinalityProvider.getFinalityScore(Long.MAX_VALUE)).isEqualTo(CardanoFinalityScore.FINAL);
-
-        // Arrange for DEVNET
-        cardanoFinalityProvider = new CardanoFinalityProvider(CardanoNetwork.DEV);
+        val slotLengthProvider = new StaticSlotLengthProvider(20, 1);
+        cardanoFinalityProvider = new CardanoFinalityProvider(CardanoNetwork.MAIN, slotLengthProvider);
 
         // Act & Assert
         assertThat(cardanoFinalityProvider.getFinalityScore(Long.MAX_VALUE)).isEqualTo(CardanoFinalityScore.FINAL);

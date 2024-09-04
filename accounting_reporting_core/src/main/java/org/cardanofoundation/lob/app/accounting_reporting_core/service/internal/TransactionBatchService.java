@@ -7,10 +7,10 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Fatal
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.BatchDetails;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.BatchStatistics;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Details;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionBatchEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.TransactionBatchCreatedEvent;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchCreatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchAssocRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
@@ -35,6 +35,7 @@ import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TransactionBatchService {
 
     private final TransactionBatchRepositoryGateway transactionBatchRepositoryGateway;
@@ -49,14 +50,18 @@ public class TransactionBatchService {
     @Value("${batch.stats.debounce.duration:PT3S}")
     private Duration batchStatsDebounceDuration;
 
+    public Optional<TransactionBatchEntity> findById(String batchId) {
+        return transactionBatchRepository.findById(batchId);
+    }
+
     @Transactional
     public void createTransactionBatch(String batchId,
                                        String organisationId,
-                                       String instanceId,
+                                       String adapterInstanceId,
                                        String initiator,
                                        UserExtractionParameters userExtractionParameters,
                                        SystemExtractionParameters systemExtractionParameters) {
-        log.info("Creating transaction batch, batchId: {}, initiator: {}, instanceId: {}, filteringParameters: {}", batchId, initiator, instanceId, userExtractionParameters);
+        log.info("Creating transaction batch, batchId: {}, initiator: {}, adapterInstanceId: {}, filteringParameters: {}", batchId, initiator, adapterInstanceId, userExtractionParameters);
 
         val filteringParameters = transactionConverter.convertToDbDetached(systemExtractionParameters, userExtractionParameters);
 
@@ -75,10 +80,11 @@ public class TransactionBatchService {
         applicationEventPublisher.publishEvent(TransactionBatchCreatedEvent.builder()
                 .batchId(batchId)
                 .organisationId(organisationId)
-                .instanceId(instanceId)
+                .adapterInstanceId(adapterInstanceId)
                 .userExtractionParameters(userExtractionParameters)
                 .systemExtractionParameters(systemExtractionParameters)
-                .build());
+                .build()
+        );
     }
 
     @Transactional(propagation = REQUIRES_NEW)
@@ -114,7 +120,7 @@ public class TransactionBatchService {
         }
 
         txBatch.setStatus(FAILED);
-        txBatch.setBatchDetails(BatchDetails.builder()
+        txBatch.setDetails(Details.builder()
                 .code(error.getCode().name())
                 .subCode(error.getSubCode())
                 .bag(error.getBag())
@@ -180,11 +186,6 @@ public class TransactionBatchService {
     @Transactional
     public List<TransactionBatchEntity> findAll() {
         return transactionBatchRepository.findAll();
-    }
-
-    @Transactional
-    public Optional<TransactionBatchEntity> findById(String batchId) {
-        return transactionBatchRepository.findById(batchId);
     }
 
     private static Optional<Integer> totalTxCount(TransactionBatchEntity txBatch,

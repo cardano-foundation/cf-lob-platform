@@ -2,7 +2,7 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.LedgerUpdatedEvent;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdatedEvent;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.L1SubmissionData;

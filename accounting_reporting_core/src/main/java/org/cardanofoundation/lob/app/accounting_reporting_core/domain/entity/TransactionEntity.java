@@ -3,14 +3,13 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 import com.google.common.base.Objects;
 import jakarta.persistence.*;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 import org.cardanofoundation.lob.app.support.audit.AuditEntity;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 import org.springframework.data.domain.Persistable;
 
+import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.LinkedHashSet;
@@ -36,14 +35,15 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
 
     @Id
     @Column(name = "transaction_id", nullable = false)
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private String id;
 
     @Column(name = "transaction_internal_number", nullable = false)
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private String transactionInternalNumber;
 
     @Column(name = "batch_id", nullable = false)
+    @DiffIgnore
     private String batchId;
 
     @Column(name = "accounting_period", nullable = false)
@@ -51,11 +51,11 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
 
     @Column(name = "type", nullable = false)
     @Enumerated(STRING)
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private TransactionType transactionType;
 
     @Column(name = "entry_date", nullable = false)
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private LocalDate entryDate;
 
     @Column(name = "ledger_dispatch_status", nullable = false)
@@ -70,7 +70,6 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
             @AttributeOverride(name = "taxIdNumber", column = @Column(name = "organisation_tax_id_number")),
             @AttributeOverride(name = "currencyId", column = @Column(name = "organisation_currency_id"))
     })
-    @LOB_ERPSourceVersionRelevant
     private Organisation organisation;
 
     @Column(name = "automated_validation_status", nullable = false)
@@ -91,7 +90,17 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
 
     @Column(name = "overall_status", nullable = false)
     @Enumerated(STRING)
+    @DiffIgnore
     private TransactionStatus overallStatus;
+
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "source", column = @Column(name = "reconcilation_source", nullable = true)),
+        @AttributeOverride(name = "sink", column = @Column(name = "reconcilation_sink", nullable = true))
+    })
+    @Nullable
+    @DiffIgnore
+    private Reconcilation reconcilation;
 
     @ElementCollection(fetch = EAGER)
     @CollectionTable(name = "accounting_core_transaction_violation", joinColumns = @JoinColumn(name = "transaction_id"))
@@ -104,14 +113,15 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
             @AttributeOverride(name = "processorModule", column = @Column(name = "processor_module", nullable = false)),
             @AttributeOverride(name = "bag", column = @Column(name = "bag", nullable = false))
     })
-    private Set<Violation> violations = new LinkedHashSet<>();
+    @DiffIgnore
+    private Set<TransactionViolation> violations = new LinkedHashSet<>();
 
     public boolean allApprovalsPassedForTransactionDispatch() {
         return transactionApproved && ledgerDispatchApproved;
     }
 
-    public void addViolation(Violation violation) {
-        this.violations.add(violation);
+    public void addViolation(TransactionViolation transactionViolation) {
+        this.violations.add(transactionViolation);
 
         recalcValidationStatus();
     }
@@ -140,6 +150,14 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
     public boolean isDispatchable() {
         return overallStatus == OK
                 && ledgerDispatchStatus == NOT_DISPATCHED;
+    }
+
+    public Optional<Reconcilation> getReconcilation() {
+        return Optional.ofNullable(reconcilation);
+    }
+
+    public void setReconcilation(Optional<Reconcilation> reconcilation) {
+        this.reconcilation = reconcilation.orElse(null);
     }
 
     @Override

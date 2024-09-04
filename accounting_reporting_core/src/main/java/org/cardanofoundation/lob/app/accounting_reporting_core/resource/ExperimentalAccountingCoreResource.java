@@ -35,7 +35,7 @@ public class ExperimentalAccountingCoreResource {
     public ResponseEntity<?> schedule() {
         val userExtractionParameters = UserExtractionParameters.builder()
                 .from(LocalDate.now().minusYears(20))
-                .to(LocalDate.now())
+                .to(LocalDate.now().minusDays(1))
                 .organisationId("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
                 //.transactionTypes(List.of(TransactionType.CardCharge, TransactionType.FxRevaluation))
                 //.transactionNumbers(List.of("JOURNAL226", "JOURNAL227"))
@@ -69,6 +69,17 @@ public class ExperimentalAccountingCoreResource {
                 }, success -> {
                     return ResponseEntity.ok().build();
                 });
+    }
+
+    @RequestMapping(value = "/reconcile", method = POST, produces = "application/json")
+    public ResponseEntity<?> reconcileStart() {
+        val orgId = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94";
+        val fromDate = LocalDate.now().minusYears(20);
+        val toDate = LocalDate.now().minusDays(1);
+
+        accountingCoreService.scheduleReconilation(orgId, fromDate, toDate);
+
+        return ResponseEntity.ok().build();
     }
 
 }

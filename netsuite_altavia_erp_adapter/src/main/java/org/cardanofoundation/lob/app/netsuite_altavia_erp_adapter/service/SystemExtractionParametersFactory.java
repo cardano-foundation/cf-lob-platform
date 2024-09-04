@@ -39,8 +39,8 @@ public class SystemExtractionParametersFactory {
                 .organisationId(organisationId)
                 .accountPeriodFrom(currentAccountingPeriod.minusMonths(organisation.getAccountPeriodMonths()))
                 .accountPeriodTo(currentAccountingPeriod)
-                .build());
-
+                .build()
+        );
     }
 
 }

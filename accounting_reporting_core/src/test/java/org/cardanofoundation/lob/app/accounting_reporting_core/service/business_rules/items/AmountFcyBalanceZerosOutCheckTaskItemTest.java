@@ -15,7 +15,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.FCY_BALANCE_MUST_BE_ZERO;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.FCY_BALANCE_MUST_BE_ZERO;
 
 class AmountFcyBalanceZerosOutCheckTaskItemTest {
 

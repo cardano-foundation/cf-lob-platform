@@ -4,6 +4,7 @@ import com.bloxbean.cardano.client.metadata.MetadataMap;
 import com.bloxbean.cardano.client.metadata.cbor.CBORMetadataList;
 import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.*;
+import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -156,8 +157,8 @@ class MetadataSerialiserTest {
                     .findFirst().orElseThrow();
 
             assertThat(itemMap.get("id")).isEqualTo(item.getId());
-            assertThat(itemMap.get("amount")).isEqualTo(item.getAmountFcy().toEngineeringString());
-            assertThat(itemMap.get("fx_rate")).isEqualTo(item.getFxRate().toEngineeringString());
+            assertThat(itemMap.get("amount")).isEqualTo(BigDecimals.normaliseEngineeringString(item.getAmountFcy()));
+            assertThat(itemMap.get("fx_rate")).isEqualTo(BigDecimals.normaliseEngineeringString(item.getFxRate()));
             assertThat(itemMap.get("document")).isInstanceOf(MetadataMap.class);
         }
 
@@ -166,8 +167,8 @@ class MetadataSerialiserTest {
         val itemMap3 = assertContainsItem("item3", itemsList);
 
         assertThat(itemMap1.get("id")).isEqualTo("item1");
-        assertThat(itemMap1.get("amount")).isEqualTo(item1.getAmountFcy().toEngineeringString());
-        assertThat(itemMap1.get("fx_rate")).isEqualTo(item1.getFxRate().toEngineeringString());
+        assertThat(itemMap1.get("amount")).isEqualTo(BigDecimals.normaliseEngineeringString(item1.getAmountFcy()));
+        assertThat(itemMap1.get("fx_rate")).isEqualTo(BigDecimals.normaliseEngineeringString(item1.getFxRate()));
         assertThat(itemMap1.get("document")).isInstanceOf(MetadataMap.class);
         assertThat(itemMap1.get("project")).isInstanceOf(MetadataMap.class); // only for item 1
         assertThat(itemMap1.get("cost_center")).isInstanceOf(MetadataMap.class); // only for item 1
@@ -194,13 +195,13 @@ class MetadataSerialiserTest {
         assertThat(costCenterMap.get("name")).isEqualTo("Cost Center");
 
         assertThat(itemMap2.get("id")).isEqualTo(item2.getId());
-        assertThat(itemMap2.get("amount")).isEqualTo(item2.getAmountFcy().toEngineeringString());
-        assertThat(itemMap2.get("fx_rate")).isEqualTo(item2.getFxRate().toEngineeringString());
+        assertThat(itemMap2.get("amount")).isEqualTo(BigDecimals.normaliseEngineeringString(item2.getAmountFcy()));
+        assertThat(itemMap2.get("fx_rate")).isEqualTo(BigDecimals.normaliseEngineeringString(item2.getFxRate()));
         assertThat(itemMap2.get("document")).isInstanceOf(MetadataMap.class);
 
         assertThat(itemMap3.get("id")).isEqualTo(item3.getId());
-        assertThat(itemMap3.get("amount")).isEqualTo(item3.getAmountFcy().toEngineeringString());
-        assertThat(itemMap3.get("fx_rate")).isEqualTo(item3.getFxRate().toEngineeringString());
+        assertThat(itemMap3.get("amount")).isEqualTo(BigDecimals.normaliseEngineeringString(item3.getAmountFcy()));
+        assertThat(itemMap3.get("fx_rate")).isEqualTo(BigDecimals.normaliseEngineeringString(item3.getFxRate()));
         assertThat(itemMap3.get("document")).isInstanceOf(MetadataMap.class);
     }
 

@@ -1,12 +1,14 @@
 package org.cardanofoundation.lob.app.support.crypto;
 
+import lombok.experimental.UtilityClass;
 import org.bouncycastle.crypto.digests.MD5Digest;
 
 import java.util.HexFormat;
 
-public final class MD5Hashing {
+@UtilityClass
+public class MD5Hashing {
 
-    public static String md5(String input) {
+    public String md5(String input) {
         var inputArray = input.getBytes();
 
         MD5Digest md5Digest = new MD5Digest();

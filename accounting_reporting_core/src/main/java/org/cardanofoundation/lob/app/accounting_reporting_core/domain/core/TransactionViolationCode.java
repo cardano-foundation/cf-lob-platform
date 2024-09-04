@@ -1,6 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
-public enum ViolationCode {
+public enum TransactionViolationCode {
 
     DOCUMENT_MUST_BE_PRESENT,
     TX_CANNOT_BE_ALTERED,

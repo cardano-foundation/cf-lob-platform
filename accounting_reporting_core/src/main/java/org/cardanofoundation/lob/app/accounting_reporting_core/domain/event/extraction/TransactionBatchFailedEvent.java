@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,7 +27,7 @@ public class TransactionBatchFailedEvent {
     private String organisationId;
 
     @NotBlank
-    private String instanceId;
+    private String adapterInstanceId;
 
     @NotNull
     private FatalError error;

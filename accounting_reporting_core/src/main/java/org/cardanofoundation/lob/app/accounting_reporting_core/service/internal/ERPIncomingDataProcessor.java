@@ -4,14 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OrganisationTransactions;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.TransactionBatchStartedEvent;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationFinalisationEvent;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationStartedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.BusinessRulesPipelineProcessor;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.time.LocalDate;
 import java.util.Set;
 
 @Service
@@ -19,30 +22,37 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ERPIncomingDataProcessor {
 
+    private final TransactionReconcilationService transactionReconcilationService;
     private final BusinessRulesPipelineProcessor businessRulesPipelineProcessor;
     private final TransactionBatchService transactionBatchService;
     private final DbSynchronisationUseCaseService dbSynchronisationUseCaseService;
+    private final TransactionConverter transactionConverter;
 
     @Transactional
-    public void initiateIngestion(TransactionBatchStartedEvent ingestionStored) {
-        log.info("Processing ERPIngestionStored event, event: {}", ingestionStored);
+    public void initiateIngestion(String batchId,
+                                  String organisationId,
+                                  String adapterInstanceId,
+                                  String initiator,
+                                  UserExtractionParameters userExtractionParameters,
+                                  SystemExtractionParameters systemExtractionParameters) {
+        log.info("Processing ERPIngestionStored event.");
 
         transactionBatchService.createTransactionBatch(
-                ingestionStored.getBatchId(),
-                ingestionStored.getOrganisationId(),
-                ingestionStored.getInstanceId(),
-                ingestionStored.getInitiator(),
-                ingestionStored.getUserExtractionParameters(),
-                ingestionStored.getSystemExtractionParameters()
+                batchId,
+                organisationId,
+                adapterInstanceId,
+                initiator,
+                userExtractionParameters,
+                systemExtractionParameters
         );
 
-        log.info("Finished processing ERPIngestionStored event, event: {}", ingestionStored);
+        log.info("Finished processing ERPIngestionStored event, event.");
     }
 
     @Transactional
     public void continueIngestion(String organisationId,
                                   String batchId,
-                                  Optional<Integer> totalTransactionsCount,
+                                  int totalTransactionsCount,
                                   Set<TransactionEntity> transactions,
                                   ProcessorFlags processorFlags) {
         log.info("Processing ERPTransactionChunk event, batchId: {}, transactions: {}", batchId, transactions.size());
@@ -59,6 +69,58 @@ public class ERPIncomingDataProcessor {
         );
 
         log.info("PASSING transactions: {}", transactions.size());
+    }
+
+    @Transactional
+    public void initiateReconcilation(ReconcilationStartedEvent reconcilationStartedEvent) {
+        log.info("Processing ReconcilationStartedEvent, event: {}", reconcilationStartedEvent);
+
+        transactionReconcilationService.createReconcilation(
+                reconcilationStartedEvent.getReconciliationId(),
+                reconcilationStartedEvent.getOrganisationId(),
+                reconcilationStartedEvent.getAdapterInstanceId(),
+                reconcilationStartedEvent.getInitiator(),
+                reconcilationStartedEvent.getFrom(),
+                reconcilationStartedEvent.getTo()
+        );
+
+        log.info("Finished processing ReconcilationStartedEvent, event: {}", reconcilationStartedEvent);
+    }
+
+    @Transactional
+    public void continueReconcilation(String reconcilationId,
+                                      String organisationId,
+                                      LocalDate fromDate,
+                                      LocalDate toDate,
+                                      Set<TransactionEntity> chunkDetachedTxEntities) {
+        log.info("Processing ReconcilationChunkEvent, event, reconcilationId: {}", reconcilationId);
+
+        val organisationTransactions = new OrganisationTransactions(organisationId, chunkDetachedTxEntities);
+
+        // run or re-run business rules
+        businessRulesPipelineProcessor.run(organisationTransactions);
+
+        transactionReconcilationService.reconcileChunk(
+                reconcilationId,
+                organisationId,
+                fromDate,
+                toDate,
+                organisationTransactions.transactions()
+        );
+
+        log.info("Finished processing ReconcilationChunkEvent, event: {}", reconcilationId);
+    }
+
+    @Transactional
+    public void finialiseReconcilation(ReconcilationFinalisationEvent event) {
+        log.info("Processing finialiseReconcilation, event: {}", event);
+
+        val reconcilationId = event.getReconciliationId();
+        val organisationId = event.getOrganisationId();
+
+        transactionReconcilationService.wrapUpReconcilation(reconcilationId, organisationId);
+
+        log.info("Finished processing ReconcilationChunkEvent, event: {}", event);
     }
 
 }

@@ -5,6 +5,7 @@ import com.bloxbean.cardano.client.metadata.MetadataMap;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.*;
+import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -138,7 +139,7 @@ public class MetadataSerialiser {
     private static MetadataMap serialise(Vat vat) {
         val vatMetadataMap = MetadataBuilder.createMap();
         vatMetadataMap.put("cust_code", vat.getCustomerCode());
-        vatMetadataMap.put("rate", vat.getRate().toEngineeringString());
+        vatMetadataMap.put("rate", BigDecimals.normaliseEngineeringString(vat.getRate()));
 
         return vatMetadataMap;
     }
@@ -147,13 +148,13 @@ public class MetadataSerialiser {
         val metadataMap = MetadataBuilder.createMap();
 
         metadataMap.put("id", transactionItemEntity.getId());
-        metadataMap.put("amount", transactionItemEntity.getAmountFcy().toEngineeringString());
+        metadataMap.put("amount", BigDecimals.normaliseEngineeringString(transactionItemEntity.getAmountFcy()));
 
         transactionItemEntity.getAccountEvent().ifPresent(accountEvent -> metadataMap.put("event", serialise(accountEvent)));
         transactionItemEntity.getProject().ifPresent(project -> metadataMap.put("project", serialise(project)));
         transactionItemEntity.getCostCenter().ifPresent(costCenter -> metadataMap.put("cost_center", serialise(costCenter)));
 
-        metadataMap.put("fx_rate", transactionItemEntity.getFxRate().toEngineeringString());
+        metadataMap.put("fx_rate", BigDecimals.normaliseEngineeringString(transactionItemEntity.getFxRate()));
 
         metadataMap.put("document", serialise(transactionItemEntity.getDocument()));
 

@@ -13,7 +13,7 @@ import java.util.Map;
 @Builder(toBuilder = true)
 @Getter
 @EqualsAndHashCode
-public class BatchDetails {
+public class Details {
 
     private String code;
     private String subCode;

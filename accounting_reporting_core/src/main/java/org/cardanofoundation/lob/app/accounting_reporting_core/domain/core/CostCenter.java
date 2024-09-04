@@ -2,7 +2,8 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+import org.javers.core.metamodel.annotation.DiffInclude;
 
 import java.util.Optional;
 
@@ -14,7 +15,8 @@ import java.util.Optional;
 @NoArgsConstructor
 public class CostCenter {
 
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
+    
     private @Size(min = 1, max =  255) String customerCode;
 
     @Builder.Default
