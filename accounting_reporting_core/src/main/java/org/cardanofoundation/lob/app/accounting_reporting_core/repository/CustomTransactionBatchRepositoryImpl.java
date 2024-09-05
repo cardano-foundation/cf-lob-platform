@@ -86,7 +86,10 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
                 Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
                 subqueryErp.select(transactionEntityRoot.get("id"));
-                Predicate whereErp = builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP");
+                Predicate whereErp = builder.and(
+                        builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP"),
+                        builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
+                );
                 subqueryErp.where(whereErp);
                 orPredicates.add((builder.in(transactionEntityJoin.get("id")).value(subqueryErp)));
 
@@ -98,31 +101,40 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
 
                 Subquery<String> subqueryItemsIn = builder.createQuery(rootEntry.getClass()).subquery(String.class);
                 Root<TransactionEntity> transactionEntityRootItem = subqueryItemsIn.from(TransactionEntity.class);
-
                 subqueryItemsIn.select(transactionEntityRootItem.get("id"));
                 Predicate whereItem =
-                        transactionEntityJoin.get("items").get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.LOB).stream().map(Enum::ordinal).toList());
+                        builder.and(
+                                transactionEntityJoin.get("items").get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.LOB).stream().map(Enum::ordinal).toList()),
+                                builder.equal(transactionEntityRootItem.get("id"),transactionEntityJoin.get("id"))
+                        );
                 subqueryItemsIn.where(whereItem);
 
                 Subquery<String> subqueryItemsOut = builder.createQuery(rootEntry.getClass()).subquery(String.class);
                 Root<TransactionEntity> transactionEntityRootItem2 = subqueryItemsOut.from(TransactionEntity.class);
-
-
                 subqueryItemsOut.select(transactionEntityRootItem2.get("id"));
                 Predicate whereItem2 =
-                        transactionEntityJoin.get("items").get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList());
+                        builder.and(
+                                transactionEntityJoin.get("items").get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList()),
+                                builder.equal(transactionEntityRootItem2.get("id"),transactionEntityJoin.get("id"))
+                        );
                 subqueryItemsOut.where(whereItem2);
 
-                Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
+                Subquery<String> subqueryErp = builder.createQuery(transactionEntityJoin.getClass()).subquery(String.class);
                 Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
                 subqueryErp.select(transactionEntityRoot.get("id"));
-                Predicate whereErp = builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP");
+                Predicate whereErp = builder.and(
+                        builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP"),
+                        builder.equal(transactionEntityRoot.get("id"),transactionEntityJoin.get("id"))
+                        );
                 subqueryErp.where(whereErp);
 
-                Subquery<String> subqueryLob = builder.createQuery().subquery(String.class);
+                Subquery<String> subqueryLob = builder.createQuery(transactionEntityJoin.getClass()).subquery(String.class);
                 Root<TransactionEntity> transactionEntityRootLob = subqueryLob.from(TransactionEntity.class);
                 subqueryLob.select(transactionEntityRootLob.get("id"));
-                Predicate whereLob = builder.equal(transactionEntityRootLob.get("violations").get("source"), "LOB");
+                Predicate whereLob = builder.and(
+                        builder.equal(transactionEntityRootLob.get("violations").get("source"), "LOB"),
+                        builder.equal(transactionEntityRootLob.get("id"),transactionEntityJoin.get("id"))
+                );
                 subqueryLob.where(whereLob);
 
                 andPredicatesJoin.add(builder.not(builder.in(transactionEntityJoin.get("id")).value(subqueryErp)));
@@ -134,17 +146,105 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
             }
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.APPROVE))) {
-                orPredicates.add(builder.and(builder.equal(transactionEntityJoin.get("transactionApproved"), false), builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), false), builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED)));
+
+                Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
+                Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
+                subqueryErp.select(transactionEntityRoot.get("id"));
+                Predicate whereErp = builder.and(
+                        builder.or(
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP"),
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), "LOB")
+                        ),
+                        builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
+                );
+                subqueryErp.where(whereErp);
+
+                Subquery<String> subqueryReject = builder.createQuery(transactionEntityJoin.getClass()).subquery(String.class);
+                Root<TransactionItemEntity> transactionItemEntityRoot = subqueryReject.from(TransactionItemEntity.class);
+                subqueryReject.select(transactionItemEntityRoot.get("transaction").get("id"));
+                Predicate whereReject = builder.and(
+                        builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionCode")),
+                        builder.equal(transactionItemEntityRoot.get("transaction").get("id"), transactionEntityJoin.get("id"))
+                );
+                subqueryReject.where(whereReject)
+                ;
+
+                orPredicates.add(builder.and(
+                                builder.equal(transactionEntityJoin.get("transactionApproved"), false),
+                                builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), false),
+                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED),
+                                builder.in(transactionEntityJoin.get("id")).value(subqueryReject).not(),
+                                builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not()
+                        )
+                );
 
             }
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.PUBLISH))) {
-                orPredicates.add(builder.and(builder.equal(transactionEntityJoin.get("transactionApproved"), true), builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), false), builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED)));
+                Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
+                Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
+                subqueryErp.select(transactionEntityRoot.get("id"));
+                Predicate whereErp = builder.and(
+                        builder.or(
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP"),
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), "LOB")
+                        ),
+                        builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
+                );
+                subqueryErp.where(whereErp);
+
+                Subquery<String> subqueryReject = builder.createQuery(transactionEntityJoin.getClass()).subquery(String.class);
+                Root<TransactionItemEntity> transactionItemEntityRoot = subqueryReject.from(TransactionItemEntity.class);
+                subqueryReject.select(transactionItemEntityRoot.get("transaction").get("id"));
+                Predicate whereReject = builder.and(
+                        builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionCode")),
+                        builder.equal(transactionItemEntityRoot.get("transaction").get("id"), transactionEntityJoin.get("id"))
+                );
+                subqueryReject.where(whereReject)
+                ;
+
+                orPredicates.add(builder.and(
+                                builder.equal(transactionEntityJoin.get("transactionApproved"), true),
+                                builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), false),
+                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED),
+                                builder.in(transactionEntityJoin.get("id")).value(subqueryReject).not(),
+                                builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not()
+                        )
+                );
 
             }
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.PUBLISHED))) {
-                orPredicates.add(builder.and(builder.equal(transactionEntityJoin.get("transactionApproved"), true), builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), true), builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED)));
+                Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
+                Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
+                subqueryErp.select(transactionEntityRoot.get("id"));
+                Predicate whereErp = builder.and(
+                        builder.or(
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP"),
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), "LOB")
+                        ),
+                        builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
+                );
+                subqueryErp.where(whereErp);
+
+                Subquery<String> subqueryReject = builder.createQuery(transactionEntityJoin.getClass()).subquery(String.class);
+                Root<TransactionItemEntity> transactionItemEntityRoot = subqueryReject.from(TransactionItemEntity.class);
+                subqueryReject.select(transactionItemEntityRoot.get("transaction").get("id"));
+                Predicate whereReject = builder.and(
+                        builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionCode")),
+                        builder.equal(transactionItemEntityRoot.get("transaction").get("id"), transactionEntityJoin.get("id"))
+                );
+                subqueryReject.where(whereReject)
+                ;
+
+                orPredicates.add(builder.and(
+                                builder.equal(transactionEntityJoin.get("transactionApproved"), true),
+                                builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), true),
+                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED),
+                                builder.in(transactionEntityJoin.get("id")).value(subqueryReject).not(),
+                                builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not()
+                        )
+                );
 
             }
 
