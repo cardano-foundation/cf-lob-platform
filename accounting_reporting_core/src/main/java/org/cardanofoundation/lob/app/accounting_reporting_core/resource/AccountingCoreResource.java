@@ -172,7 +172,7 @@ public class AccountingCoreResource {
     }
 
     @Tag(name = "Transactions", description = "Transactions Publish / Dispatch Approval API")
-    @PostMapping(value = "/transactions/approve-dispatch", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/transactions/publish", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Approve to publish one or more transactions",
             responses = {
                     @ApiResponse(content = {
