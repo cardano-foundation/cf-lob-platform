@@ -97,25 +97,25 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.PENDING))) {
 
-                List<Predicate> andPredicatesJoin = new ArrayList<>();
 
-                Subquery<String> subqueryItemsIn = builder.createQuery(rootEntry.getClass()).subquery(String.class);
-                Root<TransactionEntity> transactionEntityRootItem = subqueryItemsIn.from(TransactionEntity.class);
-                subqueryItemsIn.select(transactionEntityRootItem.get("id"));
+                Subquery<String> subqueryItemsIn = builder.createQuery().subquery(String.class);
+                Root<TransactionItemEntity> transactionEntityRootItem = subqueryItemsIn.from(TransactionItemEntity.class);
+
+                subqueryItemsIn.select(transactionEntityRootItem.get("transaction").get("id"));
                 Predicate whereItem =
                         builder.and(
-                                transactionEntityJoin.get("items").get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.LOB).stream().map(Enum::ordinal).toList()),
-                                builder.equal(transactionEntityRootItem.get("id"),transactionEntityJoin.get("id"))
+                                transactionEntityRootItem.get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.LOB).stream().map(Enum::ordinal).toList()),
+                                builder.equal(transactionEntityRootItem.get("transaction").get("id"), transactionEntityJoin.get("id"))
                         );
                 subqueryItemsIn.where(whereItem);
 
-                Subquery<String> subqueryItemsOut = builder.createQuery(rootEntry.getClass()).subquery(String.class);
-                Root<TransactionEntity> transactionEntityRootItem2 = subqueryItemsOut.from(TransactionEntity.class);
-                subqueryItemsOut.select(transactionEntityRootItem2.get("id"));
+                Subquery<String> subqueryItemsOut = builder.createQuery().subquery(String.class);
+                Root<TransactionItemEntity> transactionEntityRootItem2 = subqueryItemsOut.from(TransactionItemEntity.class);
+                subqueryItemsOut.select(transactionEntityRootItem2.get("transaction").get("id"));
                 Predicate whereItem2 =
                         builder.and(
-                                transactionEntityJoin.get("items").get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList()),
-                                builder.equal(transactionEntityRootItem2.get("id"),transactionEntityJoin.get("id"))
+                                transactionEntityRootItem2.get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList()),
+                                builder.equal(transactionEntityRootItem2.get("transaction").get("id"), transactionEntityJoin.get("id"))
                         );
                 subqueryItemsOut.where(whereItem2);
 
@@ -124,8 +124,8 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 subqueryErp.select(transactionEntityRoot.get("id"));
                 Predicate whereErp = builder.and(
                         builder.equal(transactionEntityRoot.get("violations").get("source"), "ERP"),
-                        builder.equal(transactionEntityRoot.get("id"),transactionEntityJoin.get("id"))
-                        );
+                        builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
+                );
                 subqueryErp.where(whereErp);
 
                 Subquery<String> subqueryLob = builder.createQuery(transactionEntityJoin.getClass()).subquery(String.class);
@@ -133,16 +133,20 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 subqueryLob.select(transactionEntityRootLob.get("id"));
                 Predicate whereLob = builder.and(
                         builder.equal(transactionEntityRootLob.get("violations").get("source"), "LOB"),
-                        builder.equal(transactionEntityRootLob.get("id"),transactionEntityJoin.get("id"))
+                        builder.equal(transactionEntityRootLob.get("id"), transactionEntityJoin.get("id"))
                 );
                 subqueryLob.where(whereLob);
 
-                andPredicatesJoin.add(builder.not(builder.in(transactionEntityJoin.get("id")).value(subqueryErp)));
-                andPredicatesJoin.add((builder.in(transactionEntityJoin.get("id")).value(subqueryLob)));
 
-                orPredicates.add(builder.and(builder.in(transactionEntityJoin.get("id")).value(subqueryItemsOut).not(), builder.in(transactionEntityJoin.get("id")).value(subqueryItemsIn)));
+                orPredicates.add(builder.and(
+                        builder.in(transactionEntityJoin.get("id")).value(subqueryItemsOut).not(),
+                        builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not(),
+                        builder.or(
+                                builder.in(transactionEntityJoin.get("id")).value(subqueryItemsIn),
+                                builder.in(transactionEntityJoin.get("id")).value(subqueryLob)
+                        )
+                ));
 
-                orPredicates.add(builder.and(andPredicatesJoin.toArray(new Predicate[0])));
             }
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.APPROVE))) {
