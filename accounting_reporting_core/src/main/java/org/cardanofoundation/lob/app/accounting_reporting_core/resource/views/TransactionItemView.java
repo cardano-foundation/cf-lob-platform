@@ -7,9 +7,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Count
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -66,7 +63,7 @@ public class TransactionItemView {
 
     private String counterpartyName;
 
-    private RejectionCode rejectionCode;
+    private RejectionReason rejectionReason;
 
 
 }

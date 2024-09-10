@@ -13,9 +13,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -82,7 +79,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.INVALID))) {
 
-                orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionCode").as(Integer.class).in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList()));
+                orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionReason").as(Integer.class).in(RejectionReason.getSourceBasedRejectionReasons(Source.ERP).stream().map(Enum::ordinal).toList()));
                 Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
                 Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
                 subqueryErp.select(transactionEntityRoot.get("id"));
@@ -104,7 +101,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 subqueryItemsIn.select(transactionEntityRootItem.get("transaction").get("id"));
                 Predicate whereItem =
                         builder.and(
-                                transactionEntityRootItem.get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.LOB).stream().map(Enum::ordinal).toList()),
+                                transactionEntityRootItem.get("rejection").get("rejectionReason").in(RejectionReason.getSourceBasedRejectionReasons(Source.LOB).stream().map(Enum::ordinal).toList()),
                                 builder.equal(transactionEntityRootItem.get("transaction").get("id"), transactionEntityJoin.get("id"))
                         );
                 subqueryItemsIn.where(whereItem);
@@ -114,7 +111,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 subqueryItemsOut.select(transactionEntityRootItem2.get("transaction").get("id"));
                 Predicate whereItem2 =
                         builder.and(
-                                transactionEntityRootItem2.get("rejection").get("rejectionCode").in(RejectionCode.getSourceBasedRejectionCodes(Source.ERP).stream().map(Enum::ordinal).toList()),
+                                transactionEntityRootItem2.get("rejection").get("rejectionReason").in(RejectionReason.getSourceBasedRejectionReasons(Source.ERP).stream().map(Enum::ordinal).toList()),
                                 builder.equal(transactionEntityRootItem2.get("transaction").get("id"), transactionEntityJoin.get("id"))
                         );
                 subqueryItemsOut.where(whereItem2);
@@ -143,7 +140,8 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                         builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not(),
                         builder.or(
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryItemsIn),
-                                builder.in(transactionEntityJoin.get("id")).value(subqueryLob)
+                                builder.in(transactionEntityJoin.get("id")).value(subqueryLob),
+                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.FAILED)
                         )
                 ));
 
@@ -167,7 +165,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 Root<TransactionItemEntity> transactionItemEntityRoot = subqueryReject.from(TransactionItemEntity.class);
                 subqueryReject.select(transactionItemEntityRoot.get("transaction").get("id"));
                 Predicate whereReject = builder.and(
-                        builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionCode")),
+                        builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionReason")),
                         builder.equal(transactionItemEntityRoot.get("transaction").get("id"), transactionEntityJoin.get("id"))
                 );
                 subqueryReject.where(whereReject)
@@ -201,7 +199,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 Root<TransactionItemEntity> transactionItemEntityRoot = subqueryReject.from(TransactionItemEntity.class);
                 subqueryReject.select(transactionItemEntityRoot.get("transaction").get("id"));
                 Predicate whereReject = builder.and(
-                        builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionCode")),
+                        builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionReason")),
                         builder.equal(transactionItemEntityRoot.get("transaction").get("id"), transactionEntityJoin.get("id"))
                 );
                 subqueryReject.where(whereReject)
@@ -235,7 +233,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 Root<TransactionItemEntity> transactionItemEntityRoot = subqueryReject.from(TransactionItemEntity.class);
                 subqueryReject.select(transactionItemEntityRoot.get("transaction").get("id"));
                 Predicate whereReject = builder.and(
-                        builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionCode")),
+                        builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionReason")),
                         builder.equal(transactionItemEntityRoot.get("transaction").get("id"), transactionEntityJoin.get("id"))
                 );
                 subqueryReject.where(whereReject)

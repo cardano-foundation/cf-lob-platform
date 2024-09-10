@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCoreResourceService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
@@ -98,15 +98,15 @@ public class AccountingCoreResource {
     }
 
     @Tag(name = "Transactions", description = "Transactions API")
-    @Operation(description = "Rejection types", responses = {
+    @Operation(description = "Rejection reasons", responses = {
             @ApiResponse(content =
-                    {@Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = RejectionCode.class)))}
+                    {@Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = RejectionReason.class)))}
             )
     })
-    @GetMapping(value = "/rejection-types", produces = APPLICATION_JSON_VALUE, name = "Rejection types")
-    public ResponseEntity<?> rejectionTypes() {
+    @GetMapping(value = "/rejection-reasons", produces = APPLICATION_JSON_VALUE, name = "Rejection reasons")
+    public ResponseEntity<?> rejectionReasons() {
 
-        return ResponseEntity.ok().body(RejectionCode.values());
+        return ResponseEntity.ok().body(RejectionReason.values());
     }
 
     @Tag(name = "Transactions", description = "Transactions API")
@@ -305,6 +305,19 @@ public class AccountingCoreResource {
         return ResponseEntity
                 .ok()
                 .body(txBatchM.orElseThrow());
+    }
+
+    @Deprecated
+    @Tag(name = "Transactions", description = "Transactions API")
+    @Operation(description = "Rejection types", responses = {
+            @ApiResponse(content =
+                    {@Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = RejectionReason.class)))}
+            )
+    })
+    @GetMapping(value = "/rejection-types", produces = APPLICATION_JSON_VALUE, name = "Rejection types")
+    public ResponseEntity<?> rejectionTypes() {
+
+        return ResponseEntity.ok().body(RejectionReason.values());
     }
 
 }

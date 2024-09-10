@@ -117,7 +117,7 @@ CREATE TABLE accounting_core_transaction_item (
 
    fx_rate DECIMAL NOT NULL,
 
-   rejection_code SMALLINT,
+   rejection_reason SMALLINT,
 
    account_code_debit VARCHAR(255),
    account_ref_code_debit VARCHAR(255),

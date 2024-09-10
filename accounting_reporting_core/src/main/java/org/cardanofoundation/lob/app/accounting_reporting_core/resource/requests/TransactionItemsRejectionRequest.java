@@ -1,5 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -7,8 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason;
 
 import java.util.Set;
 
@@ -27,8 +27,8 @@ public class TransactionItemsRejectionRequest {
     private String transactionId;
 
     @ArraySchema(arraySchema = @Schema(example = "[ " +
-            "{\"txItemId\": \"1a8fd26dc5bcc99e8b5cc16545c4ce383aabf6862652015c0e45ff7dbfa69263\",\"rejectionCode\":\"INCORRECT_VAT_CODE\"}," +
-            "{\"txItemId\": \"f02873e91884eb28160b5d56a7fe1cd2ef3e079ab25875f39779ad3fca36c063\",\"rejectionCode\":\"REVIEW_PARENT_PROJECT_CODE\"}" +
+            "{\"txItemId\": \"1a8fd26dc5bcc99e8b5cc16545c4ce383aabf6862652015c0e45ff7dbfa69263\",\"rejectionReason\":\"INCORRECT_VAT_CODE\"}," +
+            "{\"txItemId\": \"f02873e91884eb28160b5d56a7fe1cd2ef3e079ab25875f39779ad3fca36c063\",\"rejectionReason\":\"REVIEW_PARENT_PROJECT_CODE\"}" +
             "]"))
     @NotNull
     @Size(min = 1)
@@ -48,7 +48,12 @@ public class TransactionItemsRejectionRequest {
 
         @Schema(example = "INCORRECT_VAT_CODE")
         @NotNull
-        private RejectionCode rejectionCode;
+        private RejectionReason rejectionReason;
+
+        public void setRejectionCode(RejectionReason rejectionCode) {
+            rejectionReason = rejectionCode;
+
+        }
 
     }
 

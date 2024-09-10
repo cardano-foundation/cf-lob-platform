@@ -178,7 +178,7 @@ public class TransactionRepositoryGateway {
 
         for (val txItemRejection : transactionItemsRejections) {
             val txItemId = txItemRejection.getTxItemId();
-            val rejectionCode = txItemRejection.getRejectionCode();
+            val rejectionReason = txItemRejection.getRejectionReason();
 
             val txItemM = transactionItemRepository.findByTxIdAndItemId(tx.getId(), txItemId);
 
@@ -193,7 +193,7 @@ public class TransactionRepositoryGateway {
                 continue;
             }
 
-            txItem.setRejection(Optional.of(new Rejection(rejectionCode)));
+            txItem.setRejection(Optional.of(new Rejection(rejectionReason)));
 
             val savedTxItem = transactionItemRepository.save(txItem);
 

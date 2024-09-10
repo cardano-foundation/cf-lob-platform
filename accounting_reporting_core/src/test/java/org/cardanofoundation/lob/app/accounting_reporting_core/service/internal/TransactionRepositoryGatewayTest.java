@@ -4,7 +4,7 @@ import io.vavr.control.Either;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rejection;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
@@ -26,7 +26,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.OK;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionCode.INCORRECT_AMOUNT;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason.INCORRECT_AMOUNT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -185,7 +185,7 @@ class TransactionRepositoryGatewayTest {
         Either<IdentifiableProblem, TransactionItemEntity> result = results.get(0);
 
         assertThat(result.isRight()).isTrue();
-        assertThat(result.get().getRejection().orElseThrow().getRejectionCode()).isEqualTo(INCORRECT_AMOUNT);
+        assertThat(result.get().getRejection().orElseThrow().getRejectionReason()).isEqualTo(INCORRECT_AMOUNT);
 
         verify(transactionItemRepository, times(1)).save(transactionItemEntity);
     }
@@ -449,7 +449,7 @@ class TransactionRepositoryGatewayTest {
         transaction.setTransactionApproved(true);
 
         TransactionItemEntity itemWithRejection = new TransactionItemEntity();
-        itemWithRejection.setRejection(Optional.of(new Rejection(RejectionCode.INCORRECT_VAT_CODE)));
+        itemWithRejection.setRejection(Optional.of(new Rejection(RejectionReason.INCORRECT_VAT_CODE)));
         itemWithRejection.setTransaction(transaction);
 
         transaction.setItems(Set.of(itemWithRejection));

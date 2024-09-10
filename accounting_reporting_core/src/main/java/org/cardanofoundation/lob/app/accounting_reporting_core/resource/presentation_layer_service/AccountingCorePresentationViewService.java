@@ -4,8 +4,6 @@ import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
@@ -15,10 +13,8 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zalando.problem.Problem;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,11 +25,8 @@ import static java.math.BigDecimal.ZERO;
 import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.*;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.transactionNotFoundResponse;
-import static org.zalando.problem.Status.NOT_FOUND;
 
 @Service
 @org.jmolecules.ddd.annotation.Service
@@ -254,7 +247,7 @@ public class AccountingCorePresentationViewService {
                 return INVALID;
             }
             if (transactionEntity.hasAnyRejection()) {
-                if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionCode().getSource() == ERP))) {
+                if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource() == ERP))) {
                     return INVALID;
                 }
                 return PENDING;
@@ -263,7 +256,7 @@ public class AccountingCorePresentationViewService {
         }
 
         if (transactionEntity.hasAnyRejection()) {
-            if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionCode().getSource() == ERP))) {
+            if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource() == ERP))) {
                 return INVALID;
             }
             return PENDING;
@@ -316,7 +309,7 @@ public class AccountingCorePresentationViewService {
                     item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getCustomerCode)).orElse(""),
                     item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).orElse(VENDOR),
                     item.getDocument().flatMap(document -> document.getCounterparty().flatMap(Counterparty::getName)).orElse(""),
-                    item.getRejection().map(Rejection::getRejectionCode).orElse(null)
+                    item.getRejection().map(Rejection::getRejectionReason).orElse(null)
             );
         }).collect(toSet());
     }
