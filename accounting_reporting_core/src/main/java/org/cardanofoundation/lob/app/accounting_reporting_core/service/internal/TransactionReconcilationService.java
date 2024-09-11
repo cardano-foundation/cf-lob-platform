@@ -7,6 +7,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationCreatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;
+import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.javers.core.Javers;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -37,18 +38,14 @@ public class TransactionReconcilationService {
     @Transactional
     public void createReconcilation(String reconcilationId,
                                     String organisationId,
-                                    String adapterInstanceId,
-                                    String initiator,
                                     LocalDate from,
                                     LocalDate to
     ) {
         log.info("Creating transaction reconcilation entity," +
                         " reconcilationId: {}," +
-                        " initiator: {}," +
-                        " adapterInstanceId: {}," +
                         " from: {}," +
                         " to: {}",
-                reconcilationId, initiator, adapterInstanceId, from, to
+                reconcilationId, from, to
         );
 
         val reconcilationEntity = new ReconcilationEntity();
@@ -65,8 +62,8 @@ public class TransactionReconcilationService {
 
         applicationEventPublisher.publishEvent(ReconcilationCreatedEvent.builder()
                 .reconciliationId(reconcilationId)
+                .metadata(EventMetadata.create(ReconcilationCreatedEvent.VERSION))
                 .organisationId(organisationId)
-                .adapterInstanceId(adapterInstanceId)
                 .from(from)
                 .to(to)
                 .build()

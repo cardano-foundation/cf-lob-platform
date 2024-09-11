@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationEventPublisher;
 
 import javax.annotation.Nullable;
+import java.time.Clock;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -40,7 +41,10 @@ class LedgerUpdatedEventPublisherTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ledgerUpdatedEventPublisher = new LedgerUpdatedEventPublisher(applicationEventPublisher, blockchainPublishStatusMapper);
+        ledgerUpdatedEventPublisher = new LedgerUpdatedEventPublisher(
+                applicationEventPublisher,
+                blockchainPublishStatusMapper
+        );
     }
 
     @Test

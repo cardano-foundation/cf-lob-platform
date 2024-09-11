@@ -18,6 +18,7 @@ public class CardanoClientLibConfig {
     @Bean
     public BackendService backendService(@Value("${lob.blockfrost.url}") String blockfrostUrl,
                                          @Value("${lob.blockfrost.api.key}") String blockfrostApiKey) {
+
         return new BFBackendService(blockfrostUrl, blockfrostApiKey);
     }
 

@@ -7,6 +7,7 @@
         "support::calc",
         "support::problem_support",
         "support::crypto",
+        "support::modulith",
         "support::collections",
         "support::reactive"
 })

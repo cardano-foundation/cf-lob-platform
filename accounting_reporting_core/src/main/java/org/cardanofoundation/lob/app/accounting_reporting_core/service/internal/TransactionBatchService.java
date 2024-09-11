@@ -14,6 +14,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extr
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchAssocRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
+import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.cardanofoundation.lob.app.support.reactive.DebouncerManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -57,11 +58,9 @@ public class TransactionBatchService {
     @Transactional
     public void createTransactionBatch(String batchId,
                                        String organisationId,
-                                       String adapterInstanceId,
-                                       String initiator,
                                        UserExtractionParameters userExtractionParameters,
                                        SystemExtractionParameters systemExtractionParameters) {
-        log.info("Creating transaction batch, batchId: {}, initiator: {}, adapterInstanceId: {}, filteringParameters: {}", batchId, initiator, adapterInstanceId, userExtractionParameters);
+        log.info("Creating transaction batch, batchId: {}, filteringParameters: {}", batchId, userExtractionParameters);
 
         val filteringParameters = transactionConverter.convertToDbDetached(systemExtractionParameters, userExtractionParameters);
 
@@ -70,17 +69,17 @@ public class TransactionBatchService {
         transactionBatchEntity.setTransactions(Set.of());
         transactionBatchEntity.setFilteringParameters(filteringParameters);
         transactionBatchEntity.setStatus(CREATED);
-        transactionBatchEntity.setCreatedBy(initiator);
-        transactionBatchEntity.setUpdatedBy(initiator);
+        transactionBatchEntity.setCreatedBy("system");
+        transactionBatchEntity.setUpdatedBy("system");
 
         transactionBatchRepository.save(transactionBatchEntity);
 
         log.info("Transaction batch created, batchId: {}", batchId);
 
         applicationEventPublisher.publishEvent(TransactionBatchCreatedEvent.builder()
+                .metadata(EventMetadata.create(TransactionBatchCreatedEvent.VERSION))
                 .batchId(batchId)
                 .organisationId(organisationId)
-                .adapterInstanceId(adapterInstanceId)
                 .userExtractionParameters(userExtractionParameters)
                 .systemExtractionParameters(systemExtractionParameters)
                 .build()

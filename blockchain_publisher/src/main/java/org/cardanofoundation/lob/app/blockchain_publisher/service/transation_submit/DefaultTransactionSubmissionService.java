@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeoutException;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -28,8 +28,8 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
     @Value("${lob.transaction.submission.sleep.seconds:5}")
     private int sleepTimeSeconds;
 
-    @Value("${lob.transaction.submission.timeout.in.minutes:5}")
-    private int timeoutInMinutes;
+    @Value("${lob.transaction.submission.timeout.in.seconds:300}") // 5 minutes
+    private int timeoutInSeconds;
 
     @Override
     public String submitTransaction(byte[] txData) {
@@ -39,13 +39,12 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
     }
 
     @Override
-    public L1Submission submitTransactionWithConfirmation(byte[] txData) throws TimeoutException, InterruptedException, ApiException {
+    public L1Submission submitTransactionWithPossibleConfirmation(byte[] txData) throws InterruptedException, ApiException {
         log.info("Submitting transaction with confirmation.., txId:{}", TransactionUtil.getTxHash(txData));
         val txHash = submitTransaction(txData);
 
         val start = LocalDateTime.now(clock);
-
-        val future = start.plusMinutes(timeoutInMinutes);
+        val future = start.plusSeconds(timeoutInSeconds);
 
         while (LocalDateTime.now(clock).isBefore(future)) {
             val transactionDetailsR = backendService.getTransactionService().getTransaction(txHash);
@@ -57,10 +56,12 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
             }
 
             val transactionContent = transactionDetailsR.getValue();
+            val absoluteSlot = transactionContent.getSlot();
 
-            return new L1Submission(transactionContent.getHash(), transactionContent.getSlot());
+            return new L1Submission(txHash, Optional.of(absoluteSlot), true);
         }
 
-        throw new TimeoutException(STR."Transaction with txHash: \{txHash} not confirmed within timeout!");
+        return new L1Submission(txHash, Optional.empty(), false);
     }
+
 }

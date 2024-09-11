@@ -9,6 +9,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extr
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ScheduledReconcilationEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
+import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,11 +35,10 @@ public class AccountingCoreService {
     public void scheduleIngestion(UserExtractionParameters userExtractionParameters) {
         log.info("scheduleIngestion, parameters: {}", userExtractionParameters);
 
-        val event = new ScheduledIngestionEvent(
-                userExtractionParameters.getOrganisationId(),
-                "system",
-                userExtractionParameters
-        );
+        val event = ScheduledIngestionEvent.builder().metadata(EventMetadata.create(ScheduledIngestionEvent.VERSION))
+                .organisationId(userExtractionParameters.getOrganisationId())
+                .userExtractionParameters(userExtractionParameters)
+                .build();
 
         applicationEventPublisher.publishEvent(event);
     }
@@ -47,12 +47,12 @@ public class AccountingCoreService {
     public void scheduleReconilation(String organisationId, LocalDate from, LocalDate to) {
         log.info("scheduleReconilation, organisationId: {}, from: {}, to: {}", organisationId, from, to);
 
-        val event = new ScheduledReconcilationEvent(
-                organisationId,
-                "system",
-                from,
-                to
-        );
+        val event = ScheduledReconcilationEvent.builder()
+                .organisationId(organisationId)
+                .from(from)
+                .to(to)
+                .metadata(EventMetadata.create(ScheduledReconcilationEvent.VERSION))
+                .build();
 
         applicationEventPublisher.publishEvent(event);
     }

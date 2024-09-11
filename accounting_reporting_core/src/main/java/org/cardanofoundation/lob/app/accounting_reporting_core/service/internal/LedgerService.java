@@ -9,12 +9,14 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledg
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.cardanofoundation.lob.app.support.collections.Partitions;
+import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -98,7 +100,11 @@ public class LedgerService {
 
             log.info("dispatchTransactionToBlockchainPublisher, partitionSize: {}", txs.size());
 
-            applicationEventPublisher.publishEvent(LedgerUpdateCommand.create(organisationId, txs));
+            applicationEventPublisher.publishEvent(LedgerUpdateCommand.create(
+                    EventMetadata.create(LedgerUpdateCommand.VERSION),
+                    organisationId,
+                    txs)
+            );
         }
     }
 

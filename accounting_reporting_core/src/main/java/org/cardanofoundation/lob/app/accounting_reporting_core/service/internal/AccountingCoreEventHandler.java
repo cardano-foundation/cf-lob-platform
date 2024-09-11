@@ -64,8 +64,6 @@ public class AccountingCoreEventHandler {
         erpIncomingDataProcessor.initiateIngestion(
                 event.getBatchId(),
                 event.getOrganisationId(),
-                event.getAdapterInstanceId(),
-                event.getInitiator(),
                 event.getUserExtractionParameters(),
                 event.getSystemExtractionParameters()
         );

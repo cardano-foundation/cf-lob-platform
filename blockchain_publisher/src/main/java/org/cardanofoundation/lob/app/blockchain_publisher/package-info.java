@@ -6,6 +6,7 @@
                         "accounting_reporting_core::domain_event",
                         "organisation", "organisation::domain_core", "organisation::domain_entity",
                         "support::audit",
+                        "support::calc",
                         "support::collections",
                 }
 )

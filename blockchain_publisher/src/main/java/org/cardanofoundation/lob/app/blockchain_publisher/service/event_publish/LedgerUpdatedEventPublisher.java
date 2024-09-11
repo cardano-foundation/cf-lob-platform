@@ -9,11 +9,13 @@ import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.L1Submis
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublishStatusMapper;
 import org.cardanofoundation.lob.app.support.collections.Partitions;
+import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,7 +50,13 @@ public class LedgerUpdatedEventPublisher {
 
             log.info("Sending ledger updated event for organisation:{}, statuses:{}", organisationId, txStatuses);
 
-            applicationEventPublisher.publishEvent(new LedgerUpdatedEvent(organisationId, txStatuses));
+            val event = LedgerUpdatedEvent.builder()
+                    .metadata(EventMetadata.create(LedgerUpdatedEvent.VERSION))
+                    .organisationId(organisationId)
+                    .statusUpdates(txStatuses)
+                    .build();
+
+            applicationEventPublisher.publishEvent(event);
         }
     }
 
