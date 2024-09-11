@@ -21,13 +21,6 @@ public class TransactionConverter {
 
     private final BlockchainPublishStatusMapper blockchainPublishStatusMapper;
 
-    public Set<TransactionEntity> convertToDbDetached(Set<Transaction> transactions) {
-        return transactions
-                .stream()
-                .map(this::convertToDbDetached)
-                .collect(toSet());
-    }
-
     public TransactionEntity convertToDbDetached(Transaction tx) {
         val transactionEntity = new TransactionEntity();
         transactionEntity.setId(tx.getId());

@@ -78,24 +78,6 @@ class TransactionEntityRepositoryGatewayTest {
     }
 
     @Test
-    void storeOnlyNewTransactions_shouldStoreNewTransactions() {
-        TransactionEntity newTransaction = new TransactionEntity();
-        newTransaction.setId("tx1");
-
-        TransactionEntity existingTransaction = new TransactionEntity();
-        existingTransaction.setId("tx2");
-
-        Set<TransactionEntity> transactions = Set.of(newTransaction, existingTransaction);
-
-        when(transactionEntityRepository.findAllById(any())).thenReturn(List.of(existingTransaction));
-        when(transactionEntityRepository.saveAll(any())).thenReturn(List.of(newTransaction));
-
-        Set<TransactionEntity> actualTransactions = transactionEntityRepositoryGateway.storeOnlyNewTransactions(transactions);
-
-        assertEquals(transactions, actualTransactions.stream().collect(Collectors.toSet()));
-    }
-
-    @Test
     void storeTransaction_shouldSaveTransactionEntity() {
         TransactionEntity transactionEntity = new TransactionEntity();
 
