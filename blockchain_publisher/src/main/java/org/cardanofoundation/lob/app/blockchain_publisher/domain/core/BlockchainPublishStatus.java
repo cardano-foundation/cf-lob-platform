@@ -25,7 +25,7 @@ public enum BlockchainPublishStatus {
     }
 
     public static Set<BlockchainPublishStatus> notFinalisedButVisibleOnChain() {
-        return Set.of(VISIBLE_ON_CHAIN, COMPLETED);
+        return Set.of(SUBMITTED, VISIBLE_ON_CHAIN, COMPLETED);
     }
 
     public static Set<BlockchainPublishStatus> onChainAndNotFinalised() {

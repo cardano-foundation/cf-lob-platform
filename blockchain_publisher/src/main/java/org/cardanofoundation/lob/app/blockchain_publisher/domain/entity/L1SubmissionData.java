@@ -65,6 +65,18 @@ public class L1SubmissionData {
         this.publishStatus = publishStatus.orElse(null);
     }
 
+    public void setAbsoluteSlot(Optional<Long> absoluteSlot) {
+        this.absoluteSlot = absoluteSlot.orElse(null);
+    }
+
+    public void setCreationSlot(Optional<Long> creationSlot) {
+        this.creationSlot = creationSlot.orElse(null);
+    }
+
+    public void setTransactionHash(Optional<String> transactionHash) {
+        this.transactionHash = transactionHash.orElse(null);
+    }
+
     public boolean isFinalized() {
         return finalityScore != null && finalityScore.equals(CardanoFinalityScore.FINAL);
     }

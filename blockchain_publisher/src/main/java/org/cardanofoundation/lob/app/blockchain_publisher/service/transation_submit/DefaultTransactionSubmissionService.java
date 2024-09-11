@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service.transation_su
 
 import com.bloxbean.cardano.client.api.exception.ApiException;
 import com.bloxbean.cardano.client.backend.api.BackendService;
+import com.bloxbean.cardano.client.transaction.util.TransactionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -32,11 +33,14 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
 
     @Override
     public String submitTransaction(byte[] txData) {
+        log.info("Submitting transaction without confirmation.., txId:{}", TransactionUtil.getTxHash(txData));
+
         return transactionSubmissionService.submitTransaction(txData);
     }
 
     @Override
     public L1Submission submitTransactionWithConfirmation(byte[] txData) throws TimeoutException, InterruptedException, ApiException {
+        log.info("Submitting transaction with confirmation.., txId:{}", TransactionUtil.getTxHash(txData));
         val txHash = submitTransaction(txData);
 
         val start = LocalDateTime.now(clock);

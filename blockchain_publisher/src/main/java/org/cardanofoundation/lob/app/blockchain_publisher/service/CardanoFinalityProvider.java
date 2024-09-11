@@ -42,17 +42,17 @@ public class CardanoFinalityProvider {
     }
 
     private CardanoFinalityScore getDevnetFinalityScore(long slots) {
-        if (slots >= 12 * slotLengthProvider.getSlotLength(network)) {
+        if (slots >= 300 * slotLengthProvider.getSlotLength(network)) { // 5 minutes finality
             return CardanoFinalityScore.FINAL;
-        } else if (slots >= 11 * slotLengthProvider.getSlotLength(network)) {
+        } else if (slots >= 200 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.ULTRA_HIGH;
-        } else if (slots >= 10 * slotLengthProvider.getSlotLength(network)) {
+        } else if (slots >= 120 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.VERY_HIGH;
-        } else if (slots >= 5 * slotLengthProvider.getSlotLength(network)) {
+        } else if (slots >= 80 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.HIGH;
-        } else if (slots >= 2 * slotLengthProvider.getSlotLength(network)) {
+        } else if (slots >= 50 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.MEDIUM;
-        } else if (slots >= 1 * slotLengthProvider.getSlotLength(network)) {
+        } else if (slots >= 20 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.LOW;
         }
 

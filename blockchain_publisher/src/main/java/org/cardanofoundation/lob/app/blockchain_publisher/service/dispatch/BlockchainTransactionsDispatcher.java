@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainTransactions;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.L1Submission;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.L1SubmissionData;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
@@ -21,8 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus.VISIBLE_ON_CHAIN;
-import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore.VERY_LOW;
+import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus.SUBMITTED;
 
 @Service
 @Slf4j
@@ -114,24 +112,25 @@ public class BlockchainTransactionsDispatcher {
     @Transactional
     private void sendTransactionOnChainAndUpdateDb(BlockchainTransactions blockchainTransactions) throws InterruptedException, TimeoutException, ApiException {
         val txData = blockchainTransactions.serialisedTxData();
-        val l1SubmissionData = transactionSubmissionService.submitTransactionWithConfirmation(txData);
+        val l1SubmissionData = transactionSubmissionService.submitTransaction(txData);
+        val organisationId = blockchainTransactions.organisationId();
+        val allTxs = blockchainTransactions.submittedTransactions();
 
         updateTransactionStatuses(l1SubmissionData, blockchainTransactions);
-        ledgerUpdatedEventPublisher.sendLedgerUpdatedEvents(blockchainTransactions.organisationId(), blockchainTransactions.submittedTransactions());
+
+        ledgerUpdatedEventPublisher.sendLedgerUpdatedEvents(organisationId, allTxs);
 
         log.info("Blockchain transaction submitted, l1SubmissionData:{}", l1SubmissionData);
     }
 
     @Transactional
-    private void updateTransactionStatuses(L1Submission l1Submission,
+    private void updateTransactionStatuses(String txHash,
                                            BlockchainTransactions blockchainTransactions) {
         for (val txEntity : blockchainTransactions.submittedTransactions()) {
             txEntity.setL1SubmissionData(Optional.of(L1SubmissionData.builder()
-                    .transactionHash(l1Submission.txHash())
-                    .absoluteSlot(l1Submission.absoluteSlot())
+                    .transactionHash(txHash)
                     .creationSlot(blockchainTransactions.creationSlot())
-                    .finalityScore(VERY_LOW)
-                    .publishStatus(VISIBLE_ON_CHAIN)
+                    .publishStatus(SUBMITTED)
                     .build())
             );
 

@@ -16,7 +16,8 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
             " AND t.overallStatus = 'OK'" +
             " AND t.ledgerDispatchStatus = 'NOT_DISPATCHED'" +
             " ORDER BY t.createdAt ASC, t.id ASC")
-    Set<TransactionEntity> findDispatchableTransactions(@Param("organisationId") String organisationId, Limit limit);
+    Set<TransactionEntity> findDispatchableTransactions(@Param("organisationId") String organisationId,
+                                                        Limit limit);
 
     @Query("SELECT t FROM accounting_reporting_core.TransactionEntity t" +
             " WHERE t.organisation.id = :organisationId" +
