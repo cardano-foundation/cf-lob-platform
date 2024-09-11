@@ -68,7 +68,7 @@ public class TransactionBatchEntity extends AuditEntity implements Persistable<S
             @AttributeOverride(name = "subCode", column = @Column(name = "detail_subcode")),
             @AttributeOverride(name = "bag", column = @Column(name = "detail_bag"))
     })
-    private BatchDetails batchDetails;
+    private Details details;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -106,8 +106,8 @@ public class TransactionBatchEntity extends AuditEntity implements Persistable<S
         return id;
     }
 
-    public Optional<BatchDetails> getBatchDetails() {
-        return Optional.ofNullable(batchDetails);
+    public Optional<Details> getDetails() {
+        return Optional.ofNullable(details);
     }
 
 }

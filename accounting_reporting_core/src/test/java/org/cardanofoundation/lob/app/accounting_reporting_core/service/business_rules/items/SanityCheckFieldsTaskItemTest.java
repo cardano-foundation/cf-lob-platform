@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.TX_TECHNICAL_FAILURE;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.TX_TECHNICAL_FAILURE;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

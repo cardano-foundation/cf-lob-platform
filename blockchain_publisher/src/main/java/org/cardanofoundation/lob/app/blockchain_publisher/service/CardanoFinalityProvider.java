@@ -11,10 +11,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CardanoFinalityProvider {
 
-    private final CardanoNetwork cardanoNetwork;
+    private final CardanoNetwork network;
+    private final SlotLengthProvider slotLengthProvider;
 
     public CardanoFinalityScore getFinalityScore(long slots) {
-        return switch (cardanoNetwork) {
+        return switch (network) {
             case MAIN, PREPROD, PREVIEW:
                 yield getMainnetFinalityScore(slots);
             case DEV:
@@ -23,17 +24,17 @@ public class CardanoFinalityProvider {
     }
 
     private CardanoFinalityScore getMainnetFinalityScore(long slots) {
-        if (slots >= 2160) {
+        if (slots >= 2160 * slotLengthProvider.getSlotLength(network)) { // ca. 12 hours
             return CardanoFinalityScore.FINAL;
-        } else if (slots >= 1000) {
+        } else if (slots >= 250 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.ULTRA_HIGH;
-        } else if (slots >= 250) {
+        } else if (slots >= 100 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.VERY_HIGH;
-        } else if (slots >= 50) {
+        } else if (slots >= 30 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.HIGH;
-        } else if (slots >= 10) {
+        } else if (slots >= 15 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.MEDIUM;
-        } else if (slots >= 5) {
+        } else if (slots >= 5 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.LOW;
         }
 
@@ -41,17 +42,17 @@ public class CardanoFinalityProvider {
     }
 
     private CardanoFinalityScore getDevnetFinalityScore(long slots) {
-        if (slots >= 120) {
+        if (slots >= 12 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.FINAL;
-        } else if (slots >= 100) {
+        } else if (slots >= 11 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.ULTRA_HIGH;
-        } else if (slots >= 80) {
+        } else if (slots >= 10 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.VERY_HIGH;
-        } else if (slots >= 50) {
+        } else if (slots >= 5 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.HIGH;
-        } else if (slots >= 10) {
+        } else if (slots >= 2 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.MEDIUM;
-        } else if (slots >= 5) {
+        } else if (slots >= 1 * slotLengthProvider.getSlotLength(network)) {
             return CardanoFinalityScore.LOW;
         }
 

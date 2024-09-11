@@ -1,9 +1,7 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.jmolecules.event.annotation.DomainEvent;
 
@@ -14,10 +12,13 @@ import org.jmolecules.event.annotation.DomainEvent;
 @DomainEvent
 public class ScheduledIngestionEvent {
 
+    @NotNull
     private String organisationId;
 
+    @NotNull
     private String initiator;
 
+    @NotNull
     private UserExtractionParameters userExtractionParameters;
 
 }

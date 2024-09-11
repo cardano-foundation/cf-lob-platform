@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.val;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -22,23 +23,28 @@ public abstract class AuditEntity {
 
     @Column(name = "created_by")
     @CreatedBy
+    @DiffIgnore
     protected String createdBy = "system";
 
     @Column(name = "updated_by")
     @LastModifiedBy
+    @DiffIgnore
     protected String updatedBy = "system";
 
     @Temporal(TIMESTAMP)
     @Column(name = "created_at")
     @CreatedDate
+    @DiffIgnore
     protected LocalDateTime createdAt;
 
     @Temporal(TIMESTAMP)
     @Column(name = "updated_at")
     @LastModifiedDate
+    @DiffIgnore
     protected LocalDateTime updatedAt;
 
     @Transient
+    @DiffIgnore
     protected boolean isNew = true;
 
     @PostLoad

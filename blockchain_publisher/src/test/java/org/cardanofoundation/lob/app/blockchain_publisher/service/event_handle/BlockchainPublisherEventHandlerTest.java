@@ -4,7 +4,7 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Organisation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.LedgerUpdateCommand;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdateCommand;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublisherService;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionConverter;

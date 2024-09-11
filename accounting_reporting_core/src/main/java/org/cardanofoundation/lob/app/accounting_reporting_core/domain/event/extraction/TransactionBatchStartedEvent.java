@@ -1,10 +1,11 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.jmolecules.event.annotation.DomainEvent;
@@ -13,6 +14,7 @@ import org.jmolecules.event.annotation.DomainEvent;
 @Builder
 @DomainEvent
 @Getter
+@ToString
 public class TransactionBatchStartedEvent {
 
     @NotBlank
@@ -25,7 +27,7 @@ public class TransactionBatchStartedEvent {
     private String initiator;
 
     @NotBlank
-    private String instanceId;
+    private String adapterInstanceId;
 
     @NotNull
     private UserExtractionParameters userExtractionParameters;

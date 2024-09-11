@@ -23,8 +23,8 @@ public class NetSuiteIngestionEntity extends AuditEntity implements Persistable<
     @Column(name = "id", nullable = false)
     private String id;
 
-    @Column(name = "instance_id", nullable = false)
-    private String instanceId;
+    @Column(name = "adapter_instance_id", nullable = false)
+    private String adapterInstanceId;
 
     @Column(name = "ingestion_body", nullable = false, length = 999_999, columnDefinition = "TEXT")
     private String ingestionBody;

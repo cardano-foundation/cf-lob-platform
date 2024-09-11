@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.PROJECT_DATA_NOT_FOUND;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.PROJECT_DATA_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -41,7 +41,7 @@ public class ProjectConversionTaskItem implements PipelineTaskItem {
             log.info("Project mapping found: {}", projectMappingM);
 
             if (projectMappingM.isEmpty()) {
-                val v = Violation.builder()
+                val v = TransactionViolation.builder()
                         .code(PROJECT_DATA_NOT_FOUND)
                         .txItemId(txItem.getId())
                         .severity(ERROR)

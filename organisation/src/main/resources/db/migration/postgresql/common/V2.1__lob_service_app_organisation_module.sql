@@ -35,7 +35,7 @@ CREATE TABLE organisation_currency (
 CREATE TABLE organisation_vat (
    organisation_id CHAR(64) NOT NULL,
    customer_code VARCHAR(255) NOT NULL,
-   rate DECIMAL NOT NULL,
+   rate DECIMAL(12, 8) NOT NULL,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),

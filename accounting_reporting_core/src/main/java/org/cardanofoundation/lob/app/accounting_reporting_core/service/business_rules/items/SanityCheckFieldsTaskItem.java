@@ -4,12 +4,12 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 
 import java.util.Map;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.TX_TECHNICAL_FAILURE;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.TX_TECHNICAL_FAILURE;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
 
@@ -27,7 +27,7 @@ public class SanityCheckFieldsTaskItem implements PipelineTaskItem {
         }
 
         if (!errors.isEmpty()) {
-            val v = Violation.builder()
+            val v = TransactionViolation.builder()
                     .code(TX_TECHNICAL_FAILURE)
                     .severity(ERROR)
                     .source(LOB)

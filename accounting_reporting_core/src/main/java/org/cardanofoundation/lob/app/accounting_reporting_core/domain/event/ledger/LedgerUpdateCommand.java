@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

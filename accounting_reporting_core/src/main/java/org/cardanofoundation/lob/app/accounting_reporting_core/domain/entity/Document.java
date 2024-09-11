@@ -4,7 +4,8 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+import org.javers.core.metamodel.annotation.DiffInclude;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -17,22 +18,23 @@ import java.util.Optional;
 @EqualsAndHashCode
 public class Document {
 
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
+    
     private String num;
 
     @Embedded
     @NotNull
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private Currency currency;
 
     @Embedded
     @Nullable
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private Vat vat;
 
     @Embedded
     @Nullable
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private Counterparty counterparty;
 
     public Optional<Vat> getVat() {

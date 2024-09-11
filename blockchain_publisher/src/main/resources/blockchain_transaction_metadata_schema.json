@@ -33,7 +33,7 @@
         },
         "currency_id": {
           "type": "string",
-          "pattern": "^ISO_4217:[A-Z]{3}$|^ISO_24165:[A-Z0-9]+$"
+          "pattern": "^ISO_4217:[A-Z]{3}$|^ISO_24165:[A-Z0-9]+(:[A-Z0-9]+)?$"
         }
       },
       "required": ["country_code", "name", "tax_id_number", "id", "currency_id"]
@@ -130,7 +130,7 @@
                         },
                         "id": {
                           "type": "string",
-                          "pattern": "^ISO_4217:[A-Z]{3}$|^ISO_24165:[A-Z0-9]+$"
+                          "pattern": "^ISO_4217:[A-Z]{3}$|^ISO_24165:[A-Z0-9]+(:[A-Z0-9]+)?$"
                         }
                       },
                       "required": ["cust_code", "id"]

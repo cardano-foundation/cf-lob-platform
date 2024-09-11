@@ -51,7 +51,7 @@ class DbSynchronisationUseCaseServiceTest {
         val batchId = "batch1";
         val organisationTransactions = new OrganisationTransactions("org1", Set.of());
 
-        service.execute(batchId, organisationTransactions, Optional.of(0), new ProcessorFlags(false));
+        service.execute(batchId, organisationTransactions, 0, new ProcessorFlags(false));
         verify(transactionBatchService).updateTransactionBatchStatusAndStats(eq(batchId), eq(Optional.of(0)));
         verifyNoInteractions(transactionRepository);
         verifyNoInteractions(transactionItemRepository);
@@ -74,7 +74,7 @@ class DbSynchronisationUseCaseServiceTest {
         val transactions = new OrganisationTransactions("org1", txs);
 
         when(transactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
-        service.execute(batchId, transactions, Optional.of(1), new ProcessorFlags(true));
+        service.execute(batchId, transactions, 1, new ProcessorFlags(true));
 
         verify(transactionRepository).save(eq(tx1));
         verify(transactionBatchAssocRepository).saveAll(any(Set.class));
@@ -107,7 +107,7 @@ class DbSynchronisationUseCaseServiceTest {
 
         when(transactionRepository.findAllById(eq(Set.of(txId)))).thenReturn(List.of(tx1));
 
-        service.execute(batchId, transactions, Optional.of(1), new ProcessorFlags(false));
+        service.execute(batchId, transactions, 1, new ProcessorFlags(false));
 
         verify(transactionRepository, never()).save(any());
         verify(transactionItemRepository, never()).save(any());
@@ -138,7 +138,7 @@ class DbSynchronisationUseCaseServiceTest {
         when(transactionRepository.findAllById(any())).thenReturn(List.of());
         when(transactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
 
-        service.execute(batchId, transactions, Optional.of(txs.size()), new ProcessorFlags(false));
+        service.execute(batchId, transactions, txs.size(), new ProcessorFlags(false));
 
         verify(transactionRepository).save(eq(tx1));
         verify(transactionItemRepository).saveAll(eq(items));
@@ -185,7 +185,7 @@ class DbSynchronisationUseCaseServiceTest {
 
         when(transactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
 
-        service.execute(batchId, mixedTransactions, Optional.of(2), new ProcessorFlags(false));
+        service.execute(batchId, mixedTransactions, 2, new ProcessorFlags(false));
 
         verify(transactionRepository, never()).save(dispatchedTx);
         verify(transactionRepository).save(notDispatchedTx);

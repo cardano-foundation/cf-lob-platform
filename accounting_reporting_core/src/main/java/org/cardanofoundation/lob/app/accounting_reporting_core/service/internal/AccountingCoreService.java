@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ScheduledIngestionEvent;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.ScheduledIngestionEvent;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ScheduledReconcilationEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
 import org.springframework.context.ApplicationEventPublisher;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.problem.Problem;
 
-import java.util.Optional;
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
@@ -33,11 +34,27 @@ public class AccountingCoreService {
     public void scheduleIngestion(UserExtractionParameters userExtractionParameters) {
         log.info("scheduleIngestion, parameters: {}", userExtractionParameters);
 
-        applicationEventPublisher.publishEvent(new ScheduledIngestionEvent(
+        val event = new ScheduledIngestionEvent(
                 userExtractionParameters.getOrganisationId(),
                 "system",
-                userExtractionParameters)
+                userExtractionParameters
         );
+
+        applicationEventPublisher.publishEvent(event);
+    }
+
+    @Transactional
+    public void scheduleReconilation(String organisationId, LocalDate from, LocalDate to) {
+        log.info("scheduleReconilation, organisationId: {}, from: {}, to: {}", organisationId, from, to);
+
+        val event = new ScheduledReconcilationEvent(
+                organisationId,
+                "system",
+                from,
+                to
+        );
+
+        applicationEventPublisher.publishEvent(event);
     }
 
     @Transactional
@@ -73,9 +90,8 @@ public class AccountingCoreService {
                 .build();
 
         val organisationId = txBatch.getOrganisationId();
-        val size = Optional.of(txs.size());
 
-        erpIncomingDataProcessor.continueIngestion(organisationId, batchId, size, txs, processorFlags);
+        erpIncomingDataProcessor.continueIngestion(organisationId, batchId, txs.size(), txs, processorFlags);
 
         return Either.right(true);
     }

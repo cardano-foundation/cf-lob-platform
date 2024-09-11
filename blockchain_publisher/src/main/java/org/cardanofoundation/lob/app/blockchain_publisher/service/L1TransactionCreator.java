@@ -186,6 +186,8 @@ public class L1TransactionCreator {
                 );
             }
 
+            log.info("Metadata for tx validated, gonna serialise tx now...");
+
             return Either.right(serialiseTransaction(metadata));
         } catch (Exception e) {
             log.error("Error serialising metadata to cbor", e);

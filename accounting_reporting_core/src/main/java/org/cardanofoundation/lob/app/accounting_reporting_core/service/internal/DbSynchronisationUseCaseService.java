@@ -7,7 +7,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Organ
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionBatchAssocEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchAssocRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
@@ -23,9 +23,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionVersionAlgo.ERP_SOURCE;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.WARN;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.TX_VERSION_CONFLICT_TX_NOT_MODIFIABLE;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.TX_VERSION_CONFLICT_TX_NOT_MODIFIABLE;
 
 @Service
 @Slf4j
@@ -41,13 +40,13 @@ public class DbSynchronisationUseCaseService {
     @Transactional
     public void execute(String batchId,
                         OrganisationTransactions incomingTransactions,
-                        Optional<Integer> totalTransactionsCount,
+                        int totalTransactionsCount,
                         ProcessorFlags flags) {
         val transactions = incomingTransactions.transactions();
 
         if (transactions.isEmpty()) {
             log.info("No transactions to process, batchId: {}", batchId);
-            transactionBatchService.updateTransactionBatchStatusAndStats(batchId, totalTransactionsCount);
+            transactionBatchService.updateTransactionBatchStatusAndStats(batchId, Optional.of(totalTransactionsCount));
 
             return;
         }
@@ -60,7 +59,7 @@ public class DbSynchronisationUseCaseService {
 
         val organisationId = incomingTransactions.organisationId();
 
-        processTransactionsForTheFirstTime(batchId, organisationId, transactions, totalTransactionsCount);
+        processTransactionsForTheFirstTime(batchId, organisationId, transactions, Optional.of(totalTransactionsCount));
     }
 
     private void processTransactionsForTheFirstTime(String batchId,
@@ -137,8 +136,8 @@ public class DbSynchronisationUseCaseService {
 
     private boolean isIncomingTransactionERPSame(TransactionEntity existingTx,
                                                  TransactionEntity incomingTx) {
-        val existingTxVersion = TransactionVersionCalculator.compute(ERP_SOURCE, existingTx);
-        val incomingTxVersion = TransactionVersionCalculator.compute(ERP_SOURCE, incomingTx);
+        val existingTxVersion = TransactionVersionCalculator.compute(Source.ERP, existingTx);
+        val incomingTxVersion = TransactionVersionCalculator.compute(Source.ERP, incomingTx);
 
         log.info("Existing transaction version:{}, incomingTx:{}", existingTxVersion, incomingTxVersion);
 
@@ -156,7 +155,7 @@ public class DbSynchronisationUseCaseService {
         for (val tx : txsAlreadyDispatched) {
             log.info("tx causing conflict: {}", tx);
 
-            val v = Violation.builder()
+            val v = TransactionViolation.builder()
                     .code(TX_VERSION_CONFLICT_TX_NOT_MODIFIABLE)
                     .severity(WARN)
                     .source(Source.ERP)

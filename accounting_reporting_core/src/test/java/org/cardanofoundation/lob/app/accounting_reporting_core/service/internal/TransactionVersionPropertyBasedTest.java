@@ -4,6 +4,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import lombok.val;
 import net.jqwik.api.*;
 import net.jqwik.time.api.Dates;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 
@@ -15,7 +16,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionVersionAlgo.ERP_SOURCE;
 
 class TransactionVersionPropertyBasedTest {
 
@@ -97,11 +97,11 @@ class TransactionVersionPropertyBasedTest {
         t1.setTransactionInternalNumber("FxRevaluation-1");
         t1.setItems(Set.of(txItem1));
 
-        val tHash1 = TransactionVersionCalculator.compute(ERP_SOURCE, t1);
+        val tHash1 = TransactionVersionCalculator.compute(Source.ERP, t1);
 
         // Change transaction type
         t1.setTransactionType(transactionType2);
-        val tHash2 = TransactionVersionCalculator.compute(ERP_SOURCE, t1);
+        val tHash2 = TransactionVersionCalculator.compute(Source.ERP, t1);
 
         assertThat(tHash1).isNotNull();
         assertThat(tHash2).isNotNull();
@@ -110,7 +110,7 @@ class TransactionVersionPropertyBasedTest {
         // Reset to original type and change entry date
         t1.setTransactionType(transactionType1);
         t1.setEntryDate(entryDate2);
-        val tHash3 = TransactionVersionCalculator.compute(ERP_SOURCE, t1);
+        val tHash3 = TransactionVersionCalculator.compute(Source.ERP, t1);
 
         assertThat(tHash3).isNotNull();
         assertThat(tHash3).isNotEqualTo(tHash1);
@@ -118,7 +118,7 @@ class TransactionVersionPropertyBasedTest {
         // Reset to original entry date and change amount
         t1.setEntryDate(entryDate1);
         txItem1.setAmountFcy(amountFcy2);
-        val tHash4 = TransactionVersionCalculator.compute(ERP_SOURCE, t1);
+        val tHash4 = TransactionVersionCalculator.compute(Source.ERP, t1);
 
         assertThat(tHash4).isNotNull();
         assertThat(tHash4).isNotEqualTo(tHash1);
@@ -126,7 +126,7 @@ class TransactionVersionPropertyBasedTest {
         // Reset amount and change organisation ID
         txItem1.setAmountFcy(amountFcy1);
         t1.setOrganisation(org2);
-        val tHash5 = TransactionVersionCalculator.compute(ERP_SOURCE, t1);
+        val tHash5 = TransactionVersionCalculator.compute(Source.ERP, t1);
 
         assertThat(tHash5).isNotNull();
         assertThat(tHash5).isNotEqualTo(tHash1);

@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +17,7 @@ public class TransactionBatchCreatedEvent {
 
     private String batchId;
     private String organisationId;
-    private String instanceId;
+    private String adapterInstanceId;
     private UserExtractionParameters userExtractionParameters;
     private SystemExtractionParameters systemExtractionParameters;
 

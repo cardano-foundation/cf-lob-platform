@@ -2,7 +2,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.model;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Account;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
@@ -29,7 +29,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.CORE_CURRENCY_NOT_FOUND;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.CORE_CURRENCY_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -58,7 +58,7 @@ class AccountingCorePresentationConverterTest {
         TransactionEntity transactionEntity = new TransactionEntity();
         TransactionEntity transactionEntity2 = new TransactionEntity();
         TransactionEntity transactionEntity3 = new TransactionEntity();
-        Violation violation = new Violation();
+        TransactionViolation transactionViolation = new TransactionViolation();
         Account accountDebit = Account.builder().name("debit").code("debit-code").refCode("dcod").build();
         Account accountCredit = new Account().toBuilder().name("credit").code("credit-code").refCode("ccod").build();
 
@@ -83,14 +83,14 @@ class AccountingCorePresentationConverterTest {
         transactionItem.setId("tx-item-id");
         transactionItem3.setId("tx-item-id-3");
 
-        violation.setTxItemId(Optional.of(transactionItem.getId().toString()));
-        violation.setSource(Source.ERP);
-        violation.setSeverity(org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.WARN);
-        violation.setCode(CORE_CURRENCY_NOT_FOUND);
+        transactionViolation.setTxItemId(Optional.of(transactionItem.getId().toString()));
+        transactionViolation.setSource(Source.ERP);
+        transactionViolation.setSeverity(org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.WARN);
+        transactionViolation.setCode(CORE_CURRENCY_NOT_FOUND);
 
         transactionEntity.setItems(Set.of(transactionItem));
         transactionEntity3.setItems(Set.of(transactionItem3));
-        transactionEntity.setViolations(Set.of(violation));
+        transactionEntity.setViolations(Set.of(transactionViolation));
 
         transactionItem.setAccountDebit(Optional.of(accountDebit));
         transactionItem.setAccountCredit(Optional.of(accountCredit));
@@ -170,8 +170,8 @@ class AccountingCorePresentationConverterTest {
         TransactionItemEntity transactionItem = new TransactionItemEntity();
         transactionItem.setId("txItemId");
         transactionItem.setAmountLcy(BigDecimal.valueOf(100));
-        Violation violation = new Violation();
-        violation.setTxItemId(Optional.of("txItemId"));
+        TransactionViolation transactionViolation = new TransactionViolation();
+        transactionViolation.setTxItemId(Optional.of("txItemId"));
         LocalDate from = LocalDate.now();
         LocalDate to = LocalDate.now();
         FilteringParameters filteringParameters = new FilteringParameters("pros", List.of(TransactionType.CardCharge), from, to, YearMonth.now(), YearMonth.now(), Collections.singletonList("somestring"));
@@ -186,7 +186,7 @@ class AccountingCorePresentationConverterTest {
         transaction2.setId("tx-id2");
 
         transaction1.setItems(Set.of(transactionItem));
-        transaction1.setViolations(Set.of(violation));
+        transaction1.setViolations(Set.of(transactionViolation));
         transactionItem.setTransaction(transaction1);
 
         transactionBatchEntity.setBatchStatistics(batchStatistics);
@@ -281,11 +281,11 @@ class AccountingCorePresentationConverterTest {
     @Test
     void allTransactionsDispatchStatus() {
         TransactionEntity transaction = new TransactionEntity();
-        Violation violation = new Violation();
-        violation.setSource(Source.LOB);
+        TransactionViolation transactionViolation = new TransactionViolation();
+        transactionViolation.setSource(Source.LOB);
         TransactionItemEntity transactionItem = new TransactionItemEntity();
 
-        transaction.setViolations(Set.of(violation));
+        transaction.setViolations(Set.of(transactionViolation));
         transaction.setItems(Set.of(transactionItem));
         transaction.setAutomatedValidationStatus(ValidationStatus.VALIDATED);
         transaction.setLedgerDispatchStatus(LedgerDispatchStatus.NOT_DISPATCHED);
@@ -327,7 +327,7 @@ class AccountingCorePresentationConverterTest {
         transactionItem.setRejection(Optional.of(new Rejection(RejectionCode.INCORRECT_PROJECT)));
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
-        violation.setSource(Source.ERP);
+        transactionViolation.setSource(Source.ERP);
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
         transaction.setAutomatedValidationStatus(ValidationStatus.VALIDATED);

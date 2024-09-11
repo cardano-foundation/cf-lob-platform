@@ -1,5 +1,7 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +10,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Syste
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.jmolecules.event.annotation.DomainEvent;
 
-import java.util.Optional;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -18,16 +19,18 @@ import java.util.Set;
 @NoArgsConstructor
 public class TransactionBatchChunkEvent {
 
+    @NotBlank
     private String batchId;
 
+    @NotBlank
     private String organisationId;
 
-    @Builder.Default
-    private Optional<Integer> totalTransactionsCount = Optional.empty();
+    private int totalTransactionsCount;
 
     @Builder.Default
     private Set<Transaction> transactions = Set.of();
 
+    @NotNull
     private SystemExtractionParameters systemExtractionParameters;
 
     @Builder.Default

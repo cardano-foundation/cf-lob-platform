@@ -55,7 +55,7 @@ class ExtractionParametersFilteringServiceTest {
                 .build();
 
         // Execute
-        val result = service.applyExtractionParameters(userExtractionParameters, systemExtractionParameters, transactions);
+        val result = service.applyExtractionParameters(transactions, userExtractionParameters, systemExtractionParameters);
 
         // Verify
         assertThat(result).containsExactly(transaction);
@@ -85,7 +85,7 @@ class ExtractionParametersFilteringServiceTest {
                 .build();
 
         // Execute
-        val result = service.applyExtractionParameters(userExtractionParameters, systemExtractionParameters, transactions);
+        val result = service.applyExtractionParameters(transactions, userExtractionParameters, systemExtractionParameters);
 
         // Verify
         assertThat(result).isEmpty();
@@ -114,7 +114,7 @@ class ExtractionParametersFilteringServiceTest {
                 .build();
 
         // Execute
-        val result = service.applyExtractionParameters(userExtractionParameters, systemExtractionParameters, transactions);
+        val result = service.applyExtractionParameters(transactions, userExtractionParameters, systemExtractionParameters);
 
         // Verify
         assertThat(result).isEmpty();
@@ -143,7 +143,7 @@ class ExtractionParametersFilteringServiceTest {
                 .build();
 
         // Execute
-        val result = service.applyExtractionParameters(userExtractionParameters, systemExtractionParameters, transactions);
+        val result = service.applyExtractionParameters(transactions, userExtractionParameters, systemExtractionParameters);
 
         // Verify
         assertThat(result).isEmpty();

@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Vat;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Document;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.CoreCurrencyRepository;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 
@@ -19,7 +19,7 @@ import java.util.Optional;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.*;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.*;
 
 @RequiredArgsConstructor
 public class DocumentConversionTaskItem implements PipelineTaskItem {
@@ -126,9 +126,9 @@ public class DocumentConversionTaskItem implements PipelineTaskItem {
 
     private void addViolation(TransactionEntity tx,
                               TransactionItemEntity txItem,
-                              ViolationCode code,
+                              TransactionViolationCode code,
                               Map<String, Object> bag) {
-        val violation = Violation.builder()
+        val violation = TransactionViolation.builder()
                 .txItemId(txItem.getId())
                 .code(code)
                 .severity(ERROR)

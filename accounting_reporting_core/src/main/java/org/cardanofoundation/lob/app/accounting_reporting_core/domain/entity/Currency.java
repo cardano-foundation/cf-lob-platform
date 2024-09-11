@@ -3,7 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Embeddable;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 
 import java.util.Optional;
 
@@ -18,7 +18,7 @@ public class Currency {
     @Nullable
     private String id;
 
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private String customerCode;
 
     public Optional<String> getId() {

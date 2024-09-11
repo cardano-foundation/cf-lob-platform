@@ -3,7 +3,7 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service.event_handle;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.LedgerUpdateCommand;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdateCommand;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublisherService;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionConverter;
 import org.springframework.modulith.events.ApplicationModuleListener;

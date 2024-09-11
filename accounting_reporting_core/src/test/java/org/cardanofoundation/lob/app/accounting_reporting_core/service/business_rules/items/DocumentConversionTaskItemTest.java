@@ -20,8 +20,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency.IsoStandard.ISO_4217;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.CURRENCY_DATA_NOT_FOUND;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.VAT_DATA_NOT_FOUND;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.CURRENCY_DATA_NOT_FOUND;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.VAT_DATA_NOT_FOUND;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)

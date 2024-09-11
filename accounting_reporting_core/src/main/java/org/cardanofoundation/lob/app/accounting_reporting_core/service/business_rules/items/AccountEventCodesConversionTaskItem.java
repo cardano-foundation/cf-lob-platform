@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Account;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.AccountEvent;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationChartOfAccount;
 
@@ -20,8 +17,8 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.CHART_OF_ACCOUNT_NOT_FOUND;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode.EVENT_DATA_NOT_FOUND;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.CHART_OF_ACCOUNT_NOT_FOUND;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.EVENT_DATA_NOT_FOUND;
 
 @RequiredArgsConstructor
 public class AccountEventCodesConversionTaskItem implements PipelineTaskItem {
@@ -83,7 +80,7 @@ public class AccountEventCodesConversionTaskItem implements PipelineTaskItem {
                                                    TransactionItemEntity item,
                                                    TransactionEntity tx,
                                                    Source source) {
-        val violation = org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation.builder()
+        val violation = TransactionViolation.builder()
                 .txItemId(item.getId())
                 .code(CHART_OF_ACCOUNT_NOT_FOUND)
                 .subCode(type.name())
@@ -103,7 +100,7 @@ public class AccountEventCodesConversionTaskItem implements PipelineTaskItem {
     private void addMissingEventViolation(String eventCode,
                                           TransactionItemEntity item,
                                           TransactionEntity tx) {
-        val violation = org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Violation.builder()
+        val violation = TransactionViolation.builder()
                 .txItemId(item.getId())
                 .code(EVENT_DATA_NOT_FOUND)
                 .severity(ERROR)

@@ -3,7 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 
 import java.util.Optional;
 
@@ -14,7 +14,7 @@ import java.util.Optional;
 @NoArgsConstructor
 public class Organisation {
 
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     @Size(min = 1, max =  255) @NotBlank  private String id;
 
     @Builder.Default

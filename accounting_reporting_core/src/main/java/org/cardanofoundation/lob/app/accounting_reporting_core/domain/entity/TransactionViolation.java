@@ -6,8 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ViolationCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode;
 import org.hibernate.annotations.Type;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,7 @@ import static jakarta.persistence.EnumType.STRING;
 @NoArgsConstructor
 @Builder
 @EqualsAndHashCode
-public class Violation {
+public class TransactionViolation {
 
     @NotNull
     @Builder.Default
@@ -30,7 +31,7 @@ public class Violation {
 
     @NotNull
     @Enumerated(STRING)
-    private ViolationCode code;
+    private TransactionViolationCode code;
 
     @NotNull
     @Enumerated(STRING)
@@ -46,13 +47,15 @@ public class Violation {
     @NotBlank
     private String processorModule;
 
+    @NotNull
     @Builder.Default
     @Type(value = io.hypersistence.utils.hibernate.type.json.JsonType.class)
+    @DiffIgnore
     private Map<String, Object> bag = new HashMap<>();
 
     @Override
     public String toString() {
-        return STR."ViolationEntity{code=\{code}, txItemId=\{txItemId}";
+        return STR."TransactionViolation{code=\{code}, txItemId=\{txItemId}";
     }
 
     public void setTxItemId(Optional<String> txItemId) {

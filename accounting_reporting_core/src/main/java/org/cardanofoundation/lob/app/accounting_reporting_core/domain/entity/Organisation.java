@@ -4,7 +4,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOB_ERPSourceVersionRelevant;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -18,7 +18,7 @@ import java.util.Optional;
 public class Organisation {
 
     @NotBlank
-    @LOB_ERPSourceVersionRelevant
+    @LOBVersionSourceRelevant
     private String id;
 
     @Nullable

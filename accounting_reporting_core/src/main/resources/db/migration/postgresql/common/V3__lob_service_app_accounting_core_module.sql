@@ -51,6 +51,9 @@ CREATE TABLE accounting_core_transaction (
    organisation_tax_id_number VARCHAR(255),
    organisation_currency_id VARCHAR(255),
 
+   reconcilation_source VARCHAR(255),
+   reconcilation_sink VARCHAR(255),
+
    user_comment VARCHAR(255),
 
    automated_validation_status VARCHAR(255) NOT NULL,
@@ -80,7 +83,7 @@ CREATE TABLE accounting_core_transaction_violation (
    processor_module VARCHAR(255) NOT NULL,
    bag jsonb NOT NULL,
 
-   CONSTRAINT fk_accounting_core_transaction_violation_id FOREIGN KEY (transaction_id) REFERENCES accounting_core_transaction (transaction_id),
+   CONSTRAINT fk_accounting_core_transaction_violation FOREIGN KEY (transaction_id) REFERENCES accounting_core_transaction (transaction_id),
 
    PRIMARY KEY (transaction_id, tx_item_id, code, sub_code)
 );
@@ -107,7 +110,6 @@ CREATE TABLE accounting_core_transaction_batch_assoc (
    PRIMARY KEY (transaction_batch_id, transaction_id)
 );
 
-
 CREATE TABLE accounting_core_transaction_item (
    transaction_item_id CHAR(64) NOT NULL,
 
@@ -115,7 +117,7 @@ CREATE TABLE accounting_core_transaction_item (
 
    FOREIGN KEY (transaction_id) REFERENCES accounting_core_transaction (transaction_id),
 
-   fx_rate DECIMAL NOT NULL,
+   fx_rate DECIMAL(12, 8) NOT NULL,
 
    rejection_code SMALLINT,
 
@@ -130,15 +132,15 @@ CREATE TABLE accounting_core_transaction_item (
    account_event_code VARCHAR(255),
    account_event_name VARCHAR(255),
 
-   amount_fcy DECIMAL NOT NULL,
-   amount_lcy DECIMAL NOT NULL,
+   amount_fcy DECIMAL(100, 8) NOT NULL,
+   amount_lcy DECIMAL(100, 8) NOT NULL,
 
    document_num VARCHAR(255),
    document_currency_customer_code VARCHAR(255),
    document_currency_id VARCHAR(255),
 
    document_vat_customer_code VARCHAR(255),
-   document_vat_rate DECIMAL,
+   document_vat_rate DECIMAL(12, 8),
 
    document_counterparty_customer_code VARCHAR(255),
    document_counterparty_type VARCHAR(255),
@@ -158,6 +160,40 @@ CREATE TABLE accounting_core_transaction_item (
    updated_at TIMESTAMP WITHOUT TIME ZONE,
 
    PRIMARY KEY (transaction_item_id)
+);
+
+CREATE TABLE accounting_core_reconcilation (
+    reconcilation_id CHAR(64) NOT NULL,
+    organisation_id CHAR(64) NOT NULL,
+    from_date DATE,
+    to_date DATE,
+    status VARCHAR(255) NOT NULL,
+
+    processed_tx_count INT NOT NULL,
+
+    detail_code VARCHAR(255),
+    detail_subcode VARCHAR(255),
+    detail_bag jsonb,
+
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+
+    PRIMARY KEY (reconcilation_id)
+);
+
+CREATE TABLE accounting_core_reconcilation_violation (
+    reconcilation_id CHAR(64) NOT NULL,
+    transaction_id CHAR(64) NOT NULL,
+    rejection_code VARCHAR(255) NOT NULL,
+    transaction_internal_number VARCHAR(255) NOT NULL,
+    source_diff jsonb,
+    sink_diff jsonb,
+
+    CONSTRAINT fk_accounting_core_reconcilation_violation FOREIGN KEY (reconcilation_id) REFERENCES accounting_core_reconcilation (reconcilation_id),
+
+    PRIMARY KEY (reconcilation_id, transaction_id, rejection_code)
 );
 
 --CREATE TABLE accounting_core_transaction_line_aud (

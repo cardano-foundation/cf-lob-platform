@@ -19,10 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.problem.Problem;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
 
 import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
@@ -41,6 +39,16 @@ public class TransactionRepositoryGateway {
     private final TransactionItemRepository transactionItemRepository;
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
+
+    @Transactional(propagation = REQUIRES_NEW)
+    public void store(TransactionEntity transactionEntity) {
+        transactionRepository.save(transactionEntity);
+    }
+
+    @Transactional(propagation = REQUIRES_NEW)
+    public void storeAll(Collection<TransactionEntity> txs) {
+        transactionRepository.saveAll(txs);
+    }
 
     @Transactional(propagation = REQUIRES_NEW)
     // TODO optimise performance because we have to load transaction from db each time and we don't save it in bulk
@@ -219,6 +227,12 @@ public class TransactionRepositoryGateway {
 
     public List<TransactionEntity> listAll() {
         return transactionRepository.findAll();
+    }
+
+    public Set<TransactionEntity> findAllByDateRangeAndNotReconciledYet(String organisationId,
+                                                     LocalDate from,
+                                                     LocalDate to) {
+        return transactionRepository.findByEntryDateRangeAndNotReconciledYet(organisationId, from, to);
     }
 
 }

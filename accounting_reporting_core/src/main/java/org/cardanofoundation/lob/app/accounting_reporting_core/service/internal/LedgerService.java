@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.LedgerUpdateCommand;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdateCommand;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.cardanofoundation.lob.app.support.collections.Partitions;
