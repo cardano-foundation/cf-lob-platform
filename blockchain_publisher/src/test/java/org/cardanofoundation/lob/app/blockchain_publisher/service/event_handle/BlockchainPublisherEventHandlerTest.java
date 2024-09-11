@@ -1,11 +1,9 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service.event_handle;
 
-import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Organisation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdateCommand;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublisherService;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionConverter;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +19,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
 
 class BlockchainPublisherEventHandlerTest {
 
@@ -34,7 +33,7 @@ class BlockchainPublisherEventHandlerTest {
     private BlockchainPublisherService blockchainPublisherService;
 
     @Captor
-    private ArgumentCaptor<Set<TransactionEntity>> transactionsCaptor;
+    private ArgumentCaptor<Set<Transaction>> transactionsCaptor;
 
     @BeforeEach
     void setUp() {
@@ -49,24 +48,15 @@ class BlockchainPublisherEventHandlerTest {
         Set<Transaction> transactions = Set.of(createTransaction("tx1"), createTransaction("tx2"));
         LedgerUpdateCommand command = LedgerUpdateCommand.create(organisationId, transactions);
 
-        val txEntity1 = new TransactionEntity();
-        txEntity1.setId("tx1");
-
-        val txEntity2 = new TransactionEntity();
-        txEntity2.setId("tx2");
-
-        Set<TransactionEntity> convertedTransactions = Set.of(txEntity1, txEntity2);
-        when(transactionConverter.convertToDbDetached(transactions)).thenReturn(convertedTransactions);
-
         // When
         blockchainPublisherEventHandler.handleLedgerUpdateCommand(command);
 
         // Then
-        verify(transactionConverter).convertToDbDetached(transactions);
-        verify(blockchainPublisherService).storeTransactionForDispatchLater(eq(organisationId), transactionsCaptor.capture());
+        verify(blockchainPublisherService).storeTransactionsForDispatchLater(eq(organisationId), transactionsCaptor.capture());
 
-        Set<TransactionEntity> capturedTransactions = transactionsCaptor.getValue();
-        assertThat(capturedTransactions).isEqualTo(convertedTransactions);
+        Set<Transaction> capturedTransactions = transactionsCaptor.getValue();
+
+        assertThat(capturedTransactions).isEqualTo(transactions);
     }
 
     @Test
@@ -76,18 +66,13 @@ class BlockchainPublisherEventHandlerTest {
         Set<Transaction> transactions = Set.of();  // Empty set of transactions
         LedgerUpdateCommand command = LedgerUpdateCommand.create(organisationId, transactions);
 
-        Set<TransactionEntity> convertedTransactions = Set.of();
-        when(transactionConverter.convertToDbDetached(transactions)).thenReturn(convertedTransactions);
-
-        // When
         blockchainPublisherEventHandler.handleLedgerUpdateCommand(command);
 
         // Then
-        verify(transactionConverter).convertToDbDetached(transactions);
-        verify(blockchainPublisherService).storeTransactionForDispatchLater(eq(organisationId), transactionsCaptor.capture());
+        verify(blockchainPublisherService).storeTransactionsForDispatchLater(eq(organisationId), transactionsCaptor.capture());
 
-        Set<TransactionEntity> capturedTransactions = transactionsCaptor.getValue();
-        assertThat(capturedTransactions).isEqualTo(convertedTransactions);
+        Set<Transaction> capturedTransactions = transactionsCaptor.getValue();
+        assertThat(capturedTransactions).isEqualTo(transactions);
     }
 
     private Transaction createTransaction(String transactionId) {

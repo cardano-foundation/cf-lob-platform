@@ -2,7 +2,6 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service.event_handle;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdateCommand;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublisherService;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionConverter;
@@ -17,17 +16,15 @@ public class BlockchainPublisherEventHandler {
     private final TransactionConverter transactionConverter;
     private final BlockchainPublisherService blockchainPublisherService;
 
-    // received when a ledger update command is published meaning accounting core has changed to the transaction status
+    // received when a ledger update command is published meaning accounting core has changed to the transaction status = MARK_DISPATCH
     @ApplicationModuleListener
     public void handleLedgerUpdateCommand(LedgerUpdateCommand command) {
         log.info("Received LedgerUpdateCommand: {}", command);
 
-        val organisationId = command.getOrganisationId();
-        val transactions = command.getTransactions();
-
-        val txs = transactionConverter.convertToDbDetached(transactions);
-
-        blockchainPublisherService.storeTransactionForDispatchLater(organisationId, txs);
+        blockchainPublisherService.storeTransactionsForDispatchLater(
+                command.getOrganisationId(),
+                command.getTransactions()
+        );
     }
 
 }
