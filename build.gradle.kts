@@ -48,6 +48,7 @@ subprojects {
         }
     }
 
+
     extra["springBootVersion"] = "3.3.3"
     extra["springCloudVersion"] = "2023.0.0"
     extra["springModulithVersion"] = "1.2.3"
@@ -94,6 +95,11 @@ subprojects {
 
         implementation("org.apache.commons:commons-collections4:4.4")
         implementation("org.javers:javers-core:7.6.1")
+
+        compileOnly("com.google.auto.service:auto-service:1.1.1")
+        annotationProcessor("com.google.auto.service:auto-service:1.1.1")
+
+        implementation("com.squareup:javapoet:1.13.0")
 
         compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")
