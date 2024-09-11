@@ -41,7 +41,6 @@ public class TransactionsWatchDogService {
     private final BlockchainPublishStatusMapper blockchainPublishStatusMapper;
     private final CardanoFinalityScoreCalculator cardanoFinalityScoreCalculator;
 
-
     @Transactional
     public List<Either<Problem, Set<TransactionEntity>>> checkTransactionStatusesForOrganisation(int limitPerOrg) {
         return organisationPublicApiIF.listAll()
@@ -116,11 +115,13 @@ public class TransactionsWatchDogService {
                 log.info("Updating transaction with id: {} to status: {}, finality: {}", tx.getId(), blockchainPublishStatus, cardanoFinalityScore);
 
                 tx.setL1SubmissionData(tx.getL1SubmissionData().map(l1SubmissionData -> {
-                    val newBlockchainPublishStatus = Optional.of(blockchainPublishStatus);
-                    val newCardanoFinalityScore = Optional.of(cardanoFinalityScore);
+                    val newBlockchainPublishStatusM = Optional.of(blockchainPublishStatus);
+                    val newCardanoFinalityScoreM = Optional.of(cardanoFinalityScore);
+                    val txAbsoluteSlotM = Optional.of(txUpdateRequest.absoluteSlot.orElseThrow());
 
-                    l1SubmissionData.setPublishStatus(newBlockchainPublishStatus);
-                    l1SubmissionData.setFinalityScore(newCardanoFinalityScore);
+                    l1SubmissionData.setAbsoluteSlot(txAbsoluteSlotM);
+                    l1SubmissionData.setPublishStatus(newBlockchainPublishStatusM);
+                    l1SubmissionData.setFinalityScore(newCardanoFinalityScoreM);
 
                     return l1SubmissionData;
                 }));
@@ -136,6 +137,10 @@ public class TransactionsWatchDogService {
 
                 tx.setL1SubmissionData(tx.getL1SubmissionData().map(l1SubmissionData -> {
                     l1SubmissionData.setPublishStatus(Optional.of(blockchainPublishStatus));
+                    l1SubmissionData.setCreationSlot(Optional.empty());
+                    l1SubmissionData.setAbsoluteSlot(Optional.empty());
+                    l1SubmissionData.setTransactionHash(Optional.empty());
+                    l1SubmissionData.setFinalityScore(Optional.empty());
 
                     return l1SubmissionData;
                 }));
@@ -148,8 +153,8 @@ public class TransactionsWatchDogService {
     }
 
     @Transactional(propagation = SUPPORTS)
-    private Either<Problem, TransactionUpdate> checkTransactionStatusChange(TransactionEntity tx,
-                                                                            ChainTip chainTip) {
+    private Either<Problem, TransactionUpdateCommand> checkTransactionStatusChange(TransactionEntity tx,
+                                                                                   ChainTip chainTip) {
         val txId = tx.getId();
         val l1SubmissionDataM = tx.getL1SubmissionData();
         if (l1SubmissionDataM.isEmpty()) {
@@ -180,6 +185,7 @@ public class TransactionsWatchDogService {
             val cardanoOnChainData = cardanoOnChainDataM.orElseThrow();
             val txSubmissionAbsoluteSlot = cardanoOnChainData.getAbsoluteSlot();
             val chainTipAbsoluteSlot = chainTip.absoluteSlot();
+            val txAbsoluteSlot = cardanoOnChainData.getAbsoluteSlot();
 
             val cardanoFinalityScore = cardanoFinalityScoreCalculator.calculateFinalityScore(chainTipAbsoluteSlot, txSubmissionAbsoluteSlot);
             val blockchainPublishStatus = blockchainPublishStatusMapper.convert(cardanoFinalityScore);
@@ -189,18 +195,19 @@ public class TransactionsWatchDogService {
                     && l1SubmissionData.getFinalityScore().isPresent() && l1SubmissionData.getFinalityScore().orElseThrow().equals(cardanoFinalityScore)) {
                 log.info("Transaction with id: {} has no status change", txId);
 
-                return Either.right(TransactionUpdate.empty(tx));
+                return Either.right(TransactionUpdateCommand.empty(tx));
             }
 
-            return Either.right(TransactionUpdate.of(tx, blockchainPublishStatus, cardanoFinalityScore));
+            return Either.right(TransactionUpdateCommand.of(tx, txAbsoluteSlot, blockchainPublishStatus, cardanoFinalityScore));
         }
 
         // this means rollback scenario since we have L1 submission data but no on chain data
         if (cardanoOnChainDataM.isEmpty()) {
             log.warn("Transaction with id: {} is not on chain anymore, rollback?", txId);
 
-            val txUpdate = new TransactionUpdate(tx,
+            val txUpdate = new TransactionUpdateCommand(tx,
                     Optional.of(ROLLBACKED),
+                    Optional.empty(),
                     Optional.empty(),
                     TransactionUpdateType.ROLLBACKED
             );
@@ -208,27 +215,35 @@ public class TransactionsWatchDogService {
             return Either.right(txUpdate);
         }
 
-        return Either.right(TransactionUpdate.empty(tx));
+        return Either.right(TransactionUpdateCommand.empty(tx));
     }
 
     @AllArgsConstructor
     @Getter
     @EqualsAndHashCode
-    private static class TransactionUpdate {
+    private static class TransactionUpdateCommand {
 
         private final TransactionEntity transactionEntity;
         private final Optional<BlockchainPublishStatus> blockchainPublishStatus;
         private final Optional<CardanoFinalityScore> finalityScore;
+        private final Optional<Long> absoluteSlot;
         private final TransactionUpdateType transactionUpdateType;
 
-        public static TransactionUpdate empty(TransactionEntity transactionEntity) {
-            return new TransactionUpdate(transactionEntity, Optional.empty(), Optional.empty(), TransactionUpdateType.NONE);
+        public static TransactionUpdateCommand empty(TransactionEntity transactionEntity) {
+            return new TransactionUpdateCommand(transactionEntity, Optional.empty(), Optional.empty(), Optional.empty(), TransactionUpdateType.NONE);
         }
 
-        public static TransactionUpdate of(TransactionEntity transactionEntity,
-                                           BlockchainPublishStatus changedStatus,
-                                           CardanoFinalityScore finalityScore) {
-            return new TransactionUpdate(transactionEntity, Optional.of(changedStatus), Optional.of(finalityScore), TransactionUpdateType.FINALITY_PROGRESSED);
+        public static TransactionUpdateCommand of(TransactionEntity transactionEntity,
+                                                  long absoluteSlot,
+                                                  BlockchainPublishStatus changedStatus,
+                                                  CardanoFinalityScore finalityScore) {
+            return new TransactionUpdateCommand(
+                    transactionEntity,
+                    Optional.of(changedStatus),
+                    Optional.of(finalityScore),
+                    Optional.of(absoluteSlot),
+                    TransactionUpdateType.FINALITY_PROGRESSED
+            );
         }
 
     }

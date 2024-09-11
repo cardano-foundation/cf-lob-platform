@@ -8,7 +8,6 @@ import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.L1Submis
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublishStatusMapper;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.CardanoFinalityProvider;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionsWatchDogService;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.BlockchainDataChainTipService;
@@ -58,13 +57,10 @@ class TransactionsWatchDogServiceTest {
     @Mock
     private CardanoFinalityScoreCalculator cardanoFinalityScoreCalculator;
 
-    @Mock
-    private CardanoFinalityProvider cardanoFinalityProvider;
-
     @InjectMocks
     private TransactionsWatchDogService transactionsWatchDogService;
 
-
+    // Test case for an empty organization list
     @Test
     void testCheckTransactionStatusesForOrganisation_returnsNonEmptyList() {
         // Arrange
@@ -83,8 +79,10 @@ class TransactionsWatchDogServiceTest {
 
         // Assert
         assertThat(result).isNotEmpty();
+        assertThat(result.get(0).isRight()).isTrue();  // Ensure the result is a successful response
     }
 
+    // Test case where the chain tip cannot be found (either left side of Either)
     @Test
     void testInspectOrganisationTransactions_withEmptyChainTip() {
         // Arrange
@@ -100,6 +98,7 @@ class TransactionsWatchDogServiceTest {
         assertThat(result.getLeft().getTitle()).isEqualTo("CHAIN_TIP_NOT_FOUND");
     }
 
+    // Test case where the transaction is on-chain and finality progresses
     @Test
     void testInspectOrganisationTransactions_withOnChainDataCompleted() {
         val chainTip = 1000L;
@@ -111,8 +110,8 @@ class TransactionsWatchDogServiceTest {
 
         // Arrange
         val l1SubmissionData = new L1SubmissionData();
-        l1SubmissionData.setTransactionHash("hash1");
-        l1SubmissionData.setAbsoluteSlot(txAbsoluteSlotThen);
+        l1SubmissionData.setTransactionHash(Optional.of("hash1"));
+        l1SubmissionData.setAbsoluteSlot(Optional.of(txAbsoluteSlotThen));
         l1SubmissionData.setPublishStatus(Optional.of(BlockchainPublishStatus.VISIBLE_ON_CHAIN));
 
         val transactionEntity = new TransactionEntity();
@@ -140,6 +139,7 @@ class TransactionsWatchDogServiceTest {
                 .isEqualTo(BlockchainPublishStatus.COMPLETED);
     }
 
+    // Test case where the transaction is on-chain and finality is fully achieved
     @Test
     void testInspectOrganisationTransactions_withOnChainDataFinalized() {
         val chainTip = 1000L;
@@ -151,8 +151,8 @@ class TransactionsWatchDogServiceTest {
 
         // Arrange
         val l1SubmissionData = new L1SubmissionData();
-        l1SubmissionData.setTransactionHash("hash1");
-        l1SubmissionData.setAbsoluteSlot(txAbsoluteSlotThen);
+        l1SubmissionData.setTransactionHash(Optional.of("hash1"));
+        l1SubmissionData.setAbsoluteSlot(Optional.of(txAbsoluteSlotThen));
         l1SubmissionData.setPublishStatus(Optional.of(BlockchainPublishStatus.VISIBLE_ON_CHAIN));
 
         val transactionEntity = new TransactionEntity();
@@ -180,6 +180,7 @@ class TransactionsWatchDogServiceTest {
                 .isEqualTo(BlockchainPublishStatus.FINALIZED);
     }
 
+    // Test case for rollback scenario where the transaction is no longer found on-chain
     @Test
     void testInspectOrganisationTransactions_withRollbackScenario() {
         val chainTip = 100L;
@@ -187,8 +188,8 @@ class TransactionsWatchDogServiceTest {
         val txSubmissionData = new L1SubmissionData();
         txSubmissionData.setPublishStatus(Optional.of(BlockchainPublishStatus.VISIBLE_ON_CHAIN));
         txSubmissionData.setFinalityScore(Optional.of(CardanoFinalityScore.LOW));
-        txSubmissionData.setTransactionHash("hash1");
-        txSubmissionData.setAbsoluteSlot(chainTip - 80);
+        txSubmissionData.setTransactionHash(Optional.of("hash1"));
+        txSubmissionData.setAbsoluteSlot(Optional.of(chainTip - 80));
 
         // Arrange
         val transactionEntity = new TransactionEntity();
