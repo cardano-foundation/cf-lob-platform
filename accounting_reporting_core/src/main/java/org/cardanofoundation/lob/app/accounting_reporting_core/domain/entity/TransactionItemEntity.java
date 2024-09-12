@@ -71,7 +71,7 @@ public class TransactionItemEntity extends AuditEntity implements Persistable<St
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "rejectionCode", column = @Column(name = "rejection_code")),
+            @AttributeOverride(name = "rejectionReason", column = @Column(name = "rejection_reason")),
     })
     @Nullable
     private Rejection rejection;

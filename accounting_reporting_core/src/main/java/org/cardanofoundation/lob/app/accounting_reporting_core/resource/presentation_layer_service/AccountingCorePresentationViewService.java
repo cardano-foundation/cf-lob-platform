@@ -247,7 +247,7 @@ public class AccountingCorePresentationViewService {
                 return INVALID;
             }
             if (transactionEntity.hasAnyRejection()) {
-                if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionCode().getSource() == ERP))) {
+                if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource() == ERP))) {
                     return INVALID;
                 }
                 return PENDING;
@@ -256,7 +256,7 @@ public class AccountingCorePresentationViewService {
         }
 
         if (transactionEntity.hasAnyRejection()) {
-            if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionCode().getSource() == ERP))) {
+            if (transactionEntity.getItems().stream().anyMatch(transactionItemEntity -> transactionItemEntity.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource() == ERP))) {
                 return INVALID;
             }
             return PENDING;
@@ -309,7 +309,7 @@ public class AccountingCorePresentationViewService {
                     item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getCustomerCode)).orElse(""),
                     item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).orElse(VENDOR),
                     item.getDocument().flatMap(document -> document.getCounterparty().flatMap(Counterparty::getName)).orElse(""),
-                    item.getRejection().map(Rejection::getRejectionCode).orElse(null)
+                    item.getRejection().map(Rejection::getRejectionReason).orElse(null)
             );
         }).collect(toSet());
     }

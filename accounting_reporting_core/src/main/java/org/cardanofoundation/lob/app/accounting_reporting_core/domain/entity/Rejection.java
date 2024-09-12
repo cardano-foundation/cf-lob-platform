@@ -10,6 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 public class Rejection {
 
-    private RejectionCode rejectionCode;
+    private RejectionReason rejectionReason;
 
 }

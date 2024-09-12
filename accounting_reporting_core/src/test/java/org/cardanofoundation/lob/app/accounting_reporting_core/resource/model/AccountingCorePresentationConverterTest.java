@@ -309,7 +309,7 @@ class AccountingCorePresentationConverterTest {
         assertEquals(LedgerDispatchStatusView.PUBLISHED, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
         transaction.setLedgerDispatchStatus(LedgerDispatchStatus.NOT_DISPATCHED);
-        transactionItem.setRejection(Optional.of(new Rejection(RejectionCode.INCORRECT_AMOUNT)));
+        transactionItem.setRejection(Optional.of(new Rejection(RejectionReason.INCORRECT_AMOUNT)));
         transaction.setOverallStatus(TransactionStatus.NOK);
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
         
@@ -317,21 +317,21 @@ class AccountingCorePresentationConverterTest {
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
         transaction.setLedgerDispatchStatus(LedgerDispatchStatus.NOT_DISPATCHED);
-        transactionItem.setRejection(Optional.of(new Rejection(RejectionCode.REVIEW_PARENT_PROJECT_CODE)));
+        transactionItem.setRejection(Optional.of(new Rejection(RejectionReason.REVIEW_PARENT_PROJECT_CODE)));
         assertEquals(LedgerDispatchStatusView.PENDING, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
         transaction.setLedgerDispatchStatus(LedgerDispatchStatus.NOT_DISPATCHED);
         transactionItem.setRejection(Optional.empty());
         assertEquals(LedgerDispatchStatusView.PENDING, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
-        transactionItem.setRejection(Optional.of(new Rejection(RejectionCode.INCORRECT_PROJECT)));
+        transactionItem.setRejection(Optional.of(new Rejection(RejectionReason.INCORRECT_PROJECT)));
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
         transactionViolation.setSource(Source.ERP);
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
         transaction.setAutomatedValidationStatus(ValidationStatus.VALIDATED);
-        transactionItem.setRejection(Optional.of(new Rejection(RejectionCode.REVIEW_PARENT_COST_CENTER)));
+        transactionItem.setRejection(Optional.of(new Rejection(RejectionReason.REVIEW_PARENT_COST_CENTER)));
         transaction.setViolations(Set.of());
         assertEquals(LedgerDispatchStatusView.PENDING, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
