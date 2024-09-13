@@ -15,6 +15,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.Block
 import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.CardanoFinalityScoreCalculator;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -60,6 +61,11 @@ class TransactionsWatchDogServiceTest {
     @InjectMocks
     private TransactionsWatchDogService transactionsWatchDogService;
 
+    @BeforeEach
+    public void setup() {
+        transactionsWatchDogService.setRollbackGracePeriodMinutes(1); // reduce grace period from ca 30 minutes to 1 minute for unit testing purpouses
+    }
+
     // Test case for an empty organization list
     @Test
     void testCheckTransactionStatusesForOrganisation_returnsNonEmptyList() {
@@ -104,6 +110,7 @@ class TransactionsWatchDogServiceTest {
         val chainTip = 1000L;
         val txAbsoluteSlotNow = chainTip - 50;
         val txAbsoluteSlotThen = chainTip - 500;
+        val txCreationSlow = txAbsoluteSlotNow - 20;
 
         when(cardanoFinalityScoreCalculator.calculateFinalityScore(chainTip, txAbsoluteSlotNow))
                 .thenReturn(CardanoFinalityScore.VERY_HIGH);
@@ -113,6 +120,7 @@ class TransactionsWatchDogServiceTest {
         l1SubmissionData.setTransactionHash(Optional.of("hash1"));
         l1SubmissionData.setAbsoluteSlot(Optional.of(txAbsoluteSlotThen));
         l1SubmissionData.setPublishStatus(Optional.of(BlockchainPublishStatus.VISIBLE_ON_CHAIN));
+        l1SubmissionData.setCreationSlot(Optional.of(txCreationSlow));
 
         val transactionEntity = new TransactionEntity();
         transactionEntity.setL1SubmissionData(Optional.of(l1SubmissionData));
@@ -145,6 +153,7 @@ class TransactionsWatchDogServiceTest {
         val chainTip = 1000L;
         val txAbsoluteSlotNow = chainTip - 2160;
         val txAbsoluteSlotThen = chainTip - 999;
+        val txCreationSlow = txAbsoluteSlotNow - 20;
 
         when(cardanoFinalityScoreCalculator.calculateFinalityScore(chainTip, txAbsoluteSlotNow))
                 .thenReturn(CardanoFinalityScore.FINAL);
@@ -154,6 +163,7 @@ class TransactionsWatchDogServiceTest {
         l1SubmissionData.setTransactionHash(Optional.of("hash1"));
         l1SubmissionData.setAbsoluteSlot(Optional.of(txAbsoluteSlotThen));
         l1SubmissionData.setPublishStatus(Optional.of(BlockchainPublishStatus.VISIBLE_ON_CHAIN));
+        l1SubmissionData.setCreationSlot(Optional.of(txCreationSlow));
 
         val transactionEntity = new TransactionEntity();
         transactionEntity.setL1SubmissionData(Optional.of(l1SubmissionData));
@@ -184,12 +194,15 @@ class TransactionsWatchDogServiceTest {
     @Test
     void testInspectOrganisationTransactions_withRollbackScenario() {
         val chainTip = 100L;
+        val absoluteSlot = chainTip - 80;
+        val creationSlot = absoluteSlot - 20;
 
         val txSubmissionData = new L1SubmissionData();
         txSubmissionData.setPublishStatus(Optional.of(BlockchainPublishStatus.VISIBLE_ON_CHAIN));
         txSubmissionData.setFinalityScore(Optional.of(CardanoFinalityScore.LOW));
         txSubmissionData.setTransactionHash(Optional.of("hash1"));
-        txSubmissionData.setAbsoluteSlot(Optional.of(chainTip - 80));
+        txSubmissionData.setAbsoluteSlot(Optional.of(absoluteSlot));
+        txSubmissionData.setCreationSlot(Optional.of(creationSlot));
 
         // Arrange
         val transactionEntity = new TransactionEntity();

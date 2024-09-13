@@ -13,6 +13,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.Block
 import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.BlockchainTransactionDataProvider;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.CardanoFinalityScoreCalculator;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,11 @@ public class TransactionsWatchDogService {
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
     private final BlockchainPublishStatusMapper blockchainPublishStatusMapper;
     private final CardanoFinalityScoreCalculator cardanoFinalityScoreCalculator;
+
+    @Value("${lob.blockchain.publisher.watchdog.rollback.grace.period.minutes:30}")
+    @Getter
+    @Setter
+    private int rollbackGracePeriodMinutes = 30;
 
     @Transactional
     public List<Either<Problem, Set<TransactionEntity>>> checkTransactionStatusesForOrganisation(int limitPerOrg) {
@@ -157,7 +163,7 @@ public class TransactionsWatchDogService {
                                                                                    ChainTip chainTip) {
         val txId = tx.getId();
         val l1SubmissionDataM = tx.getL1SubmissionData();
-        if (l1SubmissionDataM.isEmpty()) {
+        if (l1SubmissionDataM.isEmpty() || l1SubmissionDataM.get().getCreationSlot().isEmpty()) {
             log.warn("Transaction with id: {} has no L1 submission data, this should never happen", txId);
 
             return Either.left(Problem.builder()
@@ -169,6 +175,7 @@ public class TransactionsWatchDogService {
             );
         }
         val l1SubmissionData = l1SubmissionDataM.orElseThrow();
+        val txCreationSlot = l1SubmissionData.getCreationSlot().orElseThrow();
 
         val txHash = l1SubmissionData.getTransactionHash().orElseThrow();
         log.info("Checking transaction status changes for txId:{}", txHash);
@@ -201,8 +208,13 @@ public class TransactionsWatchDogService {
             return Either.right(TransactionUpdateCommand.of(tx, txAbsoluteSlot, blockchainPublishStatus, cardanoFinalityScore));
         }
 
+        val txAgeInSlots = chainTip.absoluteSlot() - txCreationSlot;
+        // we have a grace period for rollback, this is to avoid premature rollbacks (e.g. when transaction is in the mempool still)
+        val isRollbackReady = txAgeInSlots > gracePeriodInSeconds(rollbackGracePeriodMinutes);
+
         // this means rollback scenario since we have L1 submission data but no on chain data
-        if (cardanoOnChainDataM.isEmpty()) {
+        // we do not want to prematurely raise ROLLBACK, so we have a grade period but if we are past it, we can safely rollback
+        if (cardanoOnChainDataM.isEmpty() && isRollbackReady) {
             log.warn("Transaction with id: {} is not on chain anymore, rollback?", txId);
 
             val txUpdate = new TransactionUpdateCommand(tx,
@@ -252,6 +264,10 @@ public class TransactionsWatchDogService {
         NONE,
         FINALITY_PROGRESSED,  // this means that transaction is still on chain and we have newer finality score / assurance level available, we just need to update it
         ROLLBACKED // this means that transaction is not on chain anymore, we need to update the status to ROLLBACKED
+    }
+
+    private int gracePeriodInSeconds(int gracePeriodInMinutes) {
+        return gracePeriodInMinutes * 60;
     }
 
 }
