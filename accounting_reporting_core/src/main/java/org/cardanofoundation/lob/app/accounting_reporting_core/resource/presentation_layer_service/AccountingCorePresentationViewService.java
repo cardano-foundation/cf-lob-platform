@@ -177,6 +177,19 @@ public class AccountingCorePresentationViewService {
 
     }
 
+    @Transactional
+    public BatchReprocessView scheduleReIngestionForFailed(String batchId) {
+        val txM = accountingCoreService.scheduleReIngestionForFailed(batchId);
+
+        if (txM.isEmpty()) {
+            return BatchReprocessView.createFail(batchId, txM.getLeft());
+
+        }
+
+        return BatchReprocessView.createSuccess(batchId);
+
+    }
+
     private BatchStatisticsView getStatistics(Set<TransactionView> transactions) {
         val invalid = transactions.stream().filter(transactionView -> INVALID == transactionView.getStatistic()).count();
 
