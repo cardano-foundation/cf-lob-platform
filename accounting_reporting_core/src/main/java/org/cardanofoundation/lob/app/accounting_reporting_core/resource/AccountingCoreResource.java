@@ -27,6 +27,7 @@ import org.zalando.problem.Problem;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.zalando.problem.Status.NOT_FOUND;
 import static org.zalando.problem.Status.OK;
 
@@ -253,6 +254,25 @@ public class AccountingCoreResource {
         return ResponseEntity
                 .ok()
                 .body(txBatchM.orElseThrow());
+    }
+
+    @Tag(name = "Batches", description = "Batches API")
+    @GetMapping(value = "/batches/reprocess/{batchId}",  produces = APPLICATION_JSON_VALUE)
+    @Operation(description = "Batch reprocess",
+            responses = {
+                    @ApiResponse(content = {
+                            @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = BatchReprocessView.class))
+                    }),
+                    @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(example = "{\"title\": \"BATCH_NOT_FOUND\",\"status\": 404,\"detail\": \"Batch with id: {batchId} could not be found\"" +
+                            "}"))})
+            }
+    )
+    public ResponseEntity<?> batchReprocess(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
+        val transactionProcessViewsResult = accountingCorePresentationService.scheduleReIngestionForFailed(batchId);
+
+        return ResponseEntity
+                .status(HttpStatusCode.valueOf(OK.getStatusCode()))
+                .body(transactionProcessViewsResult);
     }
 
     @Deprecated
