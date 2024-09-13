@@ -42,8 +42,8 @@ class ExtractionParametersFilteringServiceTest {
         transactions.add(transaction);
 
         systemExtractionParameters = systemExtractionParameters.toBuilder()
-                .accountPeriodFrom(accountingPeriod)
-                .accountPeriodTo(YearMonth.of(2023, 12))
+                .accountPeriodFrom(accountingPeriod.atDay(1))
+                .accountPeriodTo(LocalDate.of(2023, 12, 1))
                 .build();
 
         userExtractionParameters = userExtractionParameters.toBuilder()
@@ -72,8 +72,8 @@ class ExtractionParametersFilteringServiceTest {
         transactions.add(transaction);
 
         systemExtractionParameters = systemExtractionParameters.toBuilder()
-                .accountPeriodFrom(accountingPeriod)
-                .accountPeriodTo(YearMonth.of(2023, 12))
+                .accountPeriodFrom(accountingPeriod.atDay(1))
+                .accountPeriodTo(LocalDate.of(2023, 12, 1))
                 .build();
 
         userExtractionParameters = userExtractionParameters.toBuilder()
@@ -101,8 +101,8 @@ class ExtractionParametersFilteringServiceTest {
         transactions.add(transaction);
 
         systemExtractionParameters = systemExtractionParameters.toBuilder()
-                .accountPeriodFrom(YearMonth.of(2023, 1))
-                .accountPeriodTo(YearMonth.of(2023, 12))
+                .accountPeriodFrom(LocalDate.of(2023, 1, 1))
+                .accountPeriodTo(LocalDate.of(2023, 12, 1))
                 .build();
 
         userExtractionParameters = userExtractionParameters.toBuilder()
@@ -130,8 +130,8 @@ class ExtractionParametersFilteringServiceTest {
         transactions.add(transaction);
 
         systemExtractionParameters = systemExtractionParameters.toBuilder()
-                .accountPeriodFrom(YearMonth.of(2023, 1))
-                .accountPeriodTo(YearMonth.of(2023, 12))
+                .accountPeriodFrom(LocalDate.of(2023, 1, 1))
+                .accountPeriodTo(LocalDate.of(2023, 12, 1))
                 .build();
 
         userExtractionParameters = userExtractionParameters.toBuilder()
@@ -182,8 +182,8 @@ class ExtractionParametersFilteringServiceTest {
 
     private SystemExtractionParameters createSystemExtractionParameters() {
         return SystemExtractionParameters.builder()
-                .accountPeriodFrom(YearMonth.of(2022, 1))
-                .accountPeriodTo(YearMonth.of(2022, 12))
+                .accountPeriodFrom(LocalDate.of(2022, 1, 1))
+                .accountPeriodTo(LocalDate.of(2022, 12, 1))
                 .build();
     }
 

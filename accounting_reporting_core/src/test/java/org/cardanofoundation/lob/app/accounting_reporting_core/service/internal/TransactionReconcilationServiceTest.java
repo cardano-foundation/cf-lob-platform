@@ -60,8 +60,8 @@ class TransactionReconcilationServiceTest {
         String organisationId = "org1";
         String adapterInstanceId = "adapter1";
         String initiator = "user";
-        LocalDate from = LocalDate.now();
-        LocalDate to = LocalDate.now().plusDays(1);
+        LocalDate from = LocalDate.now(clock);
+        LocalDate to = LocalDate.now(clock).plusDays(1);
 
         transactionReconcilationService.createReconcilation(reconcilationId, organisationId, from, to);
 
@@ -82,8 +82,8 @@ class TransactionReconcilationServiceTest {
     void testFailReconcilation() {
         String reconcilationId = "123";
         String organisationId = "org1";
-        LocalDate from = LocalDate.now();
-        LocalDate to = LocalDate.now().plusDays(1);
+        LocalDate from = LocalDate.now(clock);
+        LocalDate to = LocalDate.now(clock).plusDays(1);
         FatalError error = new FatalError(FatalError.Code.ADAPTER_ERROR, "SubCode", null);
 
         when(transactionReconcilationRepository.findById(reconcilationId)).thenReturn(Optional.empty());
@@ -102,8 +102,8 @@ class TransactionReconcilationServiceTest {
     void testReconcileChunk_ReconcilationNotFound() {
         String reconcilationId = "123";
         String organisationId = "org1";
-        LocalDate fromDate = LocalDate.now();
-        LocalDate toDate = LocalDate.now().plusDays(1);
+        LocalDate fromDate = LocalDate.now(clock);
+        LocalDate toDate = LocalDate.now(clock).plusDays(1);
         Set<TransactionEntity> detachedChunkTxs = Set.of();
 
         when(transactionReconcilationRepository.findById(reconcilationId)).thenReturn(Optional.empty());

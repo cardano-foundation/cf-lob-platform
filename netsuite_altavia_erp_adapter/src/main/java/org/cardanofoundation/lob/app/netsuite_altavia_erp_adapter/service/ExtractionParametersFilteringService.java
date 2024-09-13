@@ -21,11 +21,13 @@ public class ExtractionParametersFilteringService {
         return txs.stream()
                 // this is for sanity reasons since actually we should be filtering out the transactions in the adapter layer and more specifically while making an HTTP call via NetSuiteClient
                 .filter(tx -> {
-                    val txAccountingPeriod = tx.getAccountingPeriod();
+                    val txAccountingPeriod = tx.getAccountingPeriod(); // e.g. 2023-01
+                    val txAccountPeriodBeginning = txAccountingPeriod.atDay(1); // e.g. 2023-01-01
+                    val txAccountPeriodEnd = txAccountingPeriod.atEndOfMonth(); // e.g. 2023-01-31
 
-                    return (txAccountingPeriod.equals(systemExtractionParameters.getAccountPeriodFrom()) || txAccountingPeriod.isAfter(systemExtractionParameters.getAccountPeriodFrom()))
+                    return (txAccountPeriodBeginning.equals(systemExtractionParameters.getAccountPeriodFrom()) || txAccountPeriodBeginning.isAfter(systemExtractionParameters.getAccountPeriodFrom()))
                             &&
-                            (txAccountingPeriod.equals(systemExtractionParameters.getAccountPeriodTo()) || txAccountingPeriod.isBefore(systemExtractionParameters.getAccountPeriodTo()));
+                            (txAccountPeriodEnd.equals(systemExtractionParameters.getAccountPeriodTo()) || txAccountPeriodEnd.isBefore(systemExtractionParameters.getAccountPeriodTo()));
                 })
                 .filter(tx -> userExtractionParameters.getOrganisationId().equals(tx.getOrganisation().getId()))
                 // this is for sanity reasons since actually we should be filtering out the transactions in the adapter layer and more specifically while making an HTTP call via NetSuiteClient
@@ -60,13 +62,9 @@ public class ExtractionParametersFilteringService {
         return txs.stream()
                 .filter(tx -> organisationId.equals(tx.getOrganisation().getId()))
                 // this is for sanity reasons since actually we are filtering out the transactions in the adapter layer and more specifically while making an HTTP call via NetSuiteClient
-                .filter(tx -> {
-                    return tx.getEntryDate().isEqual(from) || tx.getEntryDate().isAfter(from);
-                })
+                .filter(tx -> tx.getEntryDate().isEqual(from) || tx.getEntryDate().isAfter(from))
                 // this is for sanity reasons since actually we are filtering out the transactions in the adapter layer and more specifically while making an HTTP call via NetSuiteClient
-                .filter(tx -> {
-                    return tx.getEntryDate().isEqual(to) || tx.getEntryDate().isBefore(to);
-                })
+                .filter(tx -> tx.getEntryDate().isEqual(to) || tx.getEntryDate().isBefore(to))
                 .collect(Collectors.toSet());
     }
 

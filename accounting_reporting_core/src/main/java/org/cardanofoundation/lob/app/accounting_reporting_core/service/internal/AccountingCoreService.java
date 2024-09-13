@@ -4,11 +4,13 @@ import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.Range;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.ScheduledIngestionEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ScheduledReconcilationEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
+import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
+import static org.zalando.problem.Status.BAD_REQUEST;
 import static org.zalando.problem.Status.NOT_FOUND;
 
 @Service
@@ -30,10 +33,21 @@ public class AccountingCoreService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TransactionBatchRepository transactionBatchRepository;
     private final ERPIncomingDataProcessor erpIncomingDataProcessor;
+    private final OrganisationPublicApiIF organisationPublicApi;
+    private final AccountingPeriodCalculator accountingPeriodCalculator;
 
     @Transactional
-    public void scheduleIngestion(UserExtractionParameters userExtractionParameters) {
+    public Either<Problem, Void> scheduleIngestion(UserExtractionParameters userExtractionParameters) {
         log.info("scheduleIngestion, parameters: {}", userExtractionParameters);
+
+        val organisationId = userExtractionParameters.getOrganisationId();
+        val fromDate = userExtractionParameters.getFrom();
+        val toDate = userExtractionParameters.getTo();
+
+        val dateRangeCheckE = checkIfWithinAccountPeriodRange(organisationId, fromDate, toDate);
+        if (dateRangeCheckE.isLeft()) {
+            return dateRangeCheckE;
+        }
 
         val event = ScheduledIngestionEvent.builder().metadata(EventMetadata.create(ScheduledIngestionEvent.VERSION))
                 .organisationId(userExtractionParameters.getOrganisationId())
@@ -41,24 +55,35 @@ public class AccountingCoreService {
                 .build();
 
         applicationEventPublisher.publishEvent(event);
+
+        return Either.right(null); // all fine
     }
 
     @Transactional
-    public void scheduleReconilation(String organisationId, LocalDate from, LocalDate to) {
-        log.info("scheduleReconilation, organisationId: {}, from: {}, to: {}", organisationId, from, to);
+    public Either<Problem, Void> scheduleReconcilation(String organisationId,
+                                                       LocalDate fromDate,
+                                                       LocalDate toDate) {
+        log.info("scheduleReconilation, organisationId: {}, from: {}, to: {}", organisationId, fromDate, toDate);
+
+        val dateRangeCheckE = checkIfWithinAccountPeriodRange(organisationId, fromDate, toDate);
+        if (dateRangeCheckE.isLeft()) {
+            return dateRangeCheckE;
+        }
 
         val event = ScheduledReconcilationEvent.builder()
                 .organisationId(organisationId)
-                .from(from)
-                .to(to)
+                .from(fromDate)
+                .to(toDate)
                 .metadata(EventMetadata.create(ScheduledReconcilationEvent.VERSION))
                 .build();
 
         applicationEventPublisher.publishEvent(event);
+
+        return Either.right(null); // all fine
     }
 
     @Transactional
-    public Either<Problem, Boolean> scheduleReIngestionForFailed(String batchId) {
+    public Either<Problem, Void> scheduleReIngestionForFailed(String batchId) {
         log.info("scheduleReIngestion..., batchId: {}", batchId);
 
         val txBatchM = transactionBatchRepository.findById(batchId);
@@ -82,7 +107,7 @@ public class AccountingCoreService {
                 .collect(Collectors.toSet());
 
         if (txs.isEmpty()) {
-            return Either.right(true);
+            return Either.right(null);
         }
 
         val processorFlags = ProcessorFlags.builder()
@@ -93,7 +118,48 @@ public class AccountingCoreService {
 
         erpIncomingDataProcessor.continueIngestion(organisationId, batchId, txs.size(), txs, processorFlags);
 
-        return Either.right(true);
+        return Either.right(null);
+    }
+
+    private Either<Problem, Void> checkIfWithinAccountPeriodRange(String organisationId,
+                                                                  LocalDate fromDate,
+                                                                  LocalDate toDate) {
+        if (fromDate.isAfter(toDate)) {
+            return Either.left(Problem.builder()
+                    .withTitle("INVALID_DATE_RANGE")
+                    .withDetail("From date must be before to date")
+                    .withStatus(BAD_REQUEST)
+                    .build());
+        }
+        val userExtractionRange = Range.of(fromDate, toDate);
+
+        val orgM = organisationPublicApi.findByOrganisationId(organisationId);
+
+        if (orgM.isEmpty()) {
+            return Either.left(Problem.builder()
+                    .withTitle("ORGANISATION_NOT_FOUND")
+                    .withDetail(STR."Organisation with id: \{organisationId} not found")
+                    .withStatus(BAD_REQUEST)
+                    .build());
+        }
+        val org = orgM.orElseThrow();
+        val accountingPeriod = accountingPeriodCalculator.calculateAccountingPeriod(org);
+
+        val withinRange = accountingPeriod.containsRange(userExtractionRange);
+        val outsideOfRange = !withinRange;
+
+        if (outsideOfRange) {
+            return Either.left(Problem.builder()
+                    .withTitle("INVALID_DATE_RANGE")
+                    .withDetail(STR."Date range must be within the accounting period: \{accountingPeriod}")
+                    .withStatus(BAD_REQUEST)
+                    .with("accountingPeriodFrom", accountingPeriod.getMinimum())
+                    .with("accountingPeriodTo", accountingPeriod.getMaximum())
+                    .build()
+            );
+        }
+
+        return Either.right(null);
     }
 
 }

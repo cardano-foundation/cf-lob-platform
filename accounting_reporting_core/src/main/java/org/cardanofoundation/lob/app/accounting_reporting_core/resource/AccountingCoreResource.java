@@ -16,9 +16,9 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCoreResourceService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
+import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +39,7 @@ import static org.zalando.problem.Status.OK;
 public class AccountingCoreResource {
 
     private final AccountingCorePresentationViewService accountingCorePresentationService;
-    private final AccountingCoreResourceService accountingCoreResourceService;
+    private final OrganisationPublicApi organisationPublicApi;
     private final ObjectMapper objectMapper;
 
     @Tag(name = "Transactions", description = "Transactions API")
@@ -120,7 +120,7 @@ public class AccountingCoreResource {
             )
     })
     public ResponseEntity<?> extractionTrigger(@Valid @RequestBody ExtractionRequest body) throws JsonProcessingException {
-        val orgM = accountingCoreResourceService.findOrganisationById(body.getOrganisationId());
+        val orgM = organisationPublicApi.findByOrganisationId(body.getOrganisationId());
 
         if (orgM.isEmpty()) {
             val issue = Problem.builder()
@@ -134,15 +134,6 @@ public class AccountingCoreResource {
 
         val org = orgM.orElseThrow();
 
-        if (!accountingCoreResourceService.checkFromToDates(org, body.getDateFrom(), body.getDateTo())) {
-            val issue = Problem.builder()
-                    .withTitle("ORGANISATION_DATE_MISMATCH")
-                    .withDetail(STR."the requested data is outside of accounting period for \{body.getOrganisationId()}")
-                    .withStatus(NOT_FOUND)
-                    .build();
-
-            return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
-        }
         accountingCorePresentationService.extractionTrigger(body);
 
         val response = objectMapper.createObjectNode();

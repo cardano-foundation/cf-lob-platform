@@ -88,7 +88,7 @@ class BlockchainPublisherEventHandlerTest {
                         .id("orgId")
                         .name(Optional.of("orgName"))
                         .build())
-                .accountingPeriod(YearMonth.now())
+                .accountingPeriod(YearMonth.now(clock))
                 .build();
     }
 

@@ -44,8 +44,8 @@ public class Organisation {
     @Column(name = "pre_approve_transactions_dispatch")
     private Boolean preApproveTransactionsDispatch;
 
-    @Column(name = "accounting_period_months", nullable = false)
-    private int accountPeriodMonths;
+    @Column(name = "accounting_period_days", nullable = false)
+    private int accountPeriodDays; // how many days in the past from yesterday
 
     @Column(name = "currency_id", nullable = false)
     private String currencyId;

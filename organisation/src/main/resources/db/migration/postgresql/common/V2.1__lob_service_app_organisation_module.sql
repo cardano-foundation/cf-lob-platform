@@ -4,7 +4,7 @@ CREATE TABLE organisation (
    tax_id_number VARCHAR(255) NOT NULL,
    country_code VARCHAR(2) NOT NULL,
    dummy_account VARCHAR(255),
-   accounting_period_months INT NOT NULL,
+   accounting_period_days INT NOT NULL,
    currency_id VARCHAR(255) NOT NULL,
    admin_email VARCHAR(255) NOT NULL,
    pre_approve_transactions BOOLEAN,

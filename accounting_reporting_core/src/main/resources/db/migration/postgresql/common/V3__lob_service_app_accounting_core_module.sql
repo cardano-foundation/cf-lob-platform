@@ -23,8 +23,8 @@ CREATE TABLE accounting_core_transaction_batch (
    filtering_parameters_from_date DATE NOT NULL,
    filtering_parameters_to_date DATE NOT NULL,
    filtering_parameters_transaction_number VARCHAR(255),
-   filtering_parameters_accounting_period_from CHAR(7), -- NULLable since sometimes when batch fails we do not have it
-   filtering_parameters_accounting_period_to CHAR(7), -- NULLable since sometimes when batch fails we do not have it
+   filtering_parameters_accounting_period_from DATE, -- NULLable since sometimes when batch fails we do not have it
+   filtering_parameters_accounting_period_to DATE, -- NULLable since sometimes when batch fails we do not have it
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
