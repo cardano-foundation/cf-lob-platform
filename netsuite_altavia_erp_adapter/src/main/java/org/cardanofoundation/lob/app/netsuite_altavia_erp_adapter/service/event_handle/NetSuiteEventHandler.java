@@ -23,7 +23,7 @@ public class NetSuiteEventHandler {
 
         netSuiteExtractionService.startNewERPExtraction(
                 event.getOrganisationId(),
-                event.getInitiator(),
+                event.getMetadata().getUser(),
                 event.getUserExtractionParameters()
         );
 
@@ -37,7 +37,6 @@ public class NetSuiteEventHandler {
         netSuiteExtractionService.continueERPExtraction(
                 transactionBatchCreatedEvent.getBatchId(),
                 transactionBatchCreatedEvent.getOrganisationId(),
-                transactionBatchCreatedEvent.getAdapterInstanceId(),
                 transactionBatchCreatedEvent.getUserExtractionParameters(),
                 transactionBatchCreatedEvent.getSystemExtractionParameters()
         );
@@ -51,7 +50,7 @@ public class NetSuiteEventHandler {
 
         netSuiteReconcilationService.startERPReconcilation(
                 scheduledReconcilationEvent.getOrganisationId(),
-                scheduledReconcilationEvent.getInitiator(),
+                scheduledReconcilationEvent.getMetadata().getUser(),
                 scheduledReconcilationEvent.getFrom(),
                 scheduledReconcilationEvent.getTo()
         );
@@ -66,7 +65,6 @@ public class NetSuiteEventHandler {
         netSuiteReconcilationService.continueReconcilation(
                 reconcilationCreatedEvent.getReconciliationId(),
                 reconcilationCreatedEvent.getOrganisationId(),
-                reconcilationCreatedEvent.getAdapterInstanceId(),
                 reconcilationCreatedEvent.getFrom(),
                 reconcilationCreatedEvent.getTo()
         );

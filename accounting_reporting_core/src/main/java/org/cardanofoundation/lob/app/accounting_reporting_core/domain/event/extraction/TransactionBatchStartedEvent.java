@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
+import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.jmolecules.event.annotation.DomainEvent;
 
 @AllArgsConstructor
@@ -17,17 +18,16 @@ import org.jmolecules.event.annotation.DomainEvent;
 @ToString
 public class TransactionBatchStartedEvent {
 
+    public static final String VERSION = "1.0";
+
+    @NotNull
+    private EventMetadata metadata;
+
     @NotBlank
     private String batchId;
 
     @NotBlank
     private String organisationId;
-
-    @NotBlank
-    private String initiator;
-
-    @NotBlank
-    private String adapterInstanceId;
 
     @NotNull
     private UserExtractionParameters userExtractionParameters;

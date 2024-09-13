@@ -31,8 +31,6 @@ public class ERPIncomingDataProcessor {
     @Transactional
     public void initiateIngestion(String batchId,
                                   String organisationId,
-                                  String adapterInstanceId,
-                                  String initiator,
                                   UserExtractionParameters userExtractionParameters,
                                   SystemExtractionParameters systemExtractionParameters) {
         log.info("Processing ERPIngestionStored event.");
@@ -40,8 +38,6 @@ public class ERPIncomingDataProcessor {
         transactionBatchService.createTransactionBatch(
                 batchId,
                 organisationId,
-                adapterInstanceId,
-                initiator,
                 userExtractionParameters,
                 systemExtractionParameters
         );
@@ -78,8 +74,6 @@ public class ERPIncomingDataProcessor {
         transactionReconcilationService.createReconcilation(
                 reconcilationStartedEvent.getReconciliationId(),
                 reconcilationStartedEvent.getOrganisationId(),
-                reconcilationStartedEvent.getAdapterInstanceId(),
-                reconcilationStartedEvent.getInitiator(),
                 reconcilationStartedEvent.getFrom(),
                 reconcilationStartedEvent.getTo()
         );

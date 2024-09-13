@@ -1,10 +1,14 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
+import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.jmolecules.event.annotation.DomainEvent;
 
 import java.util.Set;
@@ -16,12 +20,22 @@ import java.util.Set;
 @DomainEvent
 public class LedgerUpdateCommand {
 
+    public static final String VERSION = "1.0";
+
+    @NotNull
+    private EventMetadata metadata;
+
+    @NotBlank
     private String organisationId;
+
+    @NotNull
+    @Size(min = 1)
     private Set<Transaction> transactions;
 
-    public static LedgerUpdateCommand create(String organisationId,
+    public static LedgerUpdateCommand create(EventMetadata metadata,
+                                             String organisationId,
                                              Set<Transaction> txs) {
-        return new LedgerUpdateCommand(organisationId, txs);
+        return new LedgerUpdateCommand(metadata, organisationId, txs);
     }
 
 }

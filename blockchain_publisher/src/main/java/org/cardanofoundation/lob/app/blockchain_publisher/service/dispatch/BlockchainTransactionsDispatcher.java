@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
 
 import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus.SUBMITTED;
 
@@ -102,7 +101,7 @@ public class BlockchainTransactionsDispatcher {
         val serialisedTx = serialisedTxM.orElseThrow();
         try {
             sendTransactionOnChainAndUpdateDb(serialisedTx);
-        } catch (InterruptedException | TimeoutException | ApiException e) {
+        } catch (InterruptedException | ApiException e) {
             log.error("Error sending transaction on chain and / or updating db", e);
         }
 
@@ -110,13 +109,16 @@ public class BlockchainTransactionsDispatcher {
     }
 
     @Transactional
-    private void sendTransactionOnChainAndUpdateDb(BlockchainTransactions blockchainTransactions) throws InterruptedException, TimeoutException, ApiException {
+    private void sendTransactionOnChainAndUpdateDb(BlockchainTransactions blockchainTransactions) throws InterruptedException, ApiException {
         val txData = blockchainTransactions.serialisedTxData();
-        val l1SubmissionData = transactionSubmissionService.submitTransaction(txData);
+        val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(txData);
         val organisationId = blockchainTransactions.organisationId();
         val allTxs = blockchainTransactions.submittedTransactions();
 
-        updateTransactionStatuses(l1SubmissionData, blockchainTransactions);
+        val txHash = l1SubmissionData.txHash();
+        val txAbsoluteSlotM = l1SubmissionData.absoluteSlot();
+
+        updateTransactionStatuses(txHash, txAbsoluteSlotM, blockchainTransactions);
 
         ledgerUpdatedEventPublisher.sendLedgerUpdatedEvents(organisationId, allTxs);
 
@@ -125,10 +127,12 @@ public class BlockchainTransactionsDispatcher {
 
     @Transactional
     private void updateTransactionStatuses(String txHash,
+                                           Optional<Long> absoluteSlot,
                                            BlockchainTransactions blockchainTransactions) {
         for (val txEntity : blockchainTransactions.submittedTransactions()) {
             txEntity.setL1SubmissionData(Optional.of(L1SubmissionData.builder()
                     .transactionHash(txHash)
+                    .absoluteSlot(absoluteSlot.orElse(null)) // if tx is not confirmed yet, slot will not be available
                     .creationSlot(blockchainTransactions.creationSlot())
                     .publishStatus(SUBMITTED)
                     .build())

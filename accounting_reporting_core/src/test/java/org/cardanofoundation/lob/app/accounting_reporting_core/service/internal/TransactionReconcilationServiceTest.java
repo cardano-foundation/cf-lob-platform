@@ -8,12 +8,10 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reco
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +30,9 @@ class TransactionReconcilationServiceTest {
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Spy
+    private Clock clock = Clock.systemUTC();
 
     @InjectMocks
     private TransactionReconcilationService transactionReconcilationService;
@@ -62,7 +63,7 @@ class TransactionReconcilationServiceTest {
         LocalDate from = LocalDate.now();
         LocalDate to = LocalDate.now().plusDays(1);
 
-        transactionReconcilationService.createReconcilation(reconcilationId, organisationId, adapterInstanceId, initiator, from, to);
+        transactionReconcilationService.createReconcilation(reconcilationId, organisationId, from, to);
 
         ArgumentCaptor<ReconcilationEntity> captor = ArgumentCaptor.forClass(ReconcilationEntity.class);
         verify(transactionReconcilationRepository).save(captor.capture());

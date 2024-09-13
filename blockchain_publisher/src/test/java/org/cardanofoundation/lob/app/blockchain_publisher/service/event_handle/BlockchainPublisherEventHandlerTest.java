@@ -6,13 +6,12 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Trans
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdateCommand;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublisherService;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionConverter;
+import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Optional;
@@ -35,6 +34,9 @@ class BlockchainPublisherEventHandlerTest {
     @Captor
     private ArgumentCaptor<Set<Transaction>> transactionsCaptor;
 
+    @Spy
+    private Clock clock = Clock.systemUTC();
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -46,7 +48,7 @@ class BlockchainPublisherEventHandlerTest {
         // Given
         String organisationId = "org1";
         Set<Transaction> transactions = Set.of(createTransaction("tx1"), createTransaction("tx2"));
-        LedgerUpdateCommand command = LedgerUpdateCommand.create(organisationId, transactions);
+        LedgerUpdateCommand command = LedgerUpdateCommand.create(EventMetadata.create(LedgerUpdateCommand.VERSION), organisationId, transactions);
 
         // When
         blockchainPublisherEventHandler.handleLedgerUpdateCommand(command);
@@ -64,7 +66,7 @@ class BlockchainPublisherEventHandlerTest {
         // Given
         String organisationId = "org1";
         Set<Transaction> transactions = Set.of();  // Empty set of transactions
-        LedgerUpdateCommand command = LedgerUpdateCommand.create(organisationId, transactions);
+        LedgerUpdateCommand command = LedgerUpdateCommand.create(EventMetadata.create(LedgerUpdateCommand.VERSION), organisationId, transactions);
 
         blockchainPublisherEventHandler.handleLedgerUpdateCommand(command);
 
