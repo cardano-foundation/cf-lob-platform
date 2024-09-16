@@ -212,7 +212,6 @@ public class AccountingCorePresentationViewService {
         );
     }
 
-
     private FilteringParametersView getFilteringParameters(FilteringParameters filteringParameters) {
         return new FilteringParametersView(
                 filteringParameters.getTransactionTypes(),

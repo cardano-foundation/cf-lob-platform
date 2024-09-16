@@ -40,7 +40,7 @@ public class OrganisationResource {
         return ResponseEntity.ok().body(
                 organisationService.findAll().stream().map(organisation -> {
                     LocalDate today = LocalDate.now();
-                    LocalDate monthsAgo = today.minusMonths(organisation.getAccountPeriodMonths());
+                    LocalDate monthsAgo = today.minusMonths(organisation.getAccountPeriodDays());
                     LocalDate yesterday = today.minusDays(1);
 
                     return new OrganisationView(
@@ -71,7 +71,7 @@ public class OrganisationResource {
     public ResponseEntity<?> organisationDetailSpecific(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         Optional<OrganisationView> organisation = organisationService.findById(orgId).map(organisation1 -> {
             LocalDate today = LocalDate.now();
-            LocalDate monthsAgo = today.minusMonths(organisation1.getAccountPeriodMonths());
+            LocalDate monthsAgo = today.minusMonths(organisation1.getAccountPeriodDays());
             LocalDate yesterday = today.minusDays(1);
 
             return new OrganisationView(

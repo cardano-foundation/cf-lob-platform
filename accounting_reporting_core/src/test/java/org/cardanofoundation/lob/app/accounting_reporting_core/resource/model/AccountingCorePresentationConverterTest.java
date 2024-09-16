@@ -3,31 +3,32 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.model;
 import io.vavr.control.Either;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Account;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ExtractionRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.SearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.BatchView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.BatchsDetailView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.TransactionView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -35,7 +36,6 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.zalando.problem.Status.NOT_FOUND;
 
 @ExtendWith(MockitoExtension.class)
 class AccountingCorePresentationConverterTest {
@@ -51,6 +51,9 @@ class AccountingCorePresentationConverterTest {
 
     @InjectMocks
     private AccountingCorePresentationViewService accountingCorePresentationConverter;
+
+    @Spy
+    private Clock clock = Clock.systemUTC();
 
     @Test
     void testAllTransactions() {
@@ -177,7 +180,7 @@ class AccountingCorePresentationConverterTest {
         transactionViolation.setTxItemId(Optional.of("txItemId"));
         LocalDate from = LocalDate.now();
         LocalDate to = LocalDate.now();
-        FilteringParameters filteringParameters = new FilteringParameters("pros", List.of(TransactionType.CardCharge), from, to, YearMonth.now(), YearMonth.now(), Collections.singletonList("somestring"));
+        FilteringParameters filteringParameters = new FilteringParameters("pros", List.of(TransactionType.CardCharge), from, to, LocalDate.now(), LocalDate.now(), Collections.singletonList("somestring"));
 
         String batchId = "batch-id";
         TransactionBatchEntity transactionBatchEntity = new TransactionBatchEntity();
@@ -223,8 +226,9 @@ class AccountingCorePresentationConverterTest {
         TransactionView resultTx1 = result.get().getTransactions().stream().filter(
                 transactionView -> transactionView.getId() == "tx-id1"
         ).findFirst().get();
+
         assertEquals("tx-id1", resultTx1.getId());
-        YearMonth today = YearMonth.now();
+        LocalDate today = LocalDate.now(clock);
 
         assertEquals(today, result.get().getFilteringParameters().getAccountingPeriodFrom());
         assertEquals(today, result.get().getFilteringParameters().getAccountingPeriodTo());
@@ -241,9 +245,9 @@ class AccountingCorePresentationConverterTest {
 
         BatchSearchRequest batchSearchRequest = new BatchSearchRequest();
         batchSearchRequest.setOrganisationId("org-id");
-        batchSearchRequest.setFrom(LocalDate.now());
+        batchSearchRequest.setFrom(LocalDate.now(clock));
         batchSearchRequest.setTransactionTypes(Set.of(TransactionType.CardCharge));
-        FilteringParameters filteringParameters = new FilteringParameters("pros", List.of(TransactionType.CardCharge), LocalDate.now(), LocalDate.now(), YearMonth.now(), YearMonth.now(), Collections.singletonList("batch"));
+        FilteringParameters filteringParameters = new FilteringParameters("pros", List.of(TransactionType.CardCharge), LocalDate.now(clock), LocalDate.now(clock), LocalDate.now(clock), LocalDate.now(clock), Collections.singletonList("batch"));
         TransactionBatchEntity transactionBatchEntity = new TransactionBatchEntity();
         BatchStatistics batchStatistics = BatchStatistics.builder().totalTransactionsCount(10).failedTransactionsCount(1).approvedTransactionsCount(9).finalizedTransactionsCount(10).build();
         transactionBatchEntity.setId("batch-id");
@@ -284,7 +288,7 @@ class AccountingCorePresentationConverterTest {
     @Test
     void testBatchReprocess() {
 
-        Mockito.when(accountingCoreService.scheduleReIngestionForFailed("extractionRequest")).thenReturn(Either.right(true));
+        Mockito.when(accountingCoreService.scheduleReIngestionForFailed("extractionRequest")).thenReturn(Either.right(null));
         accountingCorePresentationConverter.scheduleReIngestionForFailed("extractionRequest");
         Mockito.verify(accountingCoreService, Mockito.times(1)).scheduleReIngestionForFailed("extractionRequest");
 
@@ -296,13 +300,11 @@ class AccountingCorePresentationConverterTest {
         Mockito.when(accountingCoreService.scheduleReIngestionForFailed("extractionRequest")).thenReturn(Either.left(Problem.builder()
                 .withTitle("TX_BATCH_NOT_FOUND")
                 .withDetail(STR."Transaction batch with id: extractionRequest not found")
-                .withStatus(NOT_FOUND)
+                .withStatus(Status.NOT_FOUND)
                 .build()));
         accountingCorePresentationConverter.scheduleReIngestionForFailed("extractionRequest");
         Mockito.verify(accountingCoreService, Mockito.times(1)).scheduleReIngestionForFailed("extractionRequest");
-
     }
-
 
     @Test
     void allTransactionsDispatchStatus() {

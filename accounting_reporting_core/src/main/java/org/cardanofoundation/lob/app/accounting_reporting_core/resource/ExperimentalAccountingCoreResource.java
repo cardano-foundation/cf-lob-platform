@@ -33,18 +33,21 @@ public class ExperimentalAccountingCoreResource {
 
     @RequestMapping(value = "/schedule/new", method = POST, produces = "application/json")
     public ResponseEntity<?> schedule() {
+        val now = LocalDate.now();
+
         val userExtractionParameters = UserExtractionParameters.builder()
-                .from(LocalDate.now().minusYears(20))
-                .to(LocalDate.now().minusDays(1))
+                .from(now.minusYears(20))
+                .to(now.minusDays(1))
                 .organisationId("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
                 //.transactionTypes(List.of(TransactionType.CardCharge, TransactionType.FxRevaluation))
                 //.transactionNumbers(List.of("JOURNAL226", "JOURNAL227"))
                 .build();
 
-        accountingCoreService.scheduleIngestion(userExtractionParameters);
-
-        return ResponseEntity.ok()
-                .build();
+        return accountingCoreService.scheduleIngestion(userExtractionParameters).fold(problem -> {
+            return ResponseEntity.status(problem.getStatus().getStatusCode()).body(problem);
+        }, success -> {
+            return ResponseEntity.ok().build();
+        });
     }
 
     @RequestMapping(value = "/reschedule/failed/{batch_id}", method = POST, produces = "application/json")
@@ -77,9 +80,11 @@ public class ExperimentalAccountingCoreResource {
         val fromDate = LocalDate.now().minusYears(20);
         val toDate = LocalDate.now().minusDays(1);
 
-        accountingCoreService.scheduleReconilation(orgId, fromDate, toDate);
-
-        return ResponseEntity.ok().build();
+        return accountingCoreService.scheduleReconcilation(orgId, fromDate, toDate).fold(problem -> {
+            return ResponseEntity.status(problem.getStatus().getStatusCode()).body(problem);
+        }, success -> {
+            return ResponseEntity.ok().build();
+        });
     }
 
 }

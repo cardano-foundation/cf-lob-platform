@@ -34,10 +34,10 @@ public class FilteringParameters {
     private LocalDate to;
 
     @Nullable // nullable since when batch fails we don't always have this info (it is resolved from the org)
-    private YearMonth accountingPeriodFrom;
+    private LocalDate accountingPeriodFrom;
 
     @Nullable // nullable since when batch fails we don't always have this info (it is resolved from the org)
-    private YearMonth accountingPeriodTo;
+    private LocalDate accountingPeriodTo;
 
     @Builder.Default
     @NotNull

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.time.YearMonth;
+import java.time.LocalDate;
 
 @Getter
 @Builder(toBuilder = true)
@@ -17,9 +17,9 @@ public class SystemExtractionParameters {
     private String organisationId;
 
     @NotNull
-    private YearMonth accountPeriodFrom;
+    private LocalDate accountPeriodFrom;
 
     @NotNull
-    private YearMonth accountPeriodTo;
+    private LocalDate accountPeriodTo;
 
 }

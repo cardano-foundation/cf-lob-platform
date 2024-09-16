@@ -5,18 +5,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingPeriodCalculator;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.zalando.problem.Problem;
-
-import java.time.Clock;
-import java.time.YearMonth;
 
 @Slf4j
 @RequiredArgsConstructor
 public class SystemExtractionParametersFactory {
 
-    private final Clock clock;
     private final OrganisationPublicApiIF organisationPublicApi;
+    private final AccountingPeriodCalculator accountingPeriodCalculator;
 
     public Either<Problem, SystemExtractionParameters> createSystemExtractionParameters(String organisationId) {
         val organisationM = organisationPublicApi.findByOrganisationId(organisationId);
@@ -31,14 +29,14 @@ public class SystemExtractionParametersFactory {
 
             return Either.left(issue);
         }
-        val organisation = organisationM.orElseThrow();
+        val org = organisationM.orElseThrow();
 
-        val currentAccountingPeriod = YearMonth.now(clock);
+        val period = accountingPeriodCalculator.calculateAccountingPeriod(org);
 
         return Either.right(SystemExtractionParameters.builder()
                 .organisationId(organisationId)
-                .accountPeriodFrom(currentAccountingPeriod.minusMonths(organisation.getAccountPeriodMonths()))
-                .accountPeriodTo(currentAccountingPeriod)
+                .accountPeriodFrom(period.getMinimum())
+                .accountPeriodTo(period.getMaximum())
                 .build()
         );
     }
