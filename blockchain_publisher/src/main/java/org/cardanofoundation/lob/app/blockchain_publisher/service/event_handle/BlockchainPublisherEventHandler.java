@@ -21,7 +21,7 @@ public class BlockchainPublisherEventHandler {
     public void handleLedgerUpdateCommand(LedgerUpdateCommand command) {
         log.info("Received LedgerUpdateCommand: {}", command);
 
-        blockchainPublisherService.storeTransactionsForDispatchLater(
+        blockchainPublisherService.storeTransactionForDispatchLater(
                 command.getOrganisationId(),
                 command.getTransactions()
         );

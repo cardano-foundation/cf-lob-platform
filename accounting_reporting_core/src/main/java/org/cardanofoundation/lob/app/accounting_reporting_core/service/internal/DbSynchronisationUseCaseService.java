@@ -62,6 +62,7 @@ public class DbSynchronisationUseCaseService {
         processTransactionsForTheFirstTime(batchId, organisationId, transactions, Optional.of(totalTransactionsCount));
     }
 
+    @Transactional
     private void processTransactionsForTheFirstTime(String batchId,
                                                     String organisationId,
                                                     Set<TransactionEntity> incomingDetachedTransactions,

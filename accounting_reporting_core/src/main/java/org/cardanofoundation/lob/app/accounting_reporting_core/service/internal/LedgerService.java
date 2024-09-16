@@ -16,12 +16,10 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
 @Service
@@ -56,7 +54,7 @@ public class LedgerService {
         log.info("Updated dispatch status for statusMapCount: {} completed.", statuses.size());
     }
 
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     public void checkIfThereAreTransactionsToDispatch(String organisationId,
                                                       Set<TransactionEntity> transactions) {
         val txIds = transactions.stream()
@@ -72,7 +70,7 @@ public class LedgerService {
         dispatchTransactions(organisationId, dispatchPendingTransactions);
     }
 
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     public void dispatchPending(int limit) {
         for (val organisation : organisationPublicApi.listAll()) {
             val dispatchTransactions = transactionRepository.findDispatchableTransactions(organisation.getId(), Limit.of(limit));
