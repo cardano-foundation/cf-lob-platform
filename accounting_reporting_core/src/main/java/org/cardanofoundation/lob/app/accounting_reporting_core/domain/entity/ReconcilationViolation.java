@@ -34,10 +34,6 @@ public class ReconcilationViolation {
     @Nullable
     private String sourceDiff;
 
-    @Type(value = io.hypersistence.utils.hibernate.type.json.JsonType.class)
-    @Nullable
-    private String sinkDiff;
-
     @NotBlank
     @Getter
     @Setter
@@ -49,14 +45,6 @@ public class ReconcilationViolation {
 
     public void setSourceDiff(Optional<String> diff) {
         this.sourceDiff = diff.orElse(null);
-    }
-
-    public Optional<String> getSinkDiff() {
-        return Optional.ofNullable(sinkDiff);
-    }
-
-    public void setSinkDiff(Optional<String> sinkDiff) {
-        this.sinkDiff = sinkDiff.orElse(null);
     }
 
 }

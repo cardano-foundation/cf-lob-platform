@@ -53,6 +53,7 @@ CREATE TABLE accounting_core_transaction (
 
    reconcilation_source VARCHAR(255),
    reconcilation_sink VARCHAR(255),
+   reconcilation_final_status VARCHAR(255),
 
    user_comment VARCHAR(255),
 
@@ -189,7 +190,6 @@ CREATE TABLE accounting_core_reconcilation_violation (
     rejection_code VARCHAR(255) NOT NULL,
     transaction_internal_number VARCHAR(255) NOT NULL,
     source_diff jsonb,
-    sink_diff jsonb,
 
     CONSTRAINT fk_accounting_core_reconcilation_violation FOREIGN KEY (reconcilation_id) REFERENCES accounting_core_reconcilation (reconcilation_id),
 

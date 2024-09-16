@@ -96,7 +96,8 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "source", column = @Column(name = "reconcilation_source", nullable = true)),
-        @AttributeOverride(name = "sink", column = @Column(name = "reconcilation_sink", nullable = true))
+        @AttributeOverride(name = "sink", column = @Column(name = "reconcilation_sink", nullable = true)),
+        @AttributeOverride(name = "finalStatus", column = @Column(name = "reconcilation_final_status", nullable = true))
     })
     @Nullable
     @DiffIgnore
