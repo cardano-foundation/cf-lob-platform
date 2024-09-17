@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service;
 
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal.ExtractionParametersFilteringService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

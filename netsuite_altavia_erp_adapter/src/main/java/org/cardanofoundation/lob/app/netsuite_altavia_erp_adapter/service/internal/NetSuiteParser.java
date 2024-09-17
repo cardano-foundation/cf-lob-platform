@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service;
+package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
