@@ -26,7 +26,6 @@ import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.*;
 import static org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem.IdType.TRANSACTION;
-import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 import static org.zalando.problem.Status.METHOD_NOT_ALLOWED;
 
 @Service
@@ -40,17 +39,17 @@ public class TransactionRepositoryGateway {
     private final TransactionRepository transactionRepository;
     private final LedgerService ledgerService;
 
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     public void store(TransactionEntity transactionEntity) {
         transactionRepository.save(transactionEntity);
     }
 
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     public void storeAll(Collection<TransactionEntity> txs) {
         transactionRepository.saveAll(txs);
     }
 
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     // TODO optimise performance because we have to load transaction from db each time and we don't save it in bulk
     protected Either<IdentifiableProblem, TransactionEntity> approveTransaction(String transactionId) {
         log.info("Approving transaction: {}", transactionId);
@@ -77,7 +76,7 @@ public class TransactionRepositoryGateway {
         return Either.right(savedTx);
     }
 
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     // TODO optimise performance because we have to load transaction from db each time and we don't save it in bulk
     private Either<IdentifiableProblem, TransactionEntity> approveTransactionsDispatch(String transactionId) {
         log.info("Approving transaction to dispatch: {}", transactionId);

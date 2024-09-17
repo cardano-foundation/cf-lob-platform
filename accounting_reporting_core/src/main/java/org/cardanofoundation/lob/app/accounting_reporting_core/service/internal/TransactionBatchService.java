@@ -30,7 +30,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionBatchStatus.*;
-import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
 @Service
@@ -86,7 +85,7 @@ public class TransactionBatchService {
         );
     }
 
-    @Transactional(propagation = REQUIRES_NEW)
+    @Transactional
     public void updateTransactionBatchStatusAndStats(String batchId,
                                                      Optional<Integer> totalTransactionsCount) {
         try {

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -75,9 +76,17 @@ public class TransactionsWatchDogService {
         val rollbackEndangeredTransactions = transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(organisationId, Limit.of(limitPerOrg));
         log.info("Found {} transactions that are not finalised yet.", rollbackEndangeredTransactions.size());
 
-        val txEntitiesSetE = rollbackEndangeredTransactions.stream()
-                .map(tx -> checkTransactionStatusAndUpdateInDb(tx, chainTip))
-                .collect(Collectors.toSet());
+        val txEntitiesSetE = new LinkedHashSet<Either<Problem, Optional<TransactionEntity>>>();
+
+        for (val tx : rollbackEndangeredTransactions) {
+            log.info("Transaction with id: {} is not finalised yet", tx.getId());
+
+            try {
+                txEntitiesSetE.add(checkTransactionStatusAndUpdateInDb(tx, chainTip));
+            } catch (Exception e) {
+                log.error("Problem while updating transaction status, issue: {}", e.getMessage());
+            }
+        }
 
         txEntitiesSetE.stream().filter(Either::isLeft).map(Either::getLeft).forEach(problem -> {
             log.error("Problem while updating transaction status, issue: {}", problem);
@@ -99,7 +108,7 @@ public class TransactionsWatchDogService {
 
     @Transactional(propagation = REQUIRES_NEW)
     private Either<Problem, Optional<TransactionEntity>> checkTransactionStatusAndUpdateInDb(TransactionEntity txEntity,
-                                                                                   ChainTip chainTip) {
+                                                                                             ChainTip chainTip) {
         log.info("Checking transaction status for txId:{}", txEntity.getId());
         val txUpdateRequestE = checkTransactionStatusChange(txEntity, chainTip);
         if (txUpdateRequestE.isLeft()) {
