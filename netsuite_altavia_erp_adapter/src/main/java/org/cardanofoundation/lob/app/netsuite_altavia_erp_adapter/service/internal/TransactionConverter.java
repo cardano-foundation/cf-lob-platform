@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service;
+package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal;
 
 import io.vavr.control.Either;
 import jakarta.validation.ConstraintViolation;
@@ -15,7 +15,6 @@ import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreBigDe
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreString;
 import org.cardanofoundation.lob.app.support.collections.Optionals;
 
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 

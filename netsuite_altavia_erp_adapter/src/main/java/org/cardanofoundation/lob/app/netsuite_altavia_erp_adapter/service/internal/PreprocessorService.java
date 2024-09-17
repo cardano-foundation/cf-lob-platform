@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service;
+package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal;
 
 import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
