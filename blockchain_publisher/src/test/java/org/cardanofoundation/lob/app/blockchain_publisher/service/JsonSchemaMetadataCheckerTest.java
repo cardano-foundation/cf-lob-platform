@@ -19,7 +19,7 @@ public class JsonSchemaMetadataCheckerTest {
     @BeforeEach
     public void setUp() {
         val objectMapper = new ObjectMapper();
-        val schemaResource = new ClassPathResource("blockchain_transaction_metadata_schema.json");
+        val schemaResource = new ClassPathResource("lob_blockchain_transaction_metadata_schema.json");
         jsonSchemaMetadataChecker = new JsonSchemaMetadataChecker(objectMapper);
         jsonSchemaMetadataChecker.metatdataSchemaResource = schemaResource;
         jsonSchemaMetadataChecker.enableChecker = true;

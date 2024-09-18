@@ -1,0 +1,65 @@
+package org.cardanofoundation.lob.app.blockchain_reader.service;
+
+import com.bloxbean.cardano.yaci.store.api.blocks.service.BlockService;
+import com.bloxbean.cardano.yaci.store.core.service.EraService;
+import io.vavr.control.Either;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.cardanofoundation.lob.app.blockchain_common.domain.CardanoNetwork;
+import org.cardanofoundation.lob.app.blockchain_common.domain.ChainTip;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
+import org.zalando.problem.Problem;
+
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
+
+@Slf4j
+@RequiredArgsConstructor
+public class YaciChainTipService implements BlockchainDataChainTipService {
+
+    private final BlockService blockService;
+    private final ChainSyncService chainSyncService;
+    private final EraService eraService;
+
+    @Qualifier("blockchain_reader.network")
+    private final CardanoNetwork network;
+    private final CacheManager cacheManager;
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable("chainTipCache")
+    public Either<Problem, ChainTip> getChainTip() {
+        var latestBlockM = blockService.getLatestBlock();
+
+        if (latestBlockM.isEmpty()) {
+            return Either.left(Problem.builder()
+                    .withTitle("CHAIN_TIP_NOT_FOUND")
+                    .withDetail("Unable to get chain tip from backend service.")
+                    .withStatus(INTERNAL_SERVER_ERROR)
+                    .build()
+            );
+        }
+        var latestBlock = latestBlockM.orElseThrow();
+
+        var chainSync = chainSyncService.getSyncStatus(true);
+
+        return Either.right(ChainTip.builder()
+                .blockHash(latestBlock.getHash())
+                .epochNo(eraService.getCurrentEpoch())
+                .absoluteSlot(latestBlock.getSlot())
+                .network(network)
+                .isSynced(chainSync.isSynced())
+                .build());
+    }
+
+    @Scheduled(fixedRateString = "PT15S")
+    public void evictChainTipCache() {
+        log.debug("Evicting chain tip cache...");
+        cacheManager.getCache("chainTipCache")
+                .clear();
+    }
+
+}

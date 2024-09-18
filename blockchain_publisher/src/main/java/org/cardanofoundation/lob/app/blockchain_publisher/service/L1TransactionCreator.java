@@ -18,11 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainTransactions;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.BlockchainDataChainTipService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApi;
 import org.zalando.problem.Problem;
 
 import java.nio.file.Files;
@@ -37,7 +36,6 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.collections4.iterators.PeekingIterator.peekingIterator;
 
-@Service
 @Slf4j
 @RequiredArgsConstructor
 public class L1TransactionCreator {
@@ -48,17 +46,15 @@ public class L1TransactionCreator {
 
     private final MetadataSerialiser metadataSerialiser;
 
-    private final BlockchainDataChainTipService blockchainDataChainTipService;
+    private final BlockchainReaderPublicApi blockchainReaderPublicApi;
 
     private final MetadataChecker jsonSchemaMetadataChecker;
 
     private final Account organiserAccount;
 
-    @Value("${l1.transaction.metadata.label:22222}")
-    private int metadataLabel;
+    private final int metadataLabel;
 
-    @Value("${l1.transaction.debug.store.output.tx:false}")
-    private boolean debugStoreOutputTx = false;
+    private final boolean debugStoreOutputTx;
 
     private String runId;
 
@@ -75,9 +71,9 @@ public class L1TransactionCreator {
 
     public Either<Problem, Optional<BlockchainTransactions>> pullBlockchainTransaction(String organisationId,
                                                                                        Set<TransactionEntity> txs) {
-        val chainTipE = blockchainDataChainTipService.latestChainTip();
+        val chainTipE = blockchainReaderPublicApi.getChainTip();
 
-        return chainTipE.map(chainTip -> createTransaction(organisationId, txs, chainTip.absoluteSlot()));
+        return chainTipE.map(chainTip -> createTransaction(organisationId, txs, chainTip.getAbsoluteSlot()));
     }
 
     private Optional<BlockchainTransactions> createTransaction(String organisationId,

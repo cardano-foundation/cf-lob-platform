@@ -26,7 +26,7 @@ subprojects {
     }
 
     repositories {
-        mavenLocal()
+        //mavenLocal()
         mavenCentral()
         maven {
             name = "sonatypeSnapshots"
@@ -59,8 +59,6 @@ subprojects {
         implementation("org.flywaydb:flyway-core")
         implementation("org.flywaydb:flyway-database-postgresql")
 
-        implementation("com.bloxbean.cardano:cardano-client-crypto:0.5.1")
-
         // needed to store json via JPA in PostgreSQL
         implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.6")
 
@@ -70,6 +68,10 @@ subprojects {
         runtimeOnly("org.springframework.modulith:spring-modulith-actuator")
 
         annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+        annotationProcessor("org.springframework.boot:spring-boot-actuator-autoconfigure")
+        implementation("org.springframework.boot:spring-boot-starter-actuator")
+        implementation("org.springframework.boot:spring-boot-starter-cache")
+
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         testImplementation("org.springframework.boot:spring-boot-testcontainers")
 
@@ -94,6 +96,10 @@ subprojects {
 
         implementation("org.apache.commons:commons-collections4:4.4")
         implementation("org.javers:javers-core:7.6.1")
+
+        implementation("com.bloxbean.cardano:cardano-client-crypto:0.6.0")
+        implementation("com.bloxbean.cardano:cardano-client-backend-blockfrost:0.6.0")
+        implementation("com.bloxbean.cardano:cardano-client-quicktx:0.6.0")
 
         compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")

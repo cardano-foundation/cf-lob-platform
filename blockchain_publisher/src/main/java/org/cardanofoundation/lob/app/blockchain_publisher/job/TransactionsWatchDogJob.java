@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.BlockchainPublisherException;
+import org.cardanofoundation.lob.app.blockchain_common.BlockchainException;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionsWatchDogService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-@ConditionalOnProperty(value = "lob.blockchain.publisher.watchdog.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.blockchain_publisher.watchdog.enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class TransactionsWatchDogJob {
 
     private final TransactionsWatchDogService transactionsWatchDogService;
 
-    @Value("${lob.blockchain.publisher.watchdog.tx.limit.per.org.pull.size:1000}")
+    @Value("${lob.blockchain_publisher.watchdog.tx_limit_per_org_pull_size:1000}")
     private int txStatusInspectionLimitPerOrgPullSize = 1000; // limit per org in one go as in, per one job run
 
     @PostConstruct
@@ -28,8 +28,8 @@ public class TransactionsWatchDogJob {
     }
 
     @Scheduled(
-            fixedDelayString = "${lob.blockchain.publisher.watchdog.fixedDelay:PT1M}",
-            initialDelayString = "${lob.blockchain.publisher.watchdog.initialDelay:PT1M}"
+            fixedDelayString = "${lob.blockchain_publisher.watchdog.fixed_delay:PT1M}",
+            initialDelayString = "${lob.blockchain_publisher.watchdog.initial_delay:PT1M}"
     )
     public void execute() {
         log.info("Inspecting all organisations transactions for on chain transaction status changes...");
@@ -38,7 +38,7 @@ public class TransactionsWatchDogJob {
 
         for (val orgResult : organisationResultsE) {
             if (orgResult.isLeft()) {
-                throw new BlockchainPublisherException(STR."Failed to check transaction statuses for organisation., title:\{orgResult.getLeft().getTitle()}, msg:\{orgResult.getLeft().getDetail()}");
+                throw new BlockchainException(STR."Failed to check transaction statuses for organisation., title:\{orgResult.getLeft().getTitle()}, msg:\{orgResult.getLeft().getDetail()}");
             }
         }
 

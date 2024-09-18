@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.BlockchainPublisherException;
-import org.springframework.beans.factory.annotation.Value;
+import org.cardanofoundation.lob.app.blockchain_common.BlockchainException;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,11 +18,10 @@ import java.net.http.HttpResponse;
 public class CardanoSubmitApiBlockchainTransactionSubmissionService implements BlockchainTransactionSubmissionService {
 
     private final String cardanoSubmitApiUrl;
+    private final String blockfrostApiKey;
 
     private final HttpClient httpClient;
-
-    @Value("${lob.blockchain.publisher.submit.timeout.in.seconds:10}")
-    private int timeoutInSeconds;
+    private final int timeoutInSeconds;
 
     @Override
     @SneakyThrows
@@ -33,6 +31,7 @@ public class CardanoSubmitApiBlockchainTransactionSubmissionService implements B
                 .POST(HttpRequest.BodyPublishers.ofByteArray(txData))
                 .timeout(java.time.Duration.ofSeconds(timeoutInSeconds))
                 .header("Content-Type", "application/cbor")
+                .header("project_id", blockfrostApiKey)
                 .build();
 
         val r = httpClient.send(txTransactionSubmitPostRequest, HttpResponse.BodyHandlers.ofString());
@@ -45,7 +44,7 @@ public class CardanoSubmitApiBlockchainTransactionSubmissionService implements B
             return txId;
         }
 
-        throw new BlockchainPublisherException(STR."Error submitting transaction: \{TransactionUtil.getTxHash(txData)} to CardanoSubmitApi. Response: \{r.statusCode()} - \{r.body()}");
+        throw new BlockchainException(STR."Error submitting transaction: \{TransactionUtil.getTxHash(txData)} to CardanoSubmitApi. Response: \{r.statusCode()} - \{r.body()}");
     }
 
 }

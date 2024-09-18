@@ -11,7 +11,7 @@ import java.util.Set;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "lob.dispatching.strategy", name = "type", havingValue = "IMMEDIATE")
+@ConditionalOnProperty(prefix = "lob.dispatching_strategy", name = "type", havingValue = "IMMEDIATE")
 public class ImmediateDispatchingStrategy implements DispatchingStrategy {
 
     @Override

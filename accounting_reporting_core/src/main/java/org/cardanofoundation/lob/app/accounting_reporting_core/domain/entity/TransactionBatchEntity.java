@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionBatchStatus;
-import org.cardanofoundation.lob.app.support.audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
 import org.springframework.data.domain.Persistable;
 
 import javax.annotation.Nullable;

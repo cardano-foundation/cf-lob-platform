@@ -1,17 +1,16 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
 import io.vavr.control.Either;
+import jakarta.annotation.PostConstruct;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.cardanofoundation.lob.app.blockchain_common.domain.ChainTip;
+import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.ChainTip;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.BlockchainDataChainTipService;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.BlockchainTransactionDataProvider;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.CardanoFinalityScoreCalculator;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApi;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
@@ -36,17 +35,27 @@ import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 public class TransactionsWatchDogService {
 
     private final TransactionEntityRepositoryGateway transactionEntityRepositoryGateway;
-    private final BlockchainTransactionDataProvider blockchainTransactionDataProvider;
-    private final BlockchainDataChainTipService blockchainDataChainTipService;
     private final OrganisationPublicApiIF organisationPublicApiIF;
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
     private final BlockchainPublishStatusMapper blockchainPublishStatusMapper;
-    private final CardanoFinalityScoreCalculator cardanoFinalityScoreCalculator;
+    private final BlockchainReaderPublicApi blockchainReaderPublicApi;
 
-    @Value("${lob.blockchain.publisher.watchdog.rollback.grace.period.minutes:30}")
+    @Value("${lob.blockchain_publisher.watchdog.rollback.grace.period.minutes:30}")
     @Getter
     @Setter
     private int rollbackGracePeriodMinutes = 30;
+
+    @Value("${lob.blockchain_publisher.watchdog.rollbacks.enabled:true}")
+    @Getter
+    @Setter
+    private boolean rollbackSupportEnabled = true;
+
+    @PostConstruct
+    public void init() {
+        log.info("TransactionsWatchDogService configuration: rollbackGracePeriodMinutes={}, rollbacksEnabled={}", rollbackGracePeriodMinutes, rollbackSupportEnabled);
+
+        log.info("TransactionsWatchDogService started");
+    }
 
     @Transactional
     public List<Either<Problem, Set<TransactionEntity>>> checkTransactionStatusesForOrganisation(int limitPerOrg) {
@@ -60,18 +69,25 @@ public class TransactionsWatchDogService {
     public Either<Problem, Set<TransactionEntity>> inspectOrganisationTransactions(String organisationId, int limitPerOrg) {
         log.info("Polling for to check for transaction statuses...");
 
-        val chainTipE = blockchainDataChainTipService.latestChainTip();
+        val chainTipE = blockchainReaderPublicApi.getChainTip();
         if (chainTipE.isEmpty()) {
             log.error("Could not get cardano chain tip, exiting...");
             return Either.left(Problem.builder()
                     .withTitle("CHAIN_TIP_NOT_FOUND")
                     .withDetail("Could not get cardano chain tip")
                     .withStatus(Status.INTERNAL_SERVER_ERROR)
+                    .with("organisationId", organisationId)
+                    .with("reason", chainTipE.getLeft().getDetail())
                     .build()
             );
         }
         val chainTip = chainTipE.get();
-        val chainTipSlot = chainTip.absoluteSlot();
+        if (!chainTip.isSynced()) {
+            log.warn("Chain tip is not synced, exiting...");
+
+            return Either.right(Set.of());
+        }
+        val chainTipSlot = chainTip.getAbsoluteSlot();
 
         val rollbackEndangeredTransactions = transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(organisationId, Limit.of(limitPerOrg));
         log.info("Found {} transactions that are not finalised yet.", rollbackEndangeredTransactions.size());
@@ -189,7 +205,7 @@ public class TransactionsWatchDogService {
         val txHash = l1SubmissionData.getTransactionHash().orElseThrow();
         log.info("Checking transaction status changes for txId:{}", txHash);
 
-        val cardanoOnChainDataE = blockchainTransactionDataProvider.getCardanoOnChainData(txHash);
+        val cardanoOnChainDataE = blockchainReaderPublicApi.getTxDetails(txHash);
         if (cardanoOnChainDataE.isLeft()) {
             return Either.left(cardanoOnChainDataE.getLeft());
         }
@@ -200,10 +216,10 @@ public class TransactionsWatchDogService {
             log.info("Found transaction with id: {} on chain", txHash);
             val cardanoOnChainData = cardanoOnChainDataM.orElseThrow();
             val txSubmissionAbsoluteSlot = cardanoOnChainData.getAbsoluteSlot();
-            val chainTipAbsoluteSlot = chainTip.absoluteSlot();
+            val chainTipAbsoluteSlot = chainTip.getAbsoluteSlot();
             val txAbsoluteSlot = cardanoOnChainData.getAbsoluteSlot();
 
-            val cardanoFinalityScore = cardanoFinalityScoreCalculator.calculateFinalityScore(chainTipAbsoluteSlot, txSubmissionAbsoluteSlot);
+            val cardanoFinalityScore = cardanoOnChainData.getFinalityScore();
             val blockchainPublishStatus = blockchainPublishStatusMapper.convert(cardanoFinalityScore);
 
             // check if new status is different than the one we have in the db
@@ -217,13 +233,13 @@ public class TransactionsWatchDogService {
             return Either.right(TransactionUpdateCommand.of(tx, txAbsoluteSlot, blockchainPublishStatus, cardanoFinalityScore));
         }
 
-        val txAgeInSlots = chainTip.absoluteSlot() - txCreationSlot;
+        val txAgeInSlots = chainTip.getAbsoluteSlot() - txCreationSlot;
         // we have a grace period for rollback, this is to avoid premature rollbacks (e.g. when transaction is in the mempool still)
-        val isRollbackReady = txAgeInSlots > gracePeriodInSeconds(rollbackGracePeriodMinutes);
+        val isRollbackReadyTimewise = txAgeInSlots > gracePeriodInSeconds(rollbackGracePeriodMinutes);
 
         // this means rollback scenario since we have L1 submission data but no on chain data
         // we do not want to prematurely raise ROLLBACK, so we have a grade period but if we are past it, we can safely rollback
-        if (cardanoOnChainDataM.isEmpty() && isRollbackReady) {
+        if (cardanoOnChainDataM.isEmpty() && isRollbackReadyTimewise && rollbackSupportEnabled) {
             log.warn("Transaction with id: {} is not on chain anymore, rollback?", txId);
 
             val txUpdate = new TransactionUpdateCommand(tx,
@@ -246,7 +262,7 @@ public class TransactionsWatchDogService {
 
         private final TransactionEntity transactionEntity;
         private final Optional<BlockchainPublishStatus> blockchainPublishStatus;
-        private final Optional<CardanoFinalityScore> finalityScore;
+        private final Optional<FinalityScore> finalityScore;
         private final Optional<Long> absoluteSlot;
         private final TransactionUpdateType transactionUpdateType;
 
@@ -257,7 +273,7 @@ public class TransactionsWatchDogService {
         public static TransactionUpdateCommand of(TransactionEntity transactionEntity,
                                                   long absoluteSlot,
                                                   BlockchainPublishStatus changedStatus,
-                                                  CardanoFinalityScore finalityScore) {
+                                                  FinalityScore finalityScore) {
             return new TransactionUpdateCommand(
                     transactionEntity,
                     Optional.of(changedStatus),

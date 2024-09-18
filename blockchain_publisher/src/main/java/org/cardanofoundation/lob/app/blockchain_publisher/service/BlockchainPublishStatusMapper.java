@@ -3,8 +3,8 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
+import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,24 +16,24 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 public class BlockchainPublishStatusMapper {
 
     public LedgerDispatchStatus convert(BlockchainPublishStatus blockchainPublishStatus,
-                                        CardanoFinalityScore cardanoFinalityScore) {
-        return convert(Optional.of(blockchainPublishStatus), Optional.of(cardanoFinalityScore));
+                                        FinalityScore finalityScore) {
+        return convert(Optional.of(blockchainPublishStatus), Optional.of(finalityScore));
     }
 
     public LedgerDispatchStatus convert(BlockchainPublishStatus blockchainPublishStatus) {
         return convert(Optional.of(blockchainPublishStatus), Optional.empty());
     }
 
-    protected LedgerDispatchStatus convertToLedgerDispatchStatus(CardanoFinalityScore cardanoFinalityScore) {
-        return switch (cardanoFinalityScore) {
+    protected LedgerDispatchStatus convertToLedgerDispatchStatus(FinalityScore finalityScore) {
+        return switch (finalityScore) {
             case VERY_LOW, LOW, MEDIUM -> LedgerDispatchStatus.DISPATCHED;
             case HIGH, VERY_HIGH, ULTRA_HIGH -> LedgerDispatchStatus.COMPLETED;
             case FINAL -> LedgerDispatchStatus.FINALIZED;
         };
     }
 
-    public BlockchainPublishStatus convert(CardanoFinalityScore cardanoFinalityScore) {
-        return switch (cardanoFinalityScore) {
+    public BlockchainPublishStatus convert(FinalityScore finalityScore) {
+        return switch (finalityScore) {
             case VERY_LOW, LOW, MEDIUM -> BlockchainPublishStatus.VISIBLE_ON_CHAIN;
             case HIGH, VERY_HIGH, ULTRA_HIGH -> BlockchainPublishStatus.COMPLETED;
             case FINAL -> BlockchainPublishStatus.FINALIZED;
@@ -53,7 +53,7 @@ public class BlockchainPublishStatusMapper {
     }
 
     public LedgerDispatchStatus convert(Optional<BlockchainPublishStatus> blockchainPublishStatus,
-                                        Optional<CardanoFinalityScore> cardanoFinalityScore) {
+                                        Optional<FinalityScore> cardanoFinalityScore) {
         return blockchainPublishStatus.map(status -> {
             return switch (status) {
                 case STORED, ROLLBACKED -> LedgerDispatchStatus.MARK_DISPATCH;

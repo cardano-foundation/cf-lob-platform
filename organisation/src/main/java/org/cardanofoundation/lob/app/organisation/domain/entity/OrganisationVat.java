@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.cardanofoundation.lob.app.support.audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
 
 import java.math.BigDecimal;
 

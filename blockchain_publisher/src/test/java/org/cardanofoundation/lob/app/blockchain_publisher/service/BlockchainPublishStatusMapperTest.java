@@ -2,8 +2,8 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
+import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -54,17 +54,17 @@ public class BlockchainPublishStatusMapperTest {
     @Test
     void testConvertWithCompletedStatusAndHighAssurance() {
         assertAll(
-                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(CardanoFinalityScore.VERY_LOW)))
+                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(FinalityScore.VERY_LOW)))
                         .isEqualTo(LedgerDispatchStatus.DISPATCHED),
-                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(CardanoFinalityScore.LOW)))
+                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(FinalityScore.LOW)))
                         .isEqualTo(LedgerDispatchStatus.DISPATCHED),
-                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(CardanoFinalityScore.HIGH)))
+                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(FinalityScore.HIGH)))
                         .isEqualTo(LedgerDispatchStatus.COMPLETED),
-                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(CardanoFinalityScore.VERY_HIGH)))
+                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(FinalityScore.VERY_HIGH)))
                         .isEqualTo(LedgerDispatchStatus.COMPLETED),
-                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(CardanoFinalityScore.ULTRA_HIGH)))
+                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(FinalityScore.ULTRA_HIGH)))
                         .isEqualTo(LedgerDispatchStatus.COMPLETED),
-                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(CardanoFinalityScore.FINAL)))
+                () -> assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), Optional.of(FinalityScore.FINAL)))
                         .isEqualTo(LedgerDispatchStatus.FINALIZED)
         );
     }
@@ -72,13 +72,13 @@ public class BlockchainPublishStatusMapperTest {
     @Test
     void testConvertWithOnlyCardanoFinalityScore() {
         assertAll(
-                () -> assertThat(mapper.convertToLedgerDispatchStatus(CardanoFinalityScore.VERY_LOW)).isEqualTo(LedgerDispatchStatus.DISPATCHED),
-                () -> assertThat(mapper.convertToLedgerDispatchStatus(CardanoFinalityScore.LOW)).isEqualTo(LedgerDispatchStatus.DISPATCHED),
-                () -> assertThat(mapper.convertToLedgerDispatchStatus(CardanoFinalityScore.MEDIUM)).isEqualTo(LedgerDispatchStatus.DISPATCHED),
-                () -> assertThat(mapper.convertToLedgerDispatchStatus(CardanoFinalityScore.HIGH)).isEqualTo(LedgerDispatchStatus.COMPLETED),
-                () -> assertThat(mapper.convertToLedgerDispatchStatus(CardanoFinalityScore.VERY_HIGH)).isEqualTo(LedgerDispatchStatus.COMPLETED),
-                () -> assertThat(mapper.convertToLedgerDispatchStatus(CardanoFinalityScore.ULTRA_HIGH)).isEqualTo(LedgerDispatchStatus.COMPLETED),
-                () -> assertThat(mapper.convertToLedgerDispatchStatus(CardanoFinalityScore.FINAL)).isEqualTo(LedgerDispatchStatus.FINALIZED)
+                () -> assertThat(mapper.convertToLedgerDispatchStatus(FinalityScore.VERY_LOW)).isEqualTo(LedgerDispatchStatus.DISPATCHED),
+                () -> assertThat(mapper.convertToLedgerDispatchStatus(FinalityScore.LOW)).isEqualTo(LedgerDispatchStatus.DISPATCHED),
+                () -> assertThat(mapper.convertToLedgerDispatchStatus(FinalityScore.MEDIUM)).isEqualTo(LedgerDispatchStatus.DISPATCHED),
+                () -> assertThat(mapper.convertToLedgerDispatchStatus(FinalityScore.HIGH)).isEqualTo(LedgerDispatchStatus.COMPLETED),
+                () -> assertThat(mapper.convertToLedgerDispatchStatus(FinalityScore.VERY_HIGH)).isEqualTo(LedgerDispatchStatus.COMPLETED),
+                () -> assertThat(mapper.convertToLedgerDispatchStatus(FinalityScore.ULTRA_HIGH)).isEqualTo(LedgerDispatchStatus.COMPLETED),
+                () -> assertThat(mapper.convertToLedgerDispatchStatus(FinalityScore.FINAL)).isEqualTo(LedgerDispatchStatus.FINALIZED)
         );
     }
 
@@ -103,7 +103,7 @@ public class BlockchainPublishStatusMapperTest {
     @Test
     void testConvertWithCompletedStatusAndInvalidFinalityScore() {
         // Assuming we may have an invalid score or handling null
-        Optional<CardanoFinalityScore> invalidScore = Optional.empty();
+        Optional<FinalityScore> invalidScore = Optional.empty();
         assertThat(mapper.convert(Optional.of(BlockchainPublishStatus.COMPLETED), invalidScore))
                 .isEqualTo(LedgerDispatchStatus.DISPATCHED);
     }
@@ -140,14 +140,14 @@ public class BlockchainPublishStatusMapperTest {
     @Test
     void testConvert_withAllFinalityScores() {
         // Arrange
-        Map<CardanoFinalityScore, BlockchainPublishStatus> testCases = Map.of(
-                CardanoFinalityScore.VERY_LOW, BlockchainPublishStatus.VISIBLE_ON_CHAIN,
-                CardanoFinalityScore.LOW, BlockchainPublishStatus.VISIBLE_ON_CHAIN,
-                CardanoFinalityScore.MEDIUM, BlockchainPublishStatus.VISIBLE_ON_CHAIN,
-                CardanoFinalityScore.HIGH, BlockchainPublishStatus.COMPLETED,
-                CardanoFinalityScore.VERY_HIGH, BlockchainPublishStatus.COMPLETED,
-                CardanoFinalityScore.ULTRA_HIGH, BlockchainPublishStatus.COMPLETED,
-                CardanoFinalityScore.FINAL, BlockchainPublishStatus.FINALIZED
+        Map<FinalityScore, BlockchainPublishStatus> testCases = Map.of(
+                FinalityScore.VERY_LOW, BlockchainPublishStatus.VISIBLE_ON_CHAIN,
+                FinalityScore.LOW, BlockchainPublishStatus.VISIBLE_ON_CHAIN,
+                FinalityScore.MEDIUM, BlockchainPublishStatus.VISIBLE_ON_CHAIN,
+                FinalityScore.HIGH, BlockchainPublishStatus.COMPLETED,
+                FinalityScore.VERY_HIGH, BlockchainPublishStatus.COMPLETED,
+                FinalityScore.ULTRA_HIGH, BlockchainPublishStatus.COMPLETED,
+                FinalityScore.FINAL, BlockchainPublishStatus.FINALIZED
         );
 
         // Act & Assert

@@ -11,19 +11,19 @@ import org.springframework.stereotype.Service;
 @Service("blockchain_publisher.TransactionDispatcherJob")
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "lob.blockchain.publisher.dispatcher.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.blockchain_publisher.dispatcher.enabled", havingValue = "true")
 public class TransactionDispatcherJob {
 
     private final BlockchainTransactionsDispatcher blockchainTransactionsDispatcher;
 
     @PostConstruct
     public void init() {
-        log.info("TransactionDispatcherJob is enabled.");
+        log.info("blockchain_publisher.TransactionDispatcherJob is enabled.");
     }
 
     @Scheduled(
-            fixedDelayString = "${lob.blockchain.publisher.dispatcher.fixedDelay:PT10S}",
-            initialDelayString = "${lob.blockchain.publisher.dispatcher.initialDelay:PT1M}")
+            fixedDelayString = "${lob.blockchain_publisher.dispatcher.fixed_delay:PT10S}",
+            initialDelayString = "${lob.blockchain_publisher.dispatcher.initial_delay:PT1M}")
     public void execute() {
         log.info("Pooling for blockchain transactions to be send to the blockchain...");
 
