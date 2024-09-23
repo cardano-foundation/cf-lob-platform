@@ -150,7 +150,7 @@ public class AccountingCoreService {
 
         if (outsideOfRange) {
             return Either.left(Problem.builder()
-                    .withTitle("INVALID_DATE_RANGE")
+                    .withTitle("ORGANISATION_DATE_MISMATCH")
                     .withDetail(STR."Date range must be within the accounting period: \{accountingPeriod}")
                     .withStatus(BAD_REQUEST)
                     .with("accountingPeriodFrom", accountingPeriod.getMinimum())

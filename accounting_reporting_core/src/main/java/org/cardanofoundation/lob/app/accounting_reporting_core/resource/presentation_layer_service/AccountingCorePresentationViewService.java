@@ -15,6 +15,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zalando.problem.Problem;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -113,7 +114,7 @@ public class AccountingCorePresentationViewService {
     }
 
     @Transactional
-    public void extractionTrigger(ExtractionRequest body) {
+    public Either<Problem, Void> extractionTrigger(ExtractionRequest body) {
         val fp = UserExtractionParameters.builder()
                 .from(LocalDate.parse(body.getDateFrom()))
                 .to(LocalDate.parse(body.getDateTo()))
@@ -122,7 +123,7 @@ public class AccountingCorePresentationViewService {
                 .transactionNumbers(body.getTransactionNumbers())
                 .build();
 
-        accountingCoreService.scheduleIngestion(fp);
+        return accountingCoreService.scheduleIngestion(fp);
     }
 
     @Transactional
