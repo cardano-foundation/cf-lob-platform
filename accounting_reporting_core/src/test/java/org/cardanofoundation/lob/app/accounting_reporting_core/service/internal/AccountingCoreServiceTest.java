@@ -115,7 +115,7 @@ class AccountingCoreServiceTest {
 
         // Then
         assertThat(result.isLeft()).isTrue();
-        assertThat(result.getLeft().getTitle()).isEqualTo("INVALID_DATE_RANGE");
+        assertThat(result.getLeft().getTitle()).isEqualTo("ORGANISATION_DATE_MISMATCH");
         assertThat(result.getLeft().getStatus()).isEqualTo(Status.BAD_REQUEST);
     }
 
