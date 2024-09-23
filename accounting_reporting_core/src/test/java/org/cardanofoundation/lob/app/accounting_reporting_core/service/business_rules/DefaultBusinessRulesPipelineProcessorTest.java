@@ -1,8 +1,11 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules;
 
+import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OrganisationTransactions;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,8 +41,10 @@ class DefaultBusinessRulesPipelineProcessorTest {
         // Assert
         verify(transaction1).setAutomatedValidationStatus(ValidationStatus.VALIDATED);
         verify(transaction1).clearAllViolations();
+        verify(transaction1,times(0)).clearAllItemsRejectionsSource(Source.LOB);
         verify(transaction2).setAutomatedValidationStatus(ValidationStatus.VALIDATED);
         verify(transaction2).clearAllViolations();
+        verify(transaction2,times(0)).clearAllItemsRejectionsSource(Source.LOB);
     }
 
     @Test
@@ -71,4 +76,30 @@ class DefaultBusinessRulesPipelineProcessorTest {
                 .doesNotThrowAnyException();
     }
 
+    @Test
+    void run_shouldValidateAndClearViolationsaNDiTEMSForAllTransactions() {
+        // Arrange
+        TransactionEntity transaction1 = mock(TransactionEntity.class);
+        TransactionEntity transaction2 = mock(TransactionEntity.class);
+        TransactionItemEntity transactionItemEntity1 = mock(TransactionItemEntity.class);
+        transactionItemEntity1.setTransaction(transaction1);
+        transaction1.setItems(Set.of(transactionItemEntity1));
+        OrganisationTransactions allOrgTransactions = mock(OrganisationTransactions.class);
+        val processorFlags = ProcessorFlags.builder()
+                .reprocess(true)
+                .build();
+        when(allOrgTransactions.transactions()).thenReturn(Set.of(transaction1, transaction2));
+
+        // Act
+        processor.run(allOrgTransactions, processorFlags);
+
+        // Assert
+        verify(transaction1).setAutomatedValidationStatus(ValidationStatus.VALIDATED);
+        verify(transaction1).clearAllViolations();
+        verify(transaction1,times(1)).clearAllItemsRejectionsSource(Source.LOB);
+        verify(transaction2).setAutomatedValidationStatus(ValidationStatus.VALIDATED);
+        verify(transaction2).clearAllViolations();
+        verify(transaction2,times(1)).clearAllItemsRejectionsSource(Source.LOB);
+
+    }
 }

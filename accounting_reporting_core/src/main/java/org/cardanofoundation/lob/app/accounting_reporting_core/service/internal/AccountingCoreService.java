@@ -98,12 +98,12 @@ public class AccountingCoreService {
         val txBatch = txBatchM.get();
 
         val txs =  txBatch.getTransactions().stream()
-                .filter(tx -> tx.getAutomatedValidationStatus() == FAILED)
+                //.filter(tx -> tx.getAutomatedValidationStatus() == FAILED)
                 // reprocess only the ones that have not been approved to dispatch yet, actually it is just a sanity check because it should never happen
                 // and we should never allow approving failed transactions
                 .filter(tx -> !tx.allApprovalsPassedForTransactionDispatch())
-                // we are interested only in the ones that have LOB violations (conversion issues) or rejection issues
-                .filter(tx -> tx.getViolations().stream().anyMatch(v -> v.getSource() == LOB) || tx.hasAnyRejection())
+                // we are interested only  in the ones that have LOB violations (conversion issues) or rejection issues
+                .filter(tx -> tx.getViolations().stream().anyMatch(v -> v.getSource() == LOB) || tx.getItems().stream().anyMatch(i -> i.getRejection().stream().anyMatch(rr -> rr.getRejectionReason().getSource().equals(LOB))))
                 .collect(Collectors.toSet());
 
         if (txs.isEmpty()) {
