@@ -27,7 +27,6 @@ import org.zalando.problem.Problem;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.zalando.problem.Status.NOT_FOUND;
 import static org.zalando.problem.Status.OK;
 
@@ -119,7 +118,7 @@ public class AccountingCoreResource {
                     responseCode = "202"
             )
     })
-    public ResponseEntity<?> extractionTrigger(@Valid @RequestBody ExtractionRequest body) throws JsonProcessingException {
+    public ResponseEntity<?> extractionTrigger(@Valid @RequestBody ExtractionRequest body) {
         val orgM = organisationPublicApi.findByOrganisationId(body.getOrganisationId());
 
         if (orgM.isEmpty()) {
@@ -134,16 +133,27 @@ public class AccountingCoreResource {
 
         val org = orgM.orElseThrow();
 
-        accountingCorePresentationService.extractionTrigger(body);
+        val extractionResultE = accountingCorePresentationService.extractionTrigger(body);
 
-        val response = objectMapper.createObjectNode();
+        return extractionResultE.fold(
+                problem -> {
+                    return ResponseEntity
+                            .status(extractionResultE.getLeft().getStatus().getStatusCode())
+                            .body(extractionResultE.getLeft());
+                },
+                success -> {
+                    log.info("Extraction triggered successfully for organisation: {}", org.getId());
 
-        response.put("event", "EXTRACTION");
-        response.put("message", "We have received your extraction request now. Please review imported transactions from the batch list.");
+                    val response = objectMapper.createObjectNode();
 
-        return ResponseEntity
-                .status(HttpStatusCode.valueOf(202))
-                .body(objectMapper.writeValueAsString(response));
+                    response.put("event", "EXTRACTION");
+                    response.put("message", "We have received your extraction request now. Please review imported transactions from the batch list.");
+
+                    return ResponseEntity
+                            .status(HttpStatusCode.valueOf(202))
+                            .body(response);
+                }
+        );
     }
 
     @Tag(name = "Transactions", description = "Transactions Approval API")
@@ -207,8 +217,8 @@ public class AccountingCoreResource {
             }
     )
     public ResponseEntity<?> listAllBatches(@Valid @RequestBody BatchSearchRequest body,
-                                          @RequestParam(name = "page", defaultValue = "0") int page,
-                                          @RequestParam(name = "limit", defaultValue = "10") int limit) {
+                                            @RequestParam(name = "page", defaultValue = "0") int page,
+                                            @RequestParam(name = "limit", defaultValue = "10") int limit) {
         body.setLimit(limit);
         body.setPage(page);
 
