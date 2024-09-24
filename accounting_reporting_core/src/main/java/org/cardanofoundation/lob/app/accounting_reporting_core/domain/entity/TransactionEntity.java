@@ -8,14 +8,12 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annot
 import org.cardanofoundation.lob.app.support.audit.AuditEntity;
 import org.javers.core.metamodel.annotation.DiffIgnore;
 import org.springframework.data.domain.Persistable;
-
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.EAGER;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.NOT_DISPATCHED;
@@ -130,6 +128,17 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
     public void clearAllViolations() {
         violations.clear();
         recalcValidationStatus();
+    }
+
+    public void clearAllItemsRejectionsSource(Source source) {
+
+        for (TransactionItemEntity txItem : items) {
+            if (txItem.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource().equals(source))) {
+                txItem.setRejection(Optional.empty());
+            }
+
+        }
+
     }
 
     public boolean hasAnyRejection() {

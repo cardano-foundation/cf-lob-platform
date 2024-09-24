@@ -26,7 +26,6 @@ public class ERPIncomingDataProcessor {
     private final BusinessRulesPipelineProcessor businessRulesPipelineProcessor;
     private final TransactionBatchService transactionBatchService;
     private final DbSynchronisationUseCaseService dbSynchronisationUseCaseService;
-    private final TransactionConverter transactionConverter;
 
     @Transactional
     public void initiateIngestion(String batchId,
@@ -56,7 +55,7 @@ public class ERPIncomingDataProcessor {
         val allOrgTransactions = new OrganisationTransactions(organisationId, transactions);
 
         // run or re-run business rules
-        businessRulesPipelineProcessor.run(allOrgTransactions);
+        businessRulesPipelineProcessor.run(allOrgTransactions, processorFlags);
 
         dbSynchronisationUseCaseService.execute(batchId,
                 allOrgTransactions,
