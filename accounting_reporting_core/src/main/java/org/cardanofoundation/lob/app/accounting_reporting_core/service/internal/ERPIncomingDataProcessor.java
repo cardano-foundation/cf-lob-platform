@@ -91,7 +91,7 @@ public class ERPIncomingDataProcessor {
         val organisationTransactions = new OrganisationTransactions(organisationId, chunkDetachedTxEntities);
 
         // run or re-run business rules
-        businessRulesPipelineProcessor.run(organisationTransactions);
+        businessRulesPipelineProcessor.run(organisationTransactions, new ProcessorFlags(ProcessorFlags.Trigger.RECONCILATION));
 
         transactionReconcilationService.reconcileChunk(
                 reconcilationId,

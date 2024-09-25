@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchemaFactory;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,9 +23,11 @@ public class JsonSchemaMetadataChecker implements MetadataChecker {
     private final ObjectMapper objectMapper;
 
     @Value("classpath:lob_blockchain_transaction_metadata_schema.json")
+    @Setter
     protected Resource metatdataSchemaResource;
 
     @Value("${lob.l1.transaction.metadata.validation.enable:true}")
+    @Setter
     protected boolean enableChecker;
 
     @PostConstruct

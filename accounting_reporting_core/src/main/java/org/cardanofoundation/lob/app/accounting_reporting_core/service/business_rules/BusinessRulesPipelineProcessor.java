@@ -4,8 +4,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Organ
 
 public interface BusinessRulesPipelineProcessor {
 
-    void run(OrganisationTransactions passedTransactions,ProcessorFlags processorFlags);
-
-    void run(OrganisationTransactions passedTransactions);
+    void run(OrganisationTransactions passedTransactions, ProcessorFlags processorFlags);
 
 }

@@ -36,15 +36,18 @@ class DefaultBusinessRulesPipelineProcessorTest {
         when(allOrgTransactions.transactions()).thenReturn(Set.of(transaction1, transaction2));
 
         // Act
-        processor.run(allOrgTransactions);
+        processor.run(allOrgTransactions, new ProcessorFlags(ProcessorFlags.Trigger.EXTRACTION));
 
         // Assert
         verify(transaction1).setAutomatedValidationStatus(ValidationStatus.VALIDATED);
         verify(transaction1).clearAllViolations();
-        verify(transaction1,times(0)).clearAllItemsRejectionsSource(Source.LOB);
+        verify(transaction1, never()).clearAllItemsRejectionsSource(Source.LOB);
+        verify(transaction1, times(1)).clearAllItemsRejectionsSource(Source.ERP);
+
         verify(transaction2).setAutomatedValidationStatus(ValidationStatus.VALIDATED);
         verify(transaction2).clearAllViolations();
-        verify(transaction2,times(0)).clearAllItemsRejectionsSource(Source.LOB);
+        verify(transaction2, never()).clearAllItemsRejectionsSource(Source.LOB);
+        verify(transaction2, times(1)).clearAllItemsRejectionsSource(Source.ERP);
     }
 
     @Test
@@ -56,12 +59,15 @@ class DefaultBusinessRulesPipelineProcessorTest {
         when(allOrgTransactions.transactions()).thenReturn(Set.of(transaction));
 
         // Act
-        processor.run(allOrgTransactions);
+        processor.run(allOrgTransactions, new ProcessorFlags(ProcessorFlags.Trigger.EXTRACTION));
 
         // Assert
         for (PipelineTask pipelineTask : pipelineTasks) {
             verify(pipelineTask).run(allOrgTransactions);
         }
+
+        verify(transaction, never()).clearAllItemsRejectionsSource(Source.LOB);
+        verify(transaction, times(1)).clearAllItemsRejectionsSource(Source.ERP);
     }
 
     @Test
@@ -72,7 +78,7 @@ class DefaultBusinessRulesPipelineProcessorTest {
         when(allOrgTransactions.transactions()).thenReturn(Set.of());
 
         // Act & Assert
-        assertThatCode(() -> processor.run(allOrgTransactions))
+        assertThatCode(() -> processor.run(allOrgTransactions, new ProcessorFlags(ProcessorFlags.Trigger.EXTRACTION)))
                 .doesNotThrowAnyException();
     }
 
@@ -85,9 +91,8 @@ class DefaultBusinessRulesPipelineProcessorTest {
         transactionItemEntity1.setTransaction(transaction1);
         transaction1.setItems(Set.of(transactionItemEntity1));
         OrganisationTransactions allOrgTransactions = mock(OrganisationTransactions.class);
-        val processorFlags = ProcessorFlags.builder()
-                .reprocess(true)
-                .build();
+        val processorFlags = new ProcessorFlags(ProcessorFlags.Trigger.REPROCESSING);
+
         when(allOrgTransactions.transactions()).thenReturn(Set.of(transaction1, transaction2));
 
         // Act
@@ -96,10 +101,15 @@ class DefaultBusinessRulesPipelineProcessorTest {
         // Assert
         verify(transaction1).setAutomatedValidationStatus(ValidationStatus.VALIDATED);
         verify(transaction1).clearAllViolations();
-        verify(transaction1,times(1)).clearAllItemsRejectionsSource(Source.LOB);
+
+        verify(transaction1, never()).clearAllItemsRejectionsSource(Source.ERP);
+        verify(transaction1, times(1)).clearAllItemsRejectionsSource(Source.LOB);
+
         verify(transaction2).setAutomatedValidationStatus(ValidationStatus.VALIDATED);
         verify(transaction2).clearAllViolations();
-        verify(transaction2,times(1)).clearAllItemsRejectionsSource(Source.LOB);
 
+        verify(transaction2, never()).clearAllItemsRejectionsSource(Source.ERP);
+        verify(transaction2, times(1)).clearAllItemsRejectionsSource(Source.LOB);
     }
+
 }
