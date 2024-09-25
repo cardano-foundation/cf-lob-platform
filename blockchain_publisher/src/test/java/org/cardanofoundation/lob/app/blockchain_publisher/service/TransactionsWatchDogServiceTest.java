@@ -11,7 +11,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.repository.Transaction
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublishStatusMapper;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionsWatchDogService;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
-import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApi;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ class TransactionsWatchDogServiceTest {
     private TransactionEntityRepositoryGateway transactionEntityRepositoryGateway;
 
     @Mock
-    private BlockchainReaderPublicApi blockchainReaderPublicApi;
+    private BlockchainReaderPublicApiIF blockchainReaderPublicApi;
 
     @Mock
     private OrganisationPublicApiIF organisationPublicApiIF;

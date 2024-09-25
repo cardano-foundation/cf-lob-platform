@@ -6,7 +6,7 @@ import org.cardanofoundation.lob.app.blockchain_common.service_assistance.Metada
 import org.cardanofoundation.lob.app.blockchain_publisher.service.L1TransactionCreator;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.MetadataSerialiser;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit.*;
-import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApi;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -41,13 +41,20 @@ public class TransactionSubmissionConfig {
     public L1TransactionCreator l1TransactionCreator(@Qualifier("yaci_blockfrost") BackendService backendService,
                                                      MetadataSerialiser metadataSerialiser,
                                                      TransactionSubmissionService transactionSubmissionService,
-                                                     BlockchainReaderPublicApi blockchainReaderPublicApi,
+                                                     BlockchainReaderPublicApiIF blockchainReaderPublicApi,
                                                      MetadataChecker metadataChecker,
                                                      Account organiserAccount,
                                                      @Value("${l1.transaction.metadata_label:22222}") int metadataLabel,
                                                      @Value("${l1.transaction.debug_store_output_tx:false}") boolean debugStoreOutputTx
                                                      ) {
-        return new L1TransactionCreator(backendService, metadataSerialiser, blockchainReaderPublicApi, metadataChecker, organiserAccount, metadataLabel, debugStoreOutputTx);
+        return new L1TransactionCreator(backendService,
+                metadataSerialiser,
+                blockchainReaderPublicApi,
+                metadataChecker,
+                organiserAccount,
+                metadataLabel,
+                debugStoreOutputTx
+        );
     }
 
 //    @Bean

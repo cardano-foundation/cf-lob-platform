@@ -8,13 +8,15 @@ import org.cardanofoundation.lob.app.blockchain_common.domain.CardanoNetwork;
 import org.cardanofoundation.lob.app.blockchain_reader.service.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-public class BlockchainDataConfig {
+@ConditionalOnProperty(name = "lob.blockchain_reader.enabled", havingValue = "true", matchIfMissing = true)
+public class BlockchainReaderConfig {
 
     @Bean
     public BlockchainDataChainTipService blockchainDataChainTipService(CardanoNetwork network,

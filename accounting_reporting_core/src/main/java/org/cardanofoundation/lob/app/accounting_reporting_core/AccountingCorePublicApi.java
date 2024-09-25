@@ -8,5 +8,4 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class AccountingCorePublicApi {
-
 }
