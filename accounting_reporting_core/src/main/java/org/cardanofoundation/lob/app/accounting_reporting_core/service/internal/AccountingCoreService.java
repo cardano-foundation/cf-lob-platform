@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
 import static org.zalando.problem.Status.BAD_REQUEST;
 import static org.zalando.problem.Status.NOT_FOUND;
 
@@ -111,9 +110,7 @@ public class AccountingCoreService {
             return Either.right(null);
         }
 
-        val processorFlags = ProcessorFlags.builder()
-                .reprocess(true)
-                .build();
+        val processorFlags = new ProcessorFlags(ProcessorFlags.Trigger.REPROCESSING);
 
         val organisationId = txBatch.getOrganisationId();
 

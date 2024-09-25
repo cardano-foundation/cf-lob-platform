@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.blockchain_publisher.service;
+package org.cardanofoundation.lob.app.blockchain_common.service_assistance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
@@ -21,8 +21,8 @@ public class JsonSchemaMetadataCheckerTest {
         val objectMapper = new ObjectMapper();
         val schemaResource = new ClassPathResource("lob_blockchain_transaction_metadata_schema.json");
         jsonSchemaMetadataChecker = new JsonSchemaMetadataChecker(objectMapper);
-        jsonSchemaMetadataChecker.metatdataSchemaResource = schemaResource;
-        jsonSchemaMetadataChecker.enableChecker = true;
+        jsonSchemaMetadataChecker.setMetatdataSchemaResource(schemaResource);
+        jsonSchemaMetadataChecker.setEnableChecker(true);
         jsonSchemaMetadataChecker.init();
     }
 
