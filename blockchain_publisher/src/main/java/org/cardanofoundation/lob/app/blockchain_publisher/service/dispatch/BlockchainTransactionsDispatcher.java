@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service.dispatch;
 
 import com.bloxbean.cardano.client.api.exception.ApiException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -33,19 +34,27 @@ public class BlockchainTransactionsDispatcher {
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
     private final DispatchingStrategy dispatchingStrategy;
 
-    @Value("${lob.blockchain.publisher.dispatcher.pullBatchSize:50}")
+    @Value("${lob.blockchain_publisher.dispatcher.pullBatchSize:50}")
     private int pullTransactionsBatchSize = 50;
+
+    @PostConstruct
+    public void init() {
+        log.info("BlockchainTransactionsDispatcher initialized with pullTransactionsBatchSize:{}", pullTransactionsBatchSize);
+        log.info("DispatchStrategy:{}", dispatchingStrategy.getClass().getSimpleName());
+    }
 
     @Transactional
     public void dispatchTransactions() {
-        log.info("Dispatching passedTransactions to the cardano blockchain...");
+        log.info("Dispatching txs to the cardano blockchain...");
 
         for (val organisation : organisationPublicApi.listAll()) {
             val organisationId = organisation.getId();
             val transactionsBatch = transactionEntityRepositoryGateway.findTransactionsByStatus(organisationId, pullTransactionsBatchSize);
             val transactionToDispatch = dispatchingStrategy.apply(organisationId, transactionsBatch);
 
-            if (!transactionToDispatch.isEmpty()) {
+            val dispatchTxCount = transactionToDispatch.size();
+            log.info("Dispatching txs for organisationId:{}, tx count:{}", organisationId, dispatchTxCount);
+            if (dispatchTxCount > 0) {
                 dispatchTransactionsBatch(organisationId, transactionToDispatch);
             }
         }

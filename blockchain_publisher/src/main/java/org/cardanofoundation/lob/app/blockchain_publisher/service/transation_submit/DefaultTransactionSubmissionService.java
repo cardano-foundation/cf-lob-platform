@@ -7,14 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.L1Submission;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-@Service
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultTransactionSubmissionService implements TransactionSubmissionService {
@@ -25,11 +22,9 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
 
     private final Clock clock;
 
-    @Value("${lob.transaction.submission.sleep.seconds:5}")
-    private int sleepTimeSeconds;
+    private final int sleepTimeSeconds;
 
-    @Value("${lob.transaction.submission.timeout.in.seconds:300}") // 5 minutes
-    private int timeoutInSeconds;
+    private final int timeoutInSeconds;
 
     @Override
     public String submitTransaction(byte[] txData) {

@@ -2,7 +2,7 @@ package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.cardanofoundation.lob.app.support.audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
 import org.springframework.data.domain.Persistable;
 
 import java.io.Serializable;

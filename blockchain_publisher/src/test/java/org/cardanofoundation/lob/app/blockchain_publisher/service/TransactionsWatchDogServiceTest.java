@@ -1,18 +1,17 @@
 import io.vavr.control.Either;
 import lombok.val;
+import org.cardanofoundation.lob.app.blockchain_common.domain.CardanoNetwork;
+import org.cardanofoundation.lob.app.blockchain_common.domain.ChainTip;
+import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
+import org.cardanofoundation.lob.app.blockchain_common.domain.OnChainTxDetails;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoOnChainData;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.ChainTip;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.L1SubmissionData;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublishStatusMapper;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionsWatchDogService;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.BlockchainDataChainTipService;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.BlockchainTransactionDataProvider;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.on_chain.CardanoFinalityScoreCalculator;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApi;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,10 +40,7 @@ class TransactionsWatchDogServiceTest {
     private TransactionEntityRepositoryGateway transactionEntityRepositoryGateway;
 
     @Mock
-    private BlockchainTransactionDataProvider blockchainTransactionDataProvider;
-
-    @Mock
-    private BlockchainDataChainTipService blockchainDataChainTipService;
+    private BlockchainReaderPublicApi blockchainReaderPublicApi;
 
     @Mock
     private OrganisationPublicApiIF organisationPublicApiIF;
@@ -54,9 +50,6 @@ class TransactionsWatchDogServiceTest {
 
     @Mock
     private BlockchainPublishStatusMapper blockchainPublishStatusMapper;
-
-    @Mock
-    private CardanoFinalityScoreCalculator cardanoFinalityScoreCalculator;
 
     @InjectMocks
     private TransactionsWatchDogService transactionsWatchDogService;
@@ -78,7 +71,7 @@ class TransactionsWatchDogServiceTest {
         when(transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(eq("org1"), any(Limit.class)))
                 .thenReturn(emptySet());
 
-        when(blockchainDataChainTipService.latestChainTip()).thenReturn(Either.right(new ChainTip(1L, "hash1")));
+        when(blockchainReaderPublicApi.getChainTip()).thenReturn(Either.right(new ChainTip(1L, "hash1", Optional.of(1), CardanoNetwork.DEV, true)));
 
         // Act
         List<Either<Problem, Set<TransactionEntity>>> result = transactionsWatchDogService.checkTransactionStatusesForOrganisation(Integer.MAX_VALUE);
@@ -92,7 +85,7 @@ class TransactionsWatchDogServiceTest {
     @Test
     void testInspectOrganisationTransactions_withEmptyChainTip() {
         // Arrange
-        when(blockchainDataChainTipService.latestChainTip()).thenReturn(Either.left(Problem.builder()
+        when(blockchainReaderPublicApi.getChainTip()).thenReturn(Either.left(Problem.builder()
                 .withTitle("CHAIN_TIP_NOT_FOUND")
                 .build()));
 
@@ -112,9 +105,6 @@ class TransactionsWatchDogServiceTest {
         val txAbsoluteSlotThen = chainTip - 500;
         val txCreationSlow = txAbsoluteSlotNow - 20;
 
-        when(cardanoFinalityScoreCalculator.calculateFinalityScore(chainTip, txAbsoluteSlotNow))
-                .thenReturn(CardanoFinalityScore.VERY_HIGH);
-
         // Arrange
         val l1SubmissionData = new L1SubmissionData();
         l1SubmissionData.setTransactionHash(Optional.of("hash1"));
@@ -128,13 +118,20 @@ class TransactionsWatchDogServiceTest {
         when(transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(eq("org1"), any(Limit.class)))
                 .thenReturn(Set.of(transactionEntity));
 
-        when(blockchainDataChainTipService.latestChainTip()).thenReturn(Either.right(new ChainTip(chainTip, "hash2")));
+        when(blockchainReaderPublicApi.getChainTip()).thenReturn(Either.right(new ChainTip(chainTip, "hash1", Optional.of(1), CardanoNetwork.DEV, true)));
 
         // return latest on-chain data
-        when(blockchainTransactionDataProvider.getCardanoOnChainData(l1SubmissionData.getTransactionHash().orElseThrow()))
-                .thenReturn(Either.right(Optional.of(new CardanoOnChainData("hash1", txAbsoluteSlotNow))));
+        when(blockchainReaderPublicApi.getTxDetails(l1SubmissionData.getTransactionHash().orElseThrow()))
+                .thenReturn(Either.right(Optional.of(OnChainTxDetails.builder()
+                        .transactionHash("hash1")
+                        .blockHash("blockHash1")
+                        .absoluteSlot(txAbsoluteSlotNow)
+                        .finalityScore(FinalityScore.VERY_HIGH)
+                        .network(CardanoNetwork.DEV)
+                        .build()))
+                );
 
-        when(blockchainPublishStatusMapper.convert(any(CardanoFinalityScore.class))).thenReturn(BlockchainPublishStatus.COMPLETED);
+        when(blockchainPublishStatusMapper.convert(any(FinalityScore.class))).thenReturn(BlockchainPublishStatus.COMPLETED);
 
         // Act
         val result = transactionsWatchDogService.inspectOrganisationTransactions("org1", Integer.MAX_VALUE);
@@ -155,9 +152,6 @@ class TransactionsWatchDogServiceTest {
         val txAbsoluteSlotThen = chainTip - 999;
         val txCreationSlow = txAbsoluteSlotNow - 20;
 
-        when(cardanoFinalityScoreCalculator.calculateFinalityScore(chainTip, txAbsoluteSlotNow))
-                .thenReturn(CardanoFinalityScore.FINAL);
-
         // Arrange
         val l1SubmissionData = new L1SubmissionData();
         l1SubmissionData.setTransactionHash(Optional.of("hash1"));
@@ -171,13 +165,20 @@ class TransactionsWatchDogServiceTest {
         when(transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(eq("org1"), any(Limit.class)))
                 .thenReturn(Set.of(transactionEntity));
 
-        when(blockchainDataChainTipService.latestChainTip()).thenReturn(Either.right(new ChainTip(chainTip, "hash2")));
+        when(blockchainReaderPublicApi.getChainTip()).thenReturn(Either.right(new ChainTip(chainTip, "hash2", Optional.of(1), CardanoNetwork.DEV, true)));
 
         // return latest on-chain data
-        when(blockchainTransactionDataProvider.getCardanoOnChainData(l1SubmissionData.getTransactionHash().orElseThrow()))
-                .thenReturn(Either.right(Optional.of(new CardanoOnChainData("hash1", txAbsoluteSlotNow))));
+        when(blockchainReaderPublicApi.getTxDetails(l1SubmissionData.getTransactionHash().orElseThrow()))
+                .thenReturn(Either.right(Optional.of(OnChainTxDetails.builder()
+                        .transactionHash("hash1")
+                        .blockHash("blockHash1")
+                        .absoluteSlot(txAbsoluteSlotNow)
+                        .finalityScore(FinalityScore.FINAL)
+                        .network(CardanoNetwork.DEV)
+                        .build()))
+                );
 
-        when(blockchainPublishStatusMapper.convert(any(CardanoFinalityScore.class))).thenReturn(BlockchainPublishStatus.FINALIZED);
+        when(blockchainPublishStatusMapper.convert(any(FinalityScore.class))).thenReturn(BlockchainPublishStatus.FINALIZED);
 
         // Act
         val result = transactionsWatchDogService.inspectOrganisationTransactions("org1", Integer.MAX_VALUE);
@@ -199,7 +200,7 @@ class TransactionsWatchDogServiceTest {
 
         val txSubmissionData = new L1SubmissionData();
         txSubmissionData.setPublishStatus(Optional.of(BlockchainPublishStatus.VISIBLE_ON_CHAIN));
-        txSubmissionData.setFinalityScore(Optional.of(CardanoFinalityScore.LOW));
+        txSubmissionData.setFinalityScore(Optional.of(FinalityScore.LOW));
         txSubmissionData.setTransactionHash(Optional.of("hash1"));
         txSubmissionData.setAbsoluteSlot(Optional.of(absoluteSlot));
         txSubmissionData.setCreationSlot(Optional.of(creationSlot));
@@ -212,8 +213,8 @@ class TransactionsWatchDogServiceTest {
         when(transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(eq("org1"), any(Limit.class)))
                 .thenReturn(Set.of(transactionEntity));
 
-        when(blockchainDataChainTipService.latestChainTip()).thenReturn(Either.right(new ChainTip(chainTip, "hash2")));
-        when(blockchainTransactionDataProvider.getCardanoOnChainData(txSubmissionData.getTransactionHash().orElseThrow()))
+        when(blockchainReaderPublicApi.getChainTip()).thenReturn(Either.right(new ChainTip(chainTip, "hash2", Optional.of(1), CardanoNetwork.DEV, true)));
+        when(blockchainReaderPublicApi.getTxDetails(txSubmissionData.getTransactionHash().orElseThrow()))
                 .thenReturn(Either.right(Optional.empty()));
 
         // Act

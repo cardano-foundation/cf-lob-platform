@@ -3,8 +3,8 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdatedEvent;
+import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.CardanoFinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.L1SubmissionData;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.BlockchainPublishStatusMapper;
@@ -17,7 +17,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationEventPublisher;
 
 import javax.annotation.Nullable;
-import java.time.Clock;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -58,7 +57,7 @@ class LedgerUpdatedEventPublisherTest {
 
     @Test
     void testSendLedgerUpdatedEvents_SingleTransaction() {
-        TransactionEntity transaction = createTransactionEntity(BlockchainPublishStatus.SUBMITTED, CardanoFinalityScore.HIGH);
+        TransactionEntity transaction = createTransactionEntity(BlockchainPublishStatus.SUBMITTED, FinalityScore.HIGH);
         when(blockchainPublishStatusMapper.convert(any(Optional.class), any(Optional.class)))
                 .thenReturn(LedgerDispatchStatus.COMPLETED);
 
@@ -77,8 +76,8 @@ class LedgerUpdatedEventPublisherTest {
 
     @Test
     void testSendLedgerUpdatedEvents_MultipleTransactions_SingleBatch() {
-        TransactionEntity transaction1 = createTransactionEntity(BlockchainPublishStatus.STORED, CardanoFinalityScore.MEDIUM);
-        TransactionEntity transaction2 = createTransactionEntity(BlockchainPublishStatus.ROLLBACKED, CardanoFinalityScore.LOW);
+        TransactionEntity transaction1 = createTransactionEntity(BlockchainPublishStatus.STORED, FinalityScore.MEDIUM);
+        TransactionEntity transaction2 = createTransactionEntity(BlockchainPublishStatus.ROLLBACKED, FinalityScore.LOW);
         when(blockchainPublishStatusMapper.convert(any(Optional.class), any(Optional.class)))
                 .thenReturn(LedgerDispatchStatus.DISPATCHED);
 
@@ -95,8 +94,8 @@ class LedgerUpdatedEventPublisherTest {
     void testSendLedgerUpdatedEvents_MultipleTransactions_MultipleBatches() {
         ledgerUpdatedEventPublisher.dispatchBatchSize = 1; // Set batch size to 1 for testing
 
-        TransactionEntity transaction1 = createTransactionEntity(BlockchainPublishStatus.STORED, CardanoFinalityScore.MEDIUM);
-        TransactionEntity transaction2 = createTransactionEntity(BlockchainPublishStatus.ROLLBACKED, CardanoFinalityScore.LOW);
+        TransactionEntity transaction1 = createTransactionEntity(BlockchainPublishStatus.STORED, FinalityScore.MEDIUM);
+        TransactionEntity transaction2 = createTransactionEntity(BlockchainPublishStatus.ROLLBACKED, FinalityScore.LOW);
         when(blockchainPublishStatusMapper.convert(any(Optional.class), any(Optional.class)))
                 .thenReturn(LedgerDispatchStatus.DISPATCHED);
 
@@ -108,7 +107,7 @@ class LedgerUpdatedEventPublisherTest {
 
     @Test
     void testSendLedgerUpdatedEvents_PublishStatusEmpty() {
-        TransactionEntity transaction = createTransactionEntity(null, CardanoFinalityScore.HIGH);
+        TransactionEntity transaction = createTransactionEntity(null, FinalityScore.HIGH);
         when(blockchainPublishStatusMapper.convert(any(Optional.class), any(Optional.class)))
                 .thenReturn(LedgerDispatchStatus.NOT_DISPATCHED);
 
@@ -145,7 +144,7 @@ class LedgerUpdatedEventPublisherTest {
     }
 
     private TransactionEntity createTransactionEntity(@Nullable BlockchainPublishStatus publishStatus,
-                                                      @Nullable CardanoFinalityScore finalityScore) {
+                                                      @Nullable FinalityScore finalityScore) {
         TransactionEntity transactionEntity = new TransactionEntity();
         transactionEntity.setId(UUID.randomUUID().toString());
 

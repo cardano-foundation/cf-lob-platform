@@ -11,6 +11,8 @@ include (
  ":support",
  ":accounting_reporting_core",
  ":blockchain_publisher",
+ ":blockchain_reader",
+ ":blockchain_common",
  ":netsuite_altavia_erp_adapter",
  ":notification_gateway",
  ":organisation",

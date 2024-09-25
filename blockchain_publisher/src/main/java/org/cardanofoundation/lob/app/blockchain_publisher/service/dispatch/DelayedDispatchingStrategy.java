@@ -20,13 +20,13 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "lob.dispatching.strategy", name = "type", havingValue = "DELAYED")
+@ConditionalOnProperty(prefix = "lob.dispatching_strategy", name = "type", havingValue = "DELAYED")
 public class DelayedDispatchingStrategy implements DispatchingStrategy {
 
-    @Value("${lob.blockchain.publisher.minTransactions:30}")
+    @Value("${lob.blockchain_publisher.minTransactions:30}")
     private int minTxCount = 30;
 
-    @Value("${lob.blockchain.publisher.maxDelay:PT24H}")
+    @Value("${lob.blockchain_publisher.maxDelay:PT24H}")
     private Duration maxTxDelay;
 
     private final Clock clock;

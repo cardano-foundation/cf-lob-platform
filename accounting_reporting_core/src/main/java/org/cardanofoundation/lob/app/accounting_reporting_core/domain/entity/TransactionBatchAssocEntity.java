@@ -3,9 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 import com.google.common.base.Objects;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
-import org.cardanofoundation.lob.app.support.audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
 import org.springframework.data.domain.Persistable;
 
 @Getter

@@ -9,6 +9,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserE
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.ScheduledIngestionEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ScheduledReconcilationEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.assistance.AccountingPeriodCalculator;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;

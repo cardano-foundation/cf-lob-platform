@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import org.cardanofoundation.lob.app.support.audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
 
 @AllArgsConstructor
 @NoArgsConstructor

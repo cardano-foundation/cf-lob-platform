@@ -5,8 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
-import org.cardanofoundation.lob.app.support.audit.AuditEntity;
-import org.javers.core.metamodel.annotation.DiffInclude;
+import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
 import org.springframework.data.domain.Persistable;
 
 import javax.annotation.Nullable;

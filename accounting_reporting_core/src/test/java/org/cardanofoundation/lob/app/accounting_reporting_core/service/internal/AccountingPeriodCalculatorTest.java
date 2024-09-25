@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
 import org.apache.commons.lang3.Range;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.assistance.AccountingPeriodCalculator;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
