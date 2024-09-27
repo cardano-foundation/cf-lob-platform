@@ -43,13 +43,17 @@ public class AccountingCorePresentationViewService {
     private final AccountingCoreService accountingCoreService;
     private final TransactionBatchRepositoryGateway transactionBatchRepositoryGateway;
 
-    public TransactionReconciliationStatisticView allReconciliationTransaction() {
-        val transactions = transactionRepositoryGateway.findReconciliation();
+    public TransactionReconciliationStatisticView allReconciliationTransaction(ReconciliationFilterRequest body) {
+        Object[] transactionsStatistic = transactionRepositoryGateway.findReconciliationStatistic();
+        val transactions = transactionRepositoryGateway.findReconciliation(body.getFilter());
+
         return new TransactionReconciliationStatisticView(
-                transactions.stream().filter(transactionEntity -> transactionEntity.getReconcilation().stream().anyMatch(reconcilation -> reconcilation.getSource() == Optional.of(ReconcilationCode.OK))).count(),
-                transactions.stream().filter(transactionEntity -> transactionEntity.getReconcilation().stream().anyMatch(reconcilation -> reconcilation.getSource() == Optional.of(ReconcilationCode.NOK))).count(),
-                transactions.stream().count(),
+                (Long) transactionsStatistic[0],
+                (Long) transactionsStatistic[1],
+                (Long) transactionsStatistic[2],
+                (Long) transactionsStatistic[0] + (Long) transactionsStatistic[1] + (Long) transactionsStatistic[2],
                 transactions.stream()
+                        .limit(10L)
                         .map(this::getTransactionReconciliationView)
 
                         .collect(toSet())
@@ -280,8 +284,8 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getLedgerDispatchApproved(),
                 getAmountLcyTotalForAllItems(transactionEntity),
                 false,
-                new HashSet<>(),
-                new HashSet<>(),
+                getTransactionItemView(transactionEntity),
+                getViolations(transactionEntity),
                 transactionEntity.getReconcilation().flatMap(Reconcilation::getSource).orElse(null),
                 transactionEntity.getReconcilation().flatMap(Reconcilation::getSink).orElse(null),
                 transactionEntity.getReconcilation().flatMap(Reconcilation::getFinalStatus).orElse(null)

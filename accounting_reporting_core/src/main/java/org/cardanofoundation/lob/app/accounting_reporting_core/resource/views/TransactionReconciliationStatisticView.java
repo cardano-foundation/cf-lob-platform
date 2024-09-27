@@ -17,6 +17,8 @@ public class TransactionReconciliationStatisticView {
 
     private Long nok = 0L;
 
+    private Long none = 0L;
+
     private Long total = 0L;
     @JsonProperty("transactions")
     private Set<TransactionReconciliationView> transactionReconciliationViewList = new HashSet<>();

@@ -11,6 +11,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterStatusRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest.TxItemRejectionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
@@ -234,8 +235,12 @@ public class TransactionRepositoryGateway {
         return transactionRepository.findByEntryDateRangeAndNotReconciledYet(organisationId, from, to);
     }
 
-    public List<TransactionEntity> findReconciliation(){
-        return transactionRepository.findAllReconciliation();
+    public List<TransactionEntity> findReconciliation(ReconciliationFilterStatusRequest filter){
+        return transactionRepository.findAllReconciliation(filter);
+    }
+
+    public Object[] findReconciliationStatistic(){
+        return  transactionRepository.findCalcReconciliationStatistic();
     }
 
 }

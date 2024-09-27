@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.SearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.TransactionReconciliationStatisticView;
@@ -41,7 +42,7 @@ public class AccountingCoreResourceReconciliation {
                     {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReconciliationRequest.class))}
             )
     })
-    @PostMapping(value = "/reconciliation/trigger", produces = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/reconcile/trigger", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> reconcileTriggerAction(@Valid @RequestBody ReconciliationRequest body) {
 
         return accountingCoreService.scheduleReconcilation(body.getOrganisationId(), body.getDateFrom(), body.getDateTo()).fold(problem -> {
@@ -58,9 +59,9 @@ public class AccountingCoreResourceReconciliation {
             )
     })
     @Tag(name = "Reconciliation", description = "Reconciliation API")
-    @RequestMapping(value = "/reconciliation", method = POST, produces = "application/json")
-    public ResponseEntity<?> reconcileStart() {
-        TransactionReconciliationStatisticView transactions = accountingCorePresentationService.allReconciliationTransaction();
+    @PostMapping(value = "/transactions-reconcile", produces = "application/json")
+    public ResponseEntity<?> reconcileStart(@Valid @RequestBody ReconciliationFilterRequest body) {
+        TransactionReconciliationStatisticView transactions = accountingCorePresentationService.allReconciliationTransaction(body);
 
 
         return ResponseEntity.ok().body(transactions);
