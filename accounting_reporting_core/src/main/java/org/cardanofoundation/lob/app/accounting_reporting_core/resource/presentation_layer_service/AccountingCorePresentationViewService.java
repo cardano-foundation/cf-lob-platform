@@ -4,6 +4,8 @@ import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Reconcilation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
@@ -40,6 +42,20 @@ public class AccountingCorePresentationViewService {
     private final TransactionRepositoryGateway transactionRepositoryGateway;
     private final AccountingCoreService accountingCoreService;
     private final TransactionBatchRepositoryGateway transactionBatchRepositoryGateway;
+
+    public TransactionReconciliationStatisticView allReconciliationTransaction() {
+        val transactions = transactionRepositoryGateway.findReconciliation();
+        return new TransactionReconciliationStatisticView(
+                transactions.stream().filter(transactionEntity -> transactionEntity.getReconcilation().stream().anyMatch(reconcilation -> reconcilation.getSource() == Optional.of(ReconcilationCode.OK))).count(),
+                transactions.stream().filter(transactionEntity -> transactionEntity.getReconcilation().stream().anyMatch(reconcilation -> reconcilation.getSource() == Optional.of(ReconcilationCode.NOK))).count(),
+                transactions.stream().count(),
+                transactions.stream()
+                        .map(this::getTransactionReconciliationView)
+
+                        .collect(toSet())
+        );
+
+    }
 
     public List<TransactionView> allTransactions(SearchRequest body) {
         val transactions = transactionRepositoryGateway.findAllByStatus(
@@ -251,6 +267,27 @@ public class AccountingCorePresentationViewService {
         );
     }
 
+    private TransactionReconciliationView getTransactionReconciliationView(TransactionEntity transactionEntity) {
+        return new TransactionReconciliationView(
+                transactionEntity.getId(),
+                transactionEntity.getTransactionInternalNumber(),
+                transactionEntity.getEntryDate(),
+                transactionEntity.getTransactionType(),
+                transactionEntity.getOverallStatus(),
+                getTransactionDispatchStatus(transactionEntity),
+                transactionEntity.getAutomatedValidationStatus(),
+                transactionEntity.getTransactionApproved(),
+                transactionEntity.getLedgerDispatchApproved(),
+                getAmountLcyTotalForAllItems(transactionEntity),
+                false,
+                new HashSet<>(),
+                new HashSet<>(),
+                transactionEntity.getReconcilation().flatMap(Reconcilation::getSource).orElse(null),
+                transactionEntity.getReconcilation().flatMap(Reconcilation::getSink).orElse(null),
+                transactionEntity.getReconcilation().flatMap(Reconcilation::getFinalStatus).orElse(null)
+
+        );
+    }
 
     public LedgerDispatchStatusView getTransactionDispatchStatus(TransactionEntity transactionEntity) {
 

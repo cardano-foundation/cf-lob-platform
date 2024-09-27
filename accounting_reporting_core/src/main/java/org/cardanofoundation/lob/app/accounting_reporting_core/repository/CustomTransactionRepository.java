@@ -10,4 +10,6 @@ public interface CustomTransactionRepository {
     List<TransactionEntity> findAllByStatus(String organisationId,
                                             List<ValidationStatus> validationStatuses,
                                             List<TransactionType> transactionType);
+
+    public List<TransactionEntity> findAllReconciliation();
 }
