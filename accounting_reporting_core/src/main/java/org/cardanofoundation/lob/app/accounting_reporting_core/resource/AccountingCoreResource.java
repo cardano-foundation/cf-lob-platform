@@ -37,6 +37,7 @@ import static org.zalando.problem.Status.OK;
 @Slf4j
 public class AccountingCoreResource {
 
+    
     private final AccountingCorePresentationViewService accountingCorePresentationService;
     private final OrganisationPublicApi organisationPublicApi;
     private final ObjectMapper objectMapper;
