@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
+package org.cardanofoundation.lob.app.accounting_reporting_core.service.assistance;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;

@@ -234,6 +234,10 @@ public class TransactionRepositoryGateway {
         return transactionRepository.findByEntryDateRangeAndNotReconciledYet(organisationId, from, to);
     }
 
+    public List<TransactionEntity> findReconciliation(){
+        return transactionRepository.findAllReconciliation();
+    }
+
 }
 
 //    public Either<Problem, Boolean> changeTransactionComment(String txId, String userComment) {

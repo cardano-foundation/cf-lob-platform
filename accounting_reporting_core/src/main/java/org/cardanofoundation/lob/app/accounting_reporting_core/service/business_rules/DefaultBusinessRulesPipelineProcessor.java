@@ -18,12 +18,21 @@ public class DefaultBusinessRulesPipelineProcessor implements BusinessRulesPipel
 
     @Override
     public void run(final OrganisationTransactions allOrgTransactions, ProcessorFlags processorFlags) {
+        val trigger = processorFlags.getTrigger();
+
         for (val transactionEntity : allOrgTransactions.transactions()) {
             transactionEntity.setAutomatedValidationStatus(VALIDATED);
             transactionEntity.clearAllViolations();
-            // Remove all transaction items rejection with a LOB source, this happens only when a batch in reprocessed
-            if (processorFlags.isReprocess()) {
-                transactionEntity.clearAllItemsRejectionsSource(Source.LOB);
+
+            switch (trigger) {
+                // Remove all transaction items rejection with a ERP source, this happens only when a batch is created
+                case EXTRACTION -> {
+                    transactionEntity.clearAllItemsRejectionsSource(Source.ERP);
+                }
+                // Remove all transaction items rejection with a LOB source, this happens only when a batch in reprocessed
+                case REPROCESSING -> {
+                    transactionEntity.clearAllItemsRejectionsSource(Source.LOB);
+                }
             }
         }
 
@@ -32,9 +41,4 @@ public class DefaultBusinessRulesPipelineProcessor implements BusinessRulesPipel
         }
     }
 
-    @Override
-    public void run(final OrganisationTransactions allOrgTransactions) {
-        this.run(allOrgTransactions, ProcessorFlags.defaultFlags());
-
-    }
 }

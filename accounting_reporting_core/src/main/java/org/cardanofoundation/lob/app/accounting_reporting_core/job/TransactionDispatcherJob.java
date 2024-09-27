@@ -18,8 +18,8 @@ public class TransactionDispatcherJob {
     private int dispatchPendingPullLimit = 1_000;
 
     @Scheduled(
-            fixedDelayString = "${lob.blockchain.dispatcher.fixedDelay:PT1M}",
-            initialDelayString = "${lob.blockchain.dispatcher.initialDelay:PT10S}")
+            fixedDelayString = "${lob.blockchain.dispatcher.fixed_delay:PT1M}",
+            initialDelayString = "${lob.blockchain.dispatcher.initial_delay:PT10S}")
     public void execute() {
         log.info("Executing TransactionDispatcherJob...");
 

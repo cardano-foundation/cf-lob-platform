@@ -23,8 +23,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.WARN;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.TX_VERSION_CONFLICT_TX_NOT_MODIFIABLE;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.WARN;
 
 @Service
 @Slf4j
@@ -42,6 +42,7 @@ public class DbSynchronisationUseCaseService {
                         OrganisationTransactions incomingTransactions,
                         int totalTransactionsCount,
                         ProcessorFlags flags) {
+        val trigger = flags.getTrigger();
         val transactions = incomingTransactions.transactions();
 
         if (transactions.isEmpty()) {
@@ -51,7 +52,7 @@ public class DbSynchronisationUseCaseService {
             return;
         }
 
-        if (flags.isReprocess()) {
+        if (trigger == ProcessorFlags.Trigger.REPROCESSING) {
             // TODO should we check if we are NOT changing incomingTransactions which are already marked as dispatched?
             storeTransactions(batchId, incomingTransactions);
             return;

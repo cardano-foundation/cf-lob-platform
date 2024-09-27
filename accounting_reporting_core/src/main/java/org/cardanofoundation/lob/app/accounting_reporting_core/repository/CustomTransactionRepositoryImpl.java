@@ -42,4 +42,15 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
         return em.createQuery(criteriaQuery).getResultList();
     }
 
+    @Override
+    public List<TransactionEntity> findAllReconciliation(){
+        CriteriaBuilder builder = em.getCriteriaBuilder();
+        CriteriaQuery<TransactionEntity> criteriaQuery = builder.createQuery(TransactionEntity.class);
+        Root<TransactionEntity> rootEntry = criteriaQuery.from(TransactionEntity.class);
+
+        criteriaQuery.select(rootEntry);
+
+        return em.createQuery(criteriaQuery).getResultList();
+    }
+
 }

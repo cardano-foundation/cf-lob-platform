@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingPeriodCalculator;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.assistance.AccountingPeriodCalculator;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.zalando.problem.Problem;
 
