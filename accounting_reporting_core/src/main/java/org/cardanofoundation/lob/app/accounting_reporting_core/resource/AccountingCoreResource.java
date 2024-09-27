@@ -41,7 +41,7 @@ public class AccountingCoreResource {
     private final OrganisationPublicApi organisationPublicApi;
     private final ObjectMapper objectMapper;
 
-    
+
     @Tag(name = "Transactions", description = "Transactions API")
     @Operation(description = "Transaction list", responses = {
             @ApiResponse(content =
