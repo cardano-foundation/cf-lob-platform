@@ -23,7 +23,7 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.VALIDATED;
 import static org.junit.jupiter.api.Assertions.*;
 
-class CustomTransactionRepositoryImplTestView {
+class CustomBlockchainReaderAccountingCoreTransactionRepositoryImplTestView {
 
 
     @Test

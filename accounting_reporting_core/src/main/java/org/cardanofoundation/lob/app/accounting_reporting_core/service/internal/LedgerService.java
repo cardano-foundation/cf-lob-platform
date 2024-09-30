@@ -6,7 +6,7 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdateCommand;
-import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.cardanofoundation.lob.app.support.collections.Partitions;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
@@ -27,7 +27,7 @@ import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 @RequiredArgsConstructor
 public class LedgerService {
 
-    private final TransactionRepository transactionRepository;
+    private final AccountingCoreTransactionRepository accountingCoreTransactionRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TransactionConverter transactionConverter;
     private final PIIDataFilteringService piiDataFilteringService;
@@ -42,14 +42,14 @@ public class LedgerService {
 
         val txIds = statuses.keySet();
 
-        val transactionEntities = transactionRepository.findAllById(txIds);
+        val transactionEntities = accountingCoreTransactionRepository.findAllById(txIds);
 
         for (val tx : transactionEntities) {
             val txStatusUpdate = statuses.get(tx.getId());
             tx.setLedgerDispatchStatus(txStatusUpdate.getStatus());
         }
 
-        transactionRepository.saveAll(transactionEntities);
+        accountingCoreTransactionRepository.saveAll(transactionEntities);
 
         log.info("Updated dispatch status for statusMapCount: {} completed.", statuses.size());
     }
@@ -73,7 +73,7 @@ public class LedgerService {
     @Transactional
     public void dispatchPending(int limit) {
         for (val organisation : organisationPublicApi.listAll()) {
-            val dispatchTransactions = transactionRepository.findDispatchableTransactions(organisation.getId(), Limit.of(limit));
+            val dispatchTransactions = accountingCoreTransactionRepository.findDispatchableTransactions(organisation.getId(), Limit.of(limit));
 
             log.info("dispatchPending, organisationId: {}, total tx count: {}", organisation.getId(), dispatchTransactions.size());
 

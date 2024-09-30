@@ -10,7 +10,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchAssocRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
-import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +31,7 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 @RequiredArgsConstructor
 public class DbSynchronisationUseCaseService {
 
-    private final TransactionRepository transactionRepository;
+    private final AccountingCoreTransactionRepository accountingCoreTransactionRepository;
     private final TransactionConverter transactionConverter;
     private final TransactionItemRepository transactionItemRepository;
     private final TransactionBatchAssocRepository transactionBatchAssocRepository;
@@ -74,7 +74,7 @@ public class DbSynchronisationUseCaseService {
                 .map(TransactionEntity::getId)
                 .collect(Collectors.toSet());
 
-        val databaseTransactionsMap = transactionRepository.findAllById(txIds)
+        val databaseTransactionsMap = accountingCoreTransactionRepository.findAllById(txIds)
                 .stream()
                 .collect(toMap(TransactionEntity::getId, Function.identity()));
 
@@ -119,7 +119,7 @@ public class DbSynchronisationUseCaseService {
         val txs = transactions.transactions();
 
         for (val tx : txs) {
-            val saved = transactionRepository.save(tx);
+            val saved = accountingCoreTransactionRepository.save(tx);
             saved.getItems().forEach(i -> i.setTransaction(saved));
             transactionItemRepository.saveAll(tx.getItems());
         }

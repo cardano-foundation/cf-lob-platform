@@ -10,7 +10,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rej
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
-import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest.TxItemRejectionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
@@ -36,17 +36,17 @@ import static org.zalando.problem.Status.METHOD_NOT_ALLOWED;
 public class TransactionRepositoryGateway {
 
     private final TransactionItemRepository transactionItemRepository;
-    private final TransactionRepository transactionRepository;
+    private final AccountingCoreTransactionRepository accountingCoreTransactionRepository;
     private final LedgerService ledgerService;
 
     @Transactional
     public void store(TransactionEntity transactionEntity) {
-        transactionRepository.save(transactionEntity);
+        accountingCoreTransactionRepository.save(transactionEntity);
     }
 
     @Transactional
     public void storeAll(Collection<TransactionEntity> txs) {
-        transactionRepository.saveAll(txs);
+        accountingCoreTransactionRepository.saveAll(txs);
     }
 
     @Transactional
@@ -54,7 +54,7 @@ public class TransactionRepositoryGateway {
     protected Either<IdentifiableProblem, TransactionEntity> approveTransaction(String transactionId) {
         log.info("Approving transaction: {}", transactionId);
 
-        val txM = transactionRepository.findById(transactionId);
+        val txM = accountingCoreTransactionRepository.findById(transactionId);
 
         if (txM.isEmpty()) {
             return transactionNotFoundResponse(transactionId);
@@ -71,7 +71,7 @@ public class TransactionRepositoryGateway {
 
         tx.setTransactionApproved(true);
 
-        val savedTx = transactionRepository.save(tx);
+        val savedTx = accountingCoreTransactionRepository.save(tx);
 
         return Either.right(savedTx);
     }
@@ -81,7 +81,7 @@ public class TransactionRepositoryGateway {
     private Either<IdentifiableProblem, TransactionEntity> approveTransactionsDispatch(String transactionId) {
         log.info("Approving transaction to dispatch: {}", transactionId);
 
-        val txM = transactionRepository.findById(transactionId);
+        val txM = accountingCoreTransactionRepository.findById(transactionId);
 
         if (txM.isEmpty()) {
             return transactionNotFoundResponse(transactionId);
@@ -110,7 +110,7 @@ public class TransactionRepositoryGateway {
 
         tx.setLedgerDispatchApproved(true);
 
-        val savedTx = transactionRepository.save(tx);
+        val savedTx = accountingCoreTransactionRepository.save(tx);
 
         return Either.right(savedTx);
     }
@@ -211,27 +211,27 @@ public class TransactionRepositoryGateway {
     }
 
     public Optional<TransactionEntity> findById(String transactionId) {
-        return transactionRepository.findById(transactionId);
+        return accountingCoreTransactionRepository.findById(transactionId);
     }
 
     public List<TransactionEntity> findByAllId(Set<String> transactionIds) {
-        return transactionRepository.findAllById(transactionIds);
+        return accountingCoreTransactionRepository.findAllById(transactionIds);
     }
 
     public List<TransactionEntity> findAllByStatus(String organisationId,
                                                    List<ValidationStatus> validationStatuses,
                                                    List<TransactionType> transactionType) {
-        return transactionRepository.findAllByStatus(organisationId, validationStatuses, transactionType);
+        return accountingCoreTransactionRepository.findAllByStatus(organisationId, validationStatuses, transactionType);
     }
 
     public List<TransactionEntity> listAll() {
-        return transactionRepository.findAll();
+        return accountingCoreTransactionRepository.findAll();
     }
 
     public Set<TransactionEntity> findAllByDateRangeAndNotReconciledYet(String organisationId,
                                                      LocalDate from,
                                                      LocalDate to) {
-        return transactionRepository.findByEntryDateRangeAndNotReconciledYet(organisationId, from, to);
+        return accountingCoreTransactionRepository.findByEntryDateRangeAndNotReconciledYet(organisationId, from, to);
     }
 
 }

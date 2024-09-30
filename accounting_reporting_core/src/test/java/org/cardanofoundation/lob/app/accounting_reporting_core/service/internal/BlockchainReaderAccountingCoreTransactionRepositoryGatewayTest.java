@@ -8,7 +8,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rej
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
-import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionItemsRejectionRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.TransactionsRequest.TransactionId;
@@ -30,13 +30,13 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.ent
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class TransactionRepositoryGatewayTest {
+class BlockchainReaderAccountingCoreTransactionRepositoryGatewayTest {
 
     @Mock
     private TransactionItemRepository transactionItemRepository;
 
     @Mock
-    private TransactionRepository transactionRepository;
+    private AccountingCoreTransactionRepository accountingCoreTransactionRepository;
 
     @Mock
     private LedgerService ledgerService;
@@ -53,7 +53,7 @@ class TransactionRepositoryGatewayTest {
     void approveTransaction_shouldReturnNotFound_whenTransactionDoesNotExist() {
         // Arrange
         String transactionId = "nonexistent_tx_id";
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.empty());
 
         // Act
         Either<IdentifiableProblem, TransactionEntity> result = transactionRepositoryGateway.approveTransaction(transactionId);
@@ -69,7 +69,7 @@ class TransactionRepositoryGatewayTest {
         String transactionId = "failed_tx_id";
         TransactionEntity failedTransaction = new TransactionEntity();
         failedTransaction.setAutomatedValidationStatus(ValidationStatus.FAILED);
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(failedTransaction));
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(failedTransaction));
 
         // Act
         Either<IdentifiableProblem, TransactionEntity> result = transactionRepositoryGateway.approveTransaction(transactionId);
@@ -85,8 +85,8 @@ class TransactionRepositoryGatewayTest {
         String transactionId = "valid_tx_id";
         TransactionEntity validTransaction = new TransactionEntity();
         validTransaction.setOverallStatus(OK);
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(validTransaction));
-        when(transactionRepository.save(validTransaction)).thenReturn(validTransaction);
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(validTransaction));
+        when(accountingCoreTransactionRepository.save(validTransaction)).thenReturn(validTransaction);
 
         // Act
         Either<IdentifiableProblem, TransactionEntity> result = transactionRepositoryGateway.approveTransaction(transactionId);
@@ -94,7 +94,7 @@ class TransactionRepositoryGatewayTest {
         // Assert
         assertThat(result.isRight()).isTrue();
         assertThat(result.get()).isSameAs(validTransaction);
-        verify(transactionRepository, times(1)).save(validTransaction);
+        verify(accountingCoreTransactionRepository, times(1)).save(validTransaction);
     }
 
     @Test
@@ -108,10 +108,10 @@ class TransactionRepositoryGatewayTest {
 
         TransactionEntity validTransaction = new TransactionEntity();
         validTransaction.setOverallStatus(OK);
-        when(transactionRepository.findById(validTransactionId.getId())).thenReturn(Optional.of(validTransaction));
-        when(transactionRepository.findById(failedTransactionId.getId())).thenReturn(Optional.empty()); // Simulating not found
+        when(accountingCoreTransactionRepository.findById(validTransactionId.getId())).thenReturn(Optional.of(validTransaction));
+        when(accountingCoreTransactionRepository.findById(failedTransactionId.getId())).thenReturn(Optional.empty()); // Simulating not found
 
-        when(transactionRepository.save(validTransaction)).thenReturn(validTransaction);
+        when(accountingCoreTransactionRepository.save(validTransaction)).thenReturn(validTransaction);
 
         // Act
         List<Either<IdentifiableProblem, TransactionEntity>> results = transactionRepositoryGateway.approveTransactions(transactionsRequest);
@@ -126,7 +126,7 @@ class TransactionRepositoryGatewayTest {
         assertThat(failedResult.isLeft()).isTrue();
         assertThat(failedResult.getLeft().getProblem().getTitle()).isEqualTo("TX_NOT_FOUND");
 
-        verify(transactionRepository, times(1)).save(validTransaction);
+        verify(accountingCoreTransactionRepository, times(1)).save(validTransaction);
     }
 
     @Test
@@ -139,8 +139,8 @@ class TransactionRepositoryGatewayTest {
         TransactionEntity validTransaction = new TransactionEntity();
         validTransaction.setOverallStatus(OK);
         validTransaction.setTransactionApproved(true);
-        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(validTransaction));
-        when(transactionRepository.save(validTransaction)).thenReturn(validTransaction);
+        when(accountingCoreTransactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(validTransaction));
+        when(accountingCoreTransactionRepository.save(validTransaction)).thenReturn(validTransaction);
 
         // Act
         List<Either<IdentifiableProblem, TransactionEntity>> results = transactionRepositoryGateway.approveTransactionsDispatch(transactionsRequest);
@@ -152,7 +152,7 @@ class TransactionRepositoryGatewayTest {
         assertThat(result.isRight()).isTrue();
         assertThat(result.get()).isSameAs(validTransaction);
 
-        verify(transactionRepository, times(1)).save(validTransaction);
+        verify(accountingCoreTransactionRepository, times(1)).save(validTransaction);
         verify(ledgerService, times(1)).checkIfThereAreTransactionsToDispatch(any(), any());
     }
 
@@ -168,7 +168,7 @@ class TransactionRepositoryGatewayTest {
 
         TransactionEntity transactionEntity = new TransactionEntity();
         transactionEntity.setId(transactionId);
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
 
         TransactionItemEntity transactionItemEntity = new TransactionItemEntity();
         transactionItemEntity.setId(transactionItemId);
@@ -195,7 +195,7 @@ class TransactionRepositoryGatewayTest {
         // Arrange
         String transactionId = "tx_id";
         TransactionEntity transactionEntity = new TransactionEntity();
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
 
         // Act
         Optional<TransactionEntity> result = transactionRepositoryGateway.findById(transactionId);
@@ -209,7 +209,7 @@ class TransactionRepositoryGatewayTest {
     void findById_shouldReturnEmpty_whenNotExists() {
         // Arrange
         String transactionId = "tx_id";
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.empty());
 
         // Act
         Optional<TransactionEntity> result = transactionRepositoryGateway.findById(transactionId);
@@ -234,7 +234,7 @@ class TransactionRepositoryGatewayTest {
 
         rejectedTransaction.setItems(Set.of(transactionItemEntity));
 
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(rejectedTransaction));
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(rejectedTransaction));
 
         Either<IdentifiableProblem, TransactionEntity> result = transactionRepositoryGateway.approveTransaction(transactionId);
 
@@ -253,7 +253,7 @@ class TransactionRepositoryGatewayTest {
         TransactionEntity unapprovedTransaction = new TransactionEntity();
         unapprovedTransaction.setOverallStatus(OK);
         unapprovedTransaction.setTransactionApproved(false); // Not approved
-        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(unapprovedTransaction));
+        when(accountingCoreTransactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(unapprovedTransaction));
 
         // Act
         List<Either<IdentifiableProblem, TransactionEntity>> results = transactionRepositoryGateway.approveTransactionsDispatch(transactionsRequest);
@@ -277,7 +277,7 @@ class TransactionRepositoryGatewayTest {
         rejectionRequest.setTransactionItemsRejections(Set.of(new TransactionItemsRejectionRequest.TxItemRejectionRequest(transactionItemId, INCORRECT_AMOUNT)));
 
         TransactionEntity transactionEntity = new TransactionEntity();
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
 
         when(transactionItemRepository.findById(transactionItemId)).thenReturn(Optional.empty());
 
@@ -306,7 +306,7 @@ class TransactionRepositoryGatewayTest {
         TransactionEntity transactionEntity = new TransactionEntity();
         transactionEntity.setId(transactionId);
         transactionEntity.setLedgerDispatchApproved(true); // Transaction already approved for dispatch
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
 
         TransactionItemEntity transactionItemEntity = new TransactionItemEntity();
         transactionItemEntity.setId(transactionItemId);
@@ -332,8 +332,8 @@ class TransactionRepositoryGatewayTest {
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setTransactionIds(Set.of(transactionId));
 
-        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(new TransactionEntity()));
-        when(transactionRepository.save(any(TransactionEntity.class))).thenThrow(new DataAccessException("Database error") {
+        when(accountingCoreTransactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(new TransactionEntity()));
+        when(accountingCoreTransactionRepository.save(any(TransactionEntity.class))).thenThrow(new DataAccessException("Database error") {
         });
 
         // Act
@@ -345,7 +345,7 @@ class TransactionRepositoryGatewayTest {
         assertThat(result.isLeft()).isTrue();
         assertThat(result.getLeft().getProblem().getTitle()).isEqualTo("DB_ERROR");
 
-        verify(transactionRepository, times(1)).save(any(TransactionEntity.class));
+        verify(accountingCoreTransactionRepository, times(1)).save(any(TransactionEntity.class));
     }
 
     @Test
@@ -358,8 +358,8 @@ class TransactionRepositoryGatewayTest {
         TransactionEntity validTransaction = new TransactionEntity();
         validTransaction.setOverallStatus(OK);
         validTransaction.setTransactionApproved(true);
-        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(validTransaction));
-        when(transactionRepository.save(validTransaction)).thenThrow(new DataAccessException("Database error") {
+        when(accountingCoreTransactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(validTransaction));
+        when(accountingCoreTransactionRepository.save(validTransaction)).thenThrow(new DataAccessException("Database error") {
         });
 
         // Act
@@ -371,7 +371,7 @@ class TransactionRepositoryGatewayTest {
         assertThat(result.isLeft()).isTrue();
         assertThat(result.getLeft().getProblem().getTitle()).isEqualTo("DB_ERROR");
 
-        verify(transactionRepository, times(1)).save(validTransaction);
+        verify(accountingCoreTransactionRepository, times(1)).save(validTransaction);
     }
 
 
@@ -396,7 +396,7 @@ class TransactionRepositoryGatewayTest {
 
         transaction.setItems(Set.of(itemWithRejection, validItem));
 
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
 
         // Act
         Either<IdentifiableProblem, TransactionEntity> result = transactionRepositoryGateway.approveTransaction(transactionId);
@@ -425,8 +425,8 @@ class TransactionRepositoryGatewayTest {
 
         transaction.setItems(Set.of(validItem1, validItem2));
 
-        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
+        when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(transaction));
+        when(accountingCoreTransactionRepository.save(transaction)).thenReturn(transaction);
 
         // Act
         Either<IdentifiableProblem, TransactionEntity> result = transactionRepositoryGateway.approveTransaction(transactionId);
@@ -434,7 +434,7 @@ class TransactionRepositoryGatewayTest {
         // Assert
         assertThat(result.isRight()).isTrue();
         assertThat(result.get()).isSameAs(transaction);
-        verify(transactionRepository, times(1)).save(transaction);
+        verify(accountingCoreTransactionRepository, times(1)).save(transaction);
     }
 
     @Test
@@ -454,7 +454,7 @@ class TransactionRepositoryGatewayTest {
 
         transaction.setItems(Set.of(itemWithRejection));
 
-        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(transaction));
+        when(accountingCoreTransactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(transaction));
 
         // Act
         List<Either<IdentifiableProblem, TransactionEntity>> results = transactionRepositoryGateway.approveTransactionsDispatch(transactionsRequest);
@@ -484,8 +484,8 @@ class TransactionRepositoryGatewayTest {
 
         transaction.setItems(Set.of(validItem));
 
-        when(transactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(transaction));
-        when(transactionRepository.save(transaction)).thenReturn(transaction);
+        when(accountingCoreTransactionRepository.findById(transactionId.getId())).thenReturn(Optional.of(transaction));
+        when(accountingCoreTransactionRepository.save(transaction)).thenReturn(transaction);
 
         // Act
         List<Either<IdentifiableProblem, TransactionEntity>> results = transactionRepositoryGateway.approveTransactionsDispatch(transactionsRequest);
@@ -497,7 +497,7 @@ class TransactionRepositoryGatewayTest {
         assertThat(result.isRight()).isTrue();
         assertThat(result.get()).isSameAs(transaction);
 
-        verify(transactionRepository, times(1)).save(transaction);
+        verify(accountingCoreTransactionRepository, times(1)).save(transaction);
         verify(ledgerService, times(1)).checkIfThereAreTransactionsToDispatch(any(), any());
     }
 

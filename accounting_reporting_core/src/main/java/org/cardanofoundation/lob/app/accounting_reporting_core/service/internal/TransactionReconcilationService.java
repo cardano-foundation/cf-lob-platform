@@ -7,6 +7,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationCreatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApi;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.javers.core.Javers;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,6 +21,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.FINALIZED;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class TransactionReconcilationService {
     private final TransactionReconcilationRepository transactionReconcilationRepository;
     private final TransactionRepositoryGateway transactionRepositoryGateway;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final BlockchainReaderPublicApi blockchainReaderPublicApi;
     private final Javers javers;
 
     public Optional<ReconcilationEntity> findById(String reconcilationId) {
@@ -165,6 +169,24 @@ public class TransactionReconcilationService {
                     .build());
         }
 
+        val isOnChainE = blockchainReaderPublicApi.isOnChain(attachedTxEntities.stream()
+                .map(TransactionEntity::getId)
+                .collect(Collectors.toSet())
+        );
+        if (isOnChainE.isLeft()) {
+            log.error("Error checking if transactions are on chain, reconcilationId: {}", reconcilationId);
+            failReconcilation(
+                    reconcilationId,
+                    organisationId,
+                    Optional.of(fromDate),
+                    Optional.of(toDate),
+                    new FatalError(FatalError.Code.ADAPTER_ERROR, "ERROR_CHECKING_ON_CHAIN", Map.of())
+            );
+
+            return;
+        }
+        val isOnChainMap = isOnChainE.get();
+
         for (val attachedTx : attachedTxEntities) {
             val detachedTx = detachedChunkTxsMap.get(attachedTx.getId()); // detachedTx can never be null since we using detatched tx ids as a way to find our attached txs
 
@@ -179,9 +201,7 @@ public class TransactionReconcilationService {
                 val changes = sourceDiff.getChanges();
                 val jsonDiff = javers.getJsonConverter().toJson(changes);
 
-                log.warn("Tx source version issue, tx id:{}, txInternalNumber:{}", detachedTx.getId(), detachedTx.getTransactionInternalNumber(), sourceDiff.prettyPrint());
-
-                log.warn("Diff: {}", sourceDiff.prettyPrint());
+                log.warn("Tx source version issue, tx id:{}, txInternalNumber:{}, diff:{}", detachedTx.getId(), detachedTx.getTransactionInternalNumber(), sourceDiff.prettyPrint());
 
                 reconcilationEntity.addViolation(ReconcilationViolation.builder()
                         .transactionId(attachedTx.getId())
@@ -191,11 +211,12 @@ public class TransactionReconcilationService {
                         .build());
             }
 
+            // we check only existence of LOB transaction on chain, we do not actually check the content and hashes, etc
             attachedTx.setReconcilation(Optional.of(Reconcilation.builder()
                     .source(sourceReconcilationStatus)
+                    .sink(getSinkReconcilationStatus(attachedTx, isOnChainMap))
                     .build())
             );
-
         }
 
         // we can only store back the attached transactions, detatched transactions may not be in db
@@ -207,6 +228,17 @@ public class TransactionReconcilationService {
         transactionReconcilationRepository.save(reconcilationEntity);
 
         log.info("Finished reconciling transactions.");
+    }
+
+    private static ReconcilationCode getSinkReconcilationStatus(TransactionEntity attachedTx, Map<String, Boolean> isOnChainMap) {
+        val isLOBTxOnChain = Optional.ofNullable(isOnChainMap.get(attachedTx.getId())).orElse(false);
+
+        var sinkReconcilationStatus = ReconcilationCode.NOK;
+        if (isLOBTxOnChain && attachedTx.getLedgerDispatchStatus() == FINALIZED) {
+            sinkReconcilationStatus = ReconcilationCode.OK;
+        }
+
+        return sinkReconcilationStatus;
     }
 
     @Transactional

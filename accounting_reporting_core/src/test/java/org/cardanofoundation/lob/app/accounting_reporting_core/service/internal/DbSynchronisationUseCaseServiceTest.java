@@ -8,7 +8,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchAssocRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionItemRepository;
-import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 class DbSynchronisationUseCaseServiceTest {
 
     @Mock
-    private TransactionRepository transactionRepository;
+    private AccountingCoreTransactionRepository accountingCoreTransactionRepository;
 
     @Mock
     private TransactionItemRepository transactionItemRepository;
@@ -53,7 +53,7 @@ class DbSynchronisationUseCaseServiceTest {
 
         service.execute(batchId, organisationTransactions, 0, new ProcessorFlags(ProcessorFlags.Trigger.EXTRACTION));
         verify(transactionBatchService).updateTransactionBatchStatusAndStats(eq(batchId), eq(Optional.of(0)));
-        verifyNoInteractions(transactionRepository);
+        verifyNoInteractions(accountingCoreTransactionRepository);
         verifyNoInteractions(transactionItemRepository);
     }
 
@@ -73,10 +73,10 @@ class DbSynchronisationUseCaseServiceTest {
         val txs = Set.of(tx1);
         val transactions = new OrganisationTransactions("org1", txs);
 
-        when(transactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
+        when(accountingCoreTransactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
         service.execute(batchId, transactions, 1, new ProcessorFlags(ProcessorFlags.Trigger.RECONCILATION));
 
-        verify(transactionRepository).save(eq(tx1));
+        verify(accountingCoreTransactionRepository).save(eq(tx1));
         verify(transactionBatchAssocRepository).saveAll(any(Set.class));
     }
 
@@ -105,11 +105,11 @@ class DbSynchronisationUseCaseServiceTest {
         val txs = Set.of(tx1);
         val transactions = new OrganisationTransactions(orgId, txs);
 
-        when(transactionRepository.findAllById(eq(Set.of(txId)))).thenReturn(List.of(tx1));
+        when(accountingCoreTransactionRepository.findAllById(eq(Set.of(txId)))).thenReturn(List.of(tx1));
 
         service.execute(batchId, transactions, 1, new ProcessorFlags(ProcessorFlags.Trigger.EXTRACTION));
 
-        verify(transactionRepository, never()).save(any());
+        verify(accountingCoreTransactionRepository, never()).save(any());
         verify(transactionItemRepository, never()).save(any());
     }
 
@@ -135,12 +135,12 @@ class DbSynchronisationUseCaseServiceTest {
         val txs = Set.of(tx1);
         val transactions = new OrganisationTransactions(orgId, txs);
 
-        when(transactionRepository.findAllById(any())).thenReturn(List.of());
-        when(transactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
+        when(accountingCoreTransactionRepository.findAllById(any())).thenReturn(List.of());
+        when(accountingCoreTransactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
 
         service.execute(batchId, transactions, txs.size(), new ProcessorFlags(ProcessorFlags.Trigger.EXTRACTION));
 
-        verify(transactionRepository).save(eq(tx1));
+        verify(accountingCoreTransactionRepository).save(eq(tx1));
         verify(transactionItemRepository).saveAll(eq(items));
     }
 
@@ -181,14 +181,14 @@ class DbSynchronisationUseCaseServiceTest {
 
         val txs = Set.of(dispatchedTx, notDispatchedTx);
         val mixedTransactions = new OrganisationTransactions(orgId, txs);
-        when(transactionRepository.findAllById(any())).thenReturn(List.of(dispatchedTx));
+        when(accountingCoreTransactionRepository.findAllById(any())).thenReturn(List.of(dispatchedTx));
 
-        when(transactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
+        when(accountingCoreTransactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
 
         service.execute(batchId, mixedTransactions, 2, new ProcessorFlags(ProcessorFlags.Trigger.EXTRACTION));
 
-        verify(transactionRepository, never()).save(dispatchedTx);
-        verify(transactionRepository).save(notDispatchedTx);
+        verify(accountingCoreTransactionRepository, never()).save(dispatchedTx);
+        verify(accountingCoreTransactionRepository).save(notDispatchedTx);
         verify(transactionItemRepository).saveAll(any());
     }
 
