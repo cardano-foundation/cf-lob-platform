@@ -46,8 +46,8 @@ public class LOBOnChainBatchProcessor {
                     val tx = new TransactionEntity();
                     tx.setId(lobTx.getId());
                     tx.setOrganisationId(lobBatch.getOrganisationId());
-                    tx.setTxHash(txEvent.getTxHash());
-                    tx.setAbsoluteSlot(txEvent.getSlot());
+                    tx.setL1TransactionHash(txEvent.getTxHash());
+                    tx.setL1AbsoluteSlot(txEvent.getSlot());
 
                     transactionService.storeIfNew(tx);
                 }

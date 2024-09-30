@@ -26,11 +26,11 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
     @Column(name = "organisation_id", nullable = false)
     private String organisationId;
 
-    @Column(name = "absolute_slot", nullable = false)
-    private Long absoluteSlot;
+    @Column(name = "l1_absolute_slot", nullable = false)
+    private Long l1AbsoluteSlot;
 
-    @Column(name = "tx_hash", nullable = false)
-    private String txHash;
+    @Column(name = "l1_transaction_hash", nullable = false)
+    private String l1TransactionHash;
 
     @Override
     public String getId() {
