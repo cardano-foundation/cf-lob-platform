@@ -211,6 +211,16 @@ public class TransactionReconcilationService {
                         .build());
             }
 
+            val sinkReconcilationCode = getSinkReconcilationStatus(attachedTx, isOnChainMap);
+
+            if (sinkReconcilationCode == ReconcilationCode.NOK) {
+                reconcilationEntity.addViolation(ReconcilationViolation.builder()
+                        .transactionId(attachedTx.getId())
+                        .rejectionCode(ReconcilationRejectionCode.SINK_RECONCILATION_FAIL)
+                        .transactionInternalNumber(attachedTx.getTransactionInternalNumber())
+                        .build());
+            }
+
             // we check only existence of LOB transaction on chain, we do not actually check the content and hashes, etc
             attachedTx.setReconcilation(Optional.of(Reconcilation.builder()
                     .source(sourceReconcilationStatus)
