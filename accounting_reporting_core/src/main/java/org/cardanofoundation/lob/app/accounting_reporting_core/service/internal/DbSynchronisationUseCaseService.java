@@ -138,8 +138,8 @@ public class DbSynchronisationUseCaseService {
 
     private boolean isIncomingTransactionERPSame(TransactionEntity existingTx,
                                                  TransactionEntity incomingTx) {
-        val existingTxVersion = TransactionVersionCalculator.compute(Source.ERP, existingTx);
-        val incomingTxVersion = TransactionVersionCalculator.compute(Source.ERP, incomingTx);
+        val existingTxVersion = ERPSourceTransactionVersionCalculator.compute(existingTx);
+        val incomingTxVersion = ERPSourceTransactionVersionCalculator.compute(incomingTx);
 
         log.info("Existing transaction version:{}, incomingTx:{}", existingTxVersion, incomingTxVersion);
 

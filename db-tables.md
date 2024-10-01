@@ -1,16 +1,19 @@
 ### Accounting-Core
-- `accounting_core_reconcilation` - Reconcilation
-- `accounting_core_reconcilation_violation` - Reconcilation Violation
-- `accounting_core_transaction` - Transaction
-- `accounting_core_transaction_item` - Transaction Item
-- `accounting_core_transaction_violation` - Transaction Violation
-- `accounting_core_transaction_batch` - Transaction Batch
-- `accounting_core_batch_assoc` - Batch Association between Transaction and Batch
-- `accounting_core_transaction_filtering_params_transaction_number` - Transaction Filtering Params Transaction Number
+- `accounting_core_reconcilation` - Reconcilation (AUDIT)
+- `accounting_core_reconcilation_violation` - Reconcilation Violation (AUDIT)
+- `accounting_core_transaction` - Transaction (AUDIT)
+- `accounting_core_transaction_item` - Transaction Item (AUDIT)
+- `accounting_core_transaction_violation` - Transaction Violation (AUDIT)
+- `accounting_core_transaction_batch` - Transaction Batch (AUDIT)
+- `accounting_core_transaction_batch_assoc` - Batch Association between Transaction and Batch (AUDIT)
+- `accounting_core_transaction_filtering_params_transaction_number` - Transaction Filtering Params Transaction Number (AUDIT)
 
 ### Blockchain Publisher
 - `blockchain_publisher_transaction` - Transaction
 - `blockchain_publisher_transaction_item` - Transaction Item
+
+### Blockchain Reader
+- `blockchain_reader_transaction` - Transaction
 
 ### Netsuite Adapter
 - `netsuite_adapter_ingestion` - NetSuite Adapter Ingestion
