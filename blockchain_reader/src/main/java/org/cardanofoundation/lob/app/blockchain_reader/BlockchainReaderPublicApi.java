@@ -70,6 +70,16 @@ public class BlockchainReaderPublicApi implements BlockchainReaderPublicApiIF {
             );
         }
 
+        public Either<Problem, Map<String, Boolean>> isOnChain(Set<String> transactionIds) {
+            val result = transactionIds.stream()
+                    .collect(Collectors.toMap(
+                            transactionId -> transactionId,
+                            transactionId -> true
+                    ));
+
+            return Either.right(result);
+        }
+
     }
 
 }

@@ -7,7 +7,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationCreatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;
-import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApi;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.javers.core.Javers;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,7 +32,7 @@ public class TransactionReconcilationService {
     private final TransactionReconcilationRepository transactionReconcilationRepository;
     private final TransactionRepositoryGateway transactionRepositoryGateway;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final BlockchainReaderPublicApi blockchainReaderPublicApi;
+    private final BlockchainReaderPublicApiIF blockchainReaderPublicApi;
     private final Javers javers;
 
     public Optional<ReconcilationEntity> findById(String reconcilationId) {
