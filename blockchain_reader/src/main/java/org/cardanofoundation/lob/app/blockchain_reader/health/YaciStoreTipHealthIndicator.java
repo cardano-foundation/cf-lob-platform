@@ -5,11 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.lob.app.blockchain_reader.service.ChainSyncService;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 @Component("yaci_store_chain_sync")
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnBean(ChainSyncService.class)
 public class YaciStoreTipHealthIndicator implements HealthIndicator {
 
     private final ChainSyncService chainSyncService;

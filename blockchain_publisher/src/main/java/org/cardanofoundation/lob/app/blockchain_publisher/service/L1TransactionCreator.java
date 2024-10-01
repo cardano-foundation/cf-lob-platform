@@ -21,7 +21,7 @@ import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainTransactions;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApi;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.zalando.problem.Problem;
 
 import java.nio.file.Files;
@@ -46,7 +46,7 @@ public class L1TransactionCreator {
 
     private final MetadataSerialiser metadataSerialiser;
 
-    private final BlockchainReaderPublicApi blockchainReaderPublicApi;
+    private final BlockchainReaderPublicApiIF blockchainReaderPublicApi;
 
     private final MetadataChecker jsonSchemaMetadataChecker;
 

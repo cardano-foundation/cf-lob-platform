@@ -10,7 +10,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.Blockchain
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
-import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApi;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
@@ -38,12 +38,12 @@ public class TransactionsWatchDogService {
     private final OrganisationPublicApiIF organisationPublicApiIF;
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
     private final BlockchainPublishStatusMapper blockchainPublishStatusMapper;
-    private final BlockchainReaderPublicApi blockchainReaderPublicApi;
+    private final BlockchainReaderPublicApiIF blockchainReaderPublicApi;
 
-    @Value("${lob.blockchain_publisher.watchdog.rollback.grace.period.minutes:30}")
+    @Value("${lob.blockchain_publisher.watchdog.rollback.grace.period.minutes:15}")
     @Getter
     @Setter
-    private int rollbackGracePeriodMinutes = 30;
+    private int rollbackGracePeriodMinutes = 15;
 
     @Value("${lob.blockchain_publisher.watchdog.rollbacks.enabled:true}")
     @Getter
