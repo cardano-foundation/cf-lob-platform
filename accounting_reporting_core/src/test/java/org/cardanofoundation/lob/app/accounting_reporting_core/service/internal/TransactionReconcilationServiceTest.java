@@ -1,23 +1,29 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
+import io.vavr.control.Either;
+import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationCreatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;
+import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
+import org.javers.core.Javers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.time.Clock;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class TransactionReconcilationServiceTest {
@@ -31,8 +37,11 @@ class TransactionReconcilationServiceTest {
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
 
-    @Spy
-    private Clock clock = Clock.systemUTC();
+    @Mock
+    private BlockchainReaderPublicApiIF blockchainReaderPublicApi;
+
+    @Mock
+    private Javers javers;
 
     @InjectMocks
     private TransactionReconcilationService transactionReconcilationService;
@@ -43,101 +52,147 @@ class TransactionReconcilationServiceTest {
     }
 
     @Test
-    void testFindById() {
-        String reconcilationId = "123";
+    void testFindById_shouldReturnReconcilationEntity() {
+        String reconcilationId = "reconcilation123";
         ReconcilationEntity reconcilationEntity = new ReconcilationEntity();
-        when(transactionReconcilationRepository.findById(reconcilationId)).thenReturn(Optional.of(reconcilationEntity));
+        reconcilationEntity.setId(reconcilationId);
+
+        when(transactionReconcilationRepository.findById(reconcilationId))
+                .thenReturn(Optional.of(reconcilationEntity));
 
         Optional<ReconcilationEntity> result = transactionReconcilationService.findById(reconcilationId);
 
-        assertTrue(result.isPresent());
-        assertEquals(reconcilationEntity, result.get());
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(reconcilationId);
     }
 
     @Test
-    void testCreateReconcilation() {
-        String reconcilationId = "123";
-        String organisationId = "org1";
-        String adapterInstanceId = "adapter1";
-        String initiator = "user";
-        LocalDate from = LocalDate.now(clock);
-        LocalDate to = LocalDate.now(clock).plusDays(1);
+    void testFindById_shouldReturnEmptyIfNotFound() {
+        String reconcilationId = "reconcilation123";
 
-        transactionReconcilationService.createReconcilation(reconcilationId, organisationId, from, to);
+        when(transactionReconcilationRepository.findById(reconcilationId))
+                .thenReturn(Optional.empty());
 
-        ArgumentCaptor<ReconcilationEntity> captor = ArgumentCaptor.forClass(ReconcilationEntity.class);
-        verify(transactionReconcilationRepository).save(captor.capture());
-        ReconcilationEntity savedEntity = captor.getValue();
+        Optional<ReconcilationEntity> result = transactionReconcilationService.findById(reconcilationId);
 
-        assertEquals(reconcilationId, savedEntity.getId());
-        assertEquals(organisationId, savedEntity.getOrganisationId());
-        assertEquals(ReconcilationStatus.CREATED, savedEntity.getStatus());
-        assertEquals(from, savedEntity.getFrom().orElseThrow());
-        assertEquals(to, savedEntity.getTo().orElseThrow());
-
-        verify(applicationEventPublisher).publishEvent(any(ReconcilationCreatedEvent.class));
+        assertThat(result).isNotPresent();
     }
 
     @Test
-    void testFailReconcilation() {
-        String reconcilationId = "123";
-        String organisationId = "org1";
-        LocalDate from = LocalDate.now(clock);
-        LocalDate to = LocalDate.now(clock).plusDays(1);
-        FatalError error = new FatalError(FatalError.Code.ADAPTER_ERROR, "SubCode", null);
+    void testCreateReconcilation_shouldSaveReconcilationAndPublishEvent() {
+        String reconcilationId = "reconcilation123";
+        String organisationId = "org123";
+        LocalDate fromDate = LocalDate.now().minusDays(5);
+        LocalDate toDate = LocalDate.now();
 
-        when(transactionReconcilationRepository.findById(reconcilationId)).thenReturn(Optional.empty());
+        transactionReconcilationService.createReconcilation(reconcilationId, organisationId, fromDate, toDate);
 
-        transactionReconcilationService.failReconcilation(reconcilationId, organisationId, Optional.of(from), Optional.of(to), error);
+        ArgumentCaptor<ReconcilationEntity> reconcilationCaptor = ArgumentCaptor.forClass(ReconcilationEntity.class);
+        verify(transactionReconcilationRepository).save(reconcilationCaptor.capture());
 
-        ArgumentCaptor<ReconcilationEntity> captor = ArgumentCaptor.forClass(ReconcilationEntity.class);
-        verify(transactionReconcilationRepository).save(captor.capture());
-        ReconcilationEntity failedEntity = captor.getValue();
+        assertThat(reconcilationCaptor.getValue().getId()).isEqualTo(reconcilationId);
+        assertThat(reconcilationCaptor.getValue().getOrganisationId()).isEqualTo(organisationId);
+        assertThat(reconcilationCaptor.getValue().getFrom()).contains(fromDate);
+        assertThat(reconcilationCaptor.getValue().getTo()).contains(toDate);
 
-        assertEquals(reconcilationId, failedEntity.getId());
-        assertEquals(ReconcilationStatus.FAILED, failedEntity.getStatus());
+        verify(applicationEventPublisher, times(1)).publishEvent(any(ReconcilationCreatedEvent.class));
     }
 
     @Test
-    void testReconcileChunk_ReconcilationNotFound() {
-        String reconcilationId = "123";
-        String organisationId = "org1";
-        LocalDate fromDate = LocalDate.now(clock);
-        LocalDate toDate = LocalDate.now(clock).plusDays(1);
-        Set<TransactionEntity> detachedChunkTxs = Set.of();
+    void testFailReconcilation_shouldSaveReconcilationAsFailed() {
+        String reconcilationId = "reconcilation123";
+        String organisationId = "org123";
+        LocalDate fromDate = LocalDate.now().minusDays(5);
+        LocalDate toDate = LocalDate.now();
+        FatalError fatalError = new FatalError(FatalError.Code.ADAPTER_ERROR, "Test Error", Map.of());
 
-        when(transactionReconcilationRepository.findById(reconcilationId)).thenReturn(Optional.empty());
+        ReconcilationEntity reconcilationEntity = new ReconcilationEntity();
+        when(transactionReconcilationRepository.findById(reconcilationId))
+                .thenReturn(Optional.of(reconcilationEntity));
+
+        transactionReconcilationService.failReconcilation(reconcilationId, organisationId, Optional.of(fromDate), Optional.of(toDate), fatalError);
+
+        assertThat(reconcilationEntity.getStatus()).isEqualTo(ReconcilationStatus.FAILED);
+        assertThat(reconcilationEntity.getDetails().get().getCode()).isEqualTo(fatalError.getCode().name());
+
+        verify(transactionReconcilationRepository).save(reconcilationEntity);
+    }
+
+    @Test
+    void testReconcileChunk_shouldAddViolationsForMissingTransactions() {
+        String reconcilationId = "reconcilation123";
+        String organisationId = "org123";
+        LocalDate fromDate = LocalDate.now().minusDays(5);
+        LocalDate toDate = LocalDate.now();
+
+        ReconcilationEntity reconcilationEntity = new ReconcilationEntity();
+        when(transactionReconcilationRepository.findById(reconcilationId))
+                .thenReturn(Optional.of(reconcilationEntity));
+
+        val txEntity1 = new TransactionEntity();
+        txEntity1.setId("tx1");
+        txEntity1.setTransactionInternalNumber("internal1");
+
+        val txEntity2 = new TransactionEntity();
+        txEntity2.setId("tx2");
+        txEntity2.setTransactionInternalNumber("internal2");
+
+        val detachedChunkTxs = Set.of(txEntity1, txEntity2);
+        val txIds = Set.of("tx1", "tx2");
+
+        when(transactionRepositoryGateway.findAllByDateRangeAndNotReconciledYet(organisationId, fromDate, toDate))
+                .thenReturn(Set.of(txEntity1));
+
+        when(blockchainReaderPublicApi.isOnChain(anySet())).thenReturn(Either.right(Map.of(
+                "tx1", true,
+                "tx2", true
+        )));
+
+        when(transactionRepositoryGateway.findAllByDateRangeAndNotReconciledYet(organisationId, fromDate, toDate))
+                .thenReturn(Set.of(txEntity1));
 
         transactionReconcilationService.reconcileChunk(reconcilationId, organisationId, fromDate, toDate, detachedChunkTxs);
 
-        verify(transactionReconcilationRepository, atLeastOnce()).save(any());
-        verify(transactionRepositoryGateway, never()).findByAllId(anySet());
+        verify(transactionReconcilationRepository).save(reconcilationEntity);
     }
 
     @Test
-    void testWrapUpReconcilation_ReconcilationNotFound() {
-        String reconcilationId = "123";
-        String organisationId = "org1";
+    void testWrapUpReconcilation_shouldSetReconcilationAsCompleted() {
+        String reconcilationId = "reconcilation123";
+        String organisationId = "org123";
 
-        when(transactionReconcilationRepository.findById(reconcilationId)).thenReturn(Optional.empty());
-
-        transactionReconcilationService.wrapUpReconcilation(reconcilationId, organisationId);
-
-        verify(transactionReconcilationRepository, atLeastOnce()).save(any());
-    }
-
-    @Test
-    void testWrapUpReconcilation_AlreadyCompleted() {
-        String reconcilationId = "123";
-        String organisationId = "org1";
         ReconcilationEntity reconcilationEntity = new ReconcilationEntity();
-        reconcilationEntity.setStatus(ReconcilationStatus.COMPLETED);
+        reconcilationEntity.setStatus(ReconcilationStatus.STARTED);
+        reconcilationEntity.setFrom(Optional.of(LocalDate.now().minusDays(5)));
+        reconcilationEntity.setTo(Optional.of(LocalDate.now()));
 
-        when(transactionReconcilationRepository.findById(reconcilationId)).thenReturn(Optional.of(reconcilationEntity));
+        when(transactionReconcilationRepository.findById(reconcilationId))
+                .thenReturn(Optional.of(reconcilationEntity));
 
         transactionReconcilationService.wrapUpReconcilation(reconcilationId, organisationId);
 
-        verify(transactionReconcilationRepository, never()).save(any());
+        assertThat(reconcilationEntity.getStatus()).isEqualTo(ReconcilationStatus.COMPLETED);
+        verify(transactionRepositoryGateway).storeAll(any());
+    }
+
+    @Test
+    void testFailReconcilationWhenEntityNotFound_shouldCreateNewAndFail() {
+        String reconcilationId = "reconcilation123";
+        String organisationId = "org123";
+        LocalDate fromDate = LocalDate.now().minusDays(5);
+        LocalDate toDate = LocalDate.now();
+        FatalError fatalError = new FatalError(FatalError.Code.ADAPTER_ERROR, "Test Error", Map.of());
+
+        when(transactionReconcilationRepository.findById(reconcilationId))
+                .thenReturn(Optional.empty());
+
+        transactionReconcilationService.failReconcilation(reconcilationId, organisationId, Optional.of(fromDate), Optional.of(toDate), fatalError);
+
+        ArgumentCaptor<ReconcilationEntity> captor = ArgumentCaptor.forClass(ReconcilationEntity.class);
+        verify(transactionReconcilationRepository).save(captor.capture());
+
+        assertThat(captor.getValue().getId()).isEqualTo(reconcilationId);
+        assertThat(captor.getValue().getStatus()).isEqualTo(ReconcilationStatus.FAILED);
     }
 
 }

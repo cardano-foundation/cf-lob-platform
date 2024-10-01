@@ -3,7 +3,10 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Reconcilation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationCreatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;
@@ -22,6 +25,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.FINALIZED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode.SOURCE_RECONCILATION_FAIL;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode.TX_NOT_IN_ERP;
 
 @Service
 @Slf4j
@@ -142,8 +147,7 @@ public class TransactionReconcilationService {
         }
 
         val reconcilationEntity = reconcilationEntityM.get();
-        val totalProcessed = reconcilationEntity.getProcessedTxCount() + detachedChunkTxs.size();
-        reconcilationEntity.setProcessedTxCount(totalProcessed);
+        reconcilationEntity.incrementMissingTxsCount(detachedChunkTxs.size());
         reconcilationEntity.setStatus(ReconcilationStatus.STARTED);
 
         val attachedTxEntities = transactionRepositoryGateway.findByAllId(
@@ -190,8 +194,8 @@ public class TransactionReconcilationService {
         for (val attachedTx : attachedTxEntities) {
             val detachedTx = detachedChunkTxsMap.get(attachedTx.getId()); // detachedTx can never be null since we using detatched tx ids as a way to find our attached txs
 
-            val attachedTxHash = TransactionVersionCalculator.compute(Source.ERP, attachedTx);
-            val detachedTxHash = TransactionVersionCalculator.compute(Source.ERP, detachedTx);
+            val attachedTxHash = ERPSourceTransactionVersionCalculator.compute(attachedTx);
+            val detachedTxHash = ERPSourceTransactionVersionCalculator.compute(detachedTx);
 
             val sourceReconcilationStatus = attachedTxHash.equals(detachedTxHash)
                     ? ReconcilationCode.OK : ReconcilationCode.NOK;
@@ -205,7 +209,7 @@ public class TransactionReconcilationService {
 
                 reconcilationEntity.addViolation(ReconcilationViolation.builder()
                         .transactionId(attachedTx.getId())
-                        .rejectionCode(ReconcilationRejectionCode.SOURCE_RECONCILATION_FAIL)
+                        .rejectionCode(SOURCE_RECONCILATION_FAIL)
                         .sourceDiff(jsonDiff)
                         .transactionInternalNumber(attachedTx.getTransactionInternalNumber())
                         .build());
@@ -227,6 +231,7 @@ public class TransactionReconcilationService {
                     .sink(getSinkReconcilationStatus(attachedTx, isOnChainMap))
                     .build())
             );
+            attachedTx.setLastReconcilation(Optional.of(reconcilationEntity));
         }
 
         // we can only store back the attached transactions, detatched transactions may not be in db
@@ -297,7 +302,7 @@ public class TransactionReconcilationService {
 
             reconcilationEntity.addViolation(ReconcilationViolation.builder()
                     .transactionId(missingTx.getId())
-                    .rejectionCode(ReconcilationRejectionCode.TX_NOT_IN_ERP)
+                    .rejectionCode(TX_NOT_IN_ERP)
                     .transactionInternalNumber(missingTx.getTransactionInternalNumber())
                     .build()
             );
@@ -306,6 +311,8 @@ public class TransactionReconcilationService {
         transactionRepositoryGateway.storeAll(missingTxs);
 
         reconcilationEntity.setStatus(ReconcilationStatus.COMPLETED);
+
+        reconcilationEntity.incrementMissingTxsCount(missingTxs.size());
     }
 
 }

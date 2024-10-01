@@ -38,8 +38,6 @@ public class ProjectConversionTaskItem implements PipelineTaskItem {
 
             val projectMappingM = organisationPublicApi.findProject(organisationId, customerCode);
 
-            log.info("Project mapping found: {}", projectMappingM);
-
             if (projectMappingM.isEmpty()) {
                 val v = TransactionViolation.builder()
                         .code(PROJECT_DATA_NOT_FOUND)

@@ -51,6 +51,8 @@ CREATE TABLE accounting_core_transaction (
    organisation_tax_id_number VARCHAR(255),
    organisation_currency_id VARCHAR(255),
 
+   reconcilation_id CHAR(64),
+
    reconcilation_source VARCHAR(255),
    reconcilation_sink VARCHAR(255),
    reconcilation_final_status VARCHAR(255),

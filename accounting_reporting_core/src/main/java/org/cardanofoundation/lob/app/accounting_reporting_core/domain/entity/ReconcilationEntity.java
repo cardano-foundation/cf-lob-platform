@@ -76,6 +76,10 @@ public class ReconcilationEntity extends AuditEntity implements Persistable<Stri
     @Getter
     private Set<ReconcilationViolation> violations = new LinkedHashSet<>();
 
+    public void incrementMissingTxsCount(int delta) {
+        processedTxCount += delta;
+    }
+
     public void addViolation(ReconcilationViolation violation) {
         violations.add(violation);
     }

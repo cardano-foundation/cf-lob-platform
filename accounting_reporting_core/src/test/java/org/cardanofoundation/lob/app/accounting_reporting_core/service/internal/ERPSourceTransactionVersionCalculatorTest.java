@@ -2,9 +2,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -16,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.FxRevaluation;
 
 @Slf4j
-class TransactionVersionCalculatorTest {
+class ERPSourceTransactionVersionCalculatorTest {
 
     @Test
     public void testTx1() {
@@ -26,7 +24,7 @@ class TransactionVersionCalculatorTest {
 
         val tx = createTx1(org);
 
-        val tHash = TransactionVersionCalculator.compute(Source.ERP, tx);
+        val tHash = ERPSourceTransactionVersionCalculator.compute(tx);
 
         assertThat(tHash).isNotNull();
         assertThat(tHash).isEqualTo("2f715f83e6e1cff7ee85ce36caf6fd5557886513222d055d0d9a6207fc343930");
@@ -39,10 +37,10 @@ class TransactionVersionCalculatorTest {
                 .build();
 
         val tx1 = createTx1(org);
-        val tx1Hash = TransactionVersionCalculator.compute(Source.ERP, tx1);
+        val tx1Hash = ERPSourceTransactionVersionCalculator.compute(tx1);
 
         val tx2 = createTx2(org);
-        val tx2Hash = TransactionVersionCalculator.compute(Source.ERP, tx2);
+        val tx2Hash = ERPSourceTransactionVersionCalculator.compute(tx2);
 
         assertThat(tx1Hash).isEqualTo("2f715f83e6e1cff7ee85ce36caf6fd5557886513222d055d0d9a6207fc343930");
         assertThat(tx2Hash).isEqualTo("2f715f83e6e1cff7ee85ce36caf6fd5557886513222d055d0d9a6207fc343930");
