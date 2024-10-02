@@ -23,8 +23,8 @@ public interface AccountingCoreTransactionRepository extends JpaRepository<Trans
             " WHERE t.organisation.id = :organisationId" +
             " AND t.entryDate BETWEEN :startDate AND :endDate" +
             // TODO on sink reconcilation stories
-            //" AND (t.reconcilation.source IS NULL OR t.reconcilation.sink IS NULL)" +
-            " AND (t.reconcilation.source IS NULL)" +
+            " AND (t.reconcilation.source IS NULL OR t.reconcilation.sink IS NULL)" +
+            //" AND (t.reconcilation.source IS NULL)" +
             " ORDER BY t.createdAt ASC, t.id ASC")
     Set<TransactionEntity> findByEntryDateRangeAndNotReconciledYet(@Param("organisationId") String organisactionId,
                                               @Param("startDate") LocalDate startDate,

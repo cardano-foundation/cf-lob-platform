@@ -1,9 +1,7 @@
 package org.cardanofoundation.lob.app.blockchain_common.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.util.Optional;
 
@@ -11,6 +9,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @Builder
 @Getter
+@Setter
 public class ChainTip {
 
     private long absoluteSlot;
@@ -20,6 +19,7 @@ public class ChainTip {
     @Builder.Default
     private Optional<Integer> epochNo = Optional.empty();
 
+    @NotNull
     private CardanoNetwork network;
 
     private boolean isSynced;

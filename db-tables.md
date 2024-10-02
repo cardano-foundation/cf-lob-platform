@@ -12,20 +12,17 @@
 - `blockchain_publisher_transaction` - Transaction
 - `blockchain_publisher_transaction_item` - Transaction Item
 
-### Blockchain Reader
-- `blockchain_reader_transaction` - Transaction
-
 ### Netsuite Adapter
 - `netsuite_adapter_ingestion` - NetSuite Adapter Ingestion
 - `netsuite_adapter_code_mapping` - NetSuite Adapter Code Mapping
 
 ### Organisation
-- `organisation` - Organisation
-- `organisation_account_event` - Organisation Account Event
-- `organisation_chart_of_account` - Organisation Chart of Account
-- `organisation_currency` - Organisation Currency
-- `organisation_project` - Organisation Project
-- `organisation_vat` - Organisation VAT
+- `organisation` - Organisation (AUDIT)
+- `organisation_account_event` - Organisation Account Event (AUDIT)
+- `organisation_chart_of_account` - Organisation Chart of Account (AUDIT)
+- `organisation_currency` - Organisation Currency (AUDIT)
+- `organisation_project` - Organisation Project (AUDIT)
+- `organisation_vat` - Organisation VAT (AUDIT)
 
 ### Spring Modulith
 - `event_publication` - Event Publication

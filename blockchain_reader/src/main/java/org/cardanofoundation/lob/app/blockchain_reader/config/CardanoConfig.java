@@ -6,13 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration("blockchain_reader.cardano_config")
+@Configuration
 @Slf4j
 public class CardanoConfig {
 
-    @Bean("blockchain_reader.network")
+    @Bean
     public CardanoNetwork cardanoNetwork(@Value("${lob.cardano.network:main}") CardanoNetwork network) {
-        log.info("Configured backend network:{}", network);
+        log.info("Configured backend network: {}", network);
 
         return network;
     }
