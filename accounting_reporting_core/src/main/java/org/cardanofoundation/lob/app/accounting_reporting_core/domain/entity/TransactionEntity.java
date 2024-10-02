@@ -178,6 +178,16 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
         return items.stream().anyMatch(item -> item.getRejection().isPresent());
     }
 
+    public boolean hasAnyRejection(Source source) {
+        for (TransactionItemEntity txItem : items) {
+            if (txItem.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource().equals(source))) {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
     public boolean isRejectionFree() {
         return !hasAnyRejection();
     }
