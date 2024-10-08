@@ -52,8 +52,8 @@ public class DocumentConversionTaskItem implements PipelineTaskItem {
                                     TransactionEntity tx,
                                     TransactionItemEntity txItem,
                                     Document document) {
+        /** Always recalculate the value. */
         return document.getVat()
-                .filter(vat -> vat.getRate().isEmpty())
                 .flatMap(vat -> {
                     val vatM = organisationPublicApi.findOrganisationByVatAndCode(organisationId, vat.getCustomerCode());
 

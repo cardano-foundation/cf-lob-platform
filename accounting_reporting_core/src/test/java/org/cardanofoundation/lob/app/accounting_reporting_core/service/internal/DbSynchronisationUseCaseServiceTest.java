@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OrganisationTransactions;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionItem;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
@@ -192,4 +194,50 @@ class DbSynchronisationUseCaseServiceTest {
         verify(transactionItemRepository).saveAll(any());
     }
 
+    @Test
+    void shouldReprocessFlagTest() {
+        val batchId = "batch1";
+        val txId = "tx1";
+
+        val tx1 = Mockito.mock(TransactionEntity.class);
+        tx1.setId(txId);
+        tx1.setAccountingPeriod(YearMonth.of(2021, 1));
+        tx1.setTransactionInternalNumber("txn123");
+        tx1.setTransactionApproved(true);
+        tx1.setLedgerDispatchApproved(true);
+        tx1.setLedgerDispatchStatus(DISPATCHED);
+
+        val txs = Set.of(tx1);
+        val transactions = new OrganisationTransactions("org1", txs);
+
+        when(accountingCoreTransactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
+        service.execute(batchId, transactions, 1, new ProcessorFlags(ProcessorFlags.Trigger.REPROCESSING));
+
+        verify(accountingCoreTransactionRepository).save(eq(tx1));
+        verify(tx1, times(1)).clearAllItemsRejectionsSource(Source.LOB);
+        verify(transactionBatchAssocRepository).saveAll(any(Set.class));
+    }
+
+    void shouldExtractionFlagTest() {
+        val batchId = "batch1";
+        val txId = "tx1";
+
+        val tx1 = Mockito.mock(TransactionEntity.class);
+        tx1.setId(txId);
+        tx1.setAccountingPeriod(YearMonth.of(2021, 1));
+        tx1.setTransactionInternalNumber("txn123");
+        tx1.setTransactionApproved(true);
+        tx1.setLedgerDispatchApproved(true);
+        tx1.setLedgerDispatchStatus(DISPATCHED);
+
+        val txs = Set.of(tx1);
+        val transactions = new OrganisationTransactions("org1", txs);
+
+        when(accountingCoreTransactionRepository.save(any(TransactionEntity.class))).thenAnswer((Answer<TransactionEntity>) invocation -> (TransactionEntity) invocation.getArgument(0));
+        service.execute(batchId, transactions, 1, new ProcessorFlags(ProcessorFlags.Trigger.EXTRACTION));
+
+        verify(accountingCoreTransactionRepository).save(eq(tx1));
+        verify(tx1, times(1)).clearAllItemsRejectionsSource(Source.ERP);
+        verify(transactionBatchAssocRepository).saveAll(any(Set.class));
+    }
 }

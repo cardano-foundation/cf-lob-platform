@@ -54,20 +54,22 @@ public class DbSynchronisationUseCaseService {
 
         if (trigger == ProcessorFlags.Trigger.REPROCESSING) {
             // TODO should we check if we are NOT changing incomingTransactions which are already marked as dispatched?
-            storeTransactions(batchId, incomingTransactions);
+            storeTransactions(batchId, incomingTransactions, flags);
             return;
         }
 
         val organisationId = incomingTransactions.organisationId();
 
-        processTransactionsForTheFirstTime(batchId, organisationId, transactions, Optional.of(totalTransactionsCount));
+        processTransactionsForTheFirstTime(batchId, organisationId, transactions, Optional.of(totalTransactionsCount), flags);
     }
 
     @Transactional
     private void processTransactionsForTheFirstTime(String batchId,
                                                     String organisationId,
                                                     Set<TransactionEntity> incomingDetachedTransactions,
-                                                    Optional<Integer> totalTransactionsCount) {
+                                                    Optional<Integer> totalTransactionsCount,
+                                                    ProcessorFlags flags) {
+        val trigger = flags.getTrigger();
         val txsAlreadyStored = new LinkedHashSet<TransactionEntity>();
 
         val txIds = incomingDetachedTransactions.stream()
@@ -85,7 +87,8 @@ public class DbSynchronisationUseCaseService {
 
             val isDispatchMarked = txM.map(TransactionEntity::allApprovalsPassedForTransactionDispatch).orElse(false);
             val notStoredYet = txM.isEmpty();
-            val isChanged = notStoredYet || (txM.map(tx -> !isIncomingTransactionERPSame(tx, incomingTx)).orElse(false));
+            /** If is a new transaction || the new one is different from our Db copy || the transaction has any violation || transaction item has a ERP source rejection -> then should be processed*/
+            val isChanged = notStoredYet || (txM.map(tx -> !isIncomingTransactionERPSame(tx, incomingTx) || tx.hasAnyRejection(Source.ERP) || !tx.getViolations().isEmpty()).orElse(false));
 
             if (isDispatchMarked && isChanged) {
                 log.warn("Transaction cannot be altered, it is already marked as dispatched, transactionNumber: {}", incomingTx.getTransactionInternalNumber());
@@ -107,20 +110,29 @@ public class DbSynchronisationUseCaseService {
 
         raiseViolationForAlreadyProcessedTransactions(txsAlreadyStored);
 
-        storeTransactions(batchId, new OrganisationTransactions(organisationId, toProcessTransactions));
+        storeTransactions(batchId, new OrganisationTransactions(organisationId, toProcessTransactions), flags);
 
         transactionBatchService.updateTransactionBatchStatusAndStats(batchId, totalTransactionsCount);
     }
 
     private void storeTransactions(String batchId,
-                                   OrganisationTransactions transactions) {
+                                   OrganisationTransactions transactions, ProcessorFlags flags) {
         log.info("Updating transaction batch, batchId: {}", batchId);
-
+        val trigger = flags.getTrigger();
         val txs = transactions.transactions();
 
         for (val tx : txs) {
             val saved = accountingCoreTransactionRepository.save(tx);
             saved.getItems().forEach(i -> i.setTransaction(saved));
+
+            /** Remove items rejection according to the processor selected */
+            if (trigger == ProcessorFlags.Trigger.EXTRACTION) {
+                tx.clearAllItemsRejectionsSource(Source.ERP);
+            }
+            if (trigger == ProcessorFlags.Trigger.REPROCESSING) {
+                tx.clearAllItemsRejectionsSource(Source.LOB);
+            }
+
             transactionItemRepository.saveAll(tx.getItems());
         }
 
