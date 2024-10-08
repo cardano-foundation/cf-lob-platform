@@ -63,7 +63,7 @@ public class ERPIncomingDataProcessor {
         val allOrgTransactions = new OrganisationTransactions(organisationId, transactions);
 
         // run or re-run business rules
-        businessRulesPipelineProcessor.run(allOrgTransactions);
+        businessRulesPipelineProcessor.run(allOrgTransactions,processorFlags);
 
         dbSynchronisationUseCaseService.execute(batchId,
                 allOrgTransactions,
@@ -99,7 +99,7 @@ public class ERPIncomingDataProcessor {
         val organisationTransactions = new OrganisationTransactions(organisationId, chunkDetachedTxEntities);
 
         // run or re-run business rules
-        businessRulesPipelineProcessor.run(organisationTransactions);
+        businessRulesPipelineProcessor.run(organisationTransactions,new ProcessorFlags(ProcessorFlags.Trigger.RECONCILATION));
 
         transactionReconcilationService.reconcileChunk(
                 reconcilationId,
