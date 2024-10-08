@@ -1,6 +1,5 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OrganisationTransactions;
@@ -11,6 +10,8 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reco
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationStartedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.BusinessRulesPipelineProcessor;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +20,20 @@ import java.util.Set;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class ERPIncomingDataProcessor {
 
-    private final TransactionReconcilationService transactionReconcilationService;
-    private final BusinessRulesPipelineProcessor businessRulesPipelineProcessor;
-    private final TransactionBatchService transactionBatchService;
-    private final DbSynchronisationUseCaseService dbSynchronisationUseCaseService;
+    @Autowired
+    private TransactionReconcilationService transactionReconcilationService;
+
+    @Autowired
+    @Qualifier("selectorBusinessRulesProcessors")
+    private BusinessRulesPipelineProcessor businessRulesPipelineProcessor;
+
+    @Autowired
+    private TransactionBatchService transactionBatchService;
+
+    @Autowired
+    private DbSynchronisationUseCaseService dbSynchronisationUseCaseService;
 
     @Transactional
     public void initiateIngestion(String batchId,
