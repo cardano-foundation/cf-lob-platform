@@ -17,7 +17,7 @@ public class DefaultBusinessRulesPipelineProcessor implements BusinessRulesPipel
     private final List<PipelineTask> pipelineTasks;
 
     @Override
-    public void run(final OrganisationTransactions allOrgTransactions) {
+    public void run(final OrganisationTransactions allOrgTransactions, ProcessorFlags processorFlags) {
 
         for (val transactionEntity : allOrgTransactions.transactions()) {
             transactionEntity.setAutomatedValidationStatus(VALIDATED);
