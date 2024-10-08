@@ -4,12 +4,10 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.CoreCurrencyRepository;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.BusinessRulesPipelineProcessor;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.DefaultBusinessRulesPipelineProcessor;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.DefaultPipelineTask;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.PipelineTask;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.items.*;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,7 +23,17 @@ public class BusinessRulesConfig {
     private final CoreCurrencyRepository currencyRepository;
 
     @Bean
-    public BusinessRulesPipelineProcessor businessRulesPipelineProcessor() {
+    @Qualifier("selectorBusinessRulesProcessors")
+    public BusinessRulesPipelineProcessor selectorBusinessRulesProcessors() {
+        return new BusinessRulesPipelineSelector(
+                defaultBusinessRulesProcessor(),
+                reprocessBusinessRulesProcessor()
+        );
+    }
+
+    @Bean
+    @Qualifier("defaultBusinessRulesProcessor")
+    public BusinessRulesPipelineProcessor defaultBusinessRulesProcessor() {
         val pipelineTasks = new ArrayList<PipelineTask>();
 
         pipelineTasks.add(sanityCheckPipelineTask());
@@ -35,6 +43,16 @@ public class BusinessRulesConfig {
         pipelineTasks.add(postCleansingPipelineTask());
         pipelineTasks.add(postValidationPipelineTask());
         pipelineTasks.add(sanityCheckPipelineTask());
+
+        return new DefaultBusinessRulesPipelineProcessor(pipelineTasks);
+    }
+
+    @Bean
+    @Qualifier("reprocessBusinessRulesProcessor")
+    public BusinessRulesPipelineProcessor reprocessBusinessRulesProcessor() {
+        val pipelineTasks = new ArrayList<PipelineTask>();
+
+        pipelineTasks.add(conversionPipelineTask());
 
         return new DefaultBusinessRulesPipelineProcessor(pipelineTasks);
     }
