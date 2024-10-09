@@ -11,7 +11,7 @@ public class ProcessorFlags {
 
     public enum Trigger {
 
-        EXTRACTION, // extraction of data from ERP source
+        IMPORT, // extraction of data from ERP source
         RECONCILATION, // reconciliation of extracted data
         REPROCESSING // reprocessing some failed transactions within a batch
 

@@ -1,9 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules;
 
-import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OrganisationTransactions;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags.Trigger.IMPORT;
 import static org.mockito.Mockito.*;
 
 class DefaultBusinessRulesPipelineProcessorTest {
@@ -36,7 +34,7 @@ class DefaultBusinessRulesPipelineProcessorTest {
         when(allOrgTransactions.transactions()).thenReturn(Set.of(transaction1, transaction2));
 
         // Act
-        processor.run(allOrgTransactions);
+        processor.run(allOrgTransactions, new ProcessorFlags(IMPORT));
 
         // Assert
         verify(transaction1).clearAllViolations();
@@ -53,7 +51,7 @@ class DefaultBusinessRulesPipelineProcessorTest {
         when(allOrgTransactions.transactions()).thenReturn(Set.of(transaction));
 
         // Act
-        processor.run(allOrgTransactions);
+        processor.run(allOrgTransactions, new ProcessorFlags(IMPORT));
 
         // Assert
         for (PipelineTask pipelineTask : pipelineTasks) {
@@ -70,7 +68,7 @@ class DefaultBusinessRulesPipelineProcessorTest {
         when(allOrgTransactions.transactions()).thenReturn(Set.of());
 
         // Act & Assert
-        assertThatCode(() -> processor.run(allOrgTransactions))
+        assertThatCode(() -> processor.run(allOrgTransactions, new ProcessorFlags(IMPORT)))
                 .doesNotThrowAnyException();
     }
 
@@ -87,11 +85,10 @@ class DefaultBusinessRulesPipelineProcessorTest {
         when(allOrgTransactions.transactions()).thenReturn(Set.of(transaction1, transaction2));
 
         // Act
-        processor.run(allOrgTransactions);
+        processor.run(allOrgTransactions, new ProcessorFlags(IMPORT));
 
         // Assert
         verify(transaction1).clearAllViolations();
-
         verify(transaction2).clearAllViolations();
     }
 

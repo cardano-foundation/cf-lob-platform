@@ -126,7 +126,7 @@ public class DbSynchronisationUseCaseService {
             saved.getItems().forEach(i -> i.setTransaction(saved));
 
             /** Remove items rejection according to the processor selected */
-            if (trigger == ProcessorFlags.Trigger.EXTRACTION) {
+            if (trigger == ProcessorFlags.Trigger.IMPORT) {
                 tx.clearAllItemsRejectionsSource(Source.ERP);
             }
             if (trigger == ProcessorFlags.Trigger.REPROCESSING) {

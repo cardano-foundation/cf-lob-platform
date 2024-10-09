@@ -85,7 +85,7 @@ public class AccountingCoreEventHandler {
                 batchId,
                 transactionBatchChunkEvent.getTotalTransactionsCount(),
                 detachedDbTxs,
-                new ProcessorFlags(ProcessorFlags.Trigger.EXTRACTION)
+                new ProcessorFlags(ProcessorFlags.Trigger.IMPORT)
         );
 
         log.info("Finished processing handleTransactionBatchChunkEvent event...., event, batch_id: {}", batchId);
