@@ -41,4 +41,3 @@ out/
 .DS_Store
 .minio_bucket*
 .jqwik-database
-

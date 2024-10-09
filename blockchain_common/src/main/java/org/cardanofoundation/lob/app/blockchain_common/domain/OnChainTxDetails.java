@@ -1,12 +1,13 @@
 package org.cardanofoundation.lob.app.blockchain_common.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @AllArgsConstructor
 @Getter
+@Setter
+@NoArgsConstructor
 @Builder
+@ToString
 public class OnChainTxDetails {
 
     private String transactionHash;

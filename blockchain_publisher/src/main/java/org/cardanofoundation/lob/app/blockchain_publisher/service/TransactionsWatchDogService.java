@@ -74,7 +74,7 @@ public class TransactionsWatchDogService {
             log.error("Could not get cardano chain tip, exiting...");
             return Either.left(Problem.builder()
                     .withTitle("CHAIN_TIP_NOT_FOUND")
-                    .withDetail("Could not get cardano chain tip")
+                    .withDetail(STR."Could not get cardano chain tip, reason:\{chainTipE.getLeft().getDetail()}")
                     .withStatus(Status.INTERNAL_SERVER_ERROR)
                     .with("organisationId", organisationId)
                     .with("reason", chainTipE.getLeft().getDetail())
@@ -87,7 +87,6 @@ public class TransactionsWatchDogService {
 
             return Either.right(Set.of());
         }
-        val chainTipSlot = chainTip.getAbsoluteSlot();
 
         val rollbackEndangeredTransactions = transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(organisationId, Limit.of(limitPerOrg));
         log.info("Found {} transactions that are not finalised yet.", rollbackEndangeredTransactions.size());
@@ -113,7 +112,7 @@ public class TransactionsWatchDogService {
                 .filter(Either::isRight)
                 .map(Either::get)
                 .filter(Optional::isPresent)
-                .map(opt -> opt.orElseThrow())
+                .map(Optional::orElseThrow)
                 .collect(Collectors.toSet());
 
         // notify accounting core about updated transactions
@@ -203,7 +202,7 @@ public class TransactionsWatchDogService {
         val txCreationSlot = l1SubmissionData.getCreationSlot().orElseThrow();
 
         val txHash = l1SubmissionData.getTransactionHash().orElseThrow();
-        log.info("Checking transaction status changes for txId:{}", txHash);
+        log.info("Checking transaction status changes for txHash:{}", txHash);
 
         val cardanoOnChainDataE = blockchainReaderPublicApi.getTxDetails(txHash);
         if (cardanoOnChainDataE.isLeft()) {
@@ -215,8 +214,7 @@ public class TransactionsWatchDogService {
         if (cardanoOnChainDataM.isPresent()) {
             log.info("Found transaction with id: {} on chain", txHash);
             val cardanoOnChainData = cardanoOnChainDataM.orElseThrow();
-            val txSubmissionAbsoluteSlot = cardanoOnChainData.getAbsoluteSlot();
-            val chainTipAbsoluteSlot = chainTip.getAbsoluteSlot();
+            log.info("Cardano on chain data: {}", cardanoOnChainData);
             val txAbsoluteSlot = cardanoOnChainData.getAbsoluteSlot();
 
             val cardanoFinalityScore = cardanoOnChainData.getFinalityScore();
@@ -239,7 +237,7 @@ public class TransactionsWatchDogService {
 
         // this means rollback scenario since we have L1 submission data but no on chain data
         // we do not want to prematurely raise ROLLBACK, so we have a grade period but if we are past it, we can safely rollback
-        if (cardanoOnChainDataM.isEmpty() && isRollbackReadyTimewise && rollbackSupportEnabled) {
+        if (isRollbackReadyTimewise && rollbackSupportEnabled) {
             log.warn("Transaction with id: {} is not on chain anymore, rollback?", txId);
 
             val txUpdate = new TransactionUpdateCommand(tx,

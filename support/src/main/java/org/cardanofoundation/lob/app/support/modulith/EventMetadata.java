@@ -3,10 +3,12 @@ package org.cardanofoundation.lob.app.support.modulith;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@ToString
 public class EventMetadata {
 
     private String version;

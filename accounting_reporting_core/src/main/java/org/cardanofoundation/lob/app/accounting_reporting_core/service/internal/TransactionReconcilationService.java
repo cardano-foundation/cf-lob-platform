@@ -25,8 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.FINALIZED;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode.SOURCE_RECONCILATION_FAIL;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode.TX_NOT_IN_ERP;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode.*;
 
 @Service
 @Slf4j
@@ -196,6 +195,8 @@ public class TransactionReconcilationService {
 
             val attachedTxHash = ERPSourceTransactionVersionCalculator.compute(attachedTx);
             val detachedTxHash = ERPSourceTransactionVersionCalculator.compute(detachedTx);
+            log.info("Reconciling transaction, tx id:{}, txInternalNumber:{}, attachedTxHash:{}, detachedTxHash:{}",
+                    attachedTx.getId(), attachedTx.getTransactionInternalNumber(), attachedTxHash, detachedTxHash);
 
             val sourceReconcilationStatus = attachedTxHash.equals(detachedTxHash)
                     ? ReconcilationCode.OK : ReconcilationCode.NOK;
@@ -220,7 +221,7 @@ public class TransactionReconcilationService {
             if (sinkReconcilationCode == ReconcilationCode.NOK) {
                 reconcilationEntity.addViolation(ReconcilationViolation.builder()
                         .transactionId(attachedTx.getId())
-                        .rejectionCode(ReconcilationRejectionCode.SINK_RECONCILATION_FAIL)
+                        .rejectionCode(SINK_RECONCILATION_FAIL)
                         .transactionInternalNumber(attachedTx.getTransactionInternalNumber())
                         .build());
             }
@@ -297,6 +298,7 @@ public class TransactionReconcilationService {
 
             missingTx.setReconcilation(Optional.of(Reconcilation.builder()
                     .source(ReconcilationCode.NOK)
+                    .sink(ReconcilationCode.NOK)
                     .build())
             );
 
@@ -306,6 +308,8 @@ public class TransactionReconcilationService {
                     .transactionInternalNumber(missingTx.getTransactionInternalNumber())
                     .build()
             );
+
+            missingTx.setLastReconcilation(Optional.of(reconcilationEntity));
         }
 
         transactionRepositoryGateway.storeAll(missingTxs);
