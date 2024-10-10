@@ -31,7 +31,7 @@ public class YaciStoreConfig {
 
     @Bean
     @Qualifier("yaci_blockfrost")
-    @ConditionalOnMissingBean(BackendService.class)
+    @ConditionalOnProperty(name = "lob.blockchain_reader.enabled", havingValue = "false")
     public BackendService coreBackendService(@Qualifier("original_blockfrost") BackendService blockfrostBackend) {
         log.info("Creating Yaci Blockfrost backend service with original blockfrost backend service");
 
