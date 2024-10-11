@@ -2,8 +2,10 @@ package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 
@@ -14,7 +16,7 @@ import static jakarta.persistence.EnumType.STRING;
 @Entity(name = "netsuite.CodeMappingEntity")
 @Table(name = "netsuite_adapter_code_mapping")
 @NoArgsConstructor
-public class CodeMappingEntity extends AuditEntity implements Persistable<CodeMappingEntity.Id> {
+public class CodeMappingEntity extends CommonEntity implements Persistable<CodeMappingEntity.Id> {
 
     @EmbeddedId
     @AttributeOverrides({

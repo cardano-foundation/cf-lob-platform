@@ -5,12 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Entity(name = "organisation_chart_of_account")
-public class OrganisationChartOfAccount {
+@Entity
+@Table(name = "organisation_chart_of_account")
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
+public class OrganisationChartOfAccount extends CommonEntity implements Persistable<OrganisationChartOfAccount.Id> {
 
     @EmbeddedId
     @AttributeOverrides({

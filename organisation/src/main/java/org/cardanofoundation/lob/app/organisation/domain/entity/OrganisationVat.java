@@ -5,15 +5,21 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Entity(name = "organisation_vat")
-public class OrganisationVat extends AuditEntity {
+@Entity
+@Table(name = "organisation_vat")
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
+public class OrganisationVat extends CommonEntity implements Persistable<OrganisationVat.Id> {
 
     @EmbeddedId
     @AttributeOverrides({

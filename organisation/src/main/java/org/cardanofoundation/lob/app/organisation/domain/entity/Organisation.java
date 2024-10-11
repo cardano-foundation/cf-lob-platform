@@ -1,15 +1,16 @@
 package org.cardanofoundation.lob.app.organisation.domain.entity;
 
 import io.hypersistence.utils.hibernate.type.basic.PostgreSQLCITextType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 import org.hibernate.annotations.Type;
+import org.hibernate.envers.Audited;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Optional;
 
@@ -19,8 +20,11 @@ import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity(name = "organisation")
-public class Organisation {
+@Entity
+@Table(name = "organisation")
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
+public class Organisation extends CommonEntity implements Persistable<String> {
 
     @Id
     @Column(name = "organisation_id", nullable = false)

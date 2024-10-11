@@ -141,8 +141,8 @@ public class TransactionConverter {
         txEntity.setAccountingPeriod(transaction.getAccountingPeriod());
         txEntity.setTransactionApproved(transaction.isTransactionApproved());
         txEntity.setLedgerDispatchApproved(transaction.isLedgerDispatchApproved());
-        txEntity.setUpdatedAt(LocalDateTime.now(clock));
-        txEntity.setCreatedAt(LocalDateTime.now(clock));
+        //txEntity.setUpdatedAt(LocalDateTime.now(clock));
+        //txEntity.setCreatedAt(LocalDateTime.now(clock));
 
         txItems.forEach(i -> i.setTransaction(txEntity));
 
@@ -322,10 +322,10 @@ public class TransactionConverter {
         attached.setLedgerDispatchStatus(detached.getLedgerDispatchStatus());
         attached.setAccountingPeriod(detached.getAccountingPeriod());
         attached.setTransactionInternalNumber(detached.getTransactionInternalNumber());
-        attached.setUpdatedAt(LocalDateTime.now(clock));
-        attached.setUpdatedBy(detached.getUpdatedBy());
-        attached.setCreatedAt(detached.getCreatedAt());
-        attached.setCreatedBy(detached.getCreatedBy());
+//        attached.setUpdatedAt(LocalDateTime.now(clock));
+//        attached.setUpdatedBy(detached.getUpdatedBy());
+//        attached.setCreatedAt(detached.getCreatedAt());
+//        attached.setCreatedBy(detached.getCreatedBy());
 
         attached.getViolations().clear();
         attached.getViolations().addAll(detached.getViolations());

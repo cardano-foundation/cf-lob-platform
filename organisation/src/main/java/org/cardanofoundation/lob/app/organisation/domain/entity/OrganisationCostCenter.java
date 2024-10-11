@@ -2,13 +2,20 @@ package org.cardanofoundation.lob.app.organisation.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Entity(name = "organisation_cost_center")
+@Entity
+@Table(name = "organisation_cost_center")
 @Builder
-public class OrganisationCostCenter {
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
+public class OrganisationCostCenter extends CommonEntity implements Persistable<OrganisationCostCenter.Id> {
 
     @EmbeddedId
     @AttributeOverrides({

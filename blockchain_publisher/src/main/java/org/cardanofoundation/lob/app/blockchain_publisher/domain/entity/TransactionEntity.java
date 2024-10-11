@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 import org.springframework.data.domain.Persistable;
 
 import javax.annotation.Nullable;
@@ -26,9 +26,7 @@ import static jakarta.persistence.FetchType.EAGER;
 @Table(name = "blockchain_publisher_transaction")
 @NoArgsConstructor
 @AllArgsConstructor
-//@Audited
-//@EntityListeners({AuditingEntityListener.class})
-public class TransactionEntity extends AuditEntity implements Persistable<String> {
+public class TransactionEntity extends CommonEntity implements Persistable<String> {
 
     @Id
     @Column(name = "transaction_id", nullable = false)

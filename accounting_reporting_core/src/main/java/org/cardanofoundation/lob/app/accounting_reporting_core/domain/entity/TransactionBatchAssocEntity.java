@@ -3,8 +3,10 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 import com.google.common.base.Objects;
 import jakarta.persistence.*;
 import lombok.*;
-import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Setter
@@ -12,7 +14,9 @@ import org.springframework.data.domain.Persistable;
 @Table(name = "accounting_core_transaction_batch_assoc")
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionBatchAssocEntity extends AuditEntity implements Persistable<TransactionBatchAssocEntity.Id> {
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
+public class TransactionBatchAssocEntity extends CommonEntity implements Persistable<TransactionBatchAssocEntity.Id> {
 
     @EmbeddedId
     @AttributeOverrides({

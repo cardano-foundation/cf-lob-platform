@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
-import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -17,9 +19,9 @@ import java.util.Optional;
 @NoArgsConstructor
 @ToString
 @AllArgsConstructor
-//@Audited
-//@EntityListeners({AuditingEntityListener.class})
-public class TransactionItemEntity extends AuditEntity implements Persistable<String> {
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
+public class TransactionItemEntity extends CommonEntity implements Persistable<String> {
 
     @Id
     @Column(name = "transaction_item_id", nullable = false)
