@@ -5,9 +5,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.hibernate.annotations.Type;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static jakarta.persistence.EnumType.STRING;
@@ -38,6 +41,21 @@ public class ReconcilationViolation {
     @Getter
     @Setter
     private String transactionInternalNumber;
+
+    @NotBlank
+    @Getter
+    @Setter
+    private LocalDate transactionEntryDate;
+
+    @NotBlank
+    @Getter
+    @Setter
+    private TransactionType transactionType;
+
+    @NotNull
+    @Getter
+    @Setter
+    private BigDecimal amountLcy;
 
     public Optional<String> getSourceDiff() {
         return Optional.ofNullable(sourceDiff);

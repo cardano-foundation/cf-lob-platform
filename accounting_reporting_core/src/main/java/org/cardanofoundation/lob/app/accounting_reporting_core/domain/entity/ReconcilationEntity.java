@@ -70,7 +70,10 @@ public class ReconcilationEntity extends AuditEntity implements Persistable<Stri
     @AttributeOverrides({
             @AttributeOverride(name = "transactionId", column = @Column(name = "transaction_id", nullable = false)),
             @AttributeOverride(name = "rejectionCode", column = @Column(name = "rejection_code", nullable = false)),
-            @AttributeOverride(name = "transactionInternalNumber", column = @Column(name = "transaction_internal_number", nullable = false))
+            @AttributeOverride(name = "transactionInternalNumber", column = @Column(name = "transaction_internal_number", nullable = false)),
+            @AttributeOverride(name = "transactionEntryDate", column = @Column(name = "transaction_entry_date", nullable = false)),
+            @AttributeOverride(name = "transactionType", column = @Column(name = "transaction_type", nullable = false)),
+            @AttributeOverride(name = "amountLcy", column = @Column(name = "amount_lcy", nullable = false))
     })
     @Setter
     @Getter
