@@ -1,8 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,17 +15,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import static jakarta.persistence.EnumType.STRING;
 
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class TransactionView {
+public class TransactionReconciliationTransactionsView {
 
     private String id;
     private String internalTransactionNumber;
@@ -37,11 +32,11 @@ public class TransactionView {
 
     private TransactionType transactionType;
 
-    private TransactionStatus status = TransactionStatus.OK;
+    private Optional<TransactionStatus> status = Optional.empty();
 
-    private LedgerDispatchStatusView statistic = LedgerDispatchStatusView.PENDING;
+    private Optional<LedgerDispatchStatusView> statistic = Optional.of(LedgerDispatchStatusView.PENDING);
 
-    private ValidationStatus validationStatus = ValidationStatus.VALIDATED;
+    private Optional<ValidationStatus> validationStatus = Optional.of(ValidationStatus.VALIDATED);
 
     private boolean transactionApproved = false;
 
