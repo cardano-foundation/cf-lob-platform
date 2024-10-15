@@ -21,7 +21,13 @@ public class DefaultBusinessRulesPipelineProcessor implements BusinessRulesPipel
 
         for (val transactionEntity : allOrgTransactions.transactions()) {
             transactionEntity.setAutomatedValidationStatus(VALIDATED);
-            transactionEntity.clearAllViolations();
+            if (processorFlags.getTrigger() == ProcessorFlags.Trigger.IMPORT) {
+                transactionEntity.clearAllViolations();
+            }
+            if (processorFlags.getTrigger() == ProcessorFlags.Trigger.REPROCESSING) {
+                transactionEntity.clearAllViolations(Source.LOB);
+            }
+
         }
 
         for (val pipelineTask : pipelineTasks) {

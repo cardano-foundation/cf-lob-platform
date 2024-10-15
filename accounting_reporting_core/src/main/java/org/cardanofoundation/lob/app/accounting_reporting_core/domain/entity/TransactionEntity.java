@@ -164,6 +164,11 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
         recalcValidationStatus();
     }
 
+    public void clearAllViolations(Source source) {
+        violations.removeIf(violation -> violation.getSource().equals(source));
+        recalcValidationStatus();
+    }
+
     public void clearAllItemsRejectionsSource(Source source) {
         for (TransactionItemEntity txItem : items) {
             if (txItem.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource().equals(source))) {
@@ -185,6 +190,11 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
 
         }
         return false;
+    }
+
+    public boolean hasAnyViolation(Source source) {
+
+        return violations.stream().anyMatch(violation -> violation.getSource().equals(source));
     }
 
     public boolean isRejectionFree() {
