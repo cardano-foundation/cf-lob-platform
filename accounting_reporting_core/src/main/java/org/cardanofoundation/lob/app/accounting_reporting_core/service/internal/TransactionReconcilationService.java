@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -213,6 +214,13 @@ public class TransactionReconcilationService {
                         .rejectionCode(SOURCE_RECONCILATION_FAIL)
                         .sourceDiff(jsonDiff)
                         .transactionInternalNumber(attachedTx.getTransactionInternalNumber())
+                        .transactionEntryDate(attachedTx.getEntryDate())
+                        .transactionType(attachedTx.getTransactionType())
+                        .amountLcy(attachedTx.getItems().stream()
+                                .map(TransactionItemEntity::getAmountLcy)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        )
+
                         .build());
             }
 
@@ -223,6 +231,12 @@ public class TransactionReconcilationService {
                         .transactionId(attachedTx.getId())
                         .rejectionCode(SINK_RECONCILATION_FAIL)
                         .transactionInternalNumber(attachedTx.getTransactionInternalNumber())
+                        .transactionEntryDate(attachedTx.getEntryDate())
+                        .transactionType(attachedTx.getTransactionType())
+                        .amountLcy(attachedTx.getItems().stream()
+                                .map(TransactionItemEntity::getAmountLcy)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        )
                         .build());
             }
 
@@ -306,6 +320,12 @@ public class TransactionReconcilationService {
                     .transactionId(missingTx.getId())
                     .rejectionCode(TX_NOT_IN_ERP)
                     .transactionInternalNumber(missingTx.getTransactionInternalNumber())
+                    .transactionEntryDate(missingTx.getEntryDate())
+                    .transactionType(missingTx.getTransactionType())
+                    .amountLcy(missingTx.getItems().stream()
+                            .map(TransactionItemEntity::getAmountLcy)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    )
                     .build()
             );
 

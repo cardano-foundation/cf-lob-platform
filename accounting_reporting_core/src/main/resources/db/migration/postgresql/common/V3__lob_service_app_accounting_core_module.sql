@@ -457,7 +457,12 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation (
     reconcilation_id CHAR(64) NOT NULL,
     transaction_id CHAR(64) NOT NULL,
     rejection_code VARCHAR(255) NOT NULL,
+
     transaction_internal_number VARCHAR(255) NOT NULL,
+    transaction_entry_date DATE NOT NULL,
+    transaction_type VARCHAR(255) NOT NULL,
+    amount_lcy DECIMAL(100, 8) NOT NULL,
+
     source_diff jsonb,
 
     CONSTRAINT fk_accounting_core_reconcilation_violation FOREIGN KEY (reconcilation_id) REFERENCES accounting_core_reconcilation (reconcilation_id),
