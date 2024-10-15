@@ -60,7 +60,7 @@ public class ReconcilationViolation {
     @NotNull
     @Getter
     @Setter
-    private BigDecimal amountLcy;
+    private BigDecimal amountLcySum;
 
     public Optional<String> getSourceDiff() {
         return Optional.ofNullable(sourceDiff);
