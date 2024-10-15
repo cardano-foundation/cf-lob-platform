@@ -170,6 +170,12 @@ public class TransactionReconcilationService {
                     .transactionId(tx.getId())
                     .rejectionCode(ReconcilationRejectionCode.TX_NOT_IN_LOB)
                     .transactionInternalNumber(tx.getTransactionInternalNumber())
+                    .transactionEntryDate(tx.getEntryDate())
+                    .transactionType(tx.getTransactionType())
+                    .amountLcySum(tx.getItems().stream()
+                            .map(TransactionItemEntity::getAmountLcy)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    )
                     .build());
         }
 
