@@ -461,7 +461,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation (
     transaction_internal_number VARCHAR(255) NOT NULL,
     transaction_entry_date DATE NOT NULL,
     transaction_type VARCHAR(255) NOT NULL,
-    amount_lcy DECIMAL(100, 8) NOT NULL,
+    amount_lcy_sum DECIMAL(100, 8) NOT NULL,
 
     source_diff jsonb,
 
@@ -476,6 +476,9 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation_aud (
     transaction_id CHAR(64) NOT NULL,
     rejection_code VARCHAR(255) NOT NULL,
     transaction_internal_number VARCHAR(255) NOT NULL,
+    transaction_entry_date DATE NOT NULL,
+    transaction_type VARCHAR(255) NOT NULL,
+    amount_lcy_sum DECIMAL(100, 8) NOT NULL,
     source_diff JSONB,
 
     -- Special columns for audit tables
