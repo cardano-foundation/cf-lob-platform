@@ -7,8 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionBatchStatus;
-import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.annotation.Nullable;
 import java.util.LinkedHashSet;
@@ -20,7 +22,9 @@ import java.util.Set;
 @Entity(name = "accounting_reporting_core.TransactionBatchEntity")
 @Table(name = "accounting_core_transaction_batch")
 @NoArgsConstructor
-public class TransactionBatchEntity extends AuditEntity implements Persistable<String> {
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
+public class TransactionBatchEntity extends CommonEntity implements Persistable<String> {
 
     @Id
     @Column(name = "transaction_batch_id", nullable = false)

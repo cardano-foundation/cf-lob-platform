@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.val;
+import org.hibernate.envers.Audited;
 import org.javers.core.metamodel.annotation.DiffIgnore;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,17 +19,18 @@ import static jakarta.persistence.TemporalType.TIMESTAMP;
 @Getter
 @MappedSuperclass
 @NoArgsConstructor
-public abstract class AuditEntity {
+@Audited
+public abstract class CommonEntity {
 
     @Column(name = "created_by")
     @CreatedBy
     @DiffIgnore
-    protected String createdBy = "system";
+    protected String createdBy;
 
     @Column(name = "updated_by")
     @LastModifiedBy
     @DiffIgnore
-    protected String updatedBy = "system";
+    protected String updatedBy;
 
     @Temporal(TIMESTAMP)
     @Column(name = "created_at")
@@ -50,19 +51,6 @@ public abstract class AuditEntity {
     @PostLoad
     void markNotNew() {
         this.isNew = false;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        val now = LocalDateTime.now();
-        createdAt = now;
-        updatedAt = now;
-        this.isNew = false;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 
     public boolean isNew() {

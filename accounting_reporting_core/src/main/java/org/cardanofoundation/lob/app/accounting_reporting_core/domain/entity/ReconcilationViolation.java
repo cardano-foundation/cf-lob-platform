@@ -1,11 +1,14 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.Type;
+import org.hibernate.envers.Audited;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -17,6 +20,8 @@ import static jakarta.persistence.EnumType.STRING;
 @NoArgsConstructor
 @Builder
 @EqualsAndHashCode
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
 public class ReconcilationViolation {
 
     @NotBlank

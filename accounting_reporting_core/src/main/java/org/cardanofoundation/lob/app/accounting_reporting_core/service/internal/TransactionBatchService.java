@@ -68,8 +68,8 @@ public class TransactionBatchService {
         transactionBatchEntity.setTransactions(Set.of());
         transactionBatchEntity.setFilteringParameters(filteringParameters);
         transactionBatchEntity.setStatus(CREATED);
-        transactionBatchEntity.setCreatedBy("system");
-        transactionBatchEntity.setUpdatedBy("system");
+//        transactionBatchEntity.setCreatedBy("system");
+//        transactionBatchEntity.setUpdatedBy("system");
 
         transactionBatchRepository.save(transactionBatchEntity);
 

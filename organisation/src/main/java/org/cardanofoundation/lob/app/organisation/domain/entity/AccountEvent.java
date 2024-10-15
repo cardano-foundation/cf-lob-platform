@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Entity(name = "organisation_account_event")
+@Entity
+@Table(name = "organisation_account_event")
 @Builder
 public class AccountEvent {
 

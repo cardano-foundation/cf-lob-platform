@@ -5,9 +5,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
-import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
 import org.javers.core.metamodel.annotation.DiffIgnore;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.annotation.Nullable;
 import java.time.LocalDate;
@@ -26,10 +28,9 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 @Table(name = "accounting_core_transaction")
 @NoArgsConstructor
 @AllArgsConstructor
-//@Audited
-//@EntityListeners({AuditingEntityListener.class})
-@EntityListeners({ TransactionEntityListener.class })
-public class TransactionEntity extends AuditEntity implements Persistable<String> {
+@Audited
+@EntityListeners({ TransactionEntityListener.class, AuditingEntityListener.class })
+public class TransactionEntity extends CommonEntity implements Persistable<String> {
 
     @Id
     @Column(name = "transaction_id", nullable = false)
@@ -164,14 +165,12 @@ public class TransactionEntity extends AuditEntity implements Persistable<String
     }
 
     public void clearAllItemsRejectionsSource(Source source) {
-
         for (TransactionItemEntity txItem : items) {
             if (txItem.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource().equals(source))) {
                 txItem.setRejection(Optional.empty());
             }
 
         }
-
     }
 
     public boolean hasAnyRejection() {

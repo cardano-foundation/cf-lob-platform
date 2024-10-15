@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.cardanofoundation.lob.app.support.spring_audit.AuditEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 import org.springframework.data.domain.Persistable;
 
 @Entity
@@ -17,7 +17,7 @@ import org.springframework.data.domain.Persistable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class NetSuiteIngestionEntity extends AuditEntity implements Persistable<String> {
+public class NetSuiteIngestionEntity extends CommonEntity implements Persistable<String> {
 
     @Id
     @Column(name = "id", nullable = false)

@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,7 +9,9 @@ import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.envers.Audited;
 import org.javers.core.metamodel.annotation.DiffIgnore;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +26,8 @@ import static jakarta.persistence.EnumType.STRING;
 @NoArgsConstructor
 @Builder
 @EqualsAndHashCode
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
 public class TransactionViolation {
 
     @NotNull
