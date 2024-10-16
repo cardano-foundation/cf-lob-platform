@@ -15,15 +15,15 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.OK;
 import static org.mockito.Mockito.*;
 
-public class TransactionEntityListenerTest {
+public class OverallStatusTransactionEntityListenerTest {
 
-    private TransactionEntityListener listener;
+    private OverallStatusTransactionEntityListener listener;
 
     private TransactionEntity transactionEntity;
 
     @BeforeEach
     public void setUp() {
-        listener = new TransactionEntityListener();
+        listener = new OverallStatusTransactionEntityListener();
         transactionEntity = mock(TransactionEntity.class);
     }
 

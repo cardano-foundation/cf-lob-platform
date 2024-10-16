@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.hibernate.envers.Audited;
 
 @Embeddable
 @AllArgsConstructor
@@ -10,6 +11,7 @@ import lombok.*;
 @Getter
 @EqualsAndHashCode
 @Builder(toBuilder = true)
+@Audited
 public class AccountEvent {
 
     @NotBlank

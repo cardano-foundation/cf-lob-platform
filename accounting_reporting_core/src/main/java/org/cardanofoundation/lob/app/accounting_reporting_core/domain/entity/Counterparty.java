@@ -4,7 +4,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
-import org.javers.core.metamodel.annotation.DiffInclude;
+import org.hibernate.envers.Audited;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -17,15 +17,14 @@ import static jakarta.persistence.EnumType.STRING;
 @Builder
 @Getter
 @EqualsAndHashCode
+@Audited
 public class Counterparty {
 
     @LOBVersionSourceRelevant
-    
     private String customerCode;
 
     @Enumerated(STRING)
     @LOBVersionSourceRelevant
-    
     private org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type type;
 
     @Nullable

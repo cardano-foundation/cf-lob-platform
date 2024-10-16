@@ -12,7 +12,7 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.OK;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.VALIDATED;
 
-public class TransactionEntityListener {
+public class OverallStatusTransactionEntityListener {
 
     @PrePersist
     @PreUpdate

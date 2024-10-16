@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @Builder
 @Getter
+@Audited
 public class BatchStatistics {
 
     @Nullable

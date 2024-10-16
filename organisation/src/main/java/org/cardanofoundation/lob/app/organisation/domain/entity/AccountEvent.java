@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,6 +14,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "organisation_account_event")
 @Builder
+@Audited
+@EntityListeners({ AuditingEntityListener.class })
 public class AccountEvent {
 
     @EmbeddedId

@@ -34,6 +34,7 @@ public class OrganisationCurrency extends CommonEntity implements Persistable<Or
     @NoArgsConstructor
     @Getter
     @EqualsAndHashCode
+    @Audited
     public static class Id {
 
         private String organisationId;
