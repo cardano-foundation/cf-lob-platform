@@ -45,7 +45,7 @@ public class ExtractionParametersFilteringService {
                 .filter(tx -> {
                     val txTypes = userExtractionParameters.getTransactionTypes();
 
-                    return txTypes.isEmpty() || txTypes.contains(tx.getTransactionType());
+                    return null == txTypes || txTypes.isEmpty() || txTypes.contains(tx.getTransactionType());
                 })
                 .filter(tx -> {
                     val transactionNumbers = userExtractionParameters.getTransactionNumbers();
