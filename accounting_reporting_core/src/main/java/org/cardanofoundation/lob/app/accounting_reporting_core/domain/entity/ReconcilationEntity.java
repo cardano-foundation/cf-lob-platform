@@ -71,6 +71,7 @@ public class ReconcilationEntity extends CommonEntity implements Persistable<Str
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "accounting_core_reconcilation_violation", joinColumns = @JoinColumn(name = "reconcilation_id"))
+    @Audited
     @AttributeOverrides({
             @AttributeOverride(name = "transactionId", column = @Column(name = "transaction_id", nullable = false)),
             @AttributeOverride(name = "rejectionCode", column = @Column(name = "rejection_code", nullable = false)),

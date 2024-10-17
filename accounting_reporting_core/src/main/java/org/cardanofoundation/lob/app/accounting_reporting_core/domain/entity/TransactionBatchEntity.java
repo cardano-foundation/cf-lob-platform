@@ -37,6 +37,7 @@ public class TransactionBatchEntity extends CommonEntity implements Persistable<
             @AttributeOverride(name = "from", column = @Column(name = "filtering_parameters_from_date")),
             @AttributeOverride(name = "to", column = @Column(name = "filtering_parameters_to_date")),
             @AttributeOverride(name = "transactionTypes", column = @Column(name = "filtering_parameters_transaction_types")),
+            @AttributeOverride(name = "transactionNumbers", column = @Column(name = "filtering_parameters_transaction_numbers", columnDefinition = "text[]", nullable = false)),
             @AttributeOverride(name = "accountingPeriodFrom", column = @Column(name = "filtering_parameters_accounting_period_from")),
             @AttributeOverride(name = "accountingPeriodTo", column = @Column(name = "filtering_parameters_accounting_period_to")),
     })

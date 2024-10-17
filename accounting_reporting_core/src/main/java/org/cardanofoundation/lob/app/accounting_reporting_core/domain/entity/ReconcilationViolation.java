@@ -52,6 +52,7 @@ public class ReconcilationViolation {
     @NotBlank
     @Getter
     @Setter
+    @Enumerated(STRING)
     private TransactionType transactionType;
 
     @NotNull

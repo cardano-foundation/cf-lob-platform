@@ -362,6 +362,6 @@ class AccountingCorePresentationConverterTest {
         transactionItem.setRejection(Optional.of(new Rejection(RejectionReason.REVIEW_PARENT_COST_CENTER)));
         transaction.setViolations(Set.of());
         assertEquals(LedgerDispatchStatusView.PENDING, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
-
     }
+
 }

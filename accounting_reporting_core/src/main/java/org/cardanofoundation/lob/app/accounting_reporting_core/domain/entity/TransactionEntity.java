@@ -135,6 +135,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
 
     @ElementCollection(fetch = EAGER)
     @CollectionTable(name = "accounting_core_transaction_violation", joinColumns = @JoinColumn(name = "transaction_id"))
+    @Audited
     @AttributeOverrides({
             @AttributeOverride(name = "code", column = @Column(name = "code", nullable = false)),
             @AttributeOverride(name = "subCode", column = @Column(name = "sub_code", nullable = false)),

@@ -20,9 +20,9 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_batch (
 
    filtering_parameters_organisation_id VARCHAR(255) NOT NULL,
    filtering_parameters_transaction_types SMALLINT,
+   filtering_parameters_transaction_numbers text[] NOT NULL DEFAULT '{}',
    filtering_parameters_from_date DATE NOT NULL,
    filtering_parameters_to_date DATE NOT NULL,
-   filtering_parameters_transaction_number VARCHAR(255),
    filtering_parameters_accounting_period_from DATE, -- NULLable since sometimes when batch fails we do not have it
    filtering_parameters_accounting_period_to DATE, -- NULLable since sometimes when batch fails we do not have it
 
@@ -56,9 +56,9 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_batch_aud (
 
     filtering_parameters_organisation_id VARCHAR(255) NOT NULL,
     filtering_parameters_transaction_types SMALLINT,
+    filtering_parameters_transaction_numbers text[] NOT NULL DEFAULT '{}',
     filtering_parameters_from_date DATE NOT NULL,
     filtering_parameters_to_date DATE NOT NULL,
-    filtering_parameters_transaction_number VARCHAR(255),
     filtering_parameters_accounting_period_from DATE,
     filtering_parameters_accounting_period_to DATE,
 
@@ -210,30 +210,6 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation_aud (
     -- Foreign Key referencing the original transaction table
     FOREIGN KEY (transaction_id) REFERENCES accounting_core_transaction (transaction_id) MATCH SIMPLE
     ON UPDATE NO ACTION ON DELETE NO ACTION,
-
-    -- Foreign Key to the revision information table
-    FOREIGN KEY (rev) REFERENCES revinfo (rev) MATCH SIMPLE
-    ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-CREATE TABLE IF NOT EXISTS accounting_core_transaction_filtering_params_transaction_number (
-   owner_id CHAR(64) NOT NULL,
-   transaction_number VARCHAR(255) NOT NULL,
-
-   PRIMARY KEY (owner_id, transaction_number)
-);
-
-CREATE TABLE IF NOT EXISTS accounting_core_transaction_filtering_params_transaction_number_aud (
-    owner_id CHAR(64) NOT NULL,
-    transaction_number VARCHAR(255) NOT NULL,
-
-    -- Special columns for audit tables
-    rev INTEGER NOT NULL,
-    revtype SMALLINT,
-    ord INTEGER,
-
-    -- Primary Key for the audit table
-    CONSTRAINT pk_accounting_core_transaction_filtering_params_transaction_number_aud PRIMARY KEY (owner_id, transaction_number, rev, revtype),
 
     -- Foreign Key to the revision information table
     FOREIGN KEY (rev) REFERENCES revinfo (rev) MATCH SIMPLE
