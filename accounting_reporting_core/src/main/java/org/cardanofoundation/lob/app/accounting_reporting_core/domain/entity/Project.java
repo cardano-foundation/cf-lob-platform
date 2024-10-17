@@ -4,6 +4,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+import org.hibernate.envers.Audited;
 import org.javers.core.metamodel.annotation.DiffInclude;
 
 import javax.annotation.Nullable;
@@ -15,6 +16,7 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 @Getter
 @EqualsAndHashCode
+@Audited
 public class Project {
 
     @NotBlank

@@ -5,6 +5,7 @@ import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+import org.hibernate.envers.Audited;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import java.util.Optional;
 @Getter
 @Builder(toBuilder = true)
 @EqualsAndHashCode
+@Audited
 public class Organisation {
 
     @NotBlank

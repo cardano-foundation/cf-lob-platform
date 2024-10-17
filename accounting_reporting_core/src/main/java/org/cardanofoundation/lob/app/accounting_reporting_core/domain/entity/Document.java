@@ -5,7 +5,7 @@ import jakarta.persistence.Embedded;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
-import org.javers.core.metamodel.annotation.DiffInclude;
+import org.hibernate.envers.Audited;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -16,10 +16,10 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 @Getter
 @EqualsAndHashCode
+@Audited
 public class Document {
 
     @LOBVersionSourceRelevant
-    
     private String num;
 
     @Embedded

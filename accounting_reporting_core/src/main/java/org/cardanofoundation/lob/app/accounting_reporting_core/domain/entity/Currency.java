@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.Embeddable;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+import org.hibernate.envers.Audited;
 
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 @Getter
 @EqualsAndHashCode
+@Audited
 public class Currency {
 
     @Nullable

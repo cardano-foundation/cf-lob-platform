@@ -5,12 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
 
 @Embeddable
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @EqualsAndHashCode
+@Audited
 public class OrganisationAwareId {
 
     private String organisationId;

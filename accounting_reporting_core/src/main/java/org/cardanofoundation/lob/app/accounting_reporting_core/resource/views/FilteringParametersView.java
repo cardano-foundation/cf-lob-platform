@@ -28,4 +28,5 @@ public class FilteringParametersView {
     private LocalDate accountingPeriodTo;
 
     private List<String> transactionNumbers = List.of();
+
 }

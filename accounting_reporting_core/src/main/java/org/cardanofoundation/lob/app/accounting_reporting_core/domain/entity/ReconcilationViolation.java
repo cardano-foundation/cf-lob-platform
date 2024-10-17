@@ -1,7 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,7 +8,6 @@ import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -24,7 +22,6 @@ import static jakarta.persistence.EnumType.STRING;
 @Builder
 @EqualsAndHashCode
 @Audited
-@EntityListeners({ AuditingEntityListener.class })
 public class ReconcilationViolation {
 
     @NotBlank
@@ -55,6 +52,7 @@ public class ReconcilationViolation {
     @NotBlank
     @Getter
     @Setter
+    @Enumerated(STRING)
     private TransactionType transactionType;
 
     @NotNull

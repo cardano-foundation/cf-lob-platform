@@ -49,6 +49,7 @@ public class TransactionBatchAssocEntity extends CommonEntity implements Persist
     @NoArgsConstructor
     @Getter
     @EqualsAndHashCode
+    @Audited
     public static class Id {
 
         private String transactionBatchId;

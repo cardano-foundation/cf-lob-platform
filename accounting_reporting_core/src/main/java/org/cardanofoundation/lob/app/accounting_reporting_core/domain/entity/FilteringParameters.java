@@ -1,16 +1,18 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.envers.Audited;
+import org.hibernate.type.SqlTypes;
 
 import javax.annotation.Nullable;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 
 @Embeddable
@@ -18,6 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Getter
+@Audited
 public class FilteringParameters {
 
     @NotNull
@@ -41,12 +44,7 @@ public class FilteringParameters {
 
     @Builder.Default
     @NotNull
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "accounting_core_transaction_filtering_params_transaction_number",
-            joinColumns = @JoinColumn(name = "owner_id")
-    )
-    @Column(name = "transaction_number")
+    @JdbcTypeCode(SqlTypes.ARRAY)
     private List<String> transactionNumbers = List.of();
 
 }

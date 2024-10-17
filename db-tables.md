@@ -6,7 +6,6 @@
 - `accounting_core_transaction_violation` - Transaction Violation (AUDIT)
 - `accounting_core_transaction_batch` - Transaction Batch (AUDIT)
 - `accounting_core_transaction_batch_assoc` - Batch Association between Transaction and Batch (AUDIT)
-- `accounting_core_transaction_filtering_params_transaction_number` - Transaction Filtering Params Transaction Number (AUDIT)
 
 ### Blockchain Publisher
 - `blockchain_publisher_transaction` - Transaction
