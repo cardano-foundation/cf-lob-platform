@@ -7,6 +7,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import java.util.List;
 
 public interface CustomTransactionRepository {
+
     List<TransactionEntity> findAllByStatus(String organisationId,
                                             List<ValidationStatus> validationStatuses,
                                             List<TransactionType> transactionType);

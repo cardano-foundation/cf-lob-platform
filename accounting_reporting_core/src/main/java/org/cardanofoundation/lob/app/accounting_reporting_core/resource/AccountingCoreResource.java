@@ -27,8 +27,7 @@ import org.zalando.problem.Problem;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.zalando.problem.Status.NOT_FOUND;
-import static org.zalando.problem.Status.OK;
+import static org.zalando.problem.Status.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -119,6 +118,16 @@ public class AccountingCoreResource {
             )
     })
     public ResponseEntity<?> extractionTrigger(@Valid @RequestBody ExtractionRequest body) {
+        if (body.getTransactionNumbers().size() > 100) {
+            val issue = Problem.builder()
+                    .withTitle("TRANSACTION_NUMBERS_LIMIT_EXCEEDED")
+                    .withDetail("Transaction numbers limit exceeded. Maximum allowed transaction numbers is 100.")
+                    .withStatus(BAD_REQUEST)
+                    .build();
+
+            return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
+        }
+
         val orgM = organisationPublicApi.findByOrganisationId(body.getOrganisationId());
 
         if (orgM.isEmpty()) {
@@ -138,8 +147,8 @@ public class AccountingCoreResource {
         return extractionResultE.fold(
                 problem -> {
                     return ResponseEntity
-                            .status(extractionResultE.getLeft().getStatus().getStatusCode())
-                            .body(extractionResultE.getLeft());
+                            .status(problem.getStatus().getStatusCode())
+                            .body(problem);
                 },
                 success -> {
                     log.info("Extraction triggered successfully for organisation: {}", org.getId());
