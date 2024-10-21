@@ -29,7 +29,7 @@ public class TransactionViolation {
 
     @NotNull
     @Builder.Default
-    private String txItemId = "";
+    private String txItemId = ""; // null object pattern for simplicity here
 
     @NotNull
     @Enumerated(STRING)
