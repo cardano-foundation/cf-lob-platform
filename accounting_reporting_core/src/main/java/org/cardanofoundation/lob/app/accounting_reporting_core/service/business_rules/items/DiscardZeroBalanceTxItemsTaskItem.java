@@ -6,7 +6,8 @@ public class DiscardZeroBalanceTxItemsTaskItem implements PipelineTaskItem {
 
     @Override
     public void run(TransactionEntity tx) {
-        tx.getItems().removeIf(txItem -> txItem.getAmountLcy().signum() == 0 && txItem.getAmountFcy().signum() == 0);
+        tx.getItems()
+                .removeIf(txItem -> txItem.getAmountLcy().signum() == 0 && txItem.getAmountFcy().signum() == 0);
     }
 
 }
