@@ -15,6 +15,7 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 
 @Slf4j
 public class TxItemsCollapsingTaskItem implements PipelineTaskItem {
+
     @Override
     public void run(TransactionEntity tx) {
         if (tx.getAutomatedValidationStatus() == FAILED) {
