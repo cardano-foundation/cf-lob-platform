@@ -3,6 +3,6 @@ WORKDIR /app
 COPY . /app
 RUN ./gradlew clean build publishMavenJavaPublicationToLocalM2Repository
 
-FROM scratch AS m2-cache
+FROM scratch AS platform-library-m2-cache
 COPY --from=build /root/.m2 /root/.m2
 
