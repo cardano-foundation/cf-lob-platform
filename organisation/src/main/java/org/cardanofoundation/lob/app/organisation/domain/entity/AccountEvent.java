@@ -1,10 +1,7 @@
 package org.cardanofoundation.lob.app.organisation.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.envers.Audited;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -16,6 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Builder
 @Audited
 @EntityListeners({ AuditingEntityListener.class })
+@ToString
 public class AccountEvent {
 
     @EmbeddedId

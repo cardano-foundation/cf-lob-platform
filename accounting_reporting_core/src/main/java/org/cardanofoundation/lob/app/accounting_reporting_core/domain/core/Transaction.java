@@ -49,7 +49,7 @@ public class Transaction {
 
     @NotNull
     @Builder.Default
-    private ValidationStatus validationStatus = ValidationStatus.VALIDATED;
+    private TxValidationStatus txValidationStatus = TxValidationStatus.VALIDATED;
 
     @Builder.Default
     private boolean transactionApproved = false;

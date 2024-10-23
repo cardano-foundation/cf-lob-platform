@@ -4,15 +4,10 @@ import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Account;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.AccountEvent;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.CostCenter;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Counterparty;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Document;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Project;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Vat;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
@@ -35,7 +30,6 @@ import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.*;
-
 import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.transactionNotFoundResponse;
 
 @Service
@@ -49,11 +43,11 @@ public class AccountingCorePresentationViewService {
     private final TransactionRepositoryGateway transactionRepositoryGateway;
     private final AccountingCoreService accountingCoreService;
     private final TransactionBatchRepositoryGateway transactionBatchRepositoryGateway;
+
     /**
      * Waiting for refactoring the layer to remove this
      */
     private final AccountingCoreTransactionRepository accountingCoreTransactionRepository;
-
 
     public ReconciliationResponseView allReconciliationTransaction(ReconciliationFilterRequest body) {
         Object[] transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
@@ -405,9 +399,7 @@ public class AccountingCorePresentationViewService {
 
 
     public LedgerDispatchStatusView getTransactionDispatchStatus(TransactionEntity transactionEntity) {
-
-        if (ValidationStatus.FAILED == transactionEntity.getAutomatedValidationStatus()) {
-
+        if (TxValidationStatus.FAILED == transactionEntity.getAutomatedValidationStatus()) {
             if (transactionEntity.getViolations().stream().anyMatch(v -> v.getSource() == ERP)) {
                 return INVALID;
             }
@@ -442,8 +434,8 @@ public class AccountingCorePresentationViewService {
                 //return DISPATCHED;
             }
         }
-        return APPROVE;
 
+        return APPROVE;
     }
 
     private Set<TransactionItemView> getTransactionItemView(TransactionEntity transaction) {
@@ -492,7 +484,6 @@ public class AccountingCorePresentationViewService {
     }
 
     private TransactionReconciliationTransactionsView getReconciliationTransactionsSelector(Object[] violations) {
-
         for (Object o : violations) {
             if (o instanceof TransactionEntity) {
                 return getTransactionReconciliationView((TransactionEntity) o);
@@ -508,15 +499,13 @@ public class AccountingCorePresentationViewService {
             }
 
         }
-        return getTransactionReconciliationViolationView();
 
+        return getTransactionReconciliationViolationView();
     }
 
     public BigDecimal getAmountLcyTotalForAllItems(TransactionEntity tx) {
         return tx.getItems().stream()
-                .filter(transactionItemEntity -> {
-                    return transactionItemEntity.getAmountLcy().compareTo(ZERO) > 0;
-                })
+                .filter(transactionItemEntity -> transactionItemEntity.getAmountLcy().compareTo(ZERO) > 0)
                 .map(TransactionItemEntity::getAmountLcy)
                 .reduce(ZERO, BigDecimal::add);
     }

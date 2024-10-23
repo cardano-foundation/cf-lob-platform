@@ -11,26 +11,31 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.TRANSACTION_ITEMS_EMPTY;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.ALL_TX_ITEMS_ERASED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.ERASED_SELF_PAYMENT;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.OK;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
 
-class NoTransactionItemsTaskItemTest {
+class CheckIfAllTxItemsAreErasedTaskItemTest {
 
-    private NoTransactionItemsTaskItem taskItem;
+    private PipelineTaskItem taskItem;
     private TransactionEntity transaction;
 
     @BeforeEach
     void setUp() {
-        taskItem = new NoTransactionItemsTaskItem();
+        taskItem = new CheckIfAllTxItemsAreErasedTaskItem();
         transaction = new TransactionEntity();
         transaction.setTransactionInternalNumber("TX-123");
     }
 
     @Test
-    void shouldFailTransactionWhenNoItemsPresent() {
-        // Given: An empty set of transaction items
-        transaction.setItems(Set.of());
+    void shouldFailTransactionWhenAllItemsAreErased() {
+        // Given: A transaction where all items are erased
+        val txItem1 = new TransactionItemEntity();
+        txItem1.setStatus(ERASED_SELF_PAYMENT);
+
+        transaction.setAllItems(Set.of(txItem1));
 
         // When: The task item is run
         taskItem.run(transaction);
@@ -43,20 +48,25 @@ class NoTransactionItemsTaskItemTest {
 
         // And: The violation should have the correct properties
         TransactionViolation violation = transaction.getViolations().iterator().next();
-        assertThat(violation.getCode()).isEqualTo(TRANSACTION_ITEMS_EMPTY);
+        assertThat(violation.getCode()).isEqualTo(ALL_TX_ITEMS_ERASED);
         assertThat(violation.getSeverity()).isEqualTo(ERROR);
         assertThat(violation.getSource()).isEqualTo(ERP);
-        assertThat(violation.getProcessorModule()).isEqualTo(NoTransactionItemsTaskItem.class.getSimpleName());
+        assertThat(violation.getProcessorModule()).isEqualTo(CheckIfAllTxItemsAreErasedTaskItem.class.getSimpleName());
         assertThat(violation.getBag()).containsEntry("transactionNumber", "TX-123");
     }
 
     @Test
-    void shouldNotAddViolationWhenTransactionItemsArePresent() {
-        // Given: A set of transaction items
+    void shouldNotFailTransactionWhenNotAllItemsAreErased() {
+        // Given: A transaction where not all items are erased
         val txItem1 = new TransactionItemEntity();
+        txItem1.setStatus(ERASED_SELF_PAYMENT);
         txItem1.setId("1:0");
 
-        transaction.setItems(Set.of(txItem1)); // Mock or stub transaction items
+        val txItem2 = new TransactionItemEntity();
+        txItem2.setStatus(OK);
+        txItem2.setId("1:1");
+
+        transaction.setAllItems(Set.of(txItem1, txItem2));
 
         // When: The task item is run
         taskItem.run(transaction);
@@ -70,8 +80,11 @@ class NoTransactionItemsTaskItemTest {
 
     @Test
     void shouldNotDuplicateViolationIfRunMultipleTimes() {
-        // Given: An empty set of transaction items
-        transaction.setItems(Set.of());
+        // Given: A transaction where all items are erased
+        val txItem1 = new TransactionItemEntity();
+        txItem1.setStatus(ERASED_SELF_PAYMENT);
+
+        transaction.setAllItems(Set.of(txItem1));
 
         // When: The task item is run multiple times
         taskItem.run(transaction);
@@ -85,7 +98,10 @@ class NoTransactionItemsTaskItemTest {
     void shouldNotOverrideExistingFailedStatus() {
         // Given: A transaction that has already failed for a different reason
         transaction.setAutomatedValidationStatus(FAILED);
-        transaction.setItems(Set.of());
+        val txItem1 = new TransactionItemEntity();
+        txItem1.setStatus(ERASED_SELF_PAYMENT);
+
+        transaction.setAllItems(Set.of(txItem1));
 
         // When: The task item is run
         taskItem.run(transaction);

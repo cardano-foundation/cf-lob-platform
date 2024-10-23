@@ -1,15 +1,10 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationCode;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
 
@@ -17,12 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-
-import static jakarta.persistence.EnumType.STRING;
-
 
 @Getter
 @Setter
@@ -41,7 +31,7 @@ public class TransactionView {
 
     private LedgerDispatchStatusView statistic = LedgerDispatchStatusView.PENDING;
 
-    private ValidationStatus validationStatus = ValidationStatus.VALIDATED;
+    private TxValidationStatus validationStatus = TxValidationStatus.VALIDATED;
 
     private boolean transactionApproved = false;
 

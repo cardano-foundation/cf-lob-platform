@@ -2,7 +2,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 
 import io.vavr.control.Either;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Rejection;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
@@ -68,7 +68,7 @@ class BlockchainReaderAccountingCoreTransactionRepositoryGatewayTest {
         // Arrange
         String transactionId = "failed_tx_id";
         TransactionEntity failedTransaction = new TransactionEntity();
-        failedTransaction.setAutomatedValidationStatus(ValidationStatus.FAILED);
+        failedTransaction.setAutomatedValidationStatus(TxValidationStatus.FAILED);
         when(accountingCoreTransactionRepository.findById(transactionId)).thenReturn(Optional.of(failedTransaction));
 
         // Act

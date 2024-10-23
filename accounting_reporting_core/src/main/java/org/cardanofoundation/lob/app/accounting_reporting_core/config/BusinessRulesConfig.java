@@ -93,7 +93,7 @@ public class BusinessRulesConfig {
     private PipelineTask postCleansingPipelineTask() {
         return new DefaultPipelineTask(List.of(
                 new DebitAccountCheckTaskItem(),
-                new TxItemsCollapsingTaskItem()
+                new TxItemsAmountsSummingTaskItem()
         ));
     }
 
@@ -102,7 +102,7 @@ public class BusinessRulesConfig {
                 new AccountCodeDebitCheckTaskItem(),
                 new AccountCodeCreditCheckTaskItem(),
                 new DocumentMustBePresentTaskItem(),
-                new NoTransactionItemsTaskItem()
+                new CheckIfAllTxItemsAreErasedTaskItem()
         ));
     }
 

@@ -222,9 +222,7 @@ public class TransactionReconcilationService {
                         .transactionInternalNumber(attachedTx.getTransactionInternalNumber())
                         .transactionEntryDate(attachedTx.getEntryDate())
                         .transactionType(attachedTx.getTransactionType())
-                        .amountLcySum(attachedTx.getItems().stream()
-                                .map(TransactionItemEntity::getAmountLcy)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .amountLcySum(computeAmountLcySum(attachedTx)
                         )
 
                         .build());
@@ -239,9 +237,7 @@ public class TransactionReconcilationService {
                         .transactionInternalNumber(attachedTx.getTransactionInternalNumber())
                         .transactionEntryDate(attachedTx.getEntryDate())
                         .transactionType(attachedTx.getTransactionType())
-                        .amountLcySum(attachedTx.getItems().stream()
-                                .map(TransactionItemEntity::getAmountLcy)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .amountLcySum(computeAmountLcySum(attachedTx)
                         )
                         .build());
             }
@@ -264,6 +260,12 @@ public class TransactionReconcilationService {
         transactionReconcilationRepository.save(reconcilationEntity);
 
         log.info("Finished reconciling transactions.");
+    }
+
+    private static BigDecimal computeAmountLcySum(TransactionEntity attachedTx) {
+        return attachedTx.getItems().stream()
+                .map(TransactionItemEntity::getAmountLcy)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static ReconcilationCode getSinkReconcilationStatus(TransactionEntity attachedTx, Map<String, Boolean> isOnChainMap) {
@@ -328,9 +330,7 @@ public class TransactionReconcilationService {
                     .transactionInternalNumber(missingTx.getTransactionInternalNumber())
                     .transactionEntryDate(missingTx.getEntryDate())
                     .transactionType(missingTx.getTransactionType())
-                    .amountLcySum(missingTx.getItems().stream()
-                            .map(TransactionItemEntity::getAmountLcy)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .amountLcySum(computeAmountLcySum(missingTx)
                     )
                     .build()
             );

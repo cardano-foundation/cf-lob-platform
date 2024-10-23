@@ -5,7 +5,8 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.support.collections.Optionals;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.ERASED_SELF_PAYMENT;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 
 @Slf4j
 public class DebitAccountCheckTaskItem implements PipelineTaskItem {
@@ -16,13 +17,13 @@ public class DebitAccountCheckTaskItem implements PipelineTaskItem {
             return;
         }
 
-        tx.getItems().removeIf(txItem -> {
+        tx.getItems().stream().filter(txItem -> {
             val accountDebit = txItem.getAccountDebit();
             val accountCredit = txItem.getAccountCredit();
 
             return Optionals.zip(accountDebit, accountCredit, (debit, credit) -> debit.getCode().equals(credit.getCode()))
                     .orElse(false);
-        });
+        }).forEach(txItem -> txItem.setStatus(ERASED_SELF_PAYMENT));
     }
 
 }

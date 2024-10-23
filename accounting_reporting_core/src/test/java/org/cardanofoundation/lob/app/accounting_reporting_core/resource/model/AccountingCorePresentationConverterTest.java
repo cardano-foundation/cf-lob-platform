@@ -69,19 +69,19 @@ class AccountingCorePresentationConverterTest {
         Account accountCredit = new Account().toBuilder().name("credit").code("credit-code").refCode("ccod").build();
 
         searchRequest.setOrganisationId("org-id");
-        searchRequest.setStatus(List.of(ValidationStatus.VALIDATED));
+        searchRequest.setStatus(List.of(TxValidationStatus.VALIDATED));
         searchRequest.setTransactionType(List.of(TransactionType.CardCharge));
 
         transactionEntity.setId("tx-id");
         transactionEntity.setTransactionType(TransactionType.CardCharge);
-        transactionEntity.setAutomatedValidationStatus(ValidationStatus.VALIDATED);
+        transactionEntity.setAutomatedValidationStatus(TxValidationStatus.VALIDATED);
         transactionEntity.setTransactionApproved(Boolean.TRUE);
         transactionEntity.setLedgerDispatchApproved(Boolean.FALSE);
         transactionEntity.setOverallStatus(TransactionStatus.NOK);
 
         transactionEntity3.setId("tx-id-3");
         transactionEntity3.setTransactionType(TransactionType.CustomerPayment);
-        transactionEntity3.setAutomatedValidationStatus(ValidationStatus.VALIDATED);
+        transactionEntity3.setAutomatedValidationStatus(TxValidationStatus.VALIDATED);
         transactionEntity3.setTransactionApproved(Boolean.TRUE);
         transactionEntity3.setLedgerDispatchApproved(Boolean.TRUE);
         transactionEntity3.setOverallStatus(TransactionStatus.OK);
@@ -116,7 +116,7 @@ class AccountingCorePresentationConverterTest {
         LocalDate localDate = LocalDate.now();
         transactionEntity2.setEntryDate(localDate);
         transactionEntity2.setTransactionType(TransactionType.CardCharge);
-        transactionEntity2.setAutomatedValidationStatus(ValidationStatus.FAILED);
+        transactionEntity2.setAutomatedValidationStatus(TxValidationStatus.FAILED);
         transactionEntity2.setTransactionApproved(Boolean.FALSE);
         transactionEntity2.setLedgerDispatchApproved(Boolean.TRUE);
         transactionEntity2.setOverallStatus(TransactionStatus.OK);
@@ -133,7 +133,7 @@ class AccountingCorePresentationConverterTest {
         assertEquals(TransactionStatus.NOK, result.get(0).getStatus());
         assertEquals(Boolean.FALSE, result.get(2).isTransactionApproved());
         assertEquals(Boolean.TRUE, result.get(2).isLedgerDispatchApproved());
-        assertEquals(ValidationStatus.FAILED, result.get(2).getValidationStatus());
+        assertEquals(TxValidationStatus.FAILED, result.get(2).getValidationStatus());
         assertEquals("tx-id2-internal", result.get(2).getInternalTransactionNumber());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         assertEquals(LedgerDispatchStatusView.PUBLISHED, result.get(1).getStatistic());
@@ -315,7 +315,7 @@ class AccountingCorePresentationConverterTest {
 
         transaction.setViolations(Set.of(transactionViolation));
         transaction.setItems(Set.of(transactionItem));
-        transaction.setAutomatedValidationStatus(ValidationStatus.VALIDATED);
+        transaction.setAutomatedValidationStatus(TxValidationStatus.VALIDATED);
         transaction.setLedgerDispatchStatus(LedgerDispatchStatus.NOT_DISPATCHED);
         assertEquals(LedgerDispatchStatusView.APPROVE, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
@@ -341,7 +341,7 @@ class AccountingCorePresentationConverterTest {
         transaction.setOverallStatus(TransactionStatus.NOK);
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
-        transaction.setAutomatedValidationStatus(ValidationStatus.FAILED);
+        transaction.setAutomatedValidationStatus(TxValidationStatus.FAILED);
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
         transaction.setLedgerDispatchStatus(LedgerDispatchStatus.NOT_DISPATCHED);
@@ -358,7 +358,7 @@ class AccountingCorePresentationConverterTest {
         transactionViolation.setSource(Source.ERP);
         assertEquals(LedgerDispatchStatusView.INVALID, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));
 
-        transaction.setAutomatedValidationStatus(ValidationStatus.VALIDATED);
+        transaction.setAutomatedValidationStatus(TxValidationStatus.VALIDATED);
         transactionItem.setRejection(Optional.of(new Rejection(RejectionReason.REVIEW_PARENT_COST_CENTER)));
         transaction.setViolations(Set.of());
         assertEquals(LedgerDispatchStatusView.PENDING, accountingCorePresentationConverter.getTransactionDispatchStatus(transaction));

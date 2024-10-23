@@ -3,7 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Reconcilation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,7 +33,7 @@ public class OverallStatusTransactionEntityListenerTest {
     public void testCalcStatus_Success() {
         when(transactionEntity.allApprovalsPassedForTransactionDispatch()).thenReturn(true);
         when(transactionEntity.isRejectionFree()).thenReturn(true);
-        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(ValidationStatus.VALIDATED);
+        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(TxValidationStatus.VALIDATED);
 
         TransactionStatus status = listener.calcStatus(transactionEntity);
 
@@ -44,7 +44,7 @@ public class OverallStatusTransactionEntityListenerTest {
     public void testCalcStatus_Fail_dueToApprovalsNotPassed() {
         when(transactionEntity.allApprovalsPassedForTransactionDispatch()).thenReturn(false);
         when(transactionEntity.isRejectionFree()).thenReturn(true);
-        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(ValidationStatus.VALIDATED);
+        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(TxValidationStatus.VALIDATED);
 
         TransactionStatus status = listener.calcStatus(transactionEntity);
 
@@ -55,7 +55,7 @@ public class OverallStatusTransactionEntityListenerTest {
     public void testCalcStatus_Fail_dueToRejection() {
         when(transactionEntity.allApprovalsPassedForTransactionDispatch()).thenReturn(true);
         when(transactionEntity.isRejectionFree()).thenReturn(false);
-        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(ValidationStatus.VALIDATED);
+        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(TxValidationStatus.VALIDATED);
 
         TransactionStatus status = listener.calcStatus(transactionEntity);
 
@@ -66,7 +66,7 @@ public class OverallStatusTransactionEntityListenerTest {
     public void testCalcStatus_Fail_dueToValidationStatusNotValidated() {
         when(transactionEntity.allApprovalsPassedForTransactionDispatch()).thenReturn(true);
         when(transactionEntity.isRejectionFree()).thenReturn(true);
-        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(ValidationStatus.FAILED);
+        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(TxValidationStatus.FAILED);
 
         TransactionStatus status = listener.calcStatus(transactionEntity);
 
@@ -134,7 +134,7 @@ public class OverallStatusTransactionEntityListenerTest {
         // Setup for calcStatus
         when(transactionEntity.allApprovalsPassedForTransactionDispatch()).thenReturn(true);
         when(transactionEntity.isRejectionFree()).thenReturn(true);
-        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(ValidationStatus.VALIDATED);
+        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(TxValidationStatus.VALIDATED);
 
         // Setup for reconcilationCode
         Reconcilation reconcilation = Reconcilation.builder()
@@ -164,7 +164,7 @@ public class OverallStatusTransactionEntityListenerTest {
         // Setup for calcStatus
         when(transactionEntity.allApprovalsPassedForTransactionDispatch()).thenReturn(false);
         when(transactionEntity.isRejectionFree()).thenReturn(true);
-        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(ValidationStatus.VALIDATED);
+        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(TxValidationStatus.VALIDATED);
 
         // Setup for reconcilationCode
         Reconcilation reconcilation = Reconcilation.builder()
@@ -194,7 +194,7 @@ public class OverallStatusTransactionEntityListenerTest {
         // Setup for calcStatus
         when(transactionEntity.allApprovalsPassedForTransactionDispatch()).thenReturn(true);
         when(transactionEntity.isRejectionFree()).thenReturn(true);
-        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(ValidationStatus.VALIDATED);
+        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(TxValidationStatus.VALIDATED);
 
         // Setup for reconcilationCode
         when(transactionEntity.getReconcilation()).thenReturn(Optional.empty());
@@ -211,7 +211,7 @@ public class OverallStatusTransactionEntityListenerTest {
         // Setup for calcStatus
         when(transactionEntity.allApprovalsPassedForTransactionDispatch()).thenReturn(true);
         when(transactionEntity.isRejectionFree()).thenReturn(true);
-        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(ValidationStatus.VALIDATED);
+        when(transactionEntity.getAutomatedValidationStatus()).thenReturn(TxValidationStatus.VALIDATED);
 
         // Setup for reconcilationCode
         Reconcilation reconcilation = Reconcilation.builder()

@@ -11,10 +11,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.ERASED_SUM_APPLIED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.OK;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 
+/**
+ * Task item that collapses transaction items with the same key by summing their amounts.
+ */
 @Slf4j
-public class TxItemsCollapsingTaskItem implements PipelineTaskItem {
+public class TxItemsAmountsSummingTaskItem implements PipelineTaskItem {
 
     @Override
     public void run(TransactionEntity tx) {
@@ -22,6 +27,7 @@ public class TxItemsCollapsingTaskItem implements PipelineTaskItem {
             return;
         }
 
+        // Group items by key
         val itemsPerKeyMap = tx.getItems()
                 .stream()
                 .collect(groupingBy(txItem -> TransactionItemKey.builder()
@@ -34,22 +40,25 @@ public class TxItemsCollapsingTaskItem implements PipelineTaskItem {
                         .build())
                 );
 
-        val txItems = itemsPerKeyMap.values().stream()
+        // Mark the original items as ERASED
+        tx.getItems().forEach(item -> item.setStatus(ERASED_SUM_APPLIED));
+
+        // Collapsing logic: combine the amounts for items with the same key
+        val collapsedItems = itemsPerKeyMap.values().stream()
                 .map(items -> items.stream()
                         .reduce((txItem1, txItem2) -> {
-
                             txItem1.setAmountFcy(txItem1.getAmountFcy().add(txItem2.getAmountFcy()));
                             txItem1.setAmountLcy(txItem1.getAmountLcy().add(txItem2.getAmountLcy()));
-
                             return txItem1;
                         })
                 )
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .peek(item -> item.setStatus(OK)) // Mark collapsed items as OK
                 .collect(Collectors.toSet());
 
-        tx.getItems().clear();
-        tx.getItems().addAll(txItems);
+        // Retain the collapsed valid items in the transaction
+        tx.getItems().addAll(collapsedItems); // Add collapsed items back
     }
 
     @EqualsAndHashCode

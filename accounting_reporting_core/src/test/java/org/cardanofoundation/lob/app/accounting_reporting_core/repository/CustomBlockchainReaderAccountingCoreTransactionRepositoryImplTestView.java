@@ -6,22 +6,17 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.*;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.VendorBill;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.VALIDATED;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.VALIDATED;
 
 class CustomBlockchainReaderAccountingCoreTransactionRepositoryImplTestView {
 
@@ -60,12 +55,12 @@ class CustomBlockchainReaderAccountingCoreTransactionRepositoryImplTestView {
         Mockito.when(em.createQuery(criteriaQuery)).thenReturn(transactionEntityTypedQuery);
         CustomTransactionRepositoryImpl customTransactionRepository = new CustomTransactionRepositoryImpl(em);
 
-        List<TransactionEntity> elresult = customTransactionRepository.findAllByStatus("OrgId", List.of(ValidationStatus.valueOf(String.valueOf(VALIDATED))), List.of(TransactionType.valueOf(String.valueOf(VendorBill))));
+        List<TransactionEntity> elresult = customTransactionRepository.findAllByStatus("OrgId", List.of(TxValidationStatus.valueOf(String.valueOf(VALIDATED))), List.of(TransactionType.valueOf(String.valueOf(VendorBill))));
 
         //Mockito.verify(builder,Mockito.times(4)).isTrue(builder.literal(true));
         Mockito.verify(builder, Mockito.times(1)).in(validationStatus);
         Mockito.verify(builder, Mockito.times(1)).equal(organisationId, "OrgId");
-        Mockito.verify(inResult, Mockito.times(1)).value(List.of(ValidationStatus.valueOf(String.valueOf(VALIDATED))));
+        Mockito.verify(inResult, Mockito.times(1)).value(List.of(TxValidationStatus.valueOf(String.valueOf(VALIDATED))));
         Mockito.verify(rootEntry, Mockito.times(1)).get("organisation");
         Mockito.verify(organisation, Mockito.times(1)).get("id");
         Assertions.assertEquals(List.of(transactionEntity, transactionEntity2), elresult);

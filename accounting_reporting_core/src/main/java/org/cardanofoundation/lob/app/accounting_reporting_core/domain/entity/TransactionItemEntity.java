@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import jakarta.persistence.*;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 import org.hibernate.envers.Audited;
@@ -122,8 +123,13 @@ public class TransactionItemEntity extends CommonEntity implements Persistable<S
             @AttributeOverride(name = "counterparty.name", column = @Column(name = "document_counterparty_name")),
     })
     @Nullable
-    
     private Document document;
+
+    @Column(name = "status", nullable = false)
+    @Getter
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private TxItemValidationStatus status = TxItemValidationStatus.OK;
 
     public void clearAccountCodeCredit() {
         this.accountCredit = null;

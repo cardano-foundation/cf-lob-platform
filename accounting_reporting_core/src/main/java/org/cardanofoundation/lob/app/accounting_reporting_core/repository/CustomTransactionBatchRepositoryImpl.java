@@ -6,7 +6,7 @@ import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
@@ -141,7 +141,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                         builder.or(
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryItemsIn),
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryLob),
-                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.FAILED)
+                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), TxValidationStatus.FAILED)
                         )
                 ));
 
@@ -174,7 +174,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 orPredicates.add(builder.and(
                                 builder.equal(transactionEntityJoin.get("transactionApproved"), false),
                                 builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), false),
-                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED),
+                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), TxValidationStatus.VALIDATED),
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryReject).not(),
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not()
                         )
@@ -208,7 +208,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 orPredicates.add(builder.and(
                                 builder.equal(transactionEntityJoin.get("transactionApproved"), true),
                                 builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), false),
-                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED),
+                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), TxValidationStatus.VALIDATED),
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryReject).not(),
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not()
                         )
@@ -242,7 +242,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 orPredicates.add(builder.and(
                                 builder.equal(transactionEntityJoin.get("transactionApproved"), true),
                                 builder.equal(transactionEntityJoin.get("ledgerDispatchApproved"), true),
-                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), ValidationStatus.VALIDATED),
+                                builder.equal(transactionEntityJoin.get("automatedValidationStatus"), TxValidationStatus.VALIDATED),
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryReject).not(),
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not()
                         )

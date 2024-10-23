@@ -12,6 +12,7 @@ import org.hibernate.envers.Audited;
 @EqualsAndHashCode
 @Builder(toBuilder = true)
 @Audited
+@ToString
 public class AccountEvent {
 
     @NotBlank
