@@ -4,15 +4,23 @@ import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Account;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.AccountEvent;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.CostCenter;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Counterparty;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Document;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Project;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Vat;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zalando.problem.Problem;
@@ -27,6 +35,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.*;
+
 import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.transactionNotFoundResponse;
 
 @Service
@@ -40,6 +49,47 @@ public class AccountingCorePresentationViewService {
     private final TransactionRepositoryGateway transactionRepositoryGateway;
     private final AccountingCoreService accountingCoreService;
     private final TransactionBatchRepositoryGateway transactionBatchRepositoryGateway;
+    /**
+     * Waiting for refactoring the layer to remove this
+     */
+    private final AccountingCoreTransactionRepository accountingCoreTransactionRepository;
+
+
+    public ReconciliationResponseView allReconciliationTransaction(ReconciliationFilterRequest body) {
+        Object[] transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
+        if (body.getFilter().equals(ReconciliationFilterStatusRequest.UNRENCONCILED)) {
+            val transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getLimit(), body.getPage()).stream()
+                    .map(this::getReconciliationTransactionsSelector)
+                    .collect(toSet());
+            ;
+            val searchtotal = (long) accountingCoreTransactionRepository.findAllReconciliationSpecialCount(body.getReconciliationRejectionCode(), body.getLimit(), body.getPage()).size();
+
+            return new ReconciliationResponseView(
+                    (Long) searchtotal,
+                    new TransactionReconciliationStatisticView(
+                            (Long) transactionsStatistic[0],
+                            (Long) transactionsStatistic[1],
+                            (Long) transactionsStatistic[2],
+                            (Long) transactionsStatistic[0] + (Long) transactionsStatistic[1] + (Long) transactionsStatistic[2]
+                    ),
+                    transactions
+            );
+        }
+        val transactions = transactionRepositoryGateway.findReconciliation(body.getFilter(), body.getLimit(), body.getPage()).stream()
+                .map(this::getTransactionReconciliationView)
+                .collect(toSet());
+
+        return new ReconciliationResponseView(
+                (Long) transactions.stream().count(),
+                new TransactionReconciliationStatisticView(
+                        (Long) transactionsStatistic[0],
+                        (Long) transactionsStatistic[1],
+                        (Long) transactionsStatistic[2],
+                        (Long) transactionsStatistic[0] + (Long) transactionsStatistic[1] + (Long) transactionsStatistic[2]
+                ),
+                transactions
+        );
+    }
 
     public List<TransactionView> allTransactions(SearchRequest body) {
         val transactions = transactionRepositoryGateway.findAllByStatus(
@@ -232,6 +282,91 @@ public class AccountingCorePresentationViewService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    //
+    private TransactionReconciliationTransactionsView getTransactionReconciliationView(TransactionEntity transactionEntity) {
+        return new TransactionReconciliationTransactionsView(
+                transactionEntity.getId(),
+                transactionEntity.getTransactionInternalNumber(),
+                transactionEntity.getEntryDate(),
+                transactionEntity.getTransactionType(),
+                Optional.of(transactionEntity.getOverallStatus()),
+                Optional.of(getTransactionDispatchStatus(transactionEntity)),
+                Optional.of(transactionEntity.getAutomatedValidationStatus()),
+                transactionEntity.getTransactionApproved(),
+                transactionEntity.getLedgerDispatchApproved(),
+                getAmountLcyTotalForAllItems(transactionEntity),
+                false,
+                transactionEntity.getReconcilation().flatMap(reconcilation -> {
+                    return reconcilation.getSource().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of);
+                }).orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> {
+                    return reconcilation.getSink().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of);
+                }).orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> {
+                    return reconcilation.getFinalStatus().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of);
+                }).orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
+
+                transactionEntity.getLastReconcilation().map(reconcilationEntity -> {
+                    return reconcilationEntity.getViolations().stream()
+                            .filter(reconcilationViolation -> reconcilationViolation.getTransactionId().equals(transactionEntity.getId()))
+                            .map(ReconcilationViolation::getRejectionCode)
+                            .collect(toSet());
+                }).orElse(new LinkedHashSet<>()),
+                transactionEntity.getLastReconcilation().map(CommonEntity::getCreatedAt).orElse(null),
+                getTransactionItemView(transactionEntity),
+                getViolations(transactionEntity)
+
+        );
+    }
+
+    private TransactionReconciliationTransactionsView getTransactionReconciliationViolationView(ReconcilationViolation reconcilationViolation) {
+        return new TransactionReconciliationTransactionsView(
+                reconcilationViolation.getTransactionId(),
+                reconcilationViolation.getTransactionInternalNumber(),
+                reconcilationViolation.getTransactionEntryDate(),
+                reconcilationViolation.getTransactionType(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                false,
+                false,
+                reconcilationViolation.getAmountLcySum(),
+                false,
+                TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
+                TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
+                TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
+                Set.of(reconcilationViolation.getRejectionCode()),
+                null,
+                new LinkedHashSet<>(),
+                new LinkedHashSet<>()
+
+        );
+    }
+
+    private TransactionReconciliationTransactionsView getTransactionReconciliationViolationView() {
+        return new TransactionReconciliationTransactionsView(
+                "",
+                "",
+                LocalDate.now(),
+                TransactionType.CardCharge,
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                false,
+                false,
+                BigDecimal.valueOf(123),
+                false,
+                TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
+                TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
+                TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
+                new LinkedHashSet<>(),
+                null,
+                null,
+                null
+
+        );
+    }
+
     private TransactionView getTransactionView(TransactionEntity transactionEntity) {
         return new TransactionView(
                 transactionEntity.getId(),
@@ -245,6 +380,23 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getLedgerDispatchApproved(),
                 getAmountLcyTotalForAllItems(transactionEntity),
                 transactionEntity.hasAnyRejection(),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> {
+                    return reconcilation.getSource().map(TransactionView.ReconciliationCodeView::of);
+                }).orElse(TransactionView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> {
+                    return reconcilation.getSink().map(TransactionView.ReconciliationCodeView::of);
+                }).orElse(TransactionView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> {
+                    return reconcilation.getFinalStatus().map(TransactionView.ReconciliationCodeView::of);
+                }).orElse(TransactionView.ReconciliationCodeView.NEVER),
+
+                transactionEntity.getLastReconcilation().map(reconcilationEntity -> {
+                    return reconcilationEntity.getViolations().stream()
+                            .filter(reconcilationViolation -> reconcilationViolation.getTransactionId().equals(transactionEntity.getId()))
+                            .map(ReconcilationViolation::getRejectionCode)
+                            .collect(toSet());
+                }).orElse(new LinkedHashSet<>()),
+                transactionEntity.getLastReconcilation().map(CommonEntity::getCreatedAt).orElse(null),
                 getTransactionItemView(transactionEntity),
                 getViolations(transactionEntity)
 
@@ -337,6 +489,27 @@ public class AccountingCorePresentationViewService {
                 violation.getCode(),
                 violation.getBag()
         )).collect(toSet());
+    }
+
+    private TransactionReconciliationTransactionsView getReconciliationTransactionsSelector(Object[] violations) {
+
+        for (Object o : violations) {
+            if (o instanceof TransactionEntity) {
+                return getTransactionReconciliationView((TransactionEntity) o);
+            }
+            if (o instanceof ReconcilationViolation) {
+                return getTransactionReconciliationViolationView((ReconcilationViolation) o);
+            }
+
+            try {
+                log.warn("Object type: {}", o.getClass().toString());
+            } catch (Exception e) {
+                log.warn("\nempty object: {}\n", o);
+            }
+
+        }
+        return getTransactionReconciliationViolationView();
+
     }
 
     public BigDecimal getAmountLcyTotalForAllItems(TransactionEntity tx) {
