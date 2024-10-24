@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
 
@@ -36,7 +36,7 @@ public class TransactionReconciliationTransactionsView {
 
     private Optional<LedgerDispatchStatusView> statistic = Optional.of(LedgerDispatchStatusView.PENDING);
 
-    private Optional<ValidationStatus> validationStatus = Optional.of(ValidationStatus.VALIDATED);
+    private Optional<TxValidationStatus> validationStatus = Optional.of(TxValidationStatus.VALIDATED);
 
     private boolean transactionApproved = false;
 

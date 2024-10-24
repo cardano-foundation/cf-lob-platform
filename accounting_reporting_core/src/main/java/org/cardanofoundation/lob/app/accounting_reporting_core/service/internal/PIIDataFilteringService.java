@@ -25,6 +25,7 @@ public class PIIDataFilteringService implements Function<Set<Transaction>, Set<T
 
         return transactions.stream()
                 .map(trx -> {
+                    // TODO should we use here getAllItems ??? including ERASED ones?
                     val txItems = trx.getItems().stream()
                             .map(txItem -> txItem.toBuilder()
                                     .accountCredit(Optional.empty())

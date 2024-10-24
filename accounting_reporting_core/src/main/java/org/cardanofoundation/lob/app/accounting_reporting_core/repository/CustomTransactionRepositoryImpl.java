@@ -1,17 +1,16 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
-import io.hypersistence.utils.hibernate.query.SQLExtractor;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterStatusRequest;
 
 import java.util.List;
@@ -27,7 +26,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
     @Override
     public List<TransactionEntity> findAllByStatus(String organisationId,
-                                                   List<ValidationStatus> validationStatuses,
+                                                   List<TxValidationStatus> validationStatuses,
                                                    List<TransactionType> transactionTypes) {
         // TODO what about order by entry date or transaction internal number, etc?
         CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -50,43 +49,38 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
     @Override
     public List<Object[]> findAllReconciliationSpecial(Set<ReconcilationRejectionCode> rejectionCodes, Integer limit, Integer page) {
+        val jpql = reconciliationQuery(rejectionCodes);
 
-        String jpql = reconciliationQuery(rejectionCodes);
-
-        Query reconciliationQuery = em.createQuery(jpql);
+        val reconciliationQuery = em.createQuery(jpql);
 
         reconciliationQuery.setMaxResults(limit);
 
         if (null != page && 0 < page) {
             reconciliationQuery.setFirstResult(page * limit);
         }
-        return reconciliationQuery.getResultList();
 
+        return reconciliationQuery.getResultList();
     }
 
     @Override
     public List<Object[]> findAllReconciliationSpecialCount(Set<ReconcilationRejectionCode> rejectionCodes, Integer limit, Integer page) {
-
-        String jpql = "SELECT count(rv.transactionId) " +
+        val jpql = "SELECT count(rv.transactionId) " +
                 "FROM accounting_reporting_core.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
-                "where (r.id = tr.lastReconcilation.id or tr.id is null) ";
+                "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL) ";
 
         String where = "";
         if (!rejectionCodes.isEmpty()) {
-            where += " and rv.rejectionCode in (" + rejectionCodes.stream().map(Objects::toString).collect(Collectors.joining(",")) + ") ";
+            where += STR." AND rv.rejectionCode IN (\{rejectionCodes.stream().map(Objects::toString).collect(Collectors.joining(","))}) ";
         }
-        where += "group by rv.transactionId,tr.id,rv.amountLcySum,rv.rejectionCode,rv.sourceDiff,rv.transactionEntryDate,rv.transactionInternalNumber,rv.transactionType ";
-
+        where += "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.rejectionCode, rv.sourceDiff, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType ";
 
         return em.createQuery(jpql + where).getResultList();
-
     }
 
     @Override
     public List<TransactionEntity> findAllReconciliation(ReconciliationFilterStatusRequest filter, Integer limit, Integer page) {
-
         switch (filter) {
             case ReconciliationFilterStatusRequest.RENCONCILED -> {
                 CriteriaBuilder builder = em.getCriteriaBuilder();
@@ -123,7 +117,6 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
     @Override
     public Object[] findCalcReconciliationStatistic() {
-
         CriteriaBuilder builder = em.getCriteriaBuilder();
 
         CriteriaQuery<Object[]> mainQuery = builder.createQuery(Object[].class);
@@ -151,19 +144,20 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
     }
 
     private String reconciliationQuery(Set<ReconcilationRejectionCode> rejectionCodes) {
-        
         String jpql = "SELECT tr, rv " +
                 "FROM accounting_reporting_core.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
-                "where (r.id = tr.lastReconcilation.id or tr.lastReconcilation.id is null) ";
+                "WHERE (r.id = tr.lastReconcilation.id OR tr.lastReconcilation.id IS NULL) ";
 
         String where = "";
         if (!rejectionCodes.isEmpty()) {
-            where += " and rv.rejectionCode in (" + rejectionCodes.stream().map(Objects::toString).collect(Collectors.joining(",")) + ") ";
+            where += STR." AND rv.rejectionCode IN (\{rejectionCodes.stream().map(Objects::toString).collect(Collectors.joining(","))}) ";
         }
 
-        where += "group by rv.transactionId,tr.id,rv.amountLcySum,rv.rejectionCode,rv.sourceDiff,rv.transactionEntryDate,rv.transactionInternalNumber,rv.transactionType ";
+        where += "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.rejectionCode, rv.sourceDiff, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType ";
+
         return jpql + where;
     }
+
 }

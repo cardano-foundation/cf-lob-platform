@@ -116,14 +116,15 @@ public class DbSynchronisationUseCaseService {
     }
 
     private void storeTransactions(String batchId,
-                                   OrganisationTransactions transactions, ProcessorFlags flags) {
+                                   OrganisationTransactions transactions,
+                                   ProcessorFlags flags) {
         log.info("Updating transaction batch, batchId: {}", batchId);
         val trigger = flags.getTrigger();
         val txs = transactions.transactions();
 
         for (val tx : txs) {
             val saved = accountingCoreTransactionRepository.save(tx);
-            saved.getItems().forEach(i -> i.setTransaction(saved));
+            saved.getAllItems().forEach(i -> i.setTransaction(saved));
 
             /** Remove items rejection according to the processor selected */
             if (trigger == ProcessorFlags.Trigger.IMPORT) {
@@ -133,7 +134,7 @@ public class DbSynchronisationUseCaseService {
                 tx.clearAllItemsRejectionsSource(Source.LOB);
             }
 
-            transactionItemRepository.saveAll(tx.getItems());
+            transactionItemRepository.saveAll(tx.getAllItems());
         }
 
         val transactionBatchAssocEntities = txs

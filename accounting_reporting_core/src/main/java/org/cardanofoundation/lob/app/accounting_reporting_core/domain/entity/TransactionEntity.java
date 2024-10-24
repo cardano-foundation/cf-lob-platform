@@ -20,9 +20,9 @@ import java.util.Set;
 
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.EAGER;
+import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.NOT_DISPATCHED;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus.OK;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 
 @Entity(name = "accounting_reporting_core.TransactionEntity")
 @Table(name = "accounting_core_transaction")
@@ -90,7 +90,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     @Enumerated(STRING)
     @Getter
     @Setter
-    private ValidationStatus automatedValidationStatus = ValidationStatus.VALIDATED;
+    private TxValidationStatus automatedValidationStatus = TxValidationStatus.VALIDATED;
 
     @Column(name = "transaction_approved", nullable = false)
     @Getter
@@ -103,8 +103,6 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     private Boolean ledgerDispatchApproved = false;
 
     @OneToMany(mappedBy = "transaction", orphanRemoval = true, fetch = EAGER)
-    @Getter
-    @Setter
     private Set<TransactionItemEntity> items = new LinkedHashSet<>();
 
     @OneToOne(fetch = FetchType.EAGER)
@@ -166,13 +164,13 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     }
 
     public void clearAllViolations(Source source) {
-        violations.removeIf(violation -> violation.getSource().equals(source));
+        violations.removeIf(violation -> violation.getSource() == source);
         recalcValidationStatus();
     }
 
     public void clearAllItemsRejectionsSource(Source source) {
         for (TransactionItemEntity txItem : items) {
-            if (txItem.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource().equals(source))) {
+            if (txItem.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource() == source)) {
                 txItem.setRejection(Optional.empty());
             }
 
@@ -184,8 +182,8 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     }
 
     public boolean hasAnyRejection(Source source) {
-        for (TransactionItemEntity txItem : items) {
-            if (txItem.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource().equals(source))) {
+        for (val txItem : items) {
+            if (txItem.getRejection().stream().anyMatch(rejection -> rejection.getRejectionReason().getSource() == source)) {
                 return true;
             }
 
@@ -193,8 +191,43 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
         return false;
     }
 
-    public boolean hasAnyViolation(Source source) {
+    /**
+     * Use only in super exceptional and rare cases(!), typically only from unit tests(!)
+     */
+    public void setAllItems(Set<TransactionItemEntity> items) {
+        this.items = items;
+    }
 
+    /**
+     * Use only in super exceptional and rare cases(!), typically only from unit tests(!)
+     * @return all items including ERASED tx items
+     */
+    public Set<TransactionItemEntity> getAllItems() {
+        return items;
+    }
+
+    public void setItems(Set<TransactionItemEntity> items) {
+        if (items.stream().anyMatch(item -> item.getStatus().isErased())) {
+            throw new IllegalArgumentException("Cannot set items with ERASED status, please use setAllItems method");
+        }
+
+        this.items = items;
+    }
+
+    public Set<TransactionItemEntity> getItems() {
+        return items.stream()
+                .filter(item -> item.getStatus().isOK()).collect(toSet());
+    }
+
+    public boolean hasAnyItemsErased() {
+        return items.stream().anyMatch(item -> item.getStatus().isErased());
+    }
+
+    public boolean hasAllItemsErased() {
+        return items.stream().allMatch(item -> item.getStatus().isErased());
+    }
+
+    public boolean hasAnyViolation(Source source) {
         return violations.stream().anyMatch(violation -> violation.getSource().equals(source));
     }
 
@@ -203,7 +236,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     }
 
     private void recalcValidationStatus() {
-        automatedValidationStatus = violations.isEmpty() ? ValidationStatus.VALIDATED : FAILED;
+        automatedValidationStatus = violations.isEmpty() ? TxValidationStatus.VALIDATED : FAILED;
     }
 
     public Optional<TransactionItemEntity> findItemById(String txItemId) {
@@ -211,7 +244,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     }
 
     public boolean isDispatchable() {
-        return overallStatus == OK
+        return overallStatus == TransactionStatus.OK
                 && ledgerDispatchStatus == NOT_DISPATCHED;
     }
 

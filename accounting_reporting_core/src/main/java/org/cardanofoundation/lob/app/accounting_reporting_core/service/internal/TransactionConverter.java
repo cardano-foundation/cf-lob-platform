@@ -13,12 +13,9 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Doc
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Project;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Vat;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.springframework.stereotype.Service;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,7 +26,6 @@ import java.util.stream.Collectors;
 public class TransactionConverter {
 
     private final CoreCurrencyService coreCurrencyService;
-    private final Clock clock;
 
     public FilteringParameters convertToDbDetached(SystemExtractionParameters systemExtractionParameters,
                                                    UserExtractionParameters userExtractionParameters) {
@@ -136,13 +132,11 @@ public class TransactionConverter {
         txEntity.setTransactionType(transaction.getTransactionType());
         txEntity.setEntryDate(transaction.getEntryDate());
         txEntity.setOrganisation(convertOrganisation(transaction));
-        txEntity.setAutomatedValidationStatus(transaction.getValidationStatus());
+        txEntity.setAutomatedValidationStatus(transaction.getTxValidationStatus());
         txEntity.setLedgerDispatchStatus(transaction.getLedgerDispatchStatus());
         txEntity.setAccountingPeriod(transaction.getAccountingPeriod());
         txEntity.setTransactionApproved(transaction.isTransactionApproved());
         txEntity.setLedgerDispatchApproved(transaction.isLedgerDispatchApproved());
-        //txEntity.setUpdatedAt(LocalDateTime.now(clock));
-        //txEntity.setCreatedAt(LocalDateTime.now(clock));
 
         txItems.forEach(i -> i.setTransaction(txEntity));
 
@@ -275,7 +269,7 @@ public class TransactionConverter {
                         .build())
 
                 .entryDate(transactionEntity.getEntryDate())
-                .validationStatus(transactionEntity.getAutomatedValidationStatus())
+                .txValidationStatus(transactionEntity.getAutomatedValidationStatus())
                 .transactionType(transactionEntity.getTransactionType())
                 .internalTransactionNumber(transactionEntity.getTransactionInternalNumber())
 
@@ -322,16 +316,12 @@ public class TransactionConverter {
         attached.setLedgerDispatchStatus(detached.getLedgerDispatchStatus());
         attached.setAccountingPeriod(detached.getAccountingPeriod());
         attached.setTransactionInternalNumber(detached.getTransactionInternalNumber());
-//        attached.setUpdatedAt(LocalDateTime.now(clock));
-//        attached.setUpdatedBy(detached.getUpdatedBy());
-//        attached.setCreatedAt(detached.getCreatedAt());
-//        attached.setCreatedBy(detached.getCreatedBy());
 
         attached.getViolations().clear();
         attached.getViolations().addAll(detached.getViolations());
 
         attached.getItems().clear();
-        attached.getItems().addAll(detached.getItems());
+        attached.getAllItems().addAll(detached.getAllItems());
     }
 
 }

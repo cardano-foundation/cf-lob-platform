@@ -305,6 +305,8 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item (
    cost_center_external_customer_code VARCHAR(255),
    cost_center_name VARCHAR(255),
 
+   status VARCHAR(255) NOT NULL,
+
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
    created_at TIMESTAMP WITHOUT TIME ZONE,
@@ -357,6 +359,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item_aud (
    cost_center_customer_code VARCHAR(255),
    cost_center_external_customer_code VARCHAR(255),
    cost_center_name VARCHAR(255),
+   status VARCHAR(255) NOT NULL,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),

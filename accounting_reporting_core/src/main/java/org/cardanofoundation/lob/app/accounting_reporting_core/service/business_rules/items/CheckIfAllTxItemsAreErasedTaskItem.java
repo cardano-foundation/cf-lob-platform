@@ -8,28 +8,30 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Tra
 import java.util.Map;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.TRANSACTION_ITEMS_EMPTY;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.ALL_TX_ITEMS_ERASED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
 
+/**
+ * Task item that checks if all transaction items are erased, if yes then it fails the transaction.
+ */
 @RequiredArgsConstructor
-public class NoTransactionItemsTaskItem implements PipelineTaskItem {
+public class CheckIfAllTxItemsAreErasedTaskItem implements PipelineTaskItem {
 
     @Override
     public void run(TransactionEntity tx) {
-        if (tx.getItems().isEmpty()) {
-            tx.setAutomatedValidationStatus(FAILED); // Fail the transaction if no items are present
-
+        if (tx.hasAllItemsErased()) {
+            tx.setAutomatedValidationStatus(FAILED);
             handleViolationForEmptyItems(tx);
         }
     }
 
     private void handleViolationForEmptyItems(TransactionEntity tx) {
         val violation = TransactionViolation.builder()
-                .code(TRANSACTION_ITEMS_EMPTY)
+                .code(ALL_TX_ITEMS_ERASED)
                 .severity(ERROR)
                 .source(ERP)
-                .processorModule(NoTransactionItemsTaskItem.class.getSimpleName())
+                .processorModule(CheckIfAllTxItemsAreErasedTaskItem.class.getSimpleName())
                 .bag(createViolationBag(tx))
                 .build();
 

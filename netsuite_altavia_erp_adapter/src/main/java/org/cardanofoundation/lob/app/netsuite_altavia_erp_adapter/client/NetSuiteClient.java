@@ -17,6 +17,7 @@ import org.zalando.problem.Status;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static org.scribe.model.Verb.GET;
@@ -96,6 +97,8 @@ public class NetSuiteClient {
         log.info("call url: {}", url);
 
         val request = new OAuthRequest(GET, url);
+        request.setConnectTimeout(15, TimeUnit.SECONDS);
+        request.setReadTimeout(15, TimeUnit.SECONDS);
         request.setRealm(realm);
 
         val t = new Token(token, tokenSecret);
