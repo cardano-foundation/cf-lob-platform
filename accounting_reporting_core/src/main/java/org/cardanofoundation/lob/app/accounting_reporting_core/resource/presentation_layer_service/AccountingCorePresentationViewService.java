@@ -447,9 +447,7 @@ public class AccountingCorePresentationViewService {
     }
 
     private Set<TransactionItemView> getTransactionItemView(TransactionEntity transaction) {
-        return transaction.getItems().stream().filter(transactionItemEntity -> {
-            return transactionItemEntity.getAmountLcy().compareTo(ZERO) > 0;
-        }).map(item -> {
+        return transaction.getItems().stream().map(item -> {
             return new TransactionItemView(
                     item.getId(),
                     item.getAccountDebit().map(Account::getCode).orElse(""),
@@ -514,9 +512,6 @@ public class AccountingCorePresentationViewService {
 
     public BigDecimal getAmountLcyTotalForAllItems(TransactionEntity tx) {
         return tx.getItems().stream()
-                .filter(transactionItemEntity -> {
-                    return transactionItemEntity.getAmountLcy().compareTo(ZERO) > 0;
-                })
                 .map(TransactionItemEntity::getAmountLcy)
                 .reduce(ZERO, BigDecimal::add);
     }
