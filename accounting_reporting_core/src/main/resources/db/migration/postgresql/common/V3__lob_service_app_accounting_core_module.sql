@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_batch_aud (
 
     -- Special columns for audit tables
     rev INTEGER NOT NULL,
-    revtype SMALLINT,
+    revtype SMALLINT NOT NULL,
 
     -- Primary Key for the audit table
     CONSTRAINT pk_accounting_core_transaction_batch_aud PRIMARY KEY (transaction_batch_id, rev, revtype),
@@ -160,7 +160,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_aud (
 
    -- special for audit tables
    rev INTEGER NOT NULL,
-   revtype SMALLINT,
+   revtype SMALLINT NOT NULL,
 
    -- Primary Key Constraint
    CONSTRAINT pk_accounting_core_transaction_aud PRIMARY KEY (transaction_id, rev, revtype),
@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_aud (
 -- embeddable
 CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation (
    transaction_id CHAR(64) NOT NULL,
-   tx_item_id CHAR(64) NOT NULL,
+   tx_item_id CHAR(64),
    code VARCHAR(255) NOT NULL,
 
    severity VARCHAR(255) NOT NULL,
@@ -184,13 +184,13 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation (
 
    CONSTRAINT fk_accounting_core_transaction_violation FOREIGN KEY (transaction_id) REFERENCES accounting_core_transaction (transaction_id),
 
-   PRIMARY KEY (transaction_id, tx_item_id, code, sub_code)
+   UNIQUE (transaction_id, tx_item_id, code, sub_code)
 );
 
 -- embeddable audit table for transaction violation
 CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation_aud (
     transaction_id CHAR(64) NOT NULL,
-    tx_item_id CHAR(64) NOT NULL,
+    tx_item_id CHAR(64),
     code VARCHAR(255) NOT NULL,
 
     severity VARCHAR(255) NOT NULL,
@@ -201,11 +201,10 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation_aud (
 
     -- Special columns for audit tables
     rev INTEGER NOT NULL,
-    revtype SMALLINT,
+    revtype SMALLINT NOT NULL,
     ord INTEGER,
 
-    -- Primary Key for the audit table
-    CONSTRAINT pk_accounting_core_transaction_violation_aud PRIMARY KEY (transaction_id, tx_item_id, code, sub_code, rev, revtype),
+    CONSTRAINT pk_accounting_core_transaction_violation_aud UNIQUE (transaction_id, tx_item_id, code, sub_code, rev, revtype),
 
     -- Foreign Key referencing the original transaction table
     FOREIGN KEY (transaction_id) REFERENCES accounting_core_transaction (transaction_id) MATCH SIMPLE
@@ -242,8 +241,8 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_batch_assoc_aud (
 
     -- Special columns for audit tables
     rev INTEGER NOT NULL,
+    revtype SMALLINT NOT NULL,
     ord INTEGER,
-    revtype SMALLINT,
 
     -- Primary Key for the audit table
     CONSTRAINT pk_accounting_core_transaction_batch_assoc_aud PRIMARY KEY (transaction_batch_id, transaction_id, rev, revtype),
@@ -368,7 +367,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item_aud (
 
    -- Special columns for audit tables
    rev INTEGER NOT NULL,
-   revtype SMALLINT,
+   revtype SMALLINT NOT NULL,
    ord INTEGER,
 
    -- Primary Key for audit table
@@ -420,7 +419,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_aud (
 
     -- Special columns for audit tables
     rev INTEGER NOT NULL,
-    revtype SMALLINT,
+    revtype SMALLINT NOT NULL,
     ord INTEGER,
 
     -- Primary Key for the audit table
@@ -462,7 +461,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation_aud (
 
     -- Special columns for audit tables
     rev INTEGER NOT NULL,
-    revtype SMALLINT,
+    revtype SMALLINT NOT NULL,
     ord INTEGER,
 
     -- Primary Key for the audit table
