@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
@@ -29,6 +28,7 @@ import static java.math.BigDecimal.ZERO;
 import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.*;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.transactionNotFoundResponse;
 
@@ -45,7 +45,7 @@ public class AccountingCorePresentationViewService {
     private final TransactionBatchRepositoryGateway transactionBatchRepositoryGateway;
 
     /**
-     * Waiting for refactoring the layer to remove this
+     * TODO: waiting for refactoring the layer to remove this
      */
     private final AccountingCoreTransactionRepository accountingCoreTransactionRepository;
 
@@ -55,11 +55,10 @@ public class AccountingCorePresentationViewService {
             val transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getLimit(), body.getPage()).stream()
                     .map(this::getReconciliationTransactionsSelector)
                     .collect(toSet());
-            ;
-            val searchtotal = (long) accountingCoreTransactionRepository.findAllReconciliationSpecialCount(body.getReconciliationRejectionCode(), body.getLimit(), body.getPage()).size();
+            val searchTotal = (long) accountingCoreTransactionRepository.findAllReconciliationSpecialCount(body.getReconciliationRejectionCode(), body.getLimit(), body.getPage()).size();
 
             return new ReconciliationResponseView(
-                    (Long) searchtotal,
+                    searchTotal,
                     new TransactionReconciliationStatisticView(
                             (Long) transactionsStatistic[0],
                             (Long) transactionsStatistic[1],
@@ -74,7 +73,7 @@ public class AccountingCorePresentationViewService {
                 .collect(toSet());
 
         return new ReconciliationResponseView(
-                (Long) transactions.stream().count(),
+                (long) transactions.size(),
                 new TransactionReconciliationStatisticView(
                         (Long) transactionsStatistic[0],
                         (Long) transactionsStatistic[1],
@@ -128,7 +127,6 @@ public class AccountingCorePresentationViewService {
 
     public BatchsDetailView listAllBatch(BatchSearchRequest body) {
         val batchDetailView = new BatchsDetailView();
-
 
         val batches = transactionBatchRepositoryGateway.findByFilter(body)
                 .stream()
@@ -196,8 +194,6 @@ public class AccountingCorePresentationViewService {
 
     @Transactional
     public TransactionItemsProcessRejectView rejectTransactionItems(TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
-
-
         val txM = transactionRepositoryGateway.findById(transactionItemsRejectionRequest.getTransactionId());
         if (txM.isEmpty()) {
             Either<IdentifiableProblem, TransactionEntity> errorE = transactionNotFoundResponse(transactionItemsRejectionRequest.getTransactionId());
@@ -219,7 +215,6 @@ public class AccountingCorePresentationViewService {
                 this.getTransactionDispatchStatus(tx),
                 items
         );
-
     }
 
     @Transactional
@@ -232,7 +227,6 @@ public class AccountingCorePresentationViewService {
         }
 
         return BatchReprocessView.createSuccess(batchId);
-
     }
 
     private BatchStatisticsView getStatistics(Set<TransactionView> transactions) {
@@ -246,7 +240,8 @@ public class AccountingCorePresentationViewService {
 
         val published = transactions.stream().filter(transactionView -> PUBLISHED == transactionView.getStatistic()).count();
 
-        val total = transactions.stream().count();
+        val total = (long) transactions.size();
+
         return new BatchStatisticsView(
                 (int) invalid,
                 (int) pending,
@@ -268,7 +263,6 @@ public class AccountingCorePresentationViewService {
         );
     }
 
-
     private Set<TransactionView> getTransaction(TransactionBatchEntity transactionBatchEntity) {
         return transactionBatchEntity.getTransactions().stream()
                 .map(this::getTransactionView)
@@ -276,7 +270,6 @@ public class AccountingCorePresentationViewService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    //
     private TransactionReconciliationTransactionsView getTransactionReconciliationView(TransactionEntity transactionEntity) {
         return new TransactionReconciliationTransactionsView(
                 transactionEntity.getId(),
@@ -399,7 +392,7 @@ public class AccountingCorePresentationViewService {
 
 
     public LedgerDispatchStatusView getTransactionDispatchStatus(TransactionEntity transactionEntity) {
-        if (TxValidationStatus.FAILED == transactionEntity.getAutomatedValidationStatus()) {
+        if (FAILED == transactionEntity.getAutomatedValidationStatus()) {
             if (transactionEntity.getViolations().stream().anyMatch(v -> v.getSource() == ERP)) {
                 return INVALID;
             }
@@ -429,9 +422,9 @@ public class AccountingCorePresentationViewService {
                     return PUBLISH;
                 }
             }
+
             case DISPATCHED, COMPLETED, FINALIZED -> {
                 return PUBLISHED;
-                //return DISPATCHED;
             }
         }
 
@@ -439,9 +432,7 @@ public class AccountingCorePresentationViewService {
     }
 
     private Set<TransactionItemView> getTransactionItemView(TransactionEntity transaction) {
-        return transaction.getItems().stream().filter(transactionItemEntity -> {
-            return transactionItemEntity.getAmountLcy().compareTo(ZERO) > 0;
-        }).map(item -> {
+        return transaction.getItems().stream().map(item -> {
             return new TransactionItemView(
                     item.getId(),
                     item.getAccountDebit().map(Account::getCode).orElse(""),
@@ -505,7 +496,6 @@ public class AccountingCorePresentationViewService {
 
     public BigDecimal getAmountLcyTotalForAllItems(TransactionEntity tx) {
         return tx.getItems().stream()
-                .filter(transactionItemEntity -> transactionItemEntity.getAmountLcy().compareTo(ZERO) > 0)
                 .map(TransactionItemEntity::getAmountLcy)
                 .reduce(ZERO, BigDecimal::add);
     }
