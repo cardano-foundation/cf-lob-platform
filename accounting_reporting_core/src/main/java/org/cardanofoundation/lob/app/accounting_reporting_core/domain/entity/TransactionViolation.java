@@ -11,6 +11,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.envers.Audited;
 import org.javers.core.metamodel.annotation.DiffIgnore;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -27,9 +28,8 @@ import static jakarta.persistence.EnumType.STRING;
 @Audited
 public class TransactionViolation {
 
-    @NotNull
-    @Builder.Default
-    private String txItemId = ""; // null object pattern for simplicity here
+    @Nullable
+    private String txItemId;
 
     @NotNull
     @Enumerated(STRING)
@@ -61,11 +61,11 @@ public class TransactionViolation {
     }
 
     public void setTxItemId(Optional<String> txItemId) {
-        this.txItemId = txItemId.orElse("");
+        this.txItemId = txItemId.orElse(null);
     }
 
     public Optional<String> getTxItemId() {
-        return Optional.ofNullable(txItemId).filter(s -> !s.isEmpty());
+        return Optional.ofNullable(txItemId);
     }
 
 }
