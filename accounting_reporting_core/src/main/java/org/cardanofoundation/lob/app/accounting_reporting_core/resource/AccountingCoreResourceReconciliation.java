@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationRequest;
@@ -35,7 +36,7 @@ public class AccountingCoreResourceReconciliation {
     private final AccountingCoreService accountingCoreService;
 
     @Tag(name = "Reconciliation", description = "Reconciliation API")
-    @Operation(description = "Transaction list", responses = {
+    @Operation(description = "Start the Reconciliation", responses = {
             @ApiResponse(content =
                     {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReconcileResponseView.class))}
             )
@@ -53,7 +54,7 @@ public class AccountingCoreResourceReconciliation {
 
     }
 
-    @Operation(description = "Transaction list", responses = {
+    @Operation(description = "Get the Reconciliations", responses = {
             @ApiResponse(content =
                     {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReconciliationResponseView.class))}
             )
@@ -69,5 +70,17 @@ public class AccountingCoreResourceReconciliation {
 
 
         return ResponseEntity.ok().body(transactions);
+    }
+
+    @Operation(description = "Reconciliation Rejection Codes", responses = {
+            @ApiResponse(content =
+                    {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReconcilationRejectionCode.class))}
+            )
+    })
+    @Tag(name = "Reconciliation", description = "Reconciliation API")
+    @GetMapping(value = "/transactions-rejection-codes", produces = "application/json")
+    public ResponseEntity<?> reconciliationRejectionCode() {
+
+        return ResponseEntity.ok().body(ReconcilationRejectionCode.values());
     }
 }
