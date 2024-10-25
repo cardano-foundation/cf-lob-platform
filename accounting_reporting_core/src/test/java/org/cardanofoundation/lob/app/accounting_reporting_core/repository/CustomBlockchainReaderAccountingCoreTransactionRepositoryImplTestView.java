@@ -6,6 +6,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
+import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
@@ -13,39 +14,38 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.*;
+import java.util.List;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.VendorBill;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.VALIDATED;
+import static org.mockito.Mockito.*;
 
 class CustomBlockchainReaderAccountingCoreTransactionRepositoryImplTestView {
 
-
     @Test
     void findAllByStatus() {
-        CriteriaBuilder builder = Mockito.mock(CriteriaBuilder.class);
-        CriteriaQuery<TransactionEntity> criteriaQuery = Mockito.mock(String.valueOf(TransactionEntity.class));
-        EntityManager em = Mockito.mock(EntityManager.class);
+        val builder = mock(CriteriaBuilder.class);
+        CriteriaQuery<TransactionEntity> criteriaQuery = mock(String.valueOf(TransactionEntity.class));
+        EntityManager em = mock(EntityManager.class);
 
-        TransactionEntity transactionEntity = Mockito.mock(TransactionEntity.class);
-        TransactionEntity transactionEntity2 = Mockito.mock(TransactionEntity.class);
+        TransactionEntity transactionEntity = mock(TransactionEntity.class);
+        TransactionEntity transactionEntity2 = mock(TransactionEntity.class);
         transactionEntity.setId("nothing");
         transactionEntity2.setId("nothing2");
         List<TransactionEntity> transactions = List.of(transactionEntity, transactionEntity2);
-        Root<TransactionEntity> rootEntry = Mockito.mock(String.valueOf(TransactionEntity.class));
+        Root<TransactionEntity> rootEntry = mock(String.valueOf(TransactionEntity.class));
 
-        TypedQuery<TransactionEntity> transactionEntityTypedQuery = Mockito.mock(String.valueOf(TransactionEntity.class));
-
+        TypedQuery<TransactionEntity> transactionEntityTypedQuery = mock(String.valueOf(TransactionEntity.class));
 
         Mockito.when(em.getCriteriaBuilder()).thenReturn(builder);
         Mockito.when(builder.createQuery(TransactionEntity.class)).thenReturn(criteriaQuery);
         Mockito.when(criteriaQuery.from(TransactionEntity.class)).thenReturn(rootEntry);
         Mockito.when(transactionEntityTypedQuery.getResultList()).thenReturn(transactions);
-        Path<Object> validationStatus = Mockito.mock(Path.class);
-        Path<Object> organisation = Mockito.mock(Path.class);
-        Path<Object> organisationId = Mockito.mock(Path.class);
+        Path<Object> validationStatus = mock(Path.class);
+        Path<Object> organisation = mock(Path.class);
+        Path<Object> organisationId = mock(Path.class);
 
-        CriteriaBuilder.In inResult = Mockito.mock(CriteriaBuilder.In.class);
+        val inResult = mock(CriteriaBuilder.In.class);
 
         Mockito.when(rootEntry.get("automatedValidationStatus")).thenReturn(validationStatus);
         Mockito.when(rootEntry.get("organisation")).thenReturn(organisation);
@@ -58,11 +58,12 @@ class CustomBlockchainReaderAccountingCoreTransactionRepositoryImplTestView {
         List<TransactionEntity> elresult = customTransactionRepository.findAllByStatus("OrgId", List.of(TxValidationStatus.valueOf(String.valueOf(VALIDATED))), List.of(TransactionType.valueOf(String.valueOf(VendorBill))));
 
         //Mockito.verify(builder,Mockito.times(4)).isTrue(builder.literal(true));
-        Mockito.verify(builder, Mockito.times(1)).in(validationStatus);
-        Mockito.verify(builder, Mockito.times(1)).equal(organisationId, "OrgId");
-        Mockito.verify(inResult, Mockito.times(1)).value(List.of(TxValidationStatus.valueOf(String.valueOf(VALIDATED))));
-        Mockito.verify(rootEntry, Mockito.times(1)).get("organisation");
-        Mockito.verify(organisation, Mockito.times(1)).get("id");
+        verify(builder, times(1)).in(validationStatus);
+        verify(builder, times(1)).equal(organisationId, "OrgId");
+        verify(inResult, times(1)).value(List.of(TxValidationStatus.valueOf(String.valueOf(VALIDATED))));
+        verify(rootEntry, times(1)).get("organisation");
+        verify(organisation, times(1)).get("id");
         Assertions.assertEquals(List.of(transactionEntity, transactionEntity2), elresult);
     }
+
 }

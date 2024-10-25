@@ -141,7 +141,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
             @AttributeOverride(name = "txItemId", column = @Column(name = "tx_item_id")),
             @AttributeOverride(name = "source", column = @Column(name = "source", nullable = false)),
             @AttributeOverride(name = "processorModule", column = @Column(name = "processor_module", nullable = false)),
-            @AttributeOverride(name = "bag", column = @Column(name = "bag", nullable = false))
+            @AttributeOverride(name = "bag", column = @Column(name = "detail_bag", nullable = false))
     })
     @DiffIgnore
     @Getter

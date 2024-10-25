@@ -52,7 +52,6 @@ public class TransactionItemsRejectionRequest {
 
         public void setRejectionCode(RejectionReason rejectionCode) {
             rejectionReason = rejectionCode;
-
         }
 
     }

@@ -18,6 +18,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterStatusRequest.RENCONCILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterStatusRequest.UNPROCESSED;
+
 @RequiredArgsConstructor
 @Slf4j
 public class CustomTransactionRepositoryImpl implements CustomTransactionRepository {
@@ -82,7 +85,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
     @Override
     public List<TransactionEntity> findAllReconciliation(ReconciliationFilterStatusRequest filter, Integer limit, Integer page) {
         switch (filter) {
-            case ReconciliationFilterStatusRequest.RENCONCILED -> {
+            case RENCONCILED -> {
                 CriteriaBuilder builder = em.getCriteriaBuilder();
                 CriteriaQuery<TransactionEntity> criteriaQuery = builder.createQuery(TransactionEntity.class);
                 Root<TransactionEntity> rootEntry = criteriaQuery.from(TransactionEntity.class);
@@ -96,7 +99,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
                 }
                 return theQuery.getResultList();
             }
-            case ReconciliationFilterStatusRequest.UNPROCESSED -> {
+            case UNPROCESSED -> {
                 CriteriaBuilder builder = em.getCriteriaBuilder();
                 CriteriaQuery<TransactionEntity> criteriaQuery = builder.createQuery(TransactionEntity.class);
                 Root<TransactionEntity> rootEntry = criteriaQuery.from(TransactionEntity.class);
@@ -140,7 +143,6 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
         mainQuery.multiselect(countQueryOK.getSelection().alias("OK"), countQueryNOK.getSelection().alias("NOK"), countQueryNull.getSelection().alias("NOTYET"));
 
         return em.createQuery(mainQuery).getSingleResult();
-
     }
 
     private String reconciliationQuery(Set<ReconcilationRejectionCode> rejectionCodes) {

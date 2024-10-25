@@ -50,7 +50,7 @@ public class AccountingCorePresentationViewService {
     private final AccountingCoreTransactionRepository accountingCoreTransactionRepository;
 
     public ReconciliationResponseView allReconciliationTransaction(ReconciliationFilterRequest body) {
-        Object[] transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
+        val transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
         if (body.getFilter().equals(ReconciliationFilterStatusRequest.UNRENCONCILED)) {
             val transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getLimit(), body.getPage()).stream()
                     .map(this::getReconciliationTransactionsSelector)
@@ -80,6 +80,7 @@ public class AccountingCorePresentationViewService {
                         (Long) transactionsStatistic[2],
                         (Long) transactionsStatistic[0] + (Long) transactionsStatistic[1] + (Long) transactionsStatistic[2]
                 ),
+
                 transactions
         );
     }

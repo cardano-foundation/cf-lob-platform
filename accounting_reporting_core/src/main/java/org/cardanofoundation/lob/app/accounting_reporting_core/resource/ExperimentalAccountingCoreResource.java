@@ -21,6 +21,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping("/api/core")
 @Slf4j
 @RequiredArgsConstructor
+@Deprecated
 public class ExperimentalAccountingCoreResource {
 
     private final AccountingCoreService accountingCoreService;
