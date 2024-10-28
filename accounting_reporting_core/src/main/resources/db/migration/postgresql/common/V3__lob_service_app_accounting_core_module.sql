@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation (
    sub_code VARCHAR(255) NOT NULL,
    source VARCHAR(255) NOT NULL,
    processor_module VARCHAR(255) NOT NULL,
-   bag jsonb NOT NULL,
+   detail_bag jsonb NOT NULL,
 
    CONSTRAINT fk_accounting_core_transaction_violation FOREIGN KEY (transaction_id) REFERENCES accounting_core_transaction (transaction_id),
 
@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation_aud (
     sub_code VARCHAR(255) NOT NULL,
     source VARCHAR(255) NOT NULL,
     processor_module VARCHAR(255) NOT NULL,
-    bag JSONB NOT NULL,
+    detail_bag JSONB NOT NULL,
 
     -- Special columns for audit tables
     rev INTEGER NOT NULL,
@@ -475,3 +475,71 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation_aud (
     FOREIGN KEY (rev) REFERENCES revinfo (rev) MATCH SIMPLE
     ON UPDATE NO ACTION ON DELETE NO ACTION
 );
+
+-- indices
+
+-- Indexes for JSONB columns
+CREATE INDEX idx_transaction_violation_bag_gin
+ON accounting_core_transaction_violation USING GIN (detail_bag);
+
+-- Indexes for JSONB columns
+CREATE INDEX idx_transaction_batch_bag_gin
+ON accounting_core_transaction_batch USING GIN (detail_bag);
+
+-- Indexes for JSONB columns
+CREATE INDEX idx_accounting_core_reconcilation_bag_gin
+ON accounting_core_reconcilation USING GIN (detail_bag);
+
+-- Indexes for text array
+CREATE INDEX idx_transaction_batch_filtering_transaction_numbers
+ON accounting_core_transaction_batch USING GIN (filtering_parameters_transaction_numbers);
+
+-- AccountingCoreTransactionRepository.findDispatchableTransactions
+CREATE INDEX idx_transaction_dispatchable
+ON accounting_core_transaction (organisation_id, overall_status, ledger_dispatch_status, created_at, transaction_id);
+
+-- AccountingCoreTransactionRepository.findByEntryDateRangeAndNotReconciledYet
+CREATE INDEX idx_transaction_reconciliation_status
+ON accounting_core_transaction (organisation_id, entry_date, reconcilation_source, reconcilation_sink, created_at, transaction_id);
+
+-- CustomTransactionRepository.findAllByStatus
+CREATE INDEX idx_transaction_organisation_status
+ON accounting_core_transaction (organisation_id, automated_validation_status);
+
+CREATE INDEX idx_transaction_reconcilation_id
+ON accounting_core_transaction (reconcilation_id);
+
+-- CustomTransactionBatchRepositoryImpl.findByFilter
+CREATE INDEX idx_reconcilation_violation_source
+ON accounting_core_transaction (reconcilation_source);
+
+-- CustomTransactionBatchRepositoryImpl.findByFilter
+CREATE INDEX idx_transaction_status
+ON accounting_core_transaction (overall_status);
+
+-- CustomTransactionBatchRepositoryImpl.queryCriteria
+CREATE INDEX idx_transaction_approval_dispatch_validation_status
+ON accounting_core_transaction (transaction_approved, ledger_dispatch_approved, automated_validation_status);
+
+-- CustomTransactionBatchRepositoryImpl.findByFilter
+CREATE INDEX idx_transaction_batch
+ON accounting_core_transaction_batch (filtering_parameters_organisation_id, filtering_parameters_transaction_types, created_at);
+
+-- AccountingCoreTransactionRepository.findAllByTxId
+CREATE INDEX idx_transaction_batch_assoc_transaction_id
+ON accounting_core_transaction_batch_assoc (transaction_id);
+
+-- TransactionItemRepository.findByTxIdAndItemId
+CREATE INDEX idx_transaction_item_txid_txitemid
+ON accounting_core_transaction_item (transaction_id, transaction_item_id, rejection_reason);
+
+-- CustomTransactionRepository.findAllReconciliation
+CREATE INDEX idx_reconcilation_final_status
+ON accounting_core_reconcilation (status);
+
+-- CustomTransactionRepository.findAllReconciliationSpecial
+CREATE INDEX idx_reconcilation_violation_rejection_code
+ON accounting_core_reconcilation_violation (rejection_code);
+
+CREATE INDEX idx_reconcilation_violation_transaction_id
+ON accounting_core_reconcilation_violation (transaction_id);

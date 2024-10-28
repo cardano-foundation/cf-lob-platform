@@ -65,41 +65,6 @@ CREATE TABLE blockchain_publisher_transaction_item (
    PRIMARY KEY (transaction_item_id)
 );
 
---CREATE TABLE blockchain_publisher_transaction_line_aud (
---   id CHAR(64) NOT NULL,
---   organisation_id VARCHAR(255) NOT NULL,
---   upload_id UUID NOT NULL,
---   transaction_type VARCHAR(255) NOT NULL,
---   entry_date DATE NOT NULL,
---   transaction_internal_number VARCHAR(255),
---   base_currency_id VARCHAR(255),
---   base_currency_internal_code VARCHAR(255) NOT NULL,
---   target_currency_id VARCHAR(255),
---   target_currency_internal_code VARCHAR(255) NOT NULL,
---   fx_rate DECIMAL NOT NULL,
---   document_internal_number VARCHAR(255),
---   vendor_internal_code VARCHAR(255),
---   vat_internal_code VARCHAR(255),
---   vat_rate DECIMAL,
---   publish_status VARCHAR(255) NOT NULL,
---   l1_finality_score VARCHAR(255),
---   l1_transaction_hash VARCHAR(255),
---   l1_absolute_slot BIGINT,
---
---   amount_fcy DECIMAL NOT NULL,
---   amount_lcy DECIMAL NOT NULL,
---
---   created_by VARCHAR(255),
---   updated_by VARCHAR(255),
---   created_at TIMESTAMP WITHOUT TIME ZONE,
---   updated_at TIMESTAMP WITHOUT TIME ZONE,
---
---   -- special for audit tables
---   rev INTEGER NOT NULL,
---   revtype SMALLINT,
---
---   CONSTRAINT blockchain_transaction_line_aud_pkey PRIMARY KEY (id, rev),
---   CONSTRAINT blockchain_transaction_line_aud_revinfo FOREIGN KEY (rev)
---   REFERENCES revinfo (rev) MATCH SIMPLE
---   ON UPDATE NO ACTION ON DELETE NO ACTION
---);
+-- blockchain_publisher.TransactionEntity.findTransactionsByStatus
+CREATE INDEX idx_transaction_entity_publish_status
+ON blockchain_publisher_transaction (organisation_id, l1_publish_status, created_at, transaction_id);

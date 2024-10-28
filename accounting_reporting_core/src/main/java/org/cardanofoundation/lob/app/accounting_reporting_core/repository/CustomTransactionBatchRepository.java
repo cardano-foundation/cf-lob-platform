@@ -6,7 +6,9 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests
 import java.util.List;
 
 public interface CustomTransactionBatchRepository {
+
     List<TransactionBatchEntity> findByFilter(BatchSearchRequest body);
 
     Long findByFilterCount(BatchSearchRequest body);
+
 }

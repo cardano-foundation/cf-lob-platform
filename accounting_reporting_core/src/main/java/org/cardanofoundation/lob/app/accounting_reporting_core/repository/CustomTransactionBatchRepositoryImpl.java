@@ -5,28 +5,36 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionBatchEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.BatchSearchRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.PENDING;
 
 @RequiredArgsConstructor
 @Slf4j
 public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBatchRepository {
+
     private final EntityManager em;
 
     @Override
     public List<TransactionBatchEntity> findByFilter(BatchSearchRequest body) {
-
-        CriteriaBuilder builder = em.getCriteriaBuilder();
+        val builder = em.getCriteriaBuilder();
         CriteriaQuery<TransactionBatchEntity> criteriaQuery = builder.createQuery(TransactionBatchEntity.class);
         Root<TransactionBatchEntity> rootEntry = criteriaQuery.from(TransactionBatchEntity.class);
 
-        Collection<Predicate> andPredicates = queryCriteria(rootEntry, builder, body);
+        val andPredicates = queryCriteria(rootEntry, builder, body);
 
         criteriaQuery.select(rootEntry);
         criteriaQuery.where(andPredicates.toArray(new Predicate[0]));
@@ -42,17 +50,14 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
         }
 
         return theQuery.getResultList();
-
     }
 
     @Override
     public Long findByFilterCount(BatchSearchRequest body) {
-
-        CriteriaBuilder builder = em.getCriteriaBuilder();
+        val builder = em.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
         Root<TransactionBatchEntity> rootEntry = criteriaQuery.from(TransactionBatchEntity.class);
         Collection<Predicate> andPredicates = queryCriteria(rootEntry, builder, body);
-
 
         criteriaQuery.select(builder.count(rootEntry));
         criteriaQuery.where(andPredicates.toArray(new Predicate[0]));
@@ -62,9 +67,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
 
         TypedQuery<Long> theQuery = em.createQuery(criteriaQuery);
 
-
-        return theQuery.getResultList().stream().count();
-
+        return (long) theQuery.getResultList().size();
     }
 
     private Collection<Predicate> queryCriteria(Root<TransactionBatchEntity> rootEntry, CriteriaBuilder builder, BatchSearchRequest body) {
@@ -78,7 +81,6 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
             List<Predicate> orPredicates = new ArrayList<>();
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.INVALID))) {
-
                 orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionReason").as(Integer.class).in(RejectionReason.getSourceBasedRejectionReasons(Source.ERP).stream().map(Enum::ordinal).toList()));
                 Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
                 Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
@@ -89,12 +91,9 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 );
                 subqueryErp.where(whereErp);
                 orPredicates.add((builder.in(transactionEntityJoin.get("id")).value(subqueryErp)));
-
             }
 
-            if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.PENDING))) {
-
-
+            if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(PENDING))) {
                 Subquery<String> subqueryItemsIn = builder.createQuery().subquery(String.class);
                 Root<TransactionItemEntity> transactionEntityRootItem = subqueryItemsIn.from(TransactionItemEntity.class);
 
@@ -134,7 +133,6 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 );
                 subqueryLob.where(whereLob);
 
-
                 orPredicates.add(builder.and(
                         builder.in(transactionEntityJoin.get("id")).value(subqueryItemsOut).not(),
                         builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not(),
@@ -144,7 +142,6 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                                 builder.equal(transactionEntityJoin.get("automatedValidationStatus"), TxValidationStatus.FAILED)
                         )
                 ));
-
             }
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.APPROVE))) {
@@ -168,8 +165,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                         builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionReason")),
                         builder.equal(transactionItemEntityRoot.get("transaction").get("id"), transactionEntityJoin.get("id"))
                 );
-                subqueryReject.where(whereReject)
-                ;
+                subqueryReject.where(whereReject);
 
                 orPredicates.add(builder.and(
                                 builder.equal(transactionEntityJoin.get("transactionApproved"), false),
@@ -179,7 +175,6 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not()
                         )
                 );
-
             }
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.PUBLISH))) {
@@ -202,8 +197,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                         builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionReason")),
                         builder.equal(transactionItemEntityRoot.get("transaction").get("id"), transactionEntityJoin.get("id"))
                 );
-                subqueryReject.where(whereReject)
-                ;
+                subqueryReject.where(whereReject);
 
                 orPredicates.add(builder.and(
                                 builder.equal(transactionEntityJoin.get("transactionApproved"), true),
@@ -213,7 +207,6 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not()
                         )
                 );
-
             }
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.PUBLISHED))) {
@@ -247,7 +240,6 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                                 builder.in(transactionEntityJoin.get("id")).value(subqueryErp).not()
                         )
                 );
-
             }
 
             andPredicates.add(builder.or(orPredicates.toArray(new Predicate[0])));
@@ -261,11 +253,11 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
         if (null != body.getFrom()) {
             LocalDateTime localDateTime1 = body.getFrom().atStartOfDay();
             andPredicates.add(builder.greaterThanOrEqualTo(rootEntry.get("createdAt"), localDateTime1));
-
         }
 
         if (null != body.getTo()) {
-            LocalDateTime localDateTime2 = body.getTo().atTime(23, 59, 59);
+            val localDateTime2 = body.getTo().atTime(23, 59, 59);
+
             andPredicates.add(builder.lessThanOrEqualTo(rootEntry.get("createdAt"), localDateTime2));
         }
 

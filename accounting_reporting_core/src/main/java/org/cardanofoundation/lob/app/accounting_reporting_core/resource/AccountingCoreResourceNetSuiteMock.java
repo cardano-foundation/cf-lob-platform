@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Path;
 
-
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api")
@@ -21,10 +20,9 @@ public class AccountingCoreResourceNetSuiteMock {
     @Tag(name = "Mock", description = "Mock service API")
     @GetMapping(value = "/mockresult", produces = "application/json")
     public ResponseEntity<?> mockNet() {
-
         String sube = FileUtils.readAsString(Path.of("src/main/resources/json/NetSuiteIngestionMock.json"));
 
         return ResponseEntity.ok().body(sube);
-
     }
+
 }
