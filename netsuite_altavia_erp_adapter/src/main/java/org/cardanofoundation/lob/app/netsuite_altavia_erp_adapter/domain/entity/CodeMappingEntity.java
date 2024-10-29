@@ -3,6 +3,8 @@ package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity
 import jakarta.persistence.*;
 import lombok.*;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.springframework.data.domain.Persistable;
 
 import java.io.Serializable;
@@ -39,6 +41,7 @@ public class CodeMappingEntity extends CommonEntity implements Persistable<CodeM
         private Long internalId;
 
         @Enumerated(STRING)
+        @JdbcType(PostgreSQLEnumJdbcType.class)
         private CodeMappingType type;
 
     }

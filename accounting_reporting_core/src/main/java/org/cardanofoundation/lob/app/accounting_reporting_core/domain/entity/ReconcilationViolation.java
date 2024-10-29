@@ -6,7 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.Type;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
 
 import javax.annotation.Nullable;
@@ -33,6 +35,7 @@ public class ReconcilationViolation {
     @Enumerated(STRING)
     @Getter
     @Setter
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private ReconcilationRejectionCode rejectionCode;
 
     @Type(value = io.hypersistence.utils.hibernate.type.json.JsonType.class)
@@ -53,6 +56,7 @@ public class ReconcilationViolation {
     @Getter
     @Setter
     @Enumerated(STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private TransactionType transactionType;
 
     @NotNull

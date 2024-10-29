@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionBatchStatus;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -77,6 +79,7 @@ public class TransactionBatchEntity extends CommonEntity implements Persistable<
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private TransactionBatchStatus status = TransactionBatchStatus.CREATED;
 
     public String getOrganisationId() {

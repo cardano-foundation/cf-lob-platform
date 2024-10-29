@@ -59,8 +59,9 @@ subprojects {
         implementation("org.flywaydb:flyway-core")
         implementation("org.flywaydb:flyway-database-postgresql")
 
-        // needed to store json via JPA in PostgreSQL
-        implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.6")
+        // needed to store json via JPA in PostgreSQL for
+        // Hibernate 6.6, 6.5, 6.4, and 6.3
+        implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.8.3")
 
         runtimeOnly("io.micrometer:micrometer-registry-prometheus")
         runtimeOnly("org.postgresql:postgresql")

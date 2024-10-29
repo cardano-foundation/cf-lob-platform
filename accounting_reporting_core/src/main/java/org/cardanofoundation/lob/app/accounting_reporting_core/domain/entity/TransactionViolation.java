@@ -7,7 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.Type;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
 import org.javers.core.metamodel.annotation.DiffIgnore;
 
@@ -33,17 +35,20 @@ public class TransactionViolation {
 
     @NotNull
     @Enumerated(STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private TransactionViolationCode code;
 
     @NotNull
     @Enumerated(STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity severity;
 
-    @Builder.Default
-    private String subCode = "";
+    @Nullable
+    private String subCode;
 
     @NotNull
     @Enumerated(STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private Source source;
 
     @NotBlank
@@ -66,6 +71,14 @@ public class TransactionViolation {
 
     public Optional<String> getTxItemId() {
         return Optional.ofNullable(txItemId);
+    }
+
+    public Optional<String> getSubCode() {
+        return Optional.ofNullable(subCode);
+    }
+
+    public void setSubCode(Optional<String> subCode) {
+        this.subCode = subCode.orElse(null);
     }
 
 }

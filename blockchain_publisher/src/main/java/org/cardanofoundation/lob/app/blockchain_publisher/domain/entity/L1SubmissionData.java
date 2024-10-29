@@ -5,6 +5,8 @@ import jakarta.persistence.Enumerated;
 import lombok.*;
 import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -31,10 +33,12 @@ public class L1SubmissionData {
 
     @Nullable
     @Enumerated(STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private BlockchainPublishStatus publishStatus;
 
     @Nullable
     @Enumerated(STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private FinalityScore finalityScore;
 
     public Optional<String> getTransactionHash() {

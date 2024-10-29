@@ -1,7 +1,113 @@
+CREATE TYPE accounting_core_ledger_dispatch_status_type AS ENUM (
+    'NOT_DISPATCHED',       -- not dispatched to blockchain(s) yet
+    'MARK_DISPATCH',        -- acking that we stored in the database of blockchain publisher (marked for dispatch)
+    'DISPATCHED',           -- dispatched to blockchain(s) - tx hash
+    'COMPLETED',            -- tx hash is ready and provided and in addition we have decent finality score to consider it completed
+    'FINALIZED'             -- finalised on blockchain(s) - tx hash (12 hours)
+);
+
+CREATE TYPE accounting_core_transaction_status_type AS ENUM (
+    'OK',
+    'NOK'
+);
+
+CREATE TYPE accounting_core_reconcilation_accounting_core_source_type AS ENUM (
+    'OK',
+    'NOK'
+);
+
+CREATE TYPE accounting_core_tx_validation_status_type AS ENUM (
+    'VALIDATED',
+    'FAILED'
+);
+
+CREATE TYPE accounting_core_counter_party_type AS ENUM (
+    'EMPLOYEE',
+    'VENDOR',
+    'DONOR',
+    'CLIENT'
+);
+
+CREATE TYPE accounting_core_transaction_type AS ENUM (
+    'CardCharge',
+    'VendorBill',
+    'CardRefund',
+    'Journal',
+    'FxRevaluation',
+    'Transfer',
+    'CustomerPayment',
+    'ExpenseReport',
+    'VendorPayment',
+    'BillCredit'
+);
+
+CREATE TYPE accounting_core_reconcilation_rejection_code_type AS ENUM (
+    'SOURCE_RECONCILATION_FAIL',  -- transaction version will have to be ignored because it cannot be extracted again
+    'SINK_RECONCILATION_FAIL',    -- blockchain is missing a transaction or it is not finalized yet
+    'TX_NOT_IN_ERP',              -- transaction is not in ERP, typically this is a technical error
+    'TX_NOT_IN_LOB'               -- transaction is not in LOB, typically it has not been imported yet at all
+);
+
+CREATE TYPE accounting_core_reconcilation_status_type AS ENUM (
+    'CREATED',         -- reconcilation is created but not started yet
+    'STARTED',         -- reconcilation is started and first chunk event is sent
+    'FAILED',          -- reconcilation is failed
+    'COMPLETED'        -- reconcilation is completed, we see this on the last chunk event sent
+);
+
+CREATE TYPE accounting_core_transaction_violation_code_type AS ENUM (
+    'DOCUMENT_MUST_BE_PRESENT',
+    'TX_CANNOT_BE_ALTERED',
+    'ACCOUNT_CODE_CREDIT_IS_EMPTY',
+    'ACCOUNT_CODE_DEBIT_IS_EMPTY',
+    'TX_TECHNICAL_FAILURE',
+    'LCY_BALANCE_MUST_BE_ZERO',
+    'FCY_BALANCE_MUST_BE_ZERO',
+    'AMOUNT_LCY_IS_ZERO',
+    'AMOUNT_FCY_IS_ZERO',
+    'ALL_TX_ITEMS_ERASED',
+    'VAT_DATA_NOT_FOUND',
+    'CORE_CURRENCY_NOT_FOUND',
+    'CURRENCY_DATA_NOT_FOUND',
+    'COST_CENTER_DATA_NOT_FOUND',
+    'PROJECT_DATA_NOT_FOUND',
+    'CHART_OF_ACCOUNT_NOT_FOUND',
+    'EVENT_DATA_NOT_FOUND',
+    'ORGANISATION_DATA_NOT_FOUND',
+    'JOURNAL_DUMMY_ACCOUNT_MISSING',
+    'TX_VERSION_CONFLICT_TX_NOT_MODIFIABLE'
+);
+
+CREATE TYPE accounting_core_source_type AS ENUM (
+    'ERP',
+    'LOB'
+);
+
+CREATE TYPE accounting_core_transaction_batch_status_type AS ENUM (
+    'CREATED',        -- job created
+    'PROCESSING',     -- job is being processed
+    'FINISHED',       -- all transactions processed and valid transactions are dispatched to the blockchain(s)
+    'COMPLETE',       -- all VALID transactions that passed business validation are settled to the blockchain(s)
+    'FINALIZED',      -- all transactions are settled and the transactions are finalized on the blockchain(s)
+    'FAILED'          -- job failed due to e.g. fatal error in the adapter layer
+);
+
+CREATE TYPE accounting_core_severity_type AS ENUM (
+    'WARN',
+    'ERROR'
+);
+
+CREATE TYPE accounting_core_tx_item_validation_status_type AS ENUM (
+    'OK',
+    'ERASED_SELF_PAYMENT',
+    'ERASED_SUM_APPLIED',
+    'ERASED_ZERO_BALANCE'
+);
+
 CREATE TABLE IF NOT EXISTS accounting_core_transaction_batch (
    transaction_batch_id CHAR(64) NOT NULL,
 
-   status VARCHAR(255) NOT NULL,
+   status accounting_core_transaction_batch_status_type NOT NULL,
 
    stats_total_transactions_count INT,
    stats_processed_transactions_count INT,
@@ -37,7 +143,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_batch (
 CREATE TABLE IF NOT EXISTS accounting_core_transaction_batch_aud (
     transaction_batch_id CHAR(64) NOT NULL,
 
-    status VARCHAR(255) NOT NULL,
+    status accounting_core_transaction_batch_status_type NOT NULL,
 
     stats_total_transactions_count INT,
     stats_processed_transactions_count INT,
@@ -81,7 +187,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_batch_aud (
 
 CREATE TABLE IF NOT EXISTS accounting_core_transaction (
    transaction_id CHAR(64) NOT NULL,
-   type VARCHAR(255) NOT NULL,
+   type accounting_core_transaction_type NOT NULL,
    batch_id CHAR(64) NOT NULL,
 
    FOREIGN KEY (batch_id) REFERENCES accounting_core_transaction_batch (transaction_batch_id),
@@ -98,19 +204,19 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction (
 
    reconcilation_id CHAR(64),
 
-   reconcilation_source VARCHAR(255),
-   reconcilation_sink VARCHAR(255),
-   reconcilation_final_status VARCHAR(255),
+   reconcilation_source accounting_core_reconcilation_accounting_core_source_type,
+   reconcilation_sink accounting_core_reconcilation_accounting_core_source_type,
+   reconcilation_final_status accounting_core_reconcilation_accounting_core_source_type,
 
    user_comment VARCHAR(255),
 
-   automated_validation_status VARCHAR(255) NOT NULL,
+   automated_validation_status accounting_core_tx_validation_status_type NOT NULL,
 
    transaction_approved BOOLEAN NOT NULL,
    ledger_dispatch_approved BOOLEAN NOT NULL,
-   ledger_dispatch_status VARCHAR(255) NOT NULL,
+   ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
 
-   overall_status VARCHAR(255) NOT NULL,
+   overall_status accounting_core_transaction_status_type NOT NULL,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
@@ -122,7 +228,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction (
 
 CREATE TABLE IF NOT EXISTS accounting_core_transaction_aud (
    transaction_id CHAR(64) NOT NULL,
-   type VARCHAR(255) NOT NULL,
+   type accounting_core_transaction_type NOT NULL,
    batch_id CHAR(64) NOT NULL,
 
    FOREIGN KEY (batch_id) REFERENCES accounting_core_transaction_batch (transaction_batch_id),
@@ -139,19 +245,19 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_aud (
 
    reconcilation_id CHAR(64),
 
-   reconcilation_source VARCHAR(255),
-   reconcilation_sink VARCHAR(255),
-   reconcilation_final_status VARCHAR(255),
+   reconcilation_source accounting_core_reconcilation_accounting_core_source_type,
+   reconcilation_sink accounting_core_reconcilation_accounting_core_source_type,
+   reconcilation_final_status accounting_core_reconcilation_accounting_core_source_type,
 
    user_comment VARCHAR(255),
 
-   automated_validation_status VARCHAR(255) NOT NULL,
+   automated_validation_status accounting_core_tx_validation_status_type NOT NULL,
 
    transaction_approved BOOLEAN NOT NULL,
    ledger_dispatch_approved BOOLEAN NOT NULL,
-   ledger_dispatch_status VARCHAR(255) NOT NULL,
+   ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
 
-   overall_status VARCHAR(255) NOT NULL,
+   overall_status accounting_core_transaction_status_type NOT NULL,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
@@ -174,11 +280,11 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_aud (
 CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation (
    transaction_id CHAR(64) NOT NULL,
    tx_item_id CHAR(64),
-   code VARCHAR(255) NOT NULL,
+   code accounting_core_transaction_violation_code_type NOT NULL,
 
-   severity VARCHAR(255) NOT NULL,
-   sub_code VARCHAR(255) NOT NULL,
-   source VARCHAR(255) NOT NULL,
+   severity accounting_core_severity_type NOT NULL,
+   sub_code VARCHAR(255), -- NILLABLE
+   source accounting_core_source_type NOT NULL,
    processor_module VARCHAR(255) NOT NULL,
    detail_bag jsonb NOT NULL,
 
@@ -191,11 +297,11 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation (
 CREATE TABLE IF NOT EXISTS accounting_core_transaction_violation_aud (
     transaction_id CHAR(64) NOT NULL,
     tx_item_id CHAR(64),
-    code VARCHAR(255) NOT NULL,
+    code accounting_core_transaction_violation_code_type NOT NULL,
 
-    severity VARCHAR(255) NOT NULL,
-    sub_code VARCHAR(255) NOT NULL,
-    source VARCHAR(255) NOT NULL,
+    severity accounting_core_severity_type NOT NULL,
+    sub_code VARCHAR(255), -- NILLABLE
+    source accounting_core_source_type NOT NULL,
     processor_module VARCHAR(255) NOT NULL,
     detail_bag JSONB NOT NULL,
 
@@ -293,7 +399,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item (
    document_vat_rate DECIMAL(12, 8),
 
    document_counterparty_customer_code VARCHAR(255),
-   document_counterparty_type VARCHAR(255),
+   document_counterparty_type accounting_core_counter_party_type,
    document_counterparty_name VARCHAR(255),
 
    project_customer_code VARCHAR(255),
@@ -304,7 +410,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item (
    cost_center_external_customer_code VARCHAR(255),
    cost_center_name VARCHAR(255),
 
-   status VARCHAR(255) NOT NULL,
+   status accounting_core_tx_item_validation_status_type NOT NULL,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
@@ -348,7 +454,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item_aud (
    document_vat_rate DECIMAL(12, 8),
 
    document_counterparty_customer_code VARCHAR(255),
-   document_counterparty_type VARCHAR(255),
+   document_counterparty_type accounting_core_counter_party_type,
    document_counterparty_name VARCHAR(255),
 
    project_customer_code VARCHAR(255),
@@ -358,7 +464,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item_aud (
    cost_center_customer_code VARCHAR(255),
    cost_center_external_customer_code VARCHAR(255),
    cost_center_name VARCHAR(255),
-   status VARCHAR(255) NOT NULL,
+   status accounting_core_tx_item_validation_status_type,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
@@ -383,7 +489,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation (
     organisation_id CHAR(64) NOT NULL,
     from_date DATE,
     to_date DATE,
-    status VARCHAR(255) NOT NULL,
+    status accounting_core_reconcilation_status_type NOT NULL,
 
     processed_tx_count INT NOT NULL,
 
@@ -404,7 +510,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_aud (
     organisation_id CHAR(64) NOT NULL,
     from_date DATE,
     to_date DATE,
-    status VARCHAR(255) NOT NULL,
+    status accounting_core_reconcilation_status_type NOT NULL,
 
     processed_tx_count INT NOT NULL,
 
@@ -434,11 +540,11 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_aud (
 CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation (
     reconcilation_id CHAR(64) NOT NULL,
     transaction_id CHAR(64) NOT NULL,
-    rejection_code VARCHAR(255) NOT NULL,
+    rejection_code accounting_core_reconcilation_rejection_code_type NOT NULL,
 
     transaction_internal_number VARCHAR(255) NOT NULL,
     transaction_entry_date DATE NOT NULL,
-    transaction_type VARCHAR(255) NOT NULL,
+    transaction_type accounting_core_transaction_type NOT NULL,
     amount_lcy_sum DECIMAL(100, 8) NOT NULL,
 
     source_diff jsonb,
@@ -452,10 +558,10 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation (
 CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation_aud (
     reconcilation_id CHAR(64) NOT NULL,
     transaction_id CHAR(64) NOT NULL,
-    rejection_code VARCHAR(255) NOT NULL,
+    rejection_code accounting_core_reconcilation_rejection_code_type NOT NULL,
     transaction_internal_number VARCHAR(255) NOT NULL,
     transaction_entry_date DATE NOT NULL,
-    transaction_type VARCHAR(255) NOT NULL,
+    transaction_type accounting_core_transaction_type NOT NULL,
     amount_lcy_sum DECIMAL(100, 8) NOT NULL,
     source_diff JSONB,
 

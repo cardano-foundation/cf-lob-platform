@@ -1,3 +1,29 @@
+CREATE TYPE blockchain_publisher_blockchain_publish_status_type AS ENUM (
+    'STORED',              -- transaction is stored
+    'SUBMITTED',           -- submitted and sitting in the mem pool for now
+    'VISIBLE_ON_CHAIN',    -- confirmed to be visible on-chain
+    'COMPLETED',           -- confirmed on-chain and e.g. 5 - 40 blocks passed
+    'ROLLBACKED',          -- signal to resubmit the transaction since it disappeared from on-chain
+    'FINALIZED'            -- finalized on blockchain(s) - tx hash (12 hours)
+);
+
+CREATE TYPE blockchain_publisher_finality_score_type AS ENUM (
+    'VERY_LOW',
+    'LOW',
+    'MEDIUM',
+    'HIGH',
+    'VERY_HIGH',
+    'ULTRA_HIGH',
+    'FINAL'
+);
+
+CREATE TYPE blockchain_publisher_counter_party_type AS ENUM (
+    'EMPLOYEE',
+    'VENDOR',
+    'DONOR',
+    'CLIENT'
+);
+
 CREATE TABLE blockchain_publisher_transaction (
    transaction_id CHAR(64) NOT NULL,
    organisation_id VARCHAR(255) NOT NULL, -- consider moving this to accounting_core_batch
@@ -13,11 +39,11 @@ CREATE TABLE blockchain_publisher_transaction (
    accounting_period CHAR(7) NOT NULL,
    entry_date DATE NOT NULL,
 
-   l1_finality_score VARCHAR(255),
    l1_transaction_hash CHAR(64),
    l1_absolute_slot BIGINT,
    l1_creation_slot BIGINT,
-   l1_publish_status VARCHAR(255),
+   l1_publish_status blockchain_publisher_blockchain_publish_status_type,
+   l1_finality_score blockchain_publisher_finality_score_type,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
@@ -52,7 +78,7 @@ CREATE TABLE blockchain_publisher_transaction_item (
    document_currency_id VARCHAR(255) NOT NULL,
    document_currency_customer_code VARCHAR(255),
    document_counterparty_customer_code VARCHAR(255),
-   document_counterparty_type VARCHAR(255),
+   document_counterparty_type blockchain_publisher_counter_party_type,
 
    document_vat_customer_code VARCHAR(255),
    document_vat_rate DECIMAL(12, 8),

@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationStatus;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -67,6 +69,7 @@ public class ReconcilationEntity extends CommonEntity implements Persistable<Str
     @Column(name = "status")
     @Getter
     @Setter
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private ReconcilationStatus status = ReconcilationStatus.STARTED;
 
     @ElementCollection(fetch = FetchType.EAGER)

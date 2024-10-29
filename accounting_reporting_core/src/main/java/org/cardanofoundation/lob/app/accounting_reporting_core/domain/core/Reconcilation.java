@@ -2,6 +2,8 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
 import jakarta.persistence.Enumerated;
 import lombok.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -18,14 +20,17 @@ public class Reconcilation {
 
     @Enumerated(STRING)
     @Nullable
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private ReconcilationCode source;
 
     @Enumerated(STRING)
     @Nullable
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private ReconcilationCode sink;
 
     @Enumerated(STRING)
     @Nullable
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private ReconcilationCode finalStatus;
 
     public Optional<ReconcilationCode> getSource() {
