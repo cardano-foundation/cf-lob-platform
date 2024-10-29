@@ -1,5 +1,14 @@
 --CREATE SEQUENCE  IF NOT EXISTS netsuite_adapter_ingestion START WITH 1 INCREMENT BY 1;
 
+CREATE TYPE code_mapping_type AS ENUM (
+    'ORGANISATION',
+    'VAT',
+    'PROJECT',
+    'CURRENCY',
+    'COST_CENTER',
+    'CHART_OF_ACCOUNT'
+);
+
 CREATE TABLE netsuite_adapter_ingestion (
    id CHAR(64) NOT NULL,
    created_by VARCHAR(255),
@@ -16,7 +25,7 @@ CREATE TABLE netsuite_adapter_ingestion (
 CREATE TABLE netsuite_adapter_code_mapping (
    mapping_id CHAR(64) NOT NULL,
    internal_id BIGINT NOT NULL,
-   code_type VARCHAR(255) NOT NULL,
+   code_type code_mapping_type NOT NULL,
    customer_code VARCHAR(255) NOT NULL,
 
    created_by VARCHAR(255),

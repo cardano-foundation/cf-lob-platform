@@ -6,6 +6,8 @@ import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
 import org.javers.core.metamodel.annotation.DiffIgnore;
 import org.springframework.data.domain.Persistable;
@@ -60,6 +62,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     @LOBVersionSourceRelevant
     @Getter
     @Setter
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private TransactionType transactionType;
 
     @Column(name = "entry_date", nullable = false)
@@ -70,8 +73,10 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
 
     @Column(name = "ledger_dispatch_status", nullable = false)
     @Enumerated(STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Getter
     @Setter
+    // https://www.baeldung.com/java-enums-jpa-postgresql
     private LedgerDispatchStatus ledgerDispatchStatus = NOT_DISPATCHED;
 
     @Embedded
@@ -88,6 +93,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
 
     @Column(name = "automated_validation_status", nullable = false)
     @Enumerated(STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Getter
     @Setter
     private TxValidationStatus automatedValidationStatus = TxValidationStatus.VALIDATED;
@@ -119,6 +125,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     @DiffIgnore
     @Getter
     @Setter
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private TransactionStatus overallStatus;
 
     @Embedded
@@ -136,7 +143,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     @Audited
     @AttributeOverrides({
             @AttributeOverride(name = "code", column = @Column(name = "code", nullable = false)),
-            @AttributeOverride(name = "subCode", column = @Column(name = "sub_code", nullable = false)),
+            @AttributeOverride(name = "subCode", column = @Column(name = "sub_code")),
             @AttributeOverride(name = "type", column = @Column(name = "type", nullable = false)),
             @AttributeOverride(name = "txItemId", column = @Column(name = "tx_item_id")),
             @AttributeOverride(name = "source", column = @Column(name = "source", nullable = false)),

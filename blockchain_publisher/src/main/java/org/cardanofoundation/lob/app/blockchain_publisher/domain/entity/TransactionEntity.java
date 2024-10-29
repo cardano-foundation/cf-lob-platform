@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.springframework.data.domain.Persistable;
 
 import javax.annotation.Nullable;
@@ -50,6 +52,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
 
     @Column(name = "type", nullable = false)
     @Enumerated(STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private TransactionType transactionType;
 
     @Column(name = "entry_date", nullable = false)

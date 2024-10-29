@@ -4,6 +4,8 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
 
 import javax.annotation.Nullable;
@@ -25,6 +27,7 @@ public class Counterparty {
 
     @Enumerated(STRING)
     @LOBVersionSourceRelevant
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type type;
 
     @Nullable

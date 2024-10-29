@@ -27,7 +27,9 @@ public class Transaction {
     private String id;
 
     @LOBVersionSourceRelevant
-    @Size(min = 1, max =  255) @NotBlank String internalTransactionNumber;
+    @Getter
+    @Size(min = 1, max =  255) @NotBlank
+    private String internalTransactionNumber;
 
     @NotBlank
     private String batchId;

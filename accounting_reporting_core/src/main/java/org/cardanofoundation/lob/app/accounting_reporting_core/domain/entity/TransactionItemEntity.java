@@ -7,6 +7,8 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Opera
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -129,6 +131,7 @@ public class TransactionItemEntity extends CommonEntity implements Persistable<S
     @Getter
     @Setter
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private TxItemValidationStatus status = TxItemValidationStatus.OK;
 
     public void clearAccountCodeCredit() {
