@@ -27,6 +27,8 @@ public class TransactionView {
 
     private TransactionType transactionType;
 
+    private DataSourceView dataSource;
+
     private TransactionStatus status = TransactionStatus.OK;
 
     private LedgerDispatchStatusView statistic = LedgerDispatchStatusView.PENDING;
