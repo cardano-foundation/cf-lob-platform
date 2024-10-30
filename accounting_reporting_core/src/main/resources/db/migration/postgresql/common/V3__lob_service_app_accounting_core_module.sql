@@ -104,6 +104,34 @@ CREATE TYPE accounting_core_tx_item_validation_status_type AS ENUM (
     'ERASED_ZERO_BALANCE'
 );
 
+CREATE TYPE accounting_core_report_type AS ENUM (
+    'BALANCE_SHEET',
+    'INCOME_STATEMENT'
+);
+
+CREATE TYPE accounting_core_report_rollup_period_type AS ENUM (
+    'YEARLY',
+    'QUATERLY',
+    'MONTHLY'
+);
+
+CREATE TYPE accounting_core_report_mode_type AS ENUM (
+    'USER',
+    'SYSTEM'
+);
+
+-- ISO_4217:CHF or ISO_24165:BSV:2L8HS2MNP, ISO_24165:ADA:HWGL1C2CK, etc
+CREATE DOMAIN accounting_core_currency_id_type AS VARCHAR(25)
+    CHECK (VALUE ~ '^(ISO_4217:[A-Z]{3})|(ISO_24165:[A-Z]{3}:[A-Z0-9]+)$');
+
+-- ISO 3166-1 alpha-2 country code, e.g. CH, DE, US, etc
+CREATE DOMAIN accounting_core_country_code_type AS CHAR(2)
+    CHECK (VALUE ~ '^[A-Z]{2}$');
+
+-- YYYY-MM, e.g. 2021-01
+CREATE DOMAIN accounting_core_accounting_period_type AS CHAR(7)
+    CHECK (VALUE ~ '^[0-9]{4}-[0-9]{2}$');
+
 CREATE TABLE IF NOT EXISTS accounting_core_transaction_batch (
    transaction_batch_id CHAR(64) NOT NULL,
 
@@ -193,14 +221,14 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction (
    FOREIGN KEY (batch_id) REFERENCES accounting_core_transaction_batch (transaction_batch_id),
 
    entry_date DATE NOT NULL,
-   accounting_period CHAR(7) NOT NULL,
+   accounting_period accounting_core_accounting_period_type NOT NULL,
    transaction_internal_number VARCHAR(255) NOT NULL,
 
    organisation_id CHAR(64) NOT NULL,
    organisation_name VARCHAR(255),
-   organisation_country_code VARCHAR(255),
+   organisation_country_code accounting_core_country_code_type,
    organisation_tax_id_number VARCHAR(255),
-   organisation_currency_id VARCHAR(255),
+   organisation_currency_id accounting_core_currency_id_type,
 
    reconcilation_id CHAR(64),
 
@@ -212,8 +240,8 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction (
 
    automated_validation_status accounting_core_tx_validation_status_type NOT NULL,
 
-   transaction_approved BOOLEAN NOT NULL,
-   ledger_dispatch_approved BOOLEAN NOT NULL,
+   transaction_approved BOOLEAN NOT NULL DEFAULT FALSE,
+   ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
    ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
 
    overall_status accounting_core_transaction_status_type NOT NULL,
@@ -234,14 +262,14 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_aud (
    FOREIGN KEY (batch_id) REFERENCES accounting_core_transaction_batch (transaction_batch_id),
 
    entry_date DATE NOT NULL,
-   accounting_period CHAR(7) NOT NULL,
+   accounting_period accounting_core_accounting_period_type NOT NULL,
    transaction_internal_number VARCHAR(255) NOT NULL,
 
    organisation_id CHAR(64) NOT NULL,
    organisation_name VARCHAR(255),
-   organisation_country_code VARCHAR(255),
+   organisation_country_code accounting_core_country_code_type,
    organisation_tax_id_number VARCHAR(255),
-   organisation_currency_id VARCHAR(255),
+   organisation_currency_id accounting_core_currency_id_type,
 
    reconcilation_id CHAR(64),
 
@@ -253,8 +281,8 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_aud (
 
    automated_validation_status accounting_core_tx_validation_status_type NOT NULL,
 
-   transaction_approved BOOLEAN NOT NULL,
-   ledger_dispatch_approved BOOLEAN NOT NULL,
+   transaction_approved BOOLEAN NOT NULL DEFAULT FALSE,
+   ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
    ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
 
    overall_status accounting_core_transaction_status_type NOT NULL,
@@ -388,12 +416,12 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item (
    account_event_code VARCHAR(255),
    account_event_name VARCHAR(255),
 
-   amount_fcy DECIMAL(100, 8) NOT NULL,
-   amount_lcy DECIMAL(100, 8) NOT NULL,
+   amount_fcy DECIMAL(30, 8) NOT NULL,
+   amount_lcy DECIMAL(30, 8) NOT NULL,
 
    document_num VARCHAR(255),
    document_currency_customer_code VARCHAR(255),
-   document_currency_id VARCHAR(255),
+   document_currency_id accounting_core_currency_id_type,
 
    document_vat_customer_code VARCHAR(255),
    document_vat_rate DECIMAL(12, 8),
@@ -443,12 +471,12 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item_aud (
    account_event_code VARCHAR(255),
    account_event_name VARCHAR(255),
 
-   amount_fcy DECIMAL(100, 8) NOT NULL,
-   amount_lcy DECIMAL(100, 8) NOT NULL,
+   amount_fcy DECIMAL(30, 8) NOT NULL,
+   amount_lcy DECIMAL(30, 8) NOT NULL,
 
    document_num VARCHAR(255),
    document_currency_customer_code VARCHAR(255),
-   document_currency_id VARCHAR(255),
+   document_currency_id accounting_core_currency_id_type,
 
    document_vat_customer_code VARCHAR(255),
    document_vat_rate DECIMAL(12, 8),
@@ -545,7 +573,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation (
     transaction_internal_number VARCHAR(255) NOT NULL,
     transaction_entry_date DATE NOT NULL,
     transaction_type accounting_core_transaction_type NOT NULL,
-    amount_lcy_sum DECIMAL(100, 8) NOT NULL,
+    amount_lcy_sum DECIMAL(30, 8) NOT NULL,
 
     source_diff jsonb,
 
@@ -562,7 +590,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation_aud (
     transaction_internal_number VARCHAR(255) NOT NULL,
     transaction_entry_date DATE NOT NULL,
     transaction_type accounting_core_transaction_type NOT NULL,
-    amount_lcy_sum DECIMAL(100, 8) NOT NULL,
+    amount_lcy_sum DECIMAL(30, 8) NOT NULL,
     source_diff JSONB,
 
     -- Special columns for audit tables
@@ -576,6 +604,175 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation_aud (
     -- Foreign Key referencing the original reconciliation table
     FOREIGN KEY (reconcilation_id) REFERENCES accounting_core_reconcilation (reconcilation_id) MATCH SIMPLE
     ON UPDATE NO ACTION ON DELETE NO ACTION,
+
+    -- Foreign Key to revision information table
+    FOREIGN KEY (rev) REFERENCES revinfo (rev) MATCH SIMPLE
+    ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE table accounting_core_report (
+    report_id CHAR(64) NOT NULL,
+
+    organisation_id CHAR(64) NOT NULL,
+    organisation_name VARCHAR(255) NOT NULL,
+    organisation_country_code accounting_core_country_code_type NOT NULL,
+    organisation_tax_id_number VARCHAR(255) NOT NULL,
+    organisation_currency_id accounting_core_currency_id_type NOT NULL,
+
+    type accounting_core_report_type NOT NULL,
+    rollup_period accounting_core_report_rollup_period_type NOT NULL,
+    year SMALLINT CHECK (year BETWEEN 1970 AND 4000) NOT NULL,
+    period SMALLINT CHECK (period BETWEEN 1 AND 12) NOT NULL,
+    date DATE NOT NULL, -- report date
+
+    -- USER or SYSTEM report
+    mode accounting_core_report_mode_type NOT NULL,
+
+    -- main data fields
+
+    -- Balance Sheet::Assets
+    data_balance_sheet__assets_non_current_property_plant_equipment DECIMAL(30, 8),
+    data_balance_sheet__assets_non_current_intangible_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_non_current_investments DECIMAL(30, 8),
+    data_balance_sheet__assets_non_current_financial_assets DECIMAL(30, 8),
+
+    data_balance_sheet__assets_current_prepayments_and_other_short_term_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_current_other_receivables DECIMAL(30, 8),
+    data_balance_sheet__assets_current_crypto_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_current_cash_and_cash_equivalents DECIMAL(30, 8),
+
+    -- Balance Sheet::Liabilities
+    data_balance_sheet__liabilities_non_current_provisions DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_trade_accounts_payables DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_other_current_liabilities DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_accruals_and_short_term_provisions DECIMAL(30, 8),
+
+    -- Balance Sheet::Capital
+    data_balance_sheet__capital_capital DECIMAL(30, 8),
+    data_balance_sheet__capital_retained_earnings DECIMAL(30, 8),
+    data_balance_sheet__capital_free_foundation_capital DECIMAL(30, 8),
+
+    -- Income Statement::Revenues
+    data_income_statement__revenues_other_income DECIMAL(30, 8),
+    data_income_statement__revenues_build_long_term_provision DECIMAL(30, 8),
+
+    -- Income Statement::COGS (Cost of Goods Sold)
+    data_income_statement__cogs_cost_providing_services DECIMAL(30, 8),
+
+    -- Income Statement::Operating Expenses
+    data_income_statement__operating_expenses_personnel_expenses DECIMAL(30, 8),
+    data_income_statement__operating_expenses_general_administrative_expenses DECIMAL(30, 8),
+    data_income_statement__operating_expenses_depreciation_impairment_tangible_assets DECIMAL(30, 8),
+    data_income_statement__operating_expenses_amortization_intangible_assets DECIMAL(30, 8),
+
+    -- Income Statement::Operating Profit
+    data_income_statement__operating_profit_finance_income DECIMAL(30, 8),
+    data_income_statement__operating_profit_finance_expenses DECIMAL(30, 8),
+    data_income_statement__operating_profit_realised_gains_sale_cryptocurrencies DECIMAL(30, 8),
+    data_income_statement__operating_profit_staking_rewards_income DECIMAL(30, 8),
+    data_income_statement__operating_profit_net_income_options_sale DECIMAL(30, 8),
+    data_income_statement__operating_profit_extraordinary_expenses DECIMAL(30, 8),
+
+    -- Income Statement::Tax Expenses
+    data_income_statement__tax_expenses_income_tax_expense DECIMAL(30, 8),
+
+    -- end of main data fields
+
+   report_approved BOOLEAN NOT NULL DEFAULT FALSE,
+   ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
+   ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
+
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+
+    PRIMARY KEY (report_id)
+);
+
+CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
+    report_id CHAR(64) NOT NULL,
+
+    organisation_id CHAR(64) NOT NULL,
+    organisation_name VARCHAR(255) NOT NULL,
+    organisation_country_code accounting_core_country_code_type NOT NULL,
+    organisation_tax_id_number VARCHAR(255) NOT NULL,
+    organisation_currency_id accounting_core_currency_id_type NOT NULL,
+
+    type accounting_core_report_type NOT NULL,
+    rollup_period accounting_core_report_rollup_period_type NOT NULL,
+    year SMALLINT CHECK (year BETWEEN 1970 AND 4000) NOT NULL,
+    period SMALLINT CHECK (period BETWEEN 1 AND 12) NOT NULL,
+    date DATE NOT NULL, -- Report date
+
+    mode accounting_core_report_mode_type NOT NULL, -- USER or SYSTEM report
+
+    -- Main data fields
+
+    -- Balance Sheet::Assets
+    data_balance_sheet__assets_non_current_property_plant_equipment DECIMAL(30, 8),
+    data_balance_sheet__assets_non_current_intangible_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_non_current_investments DECIMAL(30, 8),
+    data_balance_sheet__assets_non_current_financial_assets DECIMAL(30, 8),
+
+    data_balance_sheet__assets_current_prepayments_and_other_short_term_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_current_other_receivables DECIMAL(30, 8),
+    data_balance_sheet__assets_current_crypto_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_current_cash_and_cash_equivalents DECIMAL(30, 8),
+
+    -- Balance Sheet::Liabilities
+    data_balance_sheet__liabilities_non_current_provisions DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_trade_accounts_payables DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_other_current_liabilities DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_accruals_and_short_term_provisions DECIMAL(30, 8),
+
+    -- Balance Sheet::Capital
+    data_balance_sheet__capital_capital DECIMAL(30, 8),
+    data_balance_sheet__capital_retained_earnings DECIMAL(30, 8),
+    data_balance_sheet__capital_free_foundation_capital DECIMAL(30, 8),
+
+    -- Income Statement::Revenues
+    data_income_statement__revenues_other_income DECIMAL(30, 8),
+    data_income_statement__revenues_build_long_term_provision DECIMAL(30, 8),
+
+    -- Income Statement::COGS (Cost of Goods Sold)
+    data_income_statement__cogs_cost_providing_services DECIMAL(30, 8),
+
+    -- Income Statement::Operating Expenses
+    data_income_statement__operating_expenses_personnel_expenses DECIMAL(30, 8),
+    data_income_statement__operating_expenses_general_administrative_expenses DECIMAL(30, 8),
+    data_income_statement__operating_expenses_depreciation_impairment_tangible_assets DECIMAL(30, 8),
+    data_income_statement__operating_expenses_amortization_intangible_assets DECIMAL(30, 8),
+
+    -- Income Statement::Operating Profit
+    data_income_statement__operating_profit_finance_income DECIMAL(30, 8),
+    data_income_statement__operating_profit_finance_expenses DECIMAL(30, 8),
+    data_income_statement__operating_profit_realised_gains_sale_cryptocurrencies DECIMAL(30, 8),
+    data_income_statement__operating_profit_staking_rewards_income DECIMAL(30, 8),
+    data_income_statement__operating_profit_net_income_options_sale DECIMAL(30, 8),
+    data_income_statement__operating_profit_extraordinary_expenses DECIMAL(30, 8),
+
+    -- Income Statement::Tax Expenses
+    data_income_statement__tax_expenses_income_tax_expense DECIMAL(30, 8),
+
+    -- End of main data fields
+
+    report_approved BOOLEAN NOT NULL DEFAULT FALSE,
+    ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
+    ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
+
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+
+    -- Special columns for audit tables
+    rev INTEGER NOT NULL,
+    revtype SMALLINT NOT NULL,
+    ord INTEGER,
+
+    -- Primary Key for the audit table
+    CONSTRAINT pk_accounting_core_report_aud PRIMARY KEY (report_id, rev, revtype),
 
     -- Foreign Key to revision information table
     FOREIGN KEY (rev) REFERENCES revinfo (rev) MATCH SIMPLE

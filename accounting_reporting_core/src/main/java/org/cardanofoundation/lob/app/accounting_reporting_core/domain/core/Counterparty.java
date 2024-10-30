@@ -19,11 +19,9 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 public class Counterparty {
 
     @LOBVersionSourceRelevant
-    
     private @Size(min = 1, max =  255) @NotBlank String customerCode;
 
     @Builder.Default
-    
     private Type type = VENDOR;
 
     @Builder.Default
