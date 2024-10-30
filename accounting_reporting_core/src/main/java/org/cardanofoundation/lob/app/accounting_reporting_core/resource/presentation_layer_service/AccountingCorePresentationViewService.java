@@ -361,6 +361,7 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getTransactionInternalNumber(),
                 transactionEntity.getEntryDate(),
                 transactionEntity.getTransactionType(),
+                DataSourceView.NETSUITE,
                 transactionEntity.getOverallStatus(),
                 getTransactionDispatchStatus(transactionEntity),
                 transactionEntity.getAutomatedValidationStatus(),
