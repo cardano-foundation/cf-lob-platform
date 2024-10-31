@@ -12,6 +12,7 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationRejectionCodeRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReconcileResponseView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReconciliationResponseView;
@@ -66,13 +67,13 @@ public class AccountingCoreResourceReconciliation {
 
     @Operation(description = "Reconciliation Rejection Codes", responses = {
             @ApiResponse(content =
-                    {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReconcilationRejectionCode.class))}
+                    {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReconciliationRejectionCodeRequest.class))}
             )
     })
     @Tag(name = "Reconciliation", description = "Reconciliation API")
     @GetMapping(value = "/transactions-rejection-codes", produces = "application/json")
     public ResponseEntity<?> reconciliationRejectionCode() {
-        return ResponseEntity.ok().body(ReconcilationRejectionCode.values());
+        return ResponseEntity.ok().body(ReconciliationRejectionCodeRequest.values());
     }
 
 }

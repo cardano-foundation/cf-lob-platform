@@ -10,6 +10,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Trans
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationRejectionCodeRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,6 +33,8 @@ public class TransactionReconciliationTransactionsView {
 
     private TransactionType transactionType;
 
+    private DataSourceView dataSource;
+
     private Optional<TransactionStatus> status = Optional.empty();
 
     private Optional<LedgerDispatchStatusView> statistic = Optional.of(LedgerDispatchStatusView.PENDING);
@@ -52,7 +55,7 @@ public class TransactionReconciliationTransactionsView {
 
     private ReconciliationCodeView reconciliationFinalStatus = ReconciliationCodeView.NEVER;
 
-    private Set<ReconcilationRejectionCode> reconciliationRejectionCode = new LinkedHashSet<>();
+    private Set<ReconciliationRejectionCodeRequest> reconciliationRejectionCode = new LinkedHashSet<>();
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime reconciliationDate;
@@ -73,5 +76,6 @@ public class TransactionReconciliationTransactionsView {
             };
         }
     }
+
 
 }

@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationRejectionCodeRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -49,7 +50,7 @@ public class TransactionView {
 
     private ReconciliationCodeView reconciliationFinalStatus = ReconciliationCodeView.NEVER;
 
-    private Set<ReconcilationRejectionCode> reconciliationRejectionCode = new LinkedHashSet<>();
+    private Set<ReconciliationRejectionCodeRequest> reconciliationRejectionCode = new LinkedHashSet<>();
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime reconciliationDate;
