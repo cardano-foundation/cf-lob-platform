@@ -51,7 +51,7 @@ public class AccountingCorePresentationViewService {
 
     public ReconciliationResponseView allReconciliationTransaction(ReconciliationFilterRequest body) {
         val transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
-        if (body.getFilter().equals(ReconciliationFilterStatusRequest.UNRENCONCILED)) {
+        if (body.getFilter().equals(ReconciliationFilterStatusRequest.UNRECONCILED)) {
             val transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getLimit(), body.getPage()).stream()
                     .map(this::getReconciliationTransactionsSelector)
                     .collect(toSet());
@@ -59,12 +59,7 @@ public class AccountingCorePresentationViewService {
 
             return new ReconciliationResponseView(
                     searchTotal,
-                    new TransactionReconciliationStatisticView(
-                            (Long) transactionsStatistic[0],
-                            (Long) transactionsStatistic[1],
-                            (Long) transactionsStatistic[2],
-                            (Long) transactionsStatistic[0] + (Long) transactionsStatistic[1] + (Long) transactionsStatistic[2]
-                    ),
+                    getTransactionReconciliationStatistic(transactionsStatistic),
                     transactions
             );
         }
@@ -74,12 +69,7 @@ public class AccountingCorePresentationViewService {
 
         return new ReconciliationResponseView(
                 (long) transactions.size(),
-                new TransactionReconciliationStatisticView(
-                        (Long) transactionsStatistic[0],
-                        (Long) transactionsStatistic[1],
-                        (Long) transactionsStatistic[2],
-                        (Long) transactionsStatistic[0] + (Long) transactionsStatistic[1] + (Long) transactionsStatistic[2]
-                ),
+                getTransactionReconciliationStatistic(transactionsStatistic),
 
                 transactions
         );
@@ -107,7 +97,7 @@ public class AccountingCorePresentationViewService {
     public Optional<BatchView> batchDetail(String batchId) {
         return transactionBatchRepositoryGateway.findById(batchId).map(transactionBatchEntity -> {
                     val transactions = this.getTransaction(transactionBatchEntity);
-                    val statistic = this.getStatistics(transactions);
+                    val statistic = this.getBatchesStatistics(transactions);
                     val filteringParameters = this.getFilteringParameters(transactionBatchEntity.getFilteringParameters());
 
                     return new BatchView(
@@ -134,7 +124,7 @@ public class AccountingCorePresentationViewService {
                 .map(
                         transactionBatchEntity -> {
                             val transactions = this.getTransaction(transactionBatchEntity);
-                            val statistic = this.getStatistics(transactions);
+                            val statistic = this.getBatchesStatistics(transactions);
                             return new BatchView(
                                     transactionBatchEntity.getId(),
                                     transactionBatchEntity.getCreatedAt().toString(),
@@ -230,7 +220,7 @@ public class AccountingCorePresentationViewService {
         return BatchReprocessView.createSuccess(batchId);
     }
 
-    private BatchStatisticsView getStatistics(Set<TransactionView> transactions) {
+    private BatchStatisticsView getBatchesStatistics(Set<TransactionView> transactions) {
         val invalid = transactions.stream().filter(transactionView -> INVALID == transactionView.getStatistic()).count();
 
         val pending = transactions.stream().filter(transactionView -> PENDING == transactionView.getStatistic()).count();
@@ -277,6 +267,7 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getTransactionInternalNumber(),
                 transactionEntity.getEntryDate(),
                 transactionEntity.getTransactionType(),
+                DataSourceView.NETSUITE,
                 Optional.of(transactionEntity.getOverallStatus()),
                 Optional.of(getTransactionDispatchStatus(transactionEntity)),
                 Optional.of(transactionEntity.getAutomatedValidationStatus()),
@@ -297,7 +288,9 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getLastReconcilation().map(reconcilationEntity -> {
                     return reconcilationEntity.getViolations().stream()
                             .filter(reconcilationViolation -> reconcilationViolation.getTransactionId().equals(transactionEntity.getId()))
-                            .map(ReconcilationViolation::getRejectionCode)
+                            .map(reconcilationViolation -> {
+                                return ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode());
+                            })
                             .collect(toSet());
                 }).orElse(new LinkedHashSet<>()),
                 transactionEntity.getLastReconcilation().map(CommonEntity::getCreatedAt).orElse(null),
@@ -313,6 +306,7 @@ public class AccountingCorePresentationViewService {
                 reconcilationViolation.getTransactionInternalNumber(),
                 reconcilationViolation.getTransactionEntryDate(),
                 reconcilationViolation.getTransactionType(),
+                DataSourceView.NETSUITE,
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
@@ -323,7 +317,7 @@ public class AccountingCorePresentationViewService {
                 TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
                 TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
                 TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
-                Set.of(reconcilationViolation.getRejectionCode()),
+                Set.of(ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode())),
                 null,
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>()
@@ -337,6 +331,7 @@ public class AccountingCorePresentationViewService {
                 "",
                 LocalDate.now(),
                 TransactionType.CardCharge,
+                DataSourceView.NETSUITE,
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
@@ -382,7 +377,9 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getLastReconcilation().map(reconcilationEntity -> {
                     return reconcilationEntity.getViolations().stream()
                             .filter(reconcilationViolation -> reconcilationViolation.getTransactionId().equals(transactionEntity.getId()))
-                            .map(ReconcilationViolation::getRejectionCode)
+                            .map(reconcilationViolation -> {
+                                return ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode());
+                            })
                             .collect(toSet());
                 }).orElse(new LinkedHashSet<>()),
                 transactionEntity.getLastReconcilation().map(CommonEntity::getCreatedAt).orElse(null),
@@ -431,6 +428,22 @@ public class AccountingCorePresentationViewService {
         }
 
         return APPROVE;
+    }
+
+    private TransactionReconciliationStatisticView getTransactionReconciliationStatistic(Object transactionsStatistic) {
+
+        Object[] result = (Object[]) transactionsStatistic;
+        return new TransactionReconciliationStatisticView(
+                (Integer) ((Long) result[0]).intValue(),
+                (Integer) ((Long) result[1]).intValue(),
+                (Integer) ((Long) result[2]).intValue(),
+                (Integer) ((Long) result[3]).intValue(),
+                (Integer) ((Long) result[4]).intValue(),
+                (Long) result[5],
+                (Integer) ((Long) result[6]).intValue(),
+                (Long) result[7],
+                (Integer) (((Long) result[5]).intValue() + ((Long) result[6]).intValue() + ((Long) result[7]).intValue())
+        );
     }
 
     private Set<TransactionItemView> getTransactionItemView(TransactionEntity transaction) {

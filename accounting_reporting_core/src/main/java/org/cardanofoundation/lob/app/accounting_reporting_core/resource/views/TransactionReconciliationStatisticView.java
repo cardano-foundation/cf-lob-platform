@@ -13,14 +13,24 @@ import java.util.Set;
 @AllArgsConstructor
 public class TransactionReconciliationStatisticView {
 
+
+    private Integer missingInERP = 0;
+
+    private Integer inProcessing = 0;
+
+    private Integer newInERP = 0;
+
+    private Integer newVersionNotPublished = 0;
+
+    private Integer newVersion = 0;
+
     private Long OK = 0L;
 
-    private Long NOK = 0L;
+    private Integer NOK = 0;
 
     private Long NEVER = 0L;
 
-    private Long TOTAL = 0L;
-
+    private Integer TOTAL = 0;
 
 
 }

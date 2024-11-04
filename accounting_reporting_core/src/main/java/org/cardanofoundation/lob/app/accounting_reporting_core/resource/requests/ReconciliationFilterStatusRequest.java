@@ -2,9 +2,9 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.request
 
 public enum ReconciliationFilterStatusRequest {
 
-    RENCONCILED,
+    RECONCILED,
 
-    UNRENCONCILED,
+    UNRECONCILED,
 
     UNPROCESSED
 

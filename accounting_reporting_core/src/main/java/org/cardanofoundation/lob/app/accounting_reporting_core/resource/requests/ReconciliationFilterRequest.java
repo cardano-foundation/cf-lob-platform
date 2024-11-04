@@ -28,11 +28,11 @@ public class ReconciliationFilterRequest {
     @Schema(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
     private String organisationId;
 
-    @Schema(example = "UNRENCONCILED")
+    @Schema(example = "UNRECONCILED")
     private ReconciliationFilterStatusRequest filter;
 
-    @ArraySchema(arraySchema = @Schema(example = "[\"TX_NOT_IN_LOB\",\"SOURCE_RECONCILATION_FAIL\",\"SINK_RECONCILATION_FAIL\",\"TX_NOT_IN_ERP\"]"))
-    private Set<ReconcilationRejectionCode> reconciliationRejectionCode = new HashSet<>();
+    @ArraySchema(arraySchema = @Schema(example = "[\"MISSING_IN_ERP\",\"IN_PROCESSING\",\"NEW_IN_ERP\",\"NEW_VERSION_NOT_PUBLISHED\",\"NEW_VERSION\"]"))
+    private Set<ReconciliationRejectionCodeRequest> reconciliationRejectionCode = new HashSet<>();
 
     @JsonIgnore
     private Integer limit;
