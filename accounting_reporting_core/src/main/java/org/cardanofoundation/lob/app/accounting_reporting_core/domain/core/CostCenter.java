@@ -16,7 +16,6 @@ import java.util.Optional;
 public class CostCenter {
 
     @LOBVersionSourceRelevant
-    
     private @Size(min = 1, max =  255) String customerCode;
 
     @Builder.Default

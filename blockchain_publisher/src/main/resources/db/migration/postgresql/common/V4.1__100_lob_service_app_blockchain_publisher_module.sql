@@ -24,19 +24,43 @@ CREATE TYPE blockchain_publisher_counter_party_type AS ENUM (
     'CLIENT'
 );
 
+CREATE TYPE blockchain_publisher_transaction_type AS ENUM (
+    'CardCharge',
+    'VendorBill',
+    'CardRefund',
+    'Journal',
+    'FxRevaluation',
+    'Transfer',
+    'CustomerPayment',
+    'ExpenseReport',
+    'VendorPayment',
+    'BillCredit'
+);
+
+-- ISO_4217:CHF or ISO_24165:BSV:2L8HS2MNP, ISO_24165:ADA:HWGL1C2CK, etc
+CREATE DOMAIN blockchain_publisher_currency_id_type AS VARCHAR(25)
+    CHECK (VALUE ~ '^(ISO_4217:[A-Z]{3})|(ISO_24165:[A-Z]{3}:[A-Z0-9]+)$');
+
+-- ISO 3166-1 alpha-2 country code, e.g. CH, DE, US, etc
+CREATE DOMAIN blockchain_publisher_country_code_type AS CHAR(2)
+    CHECK (VALUE ~ '^[A-Z]{2}$');
+
+CREATE DOMAIN blockchain_publisher_accounting_period_type AS CHAR(7)
+    CHECK (VALUE ~ '^[0-9]{4}-[0-9]{2}$');
+
 CREATE TABLE blockchain_publisher_transaction (
    transaction_id CHAR(64) NOT NULL,
-   organisation_id VARCHAR(255) NOT NULL, -- consider moving this to accounting_core_batch
+   organisation_id CHAR(64) NOT NULL,
    internal_number VARCHAR(255) NOT NULL,
    batch_id CHAR(64) NOT NULL,
 
    organisation_name VARCHAR(255) NOT NULL,
    organisation_tax_id_number VARCHAR(255) NOT NULL,
-   organisation_country_code VARCHAR(2) NOT NULL,
-   organisation_currency_id VARCHAR(255) NOT NULL,
+   organisation_country_code blockchain_publisher_country_code_type NOT NULL,
+   organisation_currency_id blockchain_publisher_currency_id_type NOT NULL,
 
-   type VARCHAR(255) NOT NULL,
-   accounting_period CHAR(7) NOT NULL,
+   type blockchain_publisher_transaction_type NOT NULL,
+   accounting_period blockchain_publisher_accounting_period_type NOT NULL,
    entry_date DATE NOT NULL,
 
    l1_transaction_hash CHAR(64),
@@ -56,14 +80,13 @@ CREATE TABLE blockchain_publisher_transaction (
 
 CREATE TABLE blockchain_publisher_transaction_item (
    transaction_item_id CHAR(64) NOT NULL,
-
    transaction_id CHAR(64) NOT NULL,
 
    FOREIGN KEY (transaction_id) REFERENCES blockchain_publisher_transaction (transaction_id),
 
    fx_rate DECIMAL(12, 8) NOT NULL,
 
-   amount_fcy DECIMAL(100, 8) NOT NULL,
+   amount_fcy DECIMAL(30, 8) NOT NULL,
 
    account_event_code VARCHAR(255) NOT NULL,
    account_event_name VARCHAR(255) NOT NULL,
@@ -75,7 +98,7 @@ CREATE TABLE blockchain_publisher_transaction_item (
    cost_center_name VARCHAR(255),
 
    document_num VARCHAR(255),
-   document_currency_id VARCHAR(255) NOT NULL,
+   document_currency_id blockchain_publisher_currency_id_type,
    document_currency_customer_code VARCHAR(255),
    document_counterparty_customer_code VARCHAR(255),
    document_counterparty_type blockchain_publisher_counter_party_type,

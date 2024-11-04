@@ -86,7 +86,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
                 subqueryErp.select(transactionEntityRoot.get("id"));
                 Predicate whereErp = builder.and(
-                        builder.equal(transactionEntityRoot.get("violations").get("source"), builder.literal("ERP")),
+                        builder.equal(transactionEntityRoot.get("violations").get("source"), Source.ERP),
                         builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
                 );
                 subqueryErp.where(whereErp);
@@ -119,7 +119,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
                 subqueryErp.select(transactionEntityRoot.get("id"));
                 Predicate whereErp = builder.and(
-                        builder.equal(transactionEntityRoot.get("violations").get("source"), builder.literal("ERP")),
+                        builder.equal(transactionEntityRoot.get("violations").get("source"), Source.ERP),
                         builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
                 );
                 subqueryErp.where(whereErp);
@@ -128,7 +128,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 Root<TransactionEntity> transactionEntityRootLob = subqueryLob.from(TransactionEntity.class);
                 subqueryLob.select(transactionEntityRootLob.get("id"));
                 Predicate whereLob = builder.and(
-                        builder.equal(transactionEntityRootLob.get("violations").get("source"), builder.literal("LOB")),
+                        builder.equal(transactionEntityRootLob.get("violations").get("source"), Source.LOB),
                         builder.equal(transactionEntityRootLob.get("id"), transactionEntityJoin.get("id"))
                 );
                 subqueryLob.where(whereLob);
@@ -151,8 +151,8 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 subqueryErp.select(transactionEntityRoot.get("id"));
                 Predicate whereErp = builder.and(
                         builder.or(
-                                builder.equal(transactionEntityRoot.get("violations").get("source"), builder.literal("ERP")),
-                                builder.equal(transactionEntityRoot.get("violations").get("source"), builder.literal("LOB"))
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), Source.ERP),
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), Source.LOB)
                         ),
                         builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
                 );
@@ -183,8 +183,8 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 subqueryErp.select(transactionEntityRoot.get("id"));
                 Predicate whereErp = builder.and(
                         builder.or(
-                                builder.equal(transactionEntityRoot.get("violations").get("source"), builder.literal("ERP")),
-                                builder.equal(transactionEntityRoot.get("violations").get("source"), builder.literal("LOB"))
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), Source.ERP),
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), Source.LOB)
                         ),
                         builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
                 );
@@ -215,8 +215,8 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 subqueryErp.select(transactionEntityRoot.get("id"));
                 Predicate whereErp = builder.and(
                         builder.or(
-                                builder.equal(transactionEntityRoot.get("violations").get("source"), builder.literal("ERP")),
-                                builder.equal(transactionEntityRoot.get("violations").get("source"), builder.literal("LOB"))
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), Source.ERP),
+                                builder.equal(transactionEntityRoot.get("violations").get("source"), Source.LOB)
                         ),
                         builder.equal(transactionEntityRoot.get("id"), transactionEntityJoin.get("id"))
                 );
@@ -229,8 +229,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                         builder.isNotNull(transactionItemEntityRoot.get("rejection").get("rejectionReason")),
                         builder.equal(transactionItemEntityRoot.get("transaction").get("id"), transactionEntityJoin.get("id"))
                 );
-                subqueryReject.where(whereReject)
-                ;
+                subqueryReject.where(whereReject);
 
                 orPredicates.add(builder.and(
                                 builder.equal(transactionEntityJoin.get("transactionApproved"), true),

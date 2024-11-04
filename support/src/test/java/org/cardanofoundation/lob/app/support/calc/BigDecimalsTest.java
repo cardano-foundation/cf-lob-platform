@@ -1,5 +1,6 @@
 package org.cardanofoundation.lob.app.support.calc;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -87,6 +88,29 @@ class BigDecimalsTest {
         input = new BigDecimal("0.00000000001");
         result = BigDecimals.normaliseEngineeringString(input);
         assertThat(result).isEqualTo("0");
+    }
+
+    @Test
+    public void testSumPositiveValues() {
+        BigDecimal result = BigDecimals.sum(
+                new BigDecimal("100.50"),
+                new BigDecimal("200.75"),
+                new BigDecimal("50.25")
+        );
+
+        Assertions.assertEquals(new BigDecimal("351.50"), result);
+    }
+
+    @Test
+    public void testSumWithNullValues() {
+        BigDecimal result = BigDecimals.sum(
+                new BigDecimal("100.50"),
+                null,
+                new BigDecimal("50.25"),
+                null
+        );
+
+        Assertions.assertEquals(new BigDecimal("150.75"), result);
     }
 
 }

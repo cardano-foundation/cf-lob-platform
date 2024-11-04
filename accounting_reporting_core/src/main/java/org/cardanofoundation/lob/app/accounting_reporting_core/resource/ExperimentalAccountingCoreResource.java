@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.ReportService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionBatchService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +27,7 @@ public class ExperimentalAccountingCoreResource {
 
     private final AccountingCoreService accountingCoreService;
     private final TransactionBatchService transactionBatchService;
+    private final ReportService reportService;
 
     @PostConstruct
     public void init() {
@@ -82,6 +84,28 @@ public class ExperimentalAccountingCoreResource {
         val toDate = LocalDate.now().minusDays(1);
 
         return accountingCoreService.scheduleReconcilation(orgId, fromDate, toDate).fold(problem -> {
+            return ResponseEntity.status(problem.getStatus().getStatusCode()).body(problem);
+        }, success -> {
+            return ResponseEntity.ok().build();
+        });
+    }
+
+    @RequestMapping(value = "/report-test-bs", method = POST, produces = "application/json")
+    public ResponseEntity<?> exampleReportBs() {
+        val orgId = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94";
+
+        return reportService.storeBalanceSheet(orgId).fold(problem -> {
+            return ResponseEntity.status(problem.getStatus().getStatusCode()).body(problem);
+        }, success -> {
+            return ResponseEntity.ok().build();
+        });
+    }
+
+    @RequestMapping(value = "/report-test-is", method = POST, produces = "application/json")
+    public ResponseEntity<?> exampleReportIs() {
+        val orgId = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94";
+
+        return reportService.storeIncomeStatement(orgId).fold(problem -> {
             return ResponseEntity.status(problem.getStatus().getStatusCode()).body(problem);
         }, success -> {
             return ResponseEntity.ok().build();
