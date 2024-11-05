@@ -3,8 +3,8 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import io.vavr.control.Either;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reconcilation.ReconcilationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.reconcilation.ReconcilationEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationCreatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;

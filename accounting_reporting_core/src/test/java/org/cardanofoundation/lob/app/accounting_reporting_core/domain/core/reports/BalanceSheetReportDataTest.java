@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reports;
 
 import org.assertj.core.api.Assertions;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.BalanceSheetData;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

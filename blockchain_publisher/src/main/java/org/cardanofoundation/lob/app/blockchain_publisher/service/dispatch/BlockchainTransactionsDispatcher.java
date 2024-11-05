@@ -129,7 +129,7 @@ public class BlockchainTransactionsDispatcher {
 
         updateTransactionStatuses(txHash, txAbsoluteSlotM, blockchainTransactions);
 
-        ledgerUpdatedEventPublisher.sendLedgerUpdatedEvents(organisationId, allTxs);
+        ledgerUpdatedEventPublisher.sendTxLedgerUpdatedEvents(organisationId, allTxs);
 
         log.info("Blockchain transaction submitted, l1SubmissionData:{}", l1SubmissionData);
     }

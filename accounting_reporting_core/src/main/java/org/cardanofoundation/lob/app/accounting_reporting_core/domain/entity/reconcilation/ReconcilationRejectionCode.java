@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.reconcilation;
 
 public enum ReconcilationRejectionCode {
 

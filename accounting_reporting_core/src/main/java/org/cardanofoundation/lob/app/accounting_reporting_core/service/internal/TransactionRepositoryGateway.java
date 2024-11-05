@@ -23,7 +23,6 @@ import org.zalando.problem.Problem;
 import java.time.LocalDate;
 import java.util.*;
 
-import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.*;
 import static org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem.IdType.TRANSACTION;
@@ -118,8 +117,6 @@ public class TransactionRepositoryGateway {
 
     @Transactional
     public List<Either<IdentifiableProblem, TransactionEntity>> approveTransactions(TransactionsRequest transactionsRequest) {
-        val organisationId = transactionsRequest.getOrganisationId();
-
         val transactionIds = transactionsRequest.getTransactionIds();
 
         val transactionsApprovalResponseListE = new ArrayList<Either<IdentifiableProblem, TransactionEntity>>();
@@ -137,20 +134,11 @@ public class TransactionRepositoryGateway {
             }
         }
 
-        val transactionSuccesses = transactionsApprovalResponseListE.stream()
-                .filter(Either::isRight)
-                .map(Either::get)
-                .collect(toSet());
-
-        ledgerService.checkIfThereAreTransactionsToDispatch(organisationId, transactionSuccesses);
-
         return transactionsApprovalResponseListE;
     }
 
     @Transactional
     public List<Either<IdentifiableProblem, TransactionEntity>> approveTransactionsDispatch(TransactionsRequest transactionsRequest) {
-        val organisationId = transactionsRequest.getOrganisationId();
-
         val transactionIds = transactionsRequest.getTransactionIds();
 
         val transactionsApprovalResponseListE = new ArrayList<Either<IdentifiableProblem, TransactionEntity>>();
@@ -167,13 +155,6 @@ public class TransactionRepositoryGateway {
                 transactionsApprovalResponseListE.add(Either.left(new IdentifiableProblem(transactionId.getId(), problem, TRANSACTION)));
             }
         }
-
-        val transactionSuccesses = transactionsApprovalResponseListE.stream()
-                .filter(Either::isRight)
-                .map(Either::get)
-                .collect(toSet());
-
-        ledgerService.checkIfThereAreTransactionsToDispatch(organisationId, transactionSuccesses);
 
         return transactionsApprovalResponseListE;
     }

@@ -1,0 +1,72 @@
+package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
+
+import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.IncomeStatementData;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service("accounting_reporting_core.IncomeStatementConverter")
+@RequiredArgsConstructor
+public class IncomeStatementConverter {
+
+    public Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IncomeStatementData> convertIncomeStatement(Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.IncomeStatementData> incomeStatementData) {
+        return incomeStatementData.map(entityData -> {
+            return org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IncomeStatementData.builder()
+                    .revenues(convertRevenues(entityData.getRevenues()).orElse(null))
+                    .cogs(convertCOGS(entityData.getCogs()).orElse(null))
+                    .operatingExpenses(convertOperatingExpenses(entityData.getOperatingExpenses()).orElse(null))
+                    .financialIncome(convertFinancialIncome(entityData.getFinancialIncome()).orElse(null))
+                    .taxExpenses(convertTaxExpenses(entityData.getTaxExpenses()).orElse(null))
+                    .operatingExpenses(convertOperatingExpenses(entityData.getOperatingExpenses()).orElse(null))
+                    .extraordinaryIncome(convertExtraordinaryIncome(entityData.getExtraordinaryIncome()).orElse(null))
+                    .build();
+        });
+    }
+
+    private Optional<Revenues> convertRevenues(Optional<IncomeStatementData.Revenues> revenues) {
+        return revenues.map(r -> Revenues.builder()
+                .otherIncome(r.getOtherIncome().orElse(null))
+                .buildOfLongTermProvision(r.getBuildOfLongTermProvision().orElse(null))
+                .build());
+    }
+
+    private Optional<COGS> convertCOGS(Optional<IncomeStatementData.COGS> cogs) {
+        return cogs.map(c -> COGS.builder()
+                .costOfProvidingServices(c.getCostOfProvidingServices().orElse(null))
+                .build());
+    }
+
+    private Optional<OperatingExpenses> convertOperatingExpenses(Optional<IncomeStatementData.OperatingExpenses> operatingExpenses) {
+        return operatingExpenses.map(oe -> OperatingExpenses.builder()
+                .personnelExpenses(oe.getPersonnelExpenses().orElse(null))
+                .generalAndAdministrativeExpenses(oe.getGeneralAndAdministrativeExpenses().orElse(null))
+                .depreciationAndImpairmentLossesOnTangibleAssets(oe.getDepreciationAndImpairmentLossesOnTangibleAssets().orElse(null))
+                .amortizationOnIntangibleAssets(oe.getAmortizationOnIntangibleAssets().orElse(null))
+                .build());
+    }
+
+    private Optional<FinancialIncome> convertFinancialIncome(Optional<IncomeStatementData.FinancialIncome> financialIncome) {
+        return financialIncome.map(op -> FinancialIncome.builder()
+                .financeIncome(op.getFinanceIncome().orElse(null))
+                .financeExpenses(op.getFinanceExpenses().orElse(null))
+                .realisedGainsOnSaleOfCryptocurrencies(op.getRealisedGainsOnSaleOfCryptocurrencies().orElse(null))
+                .stakingRewardsIncome(op.getStakingRewardsIncome().orElse(null))
+                .netIncomeOptionsSale(op.getNetIncomeOptionsSale().orElse(null))
+                .build());
+    }
+
+    private Optional<ExtraordinaryIncome> convertExtraordinaryIncome(Optional<IncomeStatementData.ExtraordinaryIncome> financialIncome) {
+        return financialIncome.map(op -> ExtraordinaryIncome.builder()
+                .extraordinaryExpenses(op.getExtraordinaryExpenses().orElse(null))
+                .build());
+    }
+
+    private Optional<TaxExpenses> convertTaxExpenses(Optional<IncomeStatementData.TaxExpenses> taxExpenses) {
+        return taxExpenses.map(te -> TaxExpenses.builder()
+                .incomeTaxExpense(te.getIncomeTaxExpense().orElse(null))
+                .build());
+    }
+
+}

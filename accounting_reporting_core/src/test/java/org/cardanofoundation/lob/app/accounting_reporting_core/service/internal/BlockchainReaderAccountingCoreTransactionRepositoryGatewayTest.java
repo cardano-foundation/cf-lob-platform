@@ -153,7 +153,6 @@ class BlockchainReaderAccountingCoreTransactionRepositoryGatewayTest {
         assertThat(result.get()).isSameAs(validTransaction);
 
         verify(accountingCoreTransactionRepository, times(1)).save(validTransaction);
-        verify(ledgerService, times(1)).checkIfThereAreTransactionsToDispatch(any(), any());
     }
 
     @Test
@@ -498,7 +497,6 @@ class BlockchainReaderAccountingCoreTransactionRepositoryGatewayTest {
         assertThat(result.get()).isSameAs(transaction);
 
         verify(accountingCoreTransactionRepository, times(1)).save(transaction);
-        verify(ledgerService, times(1)).checkIfThereAreTransactionsToDispatch(any(), any());
     }
 
 }

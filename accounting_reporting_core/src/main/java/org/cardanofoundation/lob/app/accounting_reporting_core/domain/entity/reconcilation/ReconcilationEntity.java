@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.reconcilation;
 
 import com.google.common.base.Objects;
 import jakarta.persistence.*;
@@ -7,7 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reconcilation.ReconcilationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Details;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
@@ -21,7 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
-@Entity(name = "accounting_reporting_core.ReconcilationEntity")
+@Entity(name = "accounting_reporting_core.reconcilation.ReconcilationEntity")
 @Table(name = "accounting_core_reconcilation")
 @NoArgsConstructor
 @Audited

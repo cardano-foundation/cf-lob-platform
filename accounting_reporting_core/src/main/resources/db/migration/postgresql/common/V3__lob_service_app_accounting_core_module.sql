@@ -269,7 +269,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_aud (
    type accounting_core_transaction_type NOT NULL,
    batch_id CHAR(64) NOT NULL,
 
-   FOREIGN KEY (batch_id) REFERENCES accounting_core_transaction_batch (transaction_batch_id),
+   --FOREIGN KEY (batch_id) REFERENCES accounting_core_transaction_batch (transaction_batch_id),
 
    entry_date DATE NOT NULL,
    accounting_period accounting_core_accounting_period_type NOT NULL,
@@ -463,8 +463,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item_aud (
 
    transaction_id CHAR(64) NOT NULL,
 
-   -- Foreign key referencing transaction_id in accounting_core_transaction
-   FOREIGN KEY (transaction_id) REFERENCES accounting_core_transaction (transaction_id),
+   --FOREIGN KEY (transaction_id) REFERENCES accounting_core_transaction (transaction_id),
 
    fx_rate DECIMAL(12, 8) NOT NULL,
 
@@ -660,7 +659,6 @@ CREATE table accounting_core_report (
     -- Balance Sheet::Capital
     data_balance_sheet__capital_capital DECIMAL(30, 8),
     data_balance_sheet__capital_retained_earnings DECIMAL(30, 8),
-    data_balance_sheet__capital_free_foundation_capital DECIMAL(30, 8),
 
     -- Income Statement::Revenues
     data_income_statement__revenues_other_income DECIMAL(30, 8),
@@ -675,22 +673,23 @@ CREATE table accounting_core_report (
     data_income_statement__operating_expenses_depreciation_impairment_tangible_assets DECIMAL(30, 8),
     data_income_statement__operating_expenses_amortization_intangible_assets DECIMAL(30, 8),
 
-    -- Income Statement::Operating Profit
-    data_income_statement__operating_profit_finance_income DECIMAL(30, 8),
-    data_income_statement__operating_profit_finance_expenses DECIMAL(30, 8),
-    data_income_statement__operating_profit_realised_gains_sale_cryptocurrencies DECIMAL(30, 8),
-    data_income_statement__operating_profit_staking_rewards_income DECIMAL(30, 8),
-    data_income_statement__operating_profit_net_income_options_sale DECIMAL(30, 8),
-    data_income_statement__operating_profit_extraordinary_expenses DECIMAL(30, 8),
+    -- Income Statement::Financial Income
+    data_income_statement__financial_income_finance_income DECIMAL(30, 8),
+    data_income_statement__financial_income_finance_expenses DECIMAL(30, 8),
+    data_income_statement__financial_income_realised_gains_sale_cryptocurrencies DECIMAL(30, 8),
+    data_income_statement__financial_income_staking_rewards_income DECIMAL(30, 8),
+    data_income_statement__financial_income_net_income_options_sale DECIMAL(30, 8),
+
+    -- Income Statement::Extraordinary Income
+    data_income_statement__extraordinary_income_extraordinary_expenses DECIMAL(30, 8),
 
     -- Income Statement::Tax Expenses
     data_income_statement__tax_expenses_income_tax_expense DECIMAL(30, 8),
 
     -- end of main data fields
 
-   report_approved BOOLEAN NOT NULL DEFAULT FALSE,
-   ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
-   ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
+    ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
+    ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
 
     created_by VARCHAR(255),
     updated_by VARCHAR(255),
@@ -739,7 +738,6 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
     -- Balance Sheet::Capital
     data_balance_sheet__capital_capital DECIMAL(30, 8),
     data_balance_sheet__capital_retained_earnings DECIMAL(30, 8),
-    data_balance_sheet__capital_free_foundation_capital DECIMAL(30, 8),
 
     -- Income Statement::Revenues
     data_income_statement__revenues_other_income DECIMAL(30, 8),
@@ -754,20 +752,21 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
     data_income_statement__operating_expenses_depreciation_impairment_tangible_assets DECIMAL(30, 8),
     data_income_statement__operating_expenses_amortization_intangible_assets DECIMAL(30, 8),
 
-    -- Income Statement::Operating Profit
-    data_income_statement__operating_profit_finance_income DECIMAL(30, 8),
-    data_income_statement__operating_profit_finance_expenses DECIMAL(30, 8),
-    data_income_statement__operating_profit_realised_gains_sale_cryptocurrencies DECIMAL(30, 8),
-    data_income_statement__operating_profit_staking_rewards_income DECIMAL(30, 8),
-    data_income_statement__operating_profit_net_income_options_sale DECIMAL(30, 8),
-    data_income_statement__operating_profit_extraordinary_expenses DECIMAL(30, 8),
+    -- Income Statement::Financial Income
+    data_income_statement__financial_income_finance_income DECIMAL(30, 8),
+    data_income_statement__financial_income_finance_expenses DECIMAL(30, 8),
+    data_income_statement__financial_income_realised_gains_sale_cryptocurrencies DECIMAL(30, 8),
+    data_income_statement__financial_income_staking_rewards_income DECIMAL(30, 8),
+    data_income_statement__financial_income_net_income_options_sale DECIMAL(30, 8),
+
+    -- Income Statement::Extraordinary Income
+    data_income_statement__extraordinary_income_extraordinary_expenses DECIMAL(30, 8),
 
     -- Income Statement::Tax Expenses
     data_income_statement__tax_expenses_income_tax_expense DECIMAL(30, 8),
 
     -- End of main data fields
 
-    report_approved BOOLEAN NOT NULL DEFAULT FALSE,
     ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
     ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
 
@@ -856,3 +855,7 @@ ON accounting_core_reconcilation_violation (rejection_code);
 
 CREATE INDEX idx_reconcilation_violation_transaction_id
 ON accounting_core_reconcilation_violation (transaction_id);
+
+-- ReportRepository.findDispatchableTransactions
+CREATE INDEX idx_report_dispatch_status_approved_order
+ON accounting_core_report (organisation_id, ledger_dispatch_status, ledger_dispatch_approved, created_at, report_id);

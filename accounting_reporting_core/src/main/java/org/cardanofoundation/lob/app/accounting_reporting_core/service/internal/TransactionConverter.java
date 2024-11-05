@@ -10,7 +10,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Cos
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Counterparty;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Currency;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Document;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Project;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Vat;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 public class TransactionConverter {
 
     private final CoreCurrencyService coreCurrencyService;
+    private final OrganisationConverter organisationConverter;
 
     public FilteringParameters convertToDbDetached(SystemExtractionParameters systemExtractionParameters,
                                                    UserExtractionParameters userExtractionParameters) {
@@ -131,7 +131,7 @@ public class TransactionConverter {
         txEntity.setTransactionInternalNumber(transaction.getInternalTransactionNumber());
         txEntity.setTransactionType(transaction.getTransactionType());
         txEntity.setEntryDate(transaction.getEntryDate());
-        txEntity.setOrganisation(convertOrganisation(transaction));
+        txEntity.setOrganisation(organisationConverter.convert(transaction.getOrganisation()));
         txEntity.setAutomatedValidationStatus(transaction.getTxValidationStatus());
         txEntity.setLedgerDispatchStatus(transaction.getLedgerDispatchStatus());
         txEntity.setAccountingPeriod(transaction.getAccountingPeriod());
@@ -160,17 +160,6 @@ public class TransactionConverter {
                         .externalCustomerCode(cc.getExternalCustomerCode().orElse(null))
                         .name(cc.getName().orElse(null))
                         .build());
-    }
-
-    private static Organisation convertOrganisation(Transaction transaction) {
-        return Organisation.builder()
-                .id(transaction.getOrganisation().getId())
-                .name(transaction.getOrganisation().getName().orElse(null))
-                .taxIdNumber(transaction.getOrganisation().getTaxIdNumber().orElse(null))
-                .countryCode(transaction.getOrganisation().getCountryCode().orElse(null))
-                .currencyId(transaction.getOrganisation().getCurrencyId())
-                .adminEmail(transaction.getOrganisation().getAdminEmail().orElse(null))
-                .build();
     }
 
     private Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Document> convertToDbDetached(Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Document> docM) {

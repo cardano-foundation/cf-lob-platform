@@ -1,7 +1,8 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reports;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -17,7 +18,8 @@ public class IncomeStatementData implements Validable {
     private Revenues revenues;
     private COGS cogs;
     private OperatingExpenses operatingExpenses;
-    private OperatingProfit operatingProfit;
+    private FinancialIncome financialIncome;
+    private ExtraordinaryIncome extraordinaryIncome;
     private TaxExpenses taxExpenses;
 
     @Override
@@ -37,12 +39,16 @@ public class IncomeStatementData implements Validable {
         return Optional.ofNullable(operatingExpenses);
     }
 
-    public Optional<OperatingProfit> getOperatingProfit() {
-        return Optional.ofNullable(operatingProfit);
+    public Optional<FinancialIncome> getFinancialIncome() {
+        return Optional.ofNullable(financialIncome);
     }
 
     public Optional<TaxExpenses> getTaxExpenses() {
         return Optional.ofNullable(taxExpenses);
+    }
+
+    public Optional<ExtraordinaryIncome> getExtraordinaryIncome() {
+        return Optional.ofNullable(extraordinaryIncome);
     }
 
     @AllArgsConstructor
@@ -116,14 +122,13 @@ public class IncomeStatementData implements Validable {
     @ToString
     @NoArgsConstructor
     @Embeddable
-    public static class OperatingProfit {
+    public static class FinancialIncome {
 
         private BigDecimal financeIncome;
         private BigDecimal financeExpenses;
         private BigDecimal realisedGainsOnSaleOfCryptocurrencies;
         private BigDecimal stakingRewardsIncome;
         private BigDecimal netIncomeOptionsSale;
-        private BigDecimal extraordinaryExpenses;
 
         public Optional<BigDecimal> getFinanceIncome() {
             return Optional.ofNullable(financeIncome);
@@ -145,9 +150,22 @@ public class IncomeStatementData implements Validable {
             return Optional.ofNullable(netIncomeOptionsSale);
         }
 
+    }
+
+    @AllArgsConstructor
+    @Builder(toBuilder = true)
+    @EqualsAndHashCode
+    @ToString
+    @NoArgsConstructor
+    @Embeddable
+    public static class ExtraordinaryIncome {
+
+        private BigDecimal extraordinaryExpenses;
+
         public Optional<BigDecimal> getExtraordinaryExpenses() {
             return Optional.ofNullable(extraordinaryExpenses);
         }
+
     }
 
     @AllArgsConstructor

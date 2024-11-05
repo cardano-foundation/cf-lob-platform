@@ -6,7 +6,7 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchChunkEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchFailedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchStartedEvent;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdatedEvent;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.TxsLedgerUpdatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationChunkEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationFailedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationFinalisationEvent;
@@ -30,7 +30,7 @@ public class AccountingCoreEventHandler {
     private final TransactionReconcilationService transactionReconcilationService;
 
     @ApplicationModuleListener
-    public void handleLedgerUpdatedEvent(LedgerUpdatedEvent event) {
+    public void handleLedgerUpdatedEvent(TxsLedgerUpdatedEvent event) {
         log.info("Received handleLedgerUpdatedEvent event, event: {}", event.getStatusUpdates());
 
         val txStatusUpdatesMap = event.statusUpdatesMap();
