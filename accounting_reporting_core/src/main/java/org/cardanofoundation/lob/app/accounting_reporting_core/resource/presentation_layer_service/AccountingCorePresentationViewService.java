@@ -52,13 +52,12 @@ public class AccountingCorePresentationViewService {
     public ReconciliationResponseView allReconciliationTransaction(ReconciliationFilterRequest body) {
         val transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
         if (body.getFilter().equals(ReconciliationFilterStatusRequest.UNRECONCILED)) {
-            val transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getLimit(), body.getPage()).stream()
+            val transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).stream()
                     .map(this::getReconciliationTransactionsSelector)
                     .collect(toSet());
-            val searchTotal = (long) accountingCoreTransactionRepository.findAllReconciliationSpecialCount(body.getReconciliationRejectionCode(), body.getLimit(), body.getPage()).size();
 
             return new ReconciliationResponseView(
-                    searchTotal,
+                    (long) accountingCoreTransactionRepository.findAllReconciliationSpecialCount(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).size(),
                     getTransactionReconciliationStatistic(transactionsStatistic),
                     transactions
             );
@@ -68,7 +67,7 @@ public class AccountingCorePresentationViewService {
                 .collect(toSet());
 
         return new ReconciliationResponseView(
-                (long) transactions.size(),
+                (long) transactionRepositoryGateway.findReconciliationCount(body.getFilter(), body.getLimit(), body.getPage()).size(),
                 getTransactionReconciliationStatistic(transactionsStatistic),
 
                 transactions
@@ -289,7 +288,7 @@ public class AccountingCorePresentationViewService {
                     return reconcilationEntity.getViolations().stream()
                             .filter(reconcilationViolation -> reconcilationViolation.getTransactionId().equals(transactionEntity.getId()))
                             .map(reconcilationViolation -> {
-                                return ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode());
+                                return ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode(), transactionEntity.getLedgerDispatchApproved());
                             })
                             .collect(toSet());
                 }).orElse(new LinkedHashSet<>()),
@@ -317,7 +316,7 @@ public class AccountingCorePresentationViewService {
                 TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
                 TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
                 TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
-                Set.of(ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode())),
+                Set.of(ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode(),false)),
                 null,
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>()
@@ -378,7 +377,7 @@ public class AccountingCorePresentationViewService {
                     return reconcilationEntity.getViolations().stream()
                             .filter(reconcilationViolation -> reconcilationViolation.getTransactionId().equals(transactionEntity.getId()))
                             .map(reconcilationViolation -> {
-                                return ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode());
+                                return ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode(), transactionEntity.getLedgerDispatchApproved());
                             })
                             .collect(toSet());
                 }).orElse(new LinkedHashSet<>()),

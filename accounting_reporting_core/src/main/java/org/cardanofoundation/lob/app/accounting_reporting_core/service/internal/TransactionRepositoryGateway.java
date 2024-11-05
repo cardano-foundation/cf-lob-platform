@@ -239,6 +239,10 @@ public class TransactionRepositoryGateway {
         return accountingCoreTransactionRepository.findAllReconciliation(filter, limit, page);
     }
 
+    public List<TransactionEntity> findReconciliationCount(ReconciliationFilterStatusRequest filter, Integer limit, Integer page) {
+        return accountingCoreTransactionRepository.findAllReconciliationCount(filter, limit, page);
+    }
+
 }
 
 //    public Either<Problem, Boolean> changeTransactionComment(String txId, String userComment) {
