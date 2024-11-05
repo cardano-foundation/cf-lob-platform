@@ -120,6 +120,16 @@ CREATE TYPE accounting_core_report_mode_type AS ENUM (
     'SYSTEM'
 );
 
+CREATE TYPE accounting_core_rejection_reason_type AS ENUM (
+    'INCORRECT_AMOUNT',
+    'INCORRECT_COST_CENTER',
+    'INCORRECT_PROJECT',
+    'INCORRECT_CURRENCY',
+    'INCORRECT_VAT_CODE',
+    'REVIEW_PARENT_COST_CENTER',
+    'REVIEW_PARENT_PROJECT_CODE'
+);
+
 -- ISO_4217:CHF or ISO_24165:BSV:2L8HS2MNP, ISO_24165:ADA:HWGL1C2CK, etc
 CREATE DOMAIN accounting_core_currency_id_type AS VARCHAR(25)
     CHECK (VALUE ~ '^(ISO_4217:[A-Z]{3})|(ISO_24165:[A-Z]{3}:[A-Z0-9]+)$');
@@ -403,7 +413,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item (
 
    fx_rate DECIMAL(12, 8) NOT NULL,
 
-   rejection_reason SMALLINT,
+   rejection_reason accounting_core_rejection_reason_type,
 
    account_code_debit VARCHAR(255),
    account_ref_code_debit VARCHAR(255),
@@ -458,7 +468,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item_aud (
 
    fx_rate DECIMAL(12, 8) NOT NULL,
 
-   rejection_reason SMALLINT,
+   rejection_reason accounting_core_rejection_reason_type,
 
    account_code_debit VARCHAR(255),
    account_ref_code_debit VARCHAR(255),

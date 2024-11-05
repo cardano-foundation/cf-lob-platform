@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionBatchEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
@@ -20,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason.getSourceBasedRejectionReasons;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.PENDING;
 
 @RequiredArgsConstructor
@@ -81,7 +81,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
             List<Predicate> orPredicates = new ArrayList<>();
 
             if (body.getBatchStatistics().stream().anyMatch(s -> s.equals(LedgerDispatchStatusView.INVALID))) {
-                orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionReason").as(Integer.class).in(RejectionReason.getSourceBasedRejectionReasons(Source.ERP).stream().map(Enum::ordinal).toList()));
+                orPredicates.add(transactionEntityJoin.get("items").get("rejection").get("rejectionReason").in(getSourceBasedRejectionReasons(Source.ERP).stream().toList()));
                 Subquery<String> subqueryErp = builder.createQuery().subquery(String.class);
                 Root<TransactionEntity> transactionEntityRoot = subqueryErp.from(TransactionEntity.class);
                 subqueryErp.select(transactionEntityRoot.get("id"));
@@ -100,7 +100,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 subqueryItemsIn.select(transactionEntityRootItem.get("transaction").get("id"));
                 Predicate whereItem =
                         builder.and(
-                                transactionEntityRootItem.get("rejection").get("rejectionReason").in(RejectionReason.getSourceBasedRejectionReasons(Source.LOB).stream().map(Enum::ordinal).toList()),
+                                transactionEntityRootItem.get("rejection").get("rejectionReason").in(getSourceBasedRejectionReasons(Source.LOB).stream().toList()),
                                 builder.equal(transactionEntityRootItem.get("transaction").get("id"), transactionEntityJoin.get("id"))
                         );
                 subqueryItemsIn.where(whereItem);
@@ -110,7 +110,7 @@ public class CustomTransactionBatchRepositoryImpl implements CustomTransactionBa
                 subqueryItemsOut.select(transactionEntityRootItem2.get("transaction").get("id"));
                 Predicate whereItem2 =
                         builder.and(
-                                transactionEntityRootItem2.get("rejection").get("rejectionReason").in(RejectionReason.getSourceBasedRejectionReasons(Source.ERP).stream().map(Enum::ordinal).toList()),
+                                transactionEntityRootItem2.get("rejection").get("rejectionReason").in(getSourceBasedRejectionReasons(Source.ERP).stream().toList()),
                                 builder.equal(transactionEntityRootItem2.get("transaction").get("id"), transactionEntityJoin.get("id"))
                         );
                 subqueryItemsOut.where(whereItem2);

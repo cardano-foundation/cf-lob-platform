@@ -75,7 +75,7 @@ public class TransactionItemEntity extends CommonEntity implements Persistable<S
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "rejectionReason", column = @Column(name = "rejection_reason")),
+            @AttributeOverride(name = "rejectionReason", column = @Column(name = "rejection_reason", columnDefinition = "accounting_core_rejection_reason_type")),
     })
     @Nullable
     private Rejection rejection;
