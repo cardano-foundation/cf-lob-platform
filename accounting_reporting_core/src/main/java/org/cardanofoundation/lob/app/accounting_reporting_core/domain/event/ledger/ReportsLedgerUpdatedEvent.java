@@ -3,22 +3,24 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.led
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
+import lombok.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReportStatusUpdate;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 import org.jmolecules.event.annotation.DomainEvent;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @ToString
 @DomainEvent
-public class LedgerUpdateCommand {
+@Builder
+public final class ReportsLedgerUpdatedEvent {
 
     public static final String VERSION = "1.0";
 
@@ -30,12 +32,10 @@ public class LedgerUpdateCommand {
 
     @NotNull
     @Size(min = 1)
-    private Set<Transaction> transactions;
+    private Set<ReportStatusUpdate> statusUpdates;
 
-    public static LedgerUpdateCommand create(EventMetadata metadata,
-                                             String organisationId,
-                                             Set<Transaction> txs) {
-        return new LedgerUpdateCommand(metadata, organisationId, txs);
+    public Map<String, ReportStatusUpdate> statusUpdatesMap() {
+        return statusUpdates.stream().collect(Collectors.toMap(ReportStatusUpdate::getTxId, Function.identity()));
     }
 
 }

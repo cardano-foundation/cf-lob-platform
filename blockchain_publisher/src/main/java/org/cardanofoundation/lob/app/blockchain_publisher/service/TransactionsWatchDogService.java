@@ -116,7 +116,7 @@ public class TransactionsWatchDogService {
                 .collect(Collectors.toSet());
 
         // notify accounting core about updated transactions
-        ledgerUpdatedEventPublisher.sendLedgerUpdatedEvents(organisationId, successfullyUpdatedTxEntities);
+        ledgerUpdatedEventPublisher.sendTxLedgerUpdatedEvents(organisationId, successfullyUpdatedTxEntities);
 
         return Either.right(successfullyUpdatedTxEntities);
     }

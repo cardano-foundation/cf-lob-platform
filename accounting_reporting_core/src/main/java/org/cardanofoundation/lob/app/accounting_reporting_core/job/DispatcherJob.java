@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service("accounting_core.TransactionDispatcherJob")
 @Slf4j
 @RequiredArgsConstructor
-public class TransactionDispatcherJob {
+public class DispatcherJob {
 
     private final LedgerService ledgerService;
 

@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -10,12 +10,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReportMode;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReportRollupPeriodType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReportType;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reports.BalanceSheetData;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reports.IncomeStatementData;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reports.Validable;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportRollupPeriodType;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
@@ -29,21 +28,20 @@ import java.util.Optional;
 
 import static jakarta.persistence.EnumType.STRING;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.NOT_DISPATCHED;
-import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
 
-@jakarta.persistence.Entity(name = "accounting_reporting_core.ReportEntity")
+@Entity(name = "accounting_reporting_core.report.ReportEntity")
 @Table(name = "accounting_core_report")
 @NoArgsConstructor
 @AllArgsConstructor
 @Audited
 @EntityListeners({ AuditingEntityListener.class })
-@Getter
-@Setter
 public class ReportEntity extends CommonEntity implements Persistable<String>, Validable {
 
     @Id
     @Column(name = "report_id", nullable = false, length = 64)
     @NotBlank
+    @Getter
+    @Setter
     private String reportId;
 
     @Override
@@ -67,31 +65,42 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @Column(name = "type", nullable = false)
     @JdbcType(PostgreSQLEnumJdbcType.class)
     @NotNull
+    @Getter
+    @Setter
     private ReportType type;
 
     @Enumerated(STRING)
     @Column(name = "rollup_period", nullable = false)
     @JdbcType(PostgreSQLEnumJdbcType.class)
     @NotNull
+    @Getter
+    @Setter
     private ReportRollupPeriodType rollupPeriod;
 
     @Column(name = "year", nullable = false)
     @Min(1900)
     @Max(4000)
-    private short year; // SMALLINT in PostgreSQL, mapped to Java's short
+    @Getter
+    @Setter
+    private Short year; // SMALLINT in PostgreSQL, mapped to Java's short
 
-    @Column(name = "period", nullable = false)
+    @Column(name = "period")
     @Min(1)
     @Max(12)
-    private short period; // SMALLINT, representing the month (1 - 12)
+    @Nullable
+    private Short period; // SMALLINT in PostgreSQL, mapped to Java's short
 
     @Enumerated(STRING)
     @Column(name = "mode", nullable = false)
     @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Getter
+    @Setter
     private ReportMode mode; // USER or SYSTEM report
 
     @Column(name = "date", nullable = false)
     @NotNull
+    @Getter
+    @Setter
     private LocalDate date;
 
     @Embedded
@@ -118,8 +127,7 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
 
             // Balance Sheet::Capital
             @AttributeOverride(name = "capital.capital", column = @Column(name = "data_balance_sheet__capital_capital")),
-            @AttributeOverride(name = "capital.retainedEarnings", column = @Column(name = "data_balance_sheet__capital_retained_earnings")),
-            @AttributeOverride(name = "capital.freeFoundationCapital", column = @Column(name = "data_balance_sheet__capital_free_foundation_capital"))
+            @AttributeOverride(name = "capital.retainedEarnings", column = @Column(name = "data_balance_sheet__capital_retained_earnings"))
     })
     @Nullable
     private BalanceSheetData balanceSheetReportData;
@@ -139,24 +147,20 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
             @AttributeOverride(name = "operatingExpenses.depreciationAndImpairmentLossesOnTangibleAssets", column = @Column(name = "data_income_statement__operating_expenses_depreciation_impairment_tangible_assets")),
             @AttributeOverride(name = "operatingExpenses.amortizationOnIntangibleAssets", column = @Column(name = "data_income_statement__operating_expenses_amortization_intangible_assets")),
 
-            // Operating Profit
-            @AttributeOverride(name = "operatingProfit.financeIncome", column = @Column(name = "data_income_statement__operating_profit_finance_income")),
-            @AttributeOverride(name = "operatingProfit.financeExpenses", column = @Column(name = "data_income_statement__operating_profit_finance_expenses")),
-            @AttributeOverride(name = "operatingProfit.realisedGainsOnSaleOfCryptocurrencies", column = @Column(name = "data_income_statement__operating_profit_realised_gains_sale_cryptocurrencies")),
-            @AttributeOverride(name = "operatingProfit.stakingRewardsIncome", column = @Column(name = "data_income_statement__operating_profit_staking_rewards_income")),
-            @AttributeOverride(name = "operatingProfit.netIncomeOptionsSale", column = @Column(name = "data_income_statement__operating_profit_net_income_options_sale")),
-            @AttributeOverride(name = "operatingProfit.extraordinaryExpenses", column = @Column(name = "data_income_statement__operating_profit_extraordinary_expenses")),
+            // Financial Income
+            @AttributeOverride(name = "financialIncome.financeIncome", column = @Column(name = "data_income_statement__financial_income_finance_income")),
+            @AttributeOverride(name = "financialIncome.financeExpenses", column = @Column(name = "data_income_statement__financial_income_finance_expenses")),
+            @AttributeOverride(name = "financialIncome.realisedGainsOnSaleOfCryptocurrencies", column = @Column(name = "data_income_statement__financial_income_realised_gains_sale_cryptocurrencies")),
+            @AttributeOverride(name = "financialIncome.stakingRewardsIncome", column = @Column(name = "data_income_statement__financial_income_staking_rewards_income")),
+            @AttributeOverride(name = "financialIncome.netIncomeOptionsSale", column = @Column(name = "data_income_statement__financial_income_net_income_options_sale")),
+
+            @AttributeOverride(name = "extraordinaryIncome.extraordinaryExpenses", column = @Column(name = "data_income_statement__extraordinary_income_extraordinary_expenses")),
 
             // Tax Expenses
             @AttributeOverride(name = "taxExpenses.incomeTaxExpense", column = @Column(name = "data_income_statement__tax_expenses_income_tax_expense"))
     })
     @Nullable
     private IncomeStatementData incomeStatementReportData;
-
-    @Column(name = "report_approved", nullable = false)
-    @Getter
-    @Setter
-    private Boolean reportApproved = false;
 
     @Column(name = "ledger_dispatch_approved", nullable = false)
     @Getter
@@ -170,18 +174,6 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @Setter
     // https://www.baeldung.com/java-enums-jpa-postgresql
     private LedgerDispatchStatus ledgerDispatchStatus = NOT_DISPATCHED;
-
-    public static String id(String organisationId,
-                            ReportType reportType,
-                            ReportRollupPeriodType rollupPeriod,
-                            short year,
-                            Optional<Short> period) {
-        return period.map(p -> {
-            return digestAsHex(STR."\{organisationId}::\{reportType}::\{rollupPeriod}::\{year}::\{p}");
-        }).orElseGet(() -> {
-            return digestAsHex(STR."\{organisationId}::\{reportType}::\{rollupPeriod}::\{year}");
-        });
-    }
 
     public void setBalanceSheetReportData(Optional<BalanceSheetData> balanceSheetReportData) {
         if (type != ReportType.BALANCE_SHEET) {
@@ -220,6 +212,14 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
             case BALANCE_SHEET -> getBalanceSheetReportData().map(Validable::isValid).orElse(false);
             case INCOME_STATEMENT -> getIncomeStatementReportData().map(Validable::isValid).orElse(false);
         };
+    }
+
+    public Optional<@Min(1) @Max(12) Short> getPeriod() {
+        return Optional.ofNullable(period);
+    }
+
+    public void setPeriod(Optional<@Min(1) @Max(12) Short> period) {
+        this.period = period.orElse(null);
     }
 
 }

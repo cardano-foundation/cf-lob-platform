@@ -5,8 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.LedgerUpdateCommand;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.ReportLedgerUpdateCommand;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.TransactionLedgerUpdateCommand;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.ReportRepository;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.cardanofoundation.lob.app.support.collections.Partitions;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
@@ -18,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
@@ -28,6 +30,8 @@ import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 public class LedgerService {
 
     private final AccountingCoreTransactionRepository accountingCoreTransactionRepository;
+    private final ReportRepository reportRepository;
+    private final ReportConverter reportConverter;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TransactionConverter transactionConverter;
     private final PIIDataFilteringService piiDataFilteringService;
@@ -55,38 +59,25 @@ public class LedgerService {
     }
 
     @Transactional
-    public void checkIfThereAreTransactionsToDispatch(String organisationId,
-                                                      Set<TransactionEntity> transactions) {
-        val txIds = transactions.stream()
-                .map(TransactionEntity::getId)
-                .collect(Collectors.toSet());
-
-        log.info("dispatchTransactionToBlockchainPublisher, txIds: {}", txIds);
-
-        val dispatchPendingTransactions = transactions.stream()
-                .filter(TransactionEntity::isDispatchable)
-                .collect(Collectors.toSet());
-
-        dispatchTransactions(organisationId, dispatchPendingTransactions);
-    }
-
-    @Transactional
     public void dispatchPending(int limit) {
         for (val organisation : organisationPublicApi.listAll()) {
             val dispatchTransactions = accountingCoreTransactionRepository.findDispatchableTransactions(organisation.getId(), Limit.of(limit));
+            val dispatchReports = reportRepository.findDispatchableTransactions(organisation.getId(), Limit.of(limit));
 
-            log.info("dispatchPending, organisationId: {}, total tx count: {}", organisation.getId(), dispatchTransactions.size());
+            log.info("dispatchPending transactions and reports, organisationId: {}, total tx count: {}", organisation.getId(), dispatchTransactions.size());
 
-            dispatchTransactions(organisation.getId(), dispatchTransactions);
+            dispatchPendingTransactions(organisation.getId(), dispatchTransactions);
+            dispatchReports(organisation.getId(), dispatchReports);
         }
     }
 
     @Transactional(propagation = SUPPORTS)
-    public void dispatchTransactions(String organisationId,
-                                     Set<TransactionEntity> transactions) {
+    private void dispatchPendingTransactions(String organisationId,
+                                             Set<TransactionEntity> transactions) {
         log.info("dispatchTransactionToBlockchainPublisher, total tx count: {}", transactions.size());
 
         if (transactions.isEmpty()) {
+            log.info("dispatchPendingTransactions, no transactions to dispatch.");
             return;
         }
 
@@ -96,12 +87,36 @@ public class LedgerService {
         for (val partition : Partitions.partition(piiFilteredOutTransactions, dispatchBatchSize)) {
             val txs = partition.asSet();
 
-            log.info("dispatchTransactionToBlockchainPublisher, partitionSize: {}", txs.size());
+            log.info("dispatchTransactionToBlockchainPublisher, txs, partitionSize: {}", txs.size());
 
-            applicationEventPublisher.publishEvent(LedgerUpdateCommand.create(
-                    EventMetadata.create(LedgerUpdateCommand.VERSION),
+            applicationEventPublisher.publishEvent(TransactionLedgerUpdateCommand.create(
+                    EventMetadata.create(TransactionLedgerUpdateCommand.VERSION),
                     organisationId,
                     txs)
+            );
+        }
+    }
+
+    @Transactional(propagation = SUPPORTS)
+    public void dispatchReports(String organisationId,
+                                Set<ReportEntity> reportEntities) {
+        log.info("dispatchReports, total reports count: {}", reportEntities.size());
+
+        if (reportEntities.isEmpty()) {
+            log.info("dispatchReports, no reports to dispatch.");
+            return;
+        }
+
+        val canonicalReports = reportConverter.convertFromDbToCanonicalForm(reportEntities);
+        for (val partition : Partitions.partition(canonicalReports, dispatchBatchSize)) {
+            val reports = partition.asSet();
+
+            log.info("dispatchTransactionToBlockchainPublisher, reports, reportsCount: {}", reports.size());
+
+            applicationEventPublisher.publishEvent(ReportLedgerUpdateCommand.create(
+                    EventMetadata.create(ReportLedgerUpdateCommand.VERSION),
+                    organisationId,
+                    reports)
             );
         }
     }

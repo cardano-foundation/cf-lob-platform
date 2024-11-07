@@ -1,7 +1,8 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reports;
+package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
 import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.cardanofoundation.lob.app.support.calc.Summable;
 
@@ -19,8 +20,10 @@ public class BalanceSheetData implements Validable {
 
     @Nullable
     private Assets assets;
+
     @Nullable
     private Liabilities liabilities;
+
     @Nullable
     private Capital capital;
 
@@ -77,10 +80,13 @@ public class BalanceSheetData implements Validable {
 
             @Nullable
             private BigDecimal propertyPlantEquipment;
+
             @Nullable
             private BigDecimal intangibleAssets;
+
             @Nullable
             private BigDecimal investments;
+
             @Nullable
             private BigDecimal financialAssets;
 
@@ -190,6 +196,7 @@ public class BalanceSheetData implements Validable {
             public Optional<BigDecimal> getProvisions() {
                 return Optional.ofNullable(provisions);
             }
+
         }
 
         @AllArgsConstructor
@@ -238,20 +245,14 @@ public class BalanceSheetData implements Validable {
         private BigDecimal capital;
         @Nullable
         private BigDecimal retainedEarnings;
-        @Nullable
-        private BigDecimal freeFoundationCapital;
 
         @Override
         public BigDecimal getValue() {
-            return BigDecimals.sum(capital, retainedEarnings, freeFoundationCapital);
+            return BigDecimals.sum(capital, retainedEarnings);
         }
 
         public Optional<BigDecimal> getCapital() {
             return Optional.ofNullable(capital);
-        }
-
-        public Optional<BigDecimal> getFreeFoundationCapital() {
-            return Optional.ofNullable(freeFoundationCapital);
         }
 
         public Optional<BigDecimal> getRetainedEarnings() {

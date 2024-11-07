@@ -1,7 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Reconcilation;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReconcilationCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reconcilation.Reconcilation;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reconcilation.ReconcilationCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.junit.jupiter.api.BeforeEach;

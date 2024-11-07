@@ -1,6 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.ReconcilationRejectionCode;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.reconcilation.ReconcilationRejectionCode;
 
 public enum ReconciliationRejectionCodeRequest {
 
@@ -19,4 +19,5 @@ public enum ReconciliationRejectionCodeRequest {
             case TX_NOT_IN_LOB -> ReconciliationRejectionCodeRequest.NEW_IN_ERP;
         };
     }
+
 }

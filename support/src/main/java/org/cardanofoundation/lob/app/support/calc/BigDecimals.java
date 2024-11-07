@@ -1,19 +1,19 @@
 package org.cardanofoundation.lob.app.support.calc;
 
 import lombok.experimental.UtilityClass;
-import lombok.val;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.function.BinaryOperator;
+import java.util.Objects;
 
 @UtilityClass
 public class BigDecimals {
 
     public BigDecimal sum(BigDecimal... values) {
-        return Arrays.stream(values)
-                .map(value -> value != null ? value : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return Summable.sum(Arrays.stream(values)
+                .filter(Objects::nonNull)
+                .map(value -> (Summable) () -> value)
+                .toArray(Summable[]::new));
     }
 
     public BigDecimal sum(Summable... values) {
