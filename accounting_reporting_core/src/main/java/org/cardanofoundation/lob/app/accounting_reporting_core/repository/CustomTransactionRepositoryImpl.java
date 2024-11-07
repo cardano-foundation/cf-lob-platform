@@ -80,8 +80,8 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
         val jpql = "SELECT count(rv.transactionId) " +
                 "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
-                "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
-                "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL) ";
+                "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
+                "WHERE (r.id = tr.lastReconcilation.id or tr.lastReconcilation IS NULL) ";
 
         String where = "";
         if (!rejectionCodes.isEmpty()) {
@@ -115,7 +115,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
             where += " AND r.createdAt > :startDate AND r.createdAt < :endDate ";
         }
 
-        where += "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.rejectionCode, rv.sourceDiff, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType ";
+        where += "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType ";
 
         Query resultQuery = em.createQuery(jpql + where);
 
@@ -245,7 +245,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
                 "JOIN r.violations rv " +
                 "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
-                "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.rejectionCode, rv.sourceDiff, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType " +
+                "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType " +
                 ") ";
 
         String txNever = "select count(txNever) from ( " +
@@ -299,7 +299,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
         if (getDateFrom.isPresent()) {
             where += " AND r.createdAt > :startDate AND r.createdAt < :endDate ";
         }
-        where += "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.rejectionCode, rv.sourceDiff, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType ";
+        where += "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.rejectionCode, rv.sourceDiff, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType ORDER BY rv.transactionId ";
 
         return jpql + where;
     }

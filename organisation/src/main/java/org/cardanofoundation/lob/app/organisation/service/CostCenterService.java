@@ -7,7 +7,9 @@ import org.cardanofoundation.lob.app.organisation.repository.CostCenterRepositor
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -19,6 +21,10 @@ public class CostCenterService {
 
     public Optional<OrganisationCostCenter> getCostCenter(String organisationId, String customerCode) {
         return costCenterRepository.findById(new OrganisationCostCenter.Id(organisationId, customerCode));
+    }
+
+    public Set<OrganisationCostCenter> getAllCostCenter(String organisationId){
+        return costCenterRepository.findAllByOrganisationId(organisationId);
     }
 
 }

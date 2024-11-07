@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationCostCenterView;
 import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationView;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,9 @@ import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -51,6 +54,8 @@ public class OrganisationResource {
                             monthsAgo,
                             yesterday,
                             organisation.getAdminEmail(),
+                            new LinkedHashSet<>(),
+                            new LinkedHashSet<>(),
                             organisation.getLogo()
                     );
                 }).toList()
@@ -82,6 +87,20 @@ public class OrganisationResource {
                     monthsAgo,
                     yesterday,
                     organisation1.getAdminEmail(),
+                    organisationService.getAllCostCenter(organisation1.getId()).stream().map(organisationCostCenter -> {
+                        return new OrganisationCostCenterView(
+                                organisationCostCenter.getId() != null ? organisationCostCenter.getId().getCustomerCode() : null,
+                                organisationCostCenter.getExternalCustomerCode(),
+                                organisationCostCenter.getName()
+                        );
+                    }).collect(Collectors.toSet()),
+                    organisationService.getAllProjects(organisation1.getId()).stream().map(organisationProject -> {
+                        return new OrganisationCostCenterView(
+                                organisationProject.getId() != null ? organisationProject.getId().getCustomerCode() : null,
+                                organisationProject.getExternalCustomerCode(),
+                                organisationProject.getName()
+                        );
+                    }).collect(Collectors.toSet()),
                     organisation1.getLogo()
             );
         });
@@ -96,6 +115,42 @@ public class OrganisationResource {
         }
 
         return ResponseEntity.ok().body(organisation);
+    }
+
+    @Operation(description = "Organisation cost center", responses = {
+            @ApiResponse(content =
+                    {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OrganisationCostCenterView.class)))}
+            ),
+    })
+    @GetMapping(value = "/organisation/{orgId}/cost-center", produces = "application/json")
+    public ResponseEntity<?> organisationCostCenter(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+        return ResponseEntity.ok().body(
+                organisationService.getAllCostCenter(orgId).stream().map(organisationCostCenter -> {
+                    return new OrganisationCostCenterView(
+                            organisationCostCenter.getId() != null ? organisationCostCenter.getId().getCustomerCode() : null,
+                            organisationCostCenter.getExternalCustomerCode(),
+                            organisationCostCenter.getName()
+                    );
+                }).toList());
+
+    }
+
+    @Operation(description = "Organisation cost center", responses = {
+            @ApiResponse(content =
+                    {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OrganisationCostCenterView.class)))}
+            ),
+    })
+    @GetMapping(value = "/organisation/{orgId}/project", produces = "application/json")
+    public ResponseEntity<?> organisationProject(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+        return ResponseEntity.ok().body(
+                organisationService.getAllProjects(orgId).stream().map(organisationProject -> {
+                    return new OrganisationCostCenterView(
+                            organisationProject.getId() != null ? organisationProject.getId().getCustomerCode() : null,
+                            organisationProject.getExternalCustomerCode(),
+                            organisationProject.getName()
+                    );
+                }).toList());
+
     }
 
 }
