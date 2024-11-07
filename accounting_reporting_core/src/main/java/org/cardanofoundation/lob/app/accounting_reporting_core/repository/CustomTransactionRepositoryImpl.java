@@ -78,7 +78,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
     @Override
     public List<Object[]> findAllReconciliationSpecialCount(Set<ReconciliationRejectionCodeRequest> rejectionCodes, Optional<LocalDate> getDateFrom, Integer limit, Integer page) {
         val jpql = "SELECT count(rv.transactionId) " +
-                "FROM accounting_reporting_core.ReconcilationEntity r " +
+                "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL) ";
@@ -181,7 +181,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
     public Object findCalcReconciliationStatistic() {
         String missingInERP = "select count(missingInERP) from ( " +
                 "SELECT rv.transactionId missingInERP " +
-                "FROM accounting_reporting_core.ReconcilationEntity r " +
+                "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
@@ -191,7 +191,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
         String newInERP = "select count(newInERP) from ( " +
                 "SELECT rv.transactionId newInERP " +
-                "FROM accounting_reporting_core.ReconcilationEntity r " +
+                "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
@@ -201,7 +201,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
         String inProcessing = "select count(inProcessing) from ( " +
                 "SELECT rv.transactionId inProcessing " +
-                "FROM accounting_reporting_core.ReconcilationEntity r " +
+                "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
@@ -211,7 +211,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
         String newVersionNotPublished = "select count(newVersionNotPublished) from ( " +
                 "SELECT rv.transactionId newVersionNotPublished " +
-                "FROM accounting_reporting_core.ReconcilationEntity r " +
+                "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
@@ -222,7 +222,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
         String newVersion = "select count(newVersion) from ( " +
                 "SELECT rv.transactionId newVersion " +
-                "FROM accounting_reporting_core.ReconcilationEntity r " +
+                "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
@@ -241,7 +241,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
         String txNok = "select count(txNok) from ( " +
                 "SELECT rv.transactionId txNok " +
-                "FROM accounting_reporting_core.ReconcilationEntity r " +
+                "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
@@ -264,7 +264,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
     private String reconciliationQuery(Set<ReconciliationRejectionCodeRequest> rejectionCodes, Optional<LocalDate> getDateFrom) {
         String jpql = "SELECT tr, rv " +
-                "FROM accounting_reporting_core.ReconcilationEntity r " +
+                "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
                 "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id OR tr.lastReconcilation.id IS NULL) ";
