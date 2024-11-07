@@ -24,7 +24,7 @@ public class LOBOnChainBatchProcessor {
     private final TransactionService transactionService;
     private final MetadataDeserialiser metadataDeserialiser;
 
-    @Value("${lob.transaction.metadata_label:22222}")
+    @Value("${lob.transaction.metadata_label:1447}")
     private int metadataLabel;
 
     @EventListener
