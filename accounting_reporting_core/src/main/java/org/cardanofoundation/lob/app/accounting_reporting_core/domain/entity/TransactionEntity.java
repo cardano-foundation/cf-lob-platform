@@ -110,7 +110,7 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     @Setter
     private Boolean ledgerDispatchApproved = false;
 
-    @OneToMany(mappedBy = "transaction", orphanRemoval = true, fetch = EAGER)
+    @OneToMany(mappedBy = "transaction", orphanRemoval = true, fetch = EAGER, cascade = CascadeType.ALL)
     private Set<TransactionItemEntity> items = new LinkedHashSet<>();
 
     @OneToOne(fetch = FetchType.LAZY)
