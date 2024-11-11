@@ -22,9 +22,9 @@ public class JsonSchemaMetadataChecker implements MetadataChecker {
 
     private final ObjectMapper objectMapper;
 
-    @Value("classpath:lob_blockchain_transaction_metadata_schema.json")
+    @Value("classpath:api1_lob_blockchain_transaction_metadata_schema.json")
     @Setter
-    protected Resource metatdataSchemaResource;
+    protected Resource metadataSchemaResource;
 
     @Value("${lob.l1.transaction.metadata.validation.enable:true}")
     @Setter
@@ -32,7 +32,7 @@ public class JsonSchemaMetadataChecker implements MetadataChecker {
 
     @PostConstruct
     public void init() {
-        log.info("JsonSchemaMetadataChecker, metadata validation enabled: {}, schema found:{}", enableChecker, metatdataSchemaResource.exists());
+        log.info("JsonSchemaMetadataChecker, metadata validation enabled: {}, schema found:{}", enableChecker, metadataSchemaResource.exists());
     }
 
     @Override
@@ -46,7 +46,7 @@ public class JsonSchemaMetadataChecker implements MetadataChecker {
         try {
             val jsonObject = objectMapper.readTree(json);
             val jsonSchemaFactory = JsonSchemaFactory.getInstance(V7);
-            val schema = jsonSchemaFactory.getSchema(metatdataSchemaResource.getInputStream());
+            val schema = jsonSchemaFactory.getSchema(metadataSchemaResource.getInputStream());
             val validationResult = schema.validate(jsonObject);
 
             if (!validationResult.isEmpty()) {

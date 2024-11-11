@@ -133,8 +133,8 @@ class MetadataSerialiserTest {
         assertThat(orgMap.get("currency_id")).isEqualTo(organisation.getCurrencyId());
         assertThat(orgMap.get("country_code")).isEqualTo(organisation.getCountryCode());
 
-        assertThat(result.get("txs")).isInstanceOf(CBORMetadataList.class);
-        CBORMetadataList txsList = (CBORMetadataList) result.get("txs");
+        assertThat(result.get("data")).isInstanceOf(CBORMetadataList.class);
+        CBORMetadataList txsList = (CBORMetadataList) result.get("data");
 
         assertThat(txsList.size() == 1).isEqualTo(true);
         MetadataMap txMap = (MetadataMap) txsList.getValueAt(0);

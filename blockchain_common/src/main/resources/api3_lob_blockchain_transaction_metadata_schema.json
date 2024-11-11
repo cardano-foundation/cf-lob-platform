@@ -1,0 +1,267 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Report Schema",
+  "definitions": {
+    "countryCodePattern": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "currencyIdPattern": {
+      "type": "string",
+      "pattern": "^ISO_4217:[A-Z]{3}$|^ISO_24165:[A-Z0-9]+(:[A-Z0-9]+)?$"
+    },
+    "bigDecimalPattern": {
+      "type": "string",
+      "pattern": "^[+-]?[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?$"
+    }
+  },
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "creation_slot": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "format": {
+          "type": "string"
+        }
+      },
+      "required": ["creation_slot", "format"]
+    },
+    "org": {
+      "type": "object",
+      "properties": {
+        "country_code": {
+          "$ref": "#/definitions/countryCodePattern"
+        },
+        "name": {
+          "type": "string"
+        },
+        "tax_id_number": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "currency_id": {
+          "$ref": "#/definitions/currencyIdPattern"
+        }
+      },
+      "required": ["country_code", "name", "tax_id_number", "id", "currency_id"]
+    },
+    "type": {
+      "type": "string",
+      "enum": ["REPORT"]
+    },
+    "subType": {
+      "type": "string",
+      "enum": ["INCOME_STATEMENT", "BALANCE_SHEET"]
+    },
+    "interval": {
+      "type": "string",
+      "enum": ["YEAR", "MONTH", "QUARTER"]
+    },
+    "period": {
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 12
+    },
+    "year": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["USER", "SYSTEM"]
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "revenues": {
+              "type": "object",
+              "properties": {
+                "other_income": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "build_of_long_term_provision": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                }
+              }
+            },
+            "cogs": {
+              "type": "object",
+              "properties": {
+                "cost_of_providing_services": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                }
+              }
+            },
+            "operating_expenses": {
+              "type": "object",
+              "properties": {
+                "personnel_expenses": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "general_and_administrative_expenses": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "depreciation_and_impairment_losses_on_tangible_assets": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "amortization_on_intangible_assets": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "rentExpenses": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                }
+              }
+            },
+            "financial_income": {
+              "type": "object",
+              "properties": {
+                "finance_income": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "finance_expenses": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "realised_gains_on_sale_of_cryptocurrencies": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "staking_rewards_income": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "net_income_options_sale": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                }
+              }
+            },
+            "extraordinary_income": {
+              "type": "object",
+              "properties": {
+                "extraordinary_expenses": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                }
+              }
+            },
+            "tax_expenses": {
+              "type": "object",
+              "properties": {
+                "income_tax_expense": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                }
+              }
+            }
+          },
+          "required": ["revenues", "cogs", "operating_expenses", "financial_income", "extraordinary_income", "tax_expenses"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "assets": {
+              "type": "object",
+              "properties": {
+                "non_current_assets": {
+                  "type": "object",
+                  "properties": {
+                    "property_plant_equipment": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    },
+                    "intangible_assets": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    },
+                    "investments": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    },
+                    "financial_assets": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    }
+                  }
+                },
+                "current_assets": {
+                  "type": "object",
+                  "properties": {
+                    "prepayments_and_other_short_term_assets": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    },
+                    "other_receivables": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    },
+                    "crypto_assets": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    },
+                    "cash_and_cash_equivalents": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    }
+                  }
+                }
+              }
+            },
+            "liabilities": {
+              "type": "object",
+              "properties": {
+                "non_current_liabilities": {
+                  "type": "object",
+                  "properties": {
+                    "provisions": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    }
+                  }
+                },
+                "current_liabilities": {
+                  "type": "object",
+                  "properties": {
+                    "trade_accounts_payables": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    },
+                    "other_current_liabilities": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    },
+                    "accruals_and_short_term_provisions": {
+                      "$ref": "#/definitions/bigDecimalPattern"
+                    }
+                  }
+                }
+              }
+            },
+            "capital": {
+              "type": "object",
+              "properties": {
+                "capital": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                },
+                "retained_earnings": {
+                  "$ref": "#/definitions/bigDecimalPattern"
+                }
+              }
+            }
+          },
+          "required": ["assets", "liabilities", "capital"]
+        }
+      ]
+    }
+  },
+  "required": ["metadata", "org", "type", "subType", "data", "interval", "year", "mode"],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "interval": { "const": "YEAR" } }
+      },
+      "then": {
+        "not": { "required": ["period"] }
+      }
+    },
+    {
+      "if": {
+        "properties": { "interval": { "enum": ["MONTH", "QUARTER"] } }
+      },
+      "then": {
+        "required": ["period"]
+      }
+    }
+  ]
+}
