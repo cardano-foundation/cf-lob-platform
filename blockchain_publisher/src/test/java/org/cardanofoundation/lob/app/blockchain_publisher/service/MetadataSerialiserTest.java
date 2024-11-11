@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.*;
 import java.util.Set;
 
@@ -119,7 +120,7 @@ class MetadataSerialiserTest {
         assertThat(result.get("metadata")).isInstanceOf(MetadataMap.class);
         MetadataMap metadata = (MetadataMap) result.get("metadata");
 
-        assertThat(metadata.get("creation_slot")).isEqualTo(String.valueOf(creationSlot));
+        assertThat(metadata.get("creation_slot")).isEqualTo(BigInteger.valueOf(creationSlot));
         assertThat(metadata.get("timestamp")).isEqualTo("2023-06-01T10:15:30Z");
         assertThat(metadata.get("version")).isEqualTo(VERSION);
 

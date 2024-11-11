@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "creation_slot": "10278",
+    "creation_slot": 10278,
     "version": "1.0"
   },
   "org": {
@@ -48,7 +48,7 @@
             }
           },
           "id": "9c6e241e1136e20e3b5033861156a1e453dce463575ebbebaa813e2af73fa95c",
-          "fx_rate": "0.91277"
+          "fx_rate": "1E-2"
         }
       ],
       "accounting_period": "2023-10"

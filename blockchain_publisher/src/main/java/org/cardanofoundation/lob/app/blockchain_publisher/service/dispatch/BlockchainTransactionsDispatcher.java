@@ -91,10 +91,9 @@ public class BlockchainTransactionsDispatcher {
             return Optional.empty();
         }
 
-        var serialisedTxE = l1TransactionCreator.pullBlockchainTransaction(organisationId, transactions);
-
+        val serialisedTxE = l1TransactionCreator.pullBlockchainTransaction(organisationId, transactions);
         if (serialisedTxE.isEmpty()) {
-            log.warn("Error, there is more passedTransactions to dispatch for organisation:{}", organisationId);
+            log.warn("Error, there is more passedTransactions to dispatch for organisation:{}, actual issue:{}", organisationId, serialisedTxE.getLeft());
 
             return Optional.empty();
         }

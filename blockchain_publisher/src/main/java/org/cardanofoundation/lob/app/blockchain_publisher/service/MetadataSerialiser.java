@@ -8,6 +8,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.*;
 import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +52,7 @@ public class MetadataSerialiser {
 
         val now = Instant.now(clock);
 
-        metadataMap.put("creation_slot", String.valueOf(creationSlot));
+        metadataMap.put("creation_slot", BigInteger.valueOf(creationSlot));
         metadataMap.put("timestamp", DateTimeFormatter.ISO_INSTANT.format(now));
         metadataMap.put("version", VERSION);
 
@@ -116,7 +117,6 @@ public class MetadataSerialiser {
         document.getVat().ifPresent(vat -> metadataMap.put("vat", serialise(vat)));
         document.getCounterparty().ifPresent(counterparty -> metadataMap.put("counterparty", serialise(counterparty)));
 
-
         return metadataMap;
     }
 
@@ -155,7 +155,6 @@ public class MetadataSerialiser {
         transactionItemEntity.getCostCenter().ifPresent(costCenter -> metadataMap.put("cost_center", serialise(costCenter)));
 
         metadataMap.put("fx_rate", BigDecimals.normaliseEngineeringString(transactionItemEntity.getFxRate()));
-
         metadataMap.put("document", serialise(transactionItemEntity.getDocument()));
 
         return metadataMap;
