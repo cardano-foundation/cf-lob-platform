@@ -1,0 +1,47 @@
+{
+  "org": {
+    "name": "Cardano Foundation",
+    "country_code": "CH",
+    "tax_id_number": "CHE-184477354",
+    "currency_id": "ISO_4217:CHF",
+    "id": "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94"
+  },
+  "metadata": {
+    "format": "1.0",
+    "creation_slot": 10278
+  },
+  "data": {
+    "revenues": {
+      "other_income": "5000000.00",
+      "build_of_long_term_provision": "1000000.00"
+    },
+    "cogs": {
+      "cost_of_providing_services": "15000000.00"
+    },
+    "operating_expenses": {
+      "personnel_expenses": "20000000.00",
+      "general_and_administrative_expenses": "5000000.00",
+      "depreciation_and_impairment_losses_on_tangible_assets": "3000000.00",
+      "amortization_on_intangible_assets": "2000000.00",
+      "rentExpenses": "1111.00"
+    },
+    "financial_income": {
+      "finance_income": "3000000.00",
+      "finance_expenses": "1500000.00",
+      "realised_gains_on_sale_of_cryptocurrencies": "1000000.00",
+      "staking_rewards_income": "2000000.00",
+      "net_income_options_sale": "500000.00"
+    },
+    "extraordinary_income": {
+      "extraordinary_expenses": "1000000.00"
+    },
+    "tax_expenses": {
+      "income_tax_expense": "2500000.00"
+    }
+  },
+  "type": "REPORT",
+  "subType": "INCOME_STATEMENT",
+  "interval": "YEAR",
+  "year": "2023",
+  "mode": "USER"
+}

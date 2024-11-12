@@ -1,0 +1,48 @@
+{
+  "org": {
+    "name": "Cardano Foundation",
+    "country_code": "CH",
+    "tax_id_number": "CHE-184477354",
+    "currency_id": "ISO_4217:CHF",
+    "id": "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94"
+  },
+  "metadata": {
+    "format": "1.0",
+    "creation_slot": 10278
+  },
+  "data": {
+    "assets": {
+      "non_current_assets": {
+        "property_plant_equipment": "500000.00",
+        "intangible_assets": "200000.00",
+        "investments": "150000.00",
+        "financial_assets": "100000.00"
+      },
+      "current_assets": {
+        "prepayments_and_other_short_term_assets": "50000.00",
+        "other_receivables": "75000.00",
+        "crypto_assets": "25000.00",
+        "cash_and_cash_equivalents": "300000.00"
+      }
+    },
+    "liabilities": {
+      "non_current_liabilities": {
+        "provisions": "250000.00"
+      },
+      "current_liabilities": {
+        "trade_accounts_payables": "50000.00",
+        "other_current_liabilities": "75000.00",
+        "accruals_and_short_term_provisions": "25000.00"
+      }
+    },
+    "capital": {
+      "capital": "300000.00",
+      "retained_earnings": "200000.00"
+    }
+  },
+  "type": "REPORT",
+  "subType": "BALANCE_SHEET",
+  "interval": "YEAR",
+  "year": "2023",
+  "mode": "USER"
+}

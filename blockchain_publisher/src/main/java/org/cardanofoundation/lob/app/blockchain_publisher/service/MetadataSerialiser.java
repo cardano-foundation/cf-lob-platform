@@ -37,7 +37,8 @@ public class MetadataSerialiser {
         val txList = MetadataBuilder.createList();
         transactions.forEach(tx -> txList.add(serialise(tx, organisationCollapsable)));
 
-        globalMetadataMap.put("txs", txList);
+        globalMetadataMap.put("type", "INDIVIDUAL_TRANSACTIONS");
+        globalMetadataMap.put("data", txList);
 
         return globalMetadataMap;
     }
