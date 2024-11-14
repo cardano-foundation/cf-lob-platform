@@ -100,7 +100,8 @@ public class DbSynchronisationUseCaseService {
                     val attached = txM.orElseThrow();
 
                     transactionConverter.copyFields(attached, incomingTx);
-
+                    attached.getAllItems().clear();
+                    attached.getAllItems().addAll(incomingTx.getAllItems());
                     toProcessTransactions.add(attached);
                 } else {
                     toProcessTransactions.add(incomingTx);
