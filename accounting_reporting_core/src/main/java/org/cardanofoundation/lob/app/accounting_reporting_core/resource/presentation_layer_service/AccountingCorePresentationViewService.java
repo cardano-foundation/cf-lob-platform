@@ -53,7 +53,21 @@ public class AccountingCorePresentationViewService {
     public ReconciliationResponseView allReconciliationTransaction(ReconciliationFilterRequest body) {
         val transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
         if (body.getFilter().equals(ReconciliationFilterStatusRequest.UNRECONCILED)) {
+            Set<Object> txDuplicated = new HashSet<>();
             val transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).stream()
+                    .filter(o -> {
+                        if (o[0] instanceof TransactionEntity) {
+                            if (!txDuplicated.contains(o[0])) {
+                                txDuplicated.add(o[0]);
+                                return true;
+                            }
+                        }
+                        if (o[1] instanceof ReconcilationViolation) {
+                            return true;
+                        }
+
+                        return false;
+                    })
                     .map(this::getReconciliationTransactionsSelector)
                     .collect(toSet());
 
@@ -317,7 +331,7 @@ public class AccountingCorePresentationViewService {
                 TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
                 TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
                 TransactionReconciliationTransactionsView.ReconciliationCodeView.NOK,
-                Set.of(ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode(),false)),
+                Set.of(ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode(), false)),
                 null,
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>()
