@@ -6,8 +6,11 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
+import org.javers.common.collections.Arrays;
 
+import java.sql.Array;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,8 +51,8 @@ public class ExtractionParametersFilteringService {
                     return txTypes.isEmpty() || txTypes.contains(tx.getTransactionType());
                 })
                 .filter(tx -> {
-                    val transactionNumbers = userExtractionParameters.getTransactionNumbers();
-
+                    val transactionNumbers = new ArrayList<>(userExtractionParameters.getTransactionNumbers());
+                    transactionNumbers.removeIf(String::isEmpty);
                     return transactionNumbers.isEmpty() || transactionNumbers.contains(tx.getInternalTransactionNumber());
                 })
                 .collect(Collectors.toSet());
