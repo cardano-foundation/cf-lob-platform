@@ -57,19 +57,22 @@ public class AccountingCorePresentationViewService {
             val transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).stream()
                     .filter(o -> {
                         if (o[0] instanceof TransactionEntity) {
-                            if (!txDuplicated.contains(o[0])) {
-                                txDuplicated.add(o[0]);
+                            if (!txDuplicated.contains(((TransactionEntity) o[0]).getId())) {
+                                txDuplicated.add(((TransactionEntity) o[0]).getId());
                                 return true;
                             }
                         }
                         if (o[1] instanceof ReconcilationViolation) {
-                            return true;
+                            if (!txDuplicated.contains(((ReconcilationViolation) o[1]).getTransactionId())) {
+                                txDuplicated.add(((ReconcilationViolation) o[1]).getTransactionId());
+                                return true;
+                            }
                         }
-
                         return false;
                     })
                     .map(this::getReconciliationTransactionsSelector)
-                    .collect(toSet());
+                    .sorted(Comparator.comparing(TransactionReconciliationTransactionsView::getId))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
             return new ReconciliationResponseView(
                     (long) accountingCoreTransactionRepository.findAllReconciliationSpecialCount(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).size(),
