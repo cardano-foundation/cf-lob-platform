@@ -165,12 +165,15 @@ public class AccountingCorePresentationViewService {
 
     @Transactional
     public Either<Problem, Void> extractionTrigger(ExtractionRequest body) {
+        val transactionNumbers = new ArrayList<>(body.getTransactionNumbers());
+        transactionNumbers.removeIf(String::isEmpty);
+
         val fp = UserExtractionParameters.builder()
                 .from(LocalDate.parse(body.getDateFrom()))
                 .to(LocalDate.parse(body.getDateTo()))
                 .organisationId(body.getOrganisationId())
                 .transactionTypes(body.getTransactionType())
-                .transactionNumbers(body.getTransactionNumbers())
+                .transactionNumbers(transactionNumbers)
                 .build();
 
         return accountingCoreService.scheduleIngestion(fp);
