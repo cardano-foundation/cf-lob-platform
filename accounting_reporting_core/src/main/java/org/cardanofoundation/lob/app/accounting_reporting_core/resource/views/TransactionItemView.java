@@ -3,7 +3,6 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 
 import java.math.BigDecimal;
@@ -59,7 +58,7 @@ public class TransactionItemView {
 
     private String counterpartyCustomerCode;
 
-    private Type counterpartyType;
+    private String counterpartyType;
 
     private String counterpartyName;
 

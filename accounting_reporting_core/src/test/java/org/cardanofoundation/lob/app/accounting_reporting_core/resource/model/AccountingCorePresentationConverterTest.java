@@ -160,6 +160,7 @@ class AccountingCorePresentationConverterTest {
 
         String transactionId = "tx-id";
         TransactionEntity transactionEntity = new TransactionEntity();
+        transactionEntity.setTransactionType(TransactionType.VendorBill);
         transactionEntity.setId(transactionId);
 
         when(transactionRepositoryGateway.findById(transactionId)).thenReturn(Optional.of(transactionEntity));
@@ -176,6 +177,7 @@ class AccountingCorePresentationConverterTest {
         TransactionItemEntity transactionItem = new TransactionItemEntity();
         transactionItem.setId("txItemId");
         transactionItem.setAmountLcy(BigDecimal.valueOf(100));
+        transactionItem.setAmountFcy(BigDecimal.valueOf(100));
         TransactionViolation transactionViolation = new TransactionViolation();
         transactionViolation.setTxItemId(Optional.of("txItemId"));
         LocalDate from = LocalDate.now();
@@ -188,8 +190,10 @@ class AccountingCorePresentationConverterTest {
 
         TransactionEntity transaction1 = new TransactionEntity();
         transaction1.setId("tx-id1");
+        transaction1.setTransactionType(TransactionType.Journal);
         TransactionEntity transaction2 = new TransactionEntity();
         transaction2.setId("tx-id2");
+        transaction2.setTransactionType(TransactionType.VendorBill);
 
         transaction1.setItems(Set.of(transactionItem));
         transaction1.setViolations(Set.of(transactionViolation));

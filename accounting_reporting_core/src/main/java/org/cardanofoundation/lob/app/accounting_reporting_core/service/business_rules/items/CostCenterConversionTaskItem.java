@@ -2,12 +2,15 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.business
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
@@ -26,7 +29,7 @@ public class CostCenterConversionTaskItem implements PipelineTaskItem {
             val costCenterM = txItem.getCostCenter();
 
             if (costCenterM.isEmpty()) {
-                return;
+                continue;
             }
 
             val costCenter = costCenterM.orElseThrow();
@@ -51,7 +54,7 @@ public class CostCenterConversionTaskItem implements PipelineTaskItem {
 
                 tx.addViolation(v);
 
-                return;
+                continue;
             }
 
             val costCenterMapping = costCenterMappingM.orElseThrow();
