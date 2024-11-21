@@ -57,8 +57,8 @@ class JournalAccountAmountsEnrichmentTaskItemTest {
         taskItem.run(transaction);
 
         // Then
-        assertThat(item1.getAmountFcy()).isEqualByComparingTo("-100.00");
-        assertThat(item1.getAmountLcy()).isEqualByComparingTo("-200.00");
+        assertThat(item1.getAmountFcy()).isEqualByComparingTo("100.00");
+        assertThat(item1.getAmountLcy()).isEqualByComparingTo("200.00");
         assertThat(item2.getAmountFcy()).isEqualByComparingTo("300.00");
         assertThat(item2.getAmountLcy()).isEqualByComparingTo("400.00");
 

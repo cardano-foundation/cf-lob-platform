@@ -4,6 +4,7 @@ import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
@@ -476,8 +477,8 @@ public class AccountingCorePresentationViewService {
                     item.getAccountCredit().map(Account::getCode).orElse(""),
                     item.getAccountCredit().flatMap(Account::getName).orElse(""),
                     item.getAccountCredit().flatMap(Account::getRefCode).orElse(""),
-                    item.getAmountFcy(),
-                    item.getAmountLcy(),
+                    item.getAmountFcy().abs(),
+                    item.getAmountLcy().abs(),
                     item.getFxRate(),
                     item.getCostCenter().map(CostCenter::getCustomerCode).orElse(""),
                     item.getCostCenter().flatMap(CostCenter::getExternalCustomerCode).orElse(""),
@@ -492,7 +493,7 @@ public class AccountingCorePresentationViewService {
                     item.getDocument().flatMap(document -> document.getVat().map(Vat::getCustomerCode)).orElse(""),
                     item.getDocument().flatMap(document -> document.getVat().flatMap(Vat::getRate)).orElse(ZERO),
                     item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getCustomerCode)).orElse(""),
-                    item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).orElse(VENDOR),
+                    item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).isPresent() ? item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).get().toString() : "",
                     item.getDocument().flatMap(document -> document.getCounterparty().flatMap(Counterparty::getName)).orElse(""),
                     item.getRejection().map(Rejection::getRejectionReason).orElse(null)
             );
@@ -530,9 +531,17 @@ public class AccountingCorePresentationViewService {
     }
 
     public BigDecimal getAmountLcyTotalForAllItems(TransactionEntity tx) {
-        return tx.getItems().stream()
+        Set<TransactionItemEntity> items = tx.getItems();
+
+        if (tx.getTransactionType().equals(TransactionType.Journal)) {
+            items = tx.getItems().stream().filter(txItems -> {
+                return txItems.getOperationType().equals(Optional.of(OperationType.DEBIT));
+            }).collect(toSet());
+        }
+
+        return items.stream()
                 .map(TransactionItemEntity::getAmountLcy)
-                .reduce(ZERO, BigDecimal::add);
+                .reduce(ZERO, BigDecimal::add).abs();
     }
 
 }

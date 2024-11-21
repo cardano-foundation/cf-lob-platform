@@ -20,10 +20,8 @@ public class DebitAccountCheckTaskItem implements PipelineTaskItem {
         tx.getItems().stream().filter(txItem -> {
             val accountDebit = txItem.getAccountDebit();
             val accountCredit = txItem.getAccountCredit();
-            /**
-             * TODO: For Journals. Need the dummy account constant to use it in here.
-             */
-            return Optionals.zip(accountDebit, accountCredit, (debit, credit) -> debit.getCode().equals(credit.getCode()) || debit.getCode().equals("0000000000"))
+
+            return Optionals.zip(accountDebit, accountCredit, (debit, credit) -> debit.getCode().equals(credit.getCode()))
                     .orElse(false);
         }).forEach(txItem -> txItem.setStatus(ERASED_SELF_PAYMENT));
     }

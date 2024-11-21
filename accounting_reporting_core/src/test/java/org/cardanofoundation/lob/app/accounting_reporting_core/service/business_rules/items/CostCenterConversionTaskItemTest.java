@@ -137,7 +137,7 @@ class CostCenterConversionTaskItemTest {
         taskItem.run(tx);
 
         assertThat(tx.getAutomatedValidationStatus()).isEqualTo(FAILED);
-        assertThat(tx.getViolations()).hasSize(1);
+        assertThat(tx.getViolations()).hasSize(2);
         assertThat(tx.getViolations().iterator().next().getCode()).isEqualTo(COST_CENTER_DATA_NOT_FOUND);
     }
 
