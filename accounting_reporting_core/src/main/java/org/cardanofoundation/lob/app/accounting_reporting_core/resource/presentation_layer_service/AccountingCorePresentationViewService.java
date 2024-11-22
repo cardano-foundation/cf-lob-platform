@@ -463,7 +463,7 @@ public class AccountingCorePresentationViewService {
                 (Long) result[5],
                 (Integer) ((Long) result[6]).intValue(),
                 (Long) result[7],
-                (Integer) (((Long) result[5]).intValue() + ((Long) result[6]).intValue() + ((Long) result[7]).intValue())
+                (Integer) (((Long) result[5]).intValue() + ((Long) result[6]).intValue())
         );
     }
 
@@ -512,7 +512,7 @@ public class AccountingCorePresentationViewService {
 
     private TransactionReconciliationTransactionsView getReconciliationTransactionsSelector(Object[] violations) {
         for (Object o : violations) {
-            if (o instanceof TransactionEntity) {
+            if (o instanceof TransactionEntity && ((TransactionEntity) o).getLastReconcilation().isPresent()) {
                 return getTransactionReconciliationView((TransactionEntity) o);
             }
             if (o instanceof ReconcilationViolation) {
