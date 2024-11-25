@@ -1,6 +1,5 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
-import io.hypersistence.utils.hibernate.query.SQLExtractor;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
@@ -80,7 +79,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
         val jpql = "SELECT count(rv.transactionId) " +
                 "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
-                "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
+                "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id or tr.lastReconcilation IS NULL) ";
 
         String where = "";
@@ -139,6 +138,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
 
                 criteriaQuery.select(rootEntry);
                 criteriaQuery.where(builder.and(builder.equal(rootEntry.get("reconcilation").get("finalStatus"), ReconcilationCode.OK)));
+                criteriaQuery.orderBy(builder.desc(rootEntry.get("entryDate")));
                 TypedQuery<TransactionEntity> theQuery = em.createQuery(criteriaQuery);
                 theQuery.setMaxResults(limit);
                 if (null != page && 0 < page) {
@@ -183,8 +183,8 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
                 "SELECT rv.transactionId missingInERP " +
                 "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
-                "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
-                "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
+                "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
+                "WHERE (r.id = tr.lastReconcilation.id or tr.lastReconcilation IS NULL)  " +
                 STR."AND rv.rejectionCode = '" + ReconcilationRejectionCode.TX_NOT_IN_ERP + "' " +
                 "GROUP BY rv.transactionId " +
                 ") ";
@@ -193,8 +193,8 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
                 "SELECT rv.transactionId newInERP " +
                 "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
-                "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
-                "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
+                "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
+                "WHERE (r.id = tr.lastReconcilation.id or tr.lastReconcilation IS NULL)  " +
                 STR."AND rv.rejectionCode = '" + ReconcilationRejectionCode.TX_NOT_IN_LOB + "' " +
                 "GROUP BY rv.transactionId " +
                 ") ";
@@ -203,8 +203,8 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
                 "SELECT rv.transactionId inProcessing " +
                 "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
-                "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
-                "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
+                "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
+                "WHERE (r.id = tr.lastReconcilation.id or tr.lastReconcilation IS NULL)  " +
                 STR."AND rv.rejectionCode = '" + ReconcilationRejectionCode.SINK_RECONCILATION_FAIL + "' " +
                 "GROUP BY rv.transactionId " +
                 ") ";
@@ -213,8 +213,8 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
                 "SELECT rv.transactionId newVersionNotPublished " +
                 "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
-                "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
-                "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
+                "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
+                "WHERE (r.id = tr.lastReconcilation.id or tr.lastReconcilation IS NULL)  " +
                 STR."AND rv.rejectionCode = '" + ReconcilationRejectionCode.SOURCE_RECONCILATION_FAIL + "' " +
                 "AND tr.ledgerDispatchApproved IS FALSE " +
                 "GROUP BY rv.transactionId " +
@@ -224,8 +224,8 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
                 "SELECT rv.transactionId newVersion " +
                 "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
-                "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
-                "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
+                "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
+                "WHERE (r.id = tr.lastReconcilation.id or tr.lastReconcilation IS NULL)  " +
                 STR."AND rv.rejectionCode = '" + ReconcilationRejectionCode.SOURCE_RECONCILATION_FAIL + "' " +
                 "AND tr.ledgerDispatchApproved IS TRUE " +
                 "GROUP BY rv.transactionId " +
@@ -243,8 +243,8 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
                 "SELECT rv.transactionId txNok " +
                 "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
-                "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
-                "WHERE (r.id = tr.lastReconcilation.id or tr.id IS NULL)  " +
+                "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
+                "WHERE (r.id = tr.lastReconcilation.id or tr.lastReconcilation IS NULL)  " +
                 "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType " +
                 ") ";
 
@@ -266,7 +266,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
         String jpql = "SELECT tr, rv " +
                 "FROM accounting_reporting_core.reconcilation.ReconcilationEntity r " +
                 "JOIN r.violations rv " +
-                "FULL JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
+                "LEFT JOIN accounting_reporting_core.TransactionEntity tr ON rv.transactionId = tr.id " +
                 "WHERE (r.id = tr.lastReconcilation.id OR tr.lastReconcilation.id IS NULL) ";
 
         String where = "";
@@ -299,7 +299,7 @@ public class CustomTransactionRepositoryImpl implements CustomTransactionReposit
         if (getDateFrom.isPresent()) {
             where += " AND r.createdAt > :startDate AND r.createdAt < :endDate ";
         }
-        where += "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.rejectionCode, rv.sourceDiff, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType ORDER BY rv.transactionId ";
+        where += "GROUP BY rv.transactionId, tr.id, rv.amountLcySum, rv.rejectionCode, rv.sourceDiff, rv.transactionEntryDate, rv.transactionInternalNumber, rv.transactionType ORDER BY rv.transactionEntryDate ";
 
         return jpql + where;
     }
