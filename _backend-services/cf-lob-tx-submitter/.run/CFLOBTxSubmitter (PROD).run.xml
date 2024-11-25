@@ -1,0 +1,23 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CFLOBTxSubmitter (PROD)" type="Application" factoryName="Application">
+    <envs>
+      <env name="SPRING_CONFIG_LOCATION" value="classpath:/application.properties,classpath:/application-prod.properties" />
+      <env name="SPRING_PROFILES_ACTIVE" value="prod" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="org.cardano.foundation.lob.CFLOBTxSubmitter" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.cardano.foundation.lob.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+      <option name="credential" />
+      <option name="region" />
+      <option name="useCurrentConnection" value="false" />
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
