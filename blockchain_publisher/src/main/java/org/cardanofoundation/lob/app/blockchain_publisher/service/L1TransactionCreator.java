@@ -129,6 +129,7 @@ public class L1TransactionCreator {
             if (newChunkTxBytes.length >= CARDANO_MAX_TRANSACTION_SIZE_BYTES) {
                 log.info("Blockchain transaction created, id:{}", TransactionUtil.getTxHash(txBytes));
 
+                log.info("Blockchain transaction created, id:{}, debugTxOutput:{}", TransactionUtil.getTxHash(txBytes), this.debugStoreOutputTx);
                 potentiallyStoreTxs(creationSlot, serializedTransaction);
 
                 val remainingTxs = calculateRemainingTransactions(transactions, transactionsBatch);
@@ -150,6 +151,7 @@ public class L1TransactionCreator {
             }
 
             val serTx = serializedTxE.get();
+            log.info("Blockchain transaction created, id:{}, debugTxOutput:{}", TransactionUtil.getTxHash(serTx.txBytes), this.debugStoreOutputTx);
             potentiallyStoreTxs(creationSlot, serTx);
             val txBytes = serTx.txBytes;
 

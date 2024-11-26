@@ -49,6 +49,14 @@ public class AccountingCoreService {
             return dateRangeCheckE;
         }
 
+        if (userExtractionParameters.getTransactionNumbers().size() > 500) { // TODO put this magic 500 in a config
+            return Either.left(Problem.builder()
+                    .withTitle("TOO_MANY_TRANSACTIONS")
+                    .withDetail("Too many transactions requested, maximum is 500")
+                    .withStatus(BAD_REQUEST)
+                    .build());
+        }
+
         val event = ScheduledIngestionEvent.builder().metadata(EventMetadata.create(ScheduledIngestionEvent.VERSION))
                 .organisationId(userExtractionParameters.getOrganisationId())
                 .userExtractionParameters(userExtractionParameters)
