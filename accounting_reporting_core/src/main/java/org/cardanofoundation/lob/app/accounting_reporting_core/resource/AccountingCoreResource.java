@@ -117,10 +117,10 @@ public class AccountingCoreResource {
             )
     })
     public ResponseEntity<?> extractionTrigger(@Valid @RequestBody ExtractionRequest body) {
-        if (body.getTransactionNumbers().size() > 100) {
+        if (body.getTransactionNumbers().size() > 500) { // TODO put this magic 500 in a config
             val issue = Problem.builder()
                     .withTitle("TRANSACTION_NUMBERS_LIMIT_EXCEEDED")
-                    .withDetail("Transaction numbers limit exceeded. Maximum allowed transaction numbers is 100.")
+                    .withDetail("Transaction numbers limit exceeded. Maximum allowed transaction numbers is 500.")
                     .withStatus(BAD_REQUEST)
                     .build();
 
