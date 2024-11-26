@@ -8,6 +8,8 @@ import com.bloxbean.cardano.client.exception.CborSerializationException;
 import com.bloxbean.cardano.client.function.helper.SignerProviders;
 import com.bloxbean.cardano.client.metadata.Metadata;
 import com.bloxbean.cardano.client.metadata.MetadataBuilder;
+import com.bloxbean.cardano.client.metadata.MetadataMap;
+import com.bloxbean.cardano.client.metadata.cbor.CBORMetadataMap;
 import com.bloxbean.cardano.client.metadata.helper.MetadataToJsonNoSchemaConverter;
 import com.bloxbean.cardano.client.quicktx.QuickTxBuilder;
 import com.bloxbean.cardano.client.quicktx.Tx;
@@ -203,7 +205,9 @@ public class L1TransactionCreator {
             val json = MetadataToJsonNoSchemaConverter.cborBytesToJson(bytes);
 
             val metadata = MetadataBuilder.createMetadata();
-            metadata.put(metadataLabel, metadataMap);
+            val cborMetadataMap = new CBORMetadataMap(data);
+
+            metadata.put(metadataLabel, cborMetadataMap);
 
             val isValid = jsonSchemaMetadataChecker.checkTransactionMetadata(json);
 
