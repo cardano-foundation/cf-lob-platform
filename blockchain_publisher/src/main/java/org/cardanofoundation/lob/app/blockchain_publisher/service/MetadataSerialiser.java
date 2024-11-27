@@ -149,7 +149,7 @@ public class MetadataSerialiser {
         val metadataMap = MetadataBuilder.createMap();
 
         metadataMap.put("id", transactionItemEntity.getId());
-        metadataMap.put("amount", BigDecimals.normaliseEngineeringString(transactionItemEntity.getAmountFcy()));
+        metadataMap.put("amount", BigDecimals.normaliseEngineeringString(transactionItemEntity.getAmountFcy().abs())); // TODO ABS function here is not a mistake but we need to revisit journals properly
 
         transactionItemEntity.getAccountEvent().ifPresent(accountEvent -> metadataMap.put("event", serialise(accountEvent)));
         transactionItemEntity.getProject().ifPresent(project -> metadataMap.put("project", serialise(project)));
