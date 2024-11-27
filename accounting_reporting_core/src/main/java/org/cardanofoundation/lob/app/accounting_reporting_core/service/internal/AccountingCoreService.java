@@ -13,6 +13,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.assistanc
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,9 @@ public class AccountingCoreService {
     private final OrganisationPublicApiIF organisationPublicApi;
     private final AccountingPeriodCalculator accountingPeriodCalculator;
 
+    @Value("${lob.max.transaction.numbers.per.batch:600}")
+    private int maxTransactionNumbersPerBatch = 600;
+
     @Transactional
     public Either<Problem, Void> scheduleIngestion(UserExtractionParameters userExtractionParameters) {
         log.info("scheduleIngestion, parameters: {}", userExtractionParameters);
@@ -49,10 +53,10 @@ public class AccountingCoreService {
             return dateRangeCheckE;
         }
 
-        if (userExtractionParameters.getTransactionNumbers().size() > 500) { // TODO put this magic 500 in a config
+        if (userExtractionParameters.getTransactionNumbers().size() > maxTransactionNumbersPerBatch) {
             return Either.left(Problem.builder()
                     .withTitle("TOO_MANY_TRANSACTIONS")
-                    .withDetail("Too many transactions requested, maximum is 500")
+                    .withDetail(STR."Too many transactions requested, maximum is \{maxTransactionNumbersPerBatch}")
                     .withStatus(BAD_REQUEST)
                     .build());
         }
