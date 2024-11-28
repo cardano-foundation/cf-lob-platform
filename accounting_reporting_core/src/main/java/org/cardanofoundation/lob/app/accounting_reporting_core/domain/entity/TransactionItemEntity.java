@@ -200,11 +200,11 @@ public class TransactionItemEntity extends CommonEntity implements Persistable<S
     }
 
     public Optional<OperationType> getOperationType() {
-        val amountLcy = this.amountLcy.intValue();
+        val amountLcy = this.amountLcy;
 
-        if (amountLcy == 0) return Optional.empty();
+        if (amountLcy.compareTo(BigDecimal.ZERO) == 0) return Optional.empty();
 
-        return amountLcy < 0 ? Optional.of(OperationType.CREDIT) : Optional.of(OperationType.DEBIT);
+        return amountLcy.compareTo(BigDecimal.ZERO) < 0 ? Optional.of(OperationType.CREDIT) : Optional.of(OperationType.DEBIT);
     }
 
     @Override
