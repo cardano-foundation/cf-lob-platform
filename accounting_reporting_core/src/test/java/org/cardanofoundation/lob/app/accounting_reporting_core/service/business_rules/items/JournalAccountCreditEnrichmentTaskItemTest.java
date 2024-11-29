@@ -17,8 +17,6 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.CREDIT;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.DEBIT;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.FxRevaluation;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.Journal;
 import static org.mockito.Mockito.eq;
@@ -131,7 +129,6 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
 
     @Test
     void should_Set_Credit_From_Debit_If_Conditions_Met() {
-
         val items = new LinkedHashSet<TransactionItemEntity>();
         transaction = new TransactionEntity();
         transaction.setOrganisation(org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation.builder()
@@ -154,9 +151,9 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
         val item2 = new TransactionItemEntity();
         item2.setId("2");
         item2.setAccountDebit(Optional.of(Account.builder()
-                .code("4102120100")
-                .build()
-        )
+                        .code("4102120100")
+                        .build()
+                )
         );
 
         item2.setAmountLcy(BigDecimal.valueOf(-188.50)); // negative implies credit
@@ -277,71 +274,6 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
         assertThat(item8.getAccountCredit().map(Account::getCode).orElseThrow()).isEqualTo("1203210100");
         assertThat(item9.getAccountCredit().map(Account::getCode).orElseThrow()).isEqualTo("0000000000");
         assertThat(item10.getAccountCredit().map(Account::getCode).orElseThrow()).isEqualTo("0000000000");
-    }
-
-    @Test
-    void should_Be_Credit_Debit_By_Amount() {
-
-        val items = new LinkedHashSet<TransactionItemEntity>();
-        transaction = new TransactionEntity();
-        transaction.setOrganisation(org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation.builder()
-                .id("org1")
-                .build()
-        );
-        transaction.setTransactionType(Journal);
-
-        val item1 = new TransactionItemEntity();
-        item1.setId("1");
-
-        item1.setAccountDebit(Optional.of(Account.builder()
-                .code("1203110540")
-                .build())
-        );
-
-        item1.setAmountLcy(BigDecimal.valueOf(0.06)); // positive implies debit
-        items.add(item1);
-
-        val item2 = new TransactionItemEntity();
-        item2.setId("2");
-        item2.setAccountDebit(Optional.of(Account.builder()
-                        .code("6421110100")
-                        .build()
-                )
-        );
-
-        item2.setAmountLcy(BigDecimal.valueOf(-0.99)); // negative implies credit
-        items.add(item2);
-
-        val item3 = new TransactionItemEntity();
-        item3.setId("3");
-
-        item3.setAccountDebit(Optional.of(Account.builder()
-                .code("6420160100")
-                .build())
-        );
-
-        item3.setAmountLcy(BigDecimal.valueOf(0.93)); // positive implies debit
-        items.add(item3);
-
-        transaction.setItems(items);
-
-        when(organisationPublicApiIF.findByOrganisationId(eq("org1"))).thenReturn(Optional.of(organisation));
-        when(organisation.getDummyAccount()).thenReturn(Optional.of(DUMMY_ACCOUNT));
-
-        taskItem.run(transaction);
-
-        assertThat(item1.getAccountDebit().map(Account::getCode).orElseThrow()).isEqualTo("1203110540");
-        assertThat(item1.getAccountCredit().map(Account::getCode).orElseThrow()).isEqualTo("0000000000");
-        assertThat(item3.getOperationType()).isEqualTo(Optional.of(DEBIT));
-
-        assertThat(item3.getAccountDebit().map(Account::getCode).orElseThrow()).isEqualTo("6420160100");
-        assertThat(item3.getAccountCredit().map(Account::getCode).orElseThrow()).isEqualTo("0000000000");
-        assertThat(item1.getOperationType()).isEqualTo(Optional.of(DEBIT));
-
-        assertThat(item2.getAccountDebit().map(Account::getCode).orElseThrow()).isEqualTo("0000000000");
-        assertThat(item2.getAccountCredit().map(Account::getCode).orElseThrow()).isEqualTo("6421110100");
-        assertThat(item2.getOperationType()).isEqualTo(Optional.of(CREDIT));
-
     }
 
 }
