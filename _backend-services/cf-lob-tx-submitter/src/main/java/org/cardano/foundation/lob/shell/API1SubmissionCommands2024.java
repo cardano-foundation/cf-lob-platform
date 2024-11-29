@@ -4,9 +4,11 @@ import co.nstant.in.cbor.model.Map;
 import com.bloxbean.cardano.client.account.Account;
 import com.bloxbean.cardano.client.api.model.Amount;
 import com.bloxbean.cardano.client.api.model.Result;
+import com.bloxbean.cardano.client.api.model.Utxo;
 import com.bloxbean.cardano.client.backend.api.BackendService;
+import com.bloxbean.cardano.client.backend.api.DefaultUtxoSupplier;
+import com.bloxbean.cardano.client.backend.model.TransactionContent;
 import com.bloxbean.cardano.client.common.cbor.CborSerializationUtil;
-import com.bloxbean.cardano.client.common.model.Network;
 import com.bloxbean.cardano.client.function.helper.SignerProviders;
 import com.bloxbean.cardano.client.metadata.Metadata;
 import com.bloxbean.cardano.client.metadata.MetadataBuilder;
@@ -14,13 +16,11 @@ import com.bloxbean.cardano.client.metadata.cbor.CBORMetadataMap;
 import com.bloxbean.cardano.client.metadata.helper.MetadataToJsonNoSchemaConverter;
 import com.bloxbean.cardano.client.quicktx.QuickTxBuilder;
 import com.bloxbean.cardano.client.quicktx.Tx;
-import com.bloxbean.cardano.client.transaction.util.TransactionUtil;
+import com.bloxbean.cardano.client.util.JsonUtil;
 import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardano.foundation.lob.service.blockchain_state.BlockchainDataChainTipService;
-import org.cardano.foundation.lob.service.transaction_submit.TransactionSubmissionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.shell.standard.ShellComponent;
@@ -36,6 +36,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -46,12 +48,9 @@ import java.util.stream.Stream;
 public class API1SubmissionCommands2024 {
 
     private final BackendService backendService;
-    private final TransactionSubmissionService transactionSubmissionService;
-    private final BlockchainDataChainTipService blockchainDataChainTipService;
     private final Account organiserAccount;
-    private final Network network;
 
-    @Value("${l1.transaction.metadata.label:1447}")
+    @Value("${l1.transaction.metadata_label:1447}")
     private int metadataLabel;
 
     @ShellMethod(key = "03_submit-txs", value = "Submit API1 txs")
@@ -147,10 +146,11 @@ public class API1SubmissionCommands2024 {
     protected Either<Exception, Result<String>> submitL1Tx(Metadata metadata) {
         val quickTxBuilder = new QuickTxBuilder(backendService);
 
+        val senderAddress = organiserAccount.baseAddress();
         val tx = new Tx()
                 .payToAddress(organiserAccount.baseAddress(), Amount.ada(1))
                 .attachMetadata(metadata)
-                .from(organiserAccount.baseAddress());
+                .from(senderAddress);
 
         try {
             val txResult = quickTxBuilder.compose(tx)
@@ -159,11 +159,53 @@ public class API1SubmissionCommands2024 {
                     //.buildAndSign()
                     .completeAndWait(Duration.ofMinutes(15));
 
+            waitForTransaction(txResult);
+            checkIfUtxoAvailable(txResult.getValue(), senderAddress);
+
             return Either.right(txResult);
         } catch (Exception e) {
             log.error("Error sending transaction", e);
 
             return Either.left(e);
+        }
+    }
+
+    public void waitForTransaction(Result<String> result) {
+        try {
+            if (result.isSuccessful()) { //Wait for transaction to be mined
+                int count = 0;
+                while (count < 60) {
+                    Result<TransactionContent> txnResult = backendService.getTransactionService().getTransaction(result.getValue());
+                    if (txnResult.isSuccessful()) {
+                        System.out.println("Transaction mined, txHash:" + result.getValue());
+                        break;
+                    } else {
+                        System.out.println("Waiting for transaction to be mined ....");
+                    }
+
+                    count++;
+                    Thread.sleep(2000);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error waiting for transaction to be mined", e);
+        }
+    }
+
+    protected void checkIfUtxoAvailable(String txHash, String address) {
+        Optional<Utxo> utxo = Optional.empty();
+        int count = 0;
+
+        while (utxo.isEmpty()) {
+            if (count++ >= 20)
+                break;
+            List<Utxo> utxos = new DefaultUtxoSupplier(backendService.getUtxoService()).getAll(address);
+            utxo = utxos.stream().filter(u -> u.getTxHash().equals(txHash))
+                    .findFirst();
+            System.out.println("Try to get new output... txhash: " + txHash);
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {}
         }
     }
 
