@@ -40,11 +40,10 @@ public class TransactionSubmissionConfig {
     @Bean
     public L1TransactionCreator l1TransactionCreator(@Qualifier("yaci_blockfrost") BackendService backendService,
                                                      MetadataSerialiser metadataSerialiser,
-                                                     TransactionSubmissionService transactionSubmissionService,
                                                      BlockchainReaderPublicApiIF blockchainReaderPublicApi,
                                                      MetadataChecker metadataChecker,
                                                      Account organiserAccount,
-                                                     @Value("${l1.transaction.metadata_label:22222}") int metadataLabel,
+                                                     @Value("${l1.transaction.metadata_label:1447}") int metadataLabel,
                                                      @Value("${l1.transaction.debug_store_output_tx:false}") boolean debugStoreOutputTx
                                                      ) {
         return new L1TransactionCreator(backendService,
