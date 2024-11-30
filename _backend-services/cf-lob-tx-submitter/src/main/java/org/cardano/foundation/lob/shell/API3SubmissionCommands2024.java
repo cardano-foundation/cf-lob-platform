@@ -35,7 +35,7 @@ public class API3SubmissionCommands2024 { // reports
     private final Account organiserAccount;
     private final Network network;
 
-    @Value("${l1.transaction.metadata.label:1447}")
+    @Value("${l1.transaction.metadata_label:1447}")
     private int metadataLabel;
 
     @ShellMethod(key = "01_create-income-statement")
@@ -199,19 +199,21 @@ public class API3SubmissionCommands2024 { // reports
 
         // Non-current assets
         val nonCurrentAssets = MetadataBuilder.createMap();
-        nonCurrentAssets.put("property_plant_equipment", "500000.00");
-        nonCurrentAssets.put("intangible_assets", "200000.00");
-        nonCurrentAssets.put("investments", "150000.00");
-        nonCurrentAssets.put("financial_assets", "100000.00");
+        nonCurrentAssets.put("property_plant_equipment", "56493.71"); // ok
+        nonCurrentAssets.put("intangible_assets", "3480.00"); // ok
+        nonCurrentAssets.put("investments", "24466.99"); // ok
+        nonCurrentAssets.put("financial_assets", "20394894.94"); // ok
         assets.put("non_current_assets", nonCurrentAssets);
 
         // Current assets
         val currentAssets = MetadataBuilder.createMap();
-        currentAssets.put("prepayments_and_other_short_term_assets", "50000.00");
-        currentAssets.put("other_receivables", "75000.00");
-        currentAssets.put("crypto_assets", "25000.00");
-        currentAssets.put("cash_and_cash_equivalents", "300000.00");
+        currentAssets.put("prepayments_and_other_short_term_assets", "644311.18"); //ok
+        currentAssets.put("other_receivables", "503067.18"); // ok
+        currentAssets.put("crypto_assets", "58499305.14"); // ok
+        currentAssets.put("cash_and_cash_equivalents", "9628010.23"); // ok
         assets.put("current_assets", currentAssets);
+
+        //assets.put("total_assets", "89754029.37"); // current + non-current
 
         data.put("assets", assets);
 
@@ -220,24 +222,25 @@ public class API3SubmissionCommands2024 { // reports
 
         // Non-current liabilities
         val nonCurrentLiabilities = MetadataBuilder.createMap();
-        nonCurrentLiabilities.put("provisions", "250000.00");
+        nonCurrentLiabilities.put("provisions", "82085632.53"); // ok
         liabilities.put("non_current_liabilities", nonCurrentLiabilities);
 
         // Current liabilities
         val currentLiabilities = MetadataBuilder.createMap();
-        currentLiabilities.put("trade_accounts_payables", "50000.00");
-        currentLiabilities.put("other_current_liabilities", "75000.00");
-        currentLiabilities.put("accruals_and_short_term_provisions", "25000.00");
+        currentLiabilities.put("trade_accounts_payables", "4812.50"); // ok
+        currentLiabilities.put("other_current_liabilities", "617835.67"); // ok
+        currentLiabilities.put("accruals_and_short_term_provisions", "3523134.10"); // ok
         liabilities.put("current_liabilities", currentLiabilities);
+
+        //liabilities.put("total_liabilities", "86231414.8");
 
         data.put("liabilities", liabilities);
 
         // Capital section
         val capital = MetadataBuilder.createMap();
-        capital.put("capital", "300000.00");
-        //capital.put("retained_earnings", "200000.00"); // OLD
-        capital.put("results_carried_forward", "200000.00");
-        capital.put("profit_for_the_year", "100000.00");
+        capital.put("capital", "50000.00"); // ok
+        capital.put("results_carried_forward", "2358675.26"); // ok
+        capital.put("profit_for_the_year", "1113939.31"); // ok
 
         data.put("capital", capital);
 
@@ -249,42 +252,43 @@ public class API3SubmissionCommands2024 { // reports
 
         // Revenues section
         val revenues = MetadataBuilder.createMap();
-        revenues.put("other_income", "5000000.00");
-        revenues.put("build_of_long_term_provision", "1000000.00");
+        revenues.put("other_income", "0"); // ok
+        revenues.put("build_of_long_term_provision", "14410204.33"); // ok
         data.put("revenues", revenues);
 
-        // COGS (Cost of Goods Sold) section
-        val cogs = MetadataBuilder.createMap();
-        cogs.put("cost_of_providing_services", "15000000.00");
-        data.put("cogs", cogs);
+        val costOfGoodsAndServices = MetadataBuilder.createMap();
+        costOfGoodsAndServices.put("cost_of_providing_services", "-5819594.52"); // ok
+        data.put("cost_of_goods_and_services", costOfGoodsAndServices);
 
         // Operating Expenses section
         val operatingExpenses = MetadataBuilder.createMap();
-        operatingExpenses.put("personnel_expenses", "20000000.00");
-        operatingExpenses.put("general_and_administrative_expenses", "5000000.00");
-        operatingExpenses.put("depreciation_and_impairment_losses_on_tangible_assets", "3000000.00");
-        operatingExpenses.put("amortization_on_intangible_assets", "2000000.00");
-        operatingExpenses.put("rentExpenses", "1111.00");
+        operatingExpenses.put("personnel_expenses", "-13364269.18"); // ok
+        operatingExpenses.put("general_and_administrative_expenses", "-1765633.98"); // ok
+        operatingExpenses.put("depreciation_and_impairment_losses_on_tangible_assets", "-38316.88"); // ok
+        operatingExpenses.put("amortization_on_intangible_assets", "-2320.00"); // ok
+        operatingExpenses.put("rentExpenses", "-216536.85"); // ok
         data.put("operating_expenses", operatingExpenses);
 
         // Financial Income section
         val financialIncome = MetadataBuilder.createMap();
-        financialIncome.put("finance_income", "3000000.00");
-        financialIncome.put("finance_expenses", "1500000.00");
-        financialIncome.put("realised_gains_on_sale_of_cryptocurrencies", "1000000.00");
-        financialIncome.put("staking_rewards_income", "2000000.00");
-        financialIncome.put("net_income_options_sale", "500000.00");
+        financialIncome.put("financial_revenues", "947865.18"); // OK
+        financialIncome.put("financial_expenses", "-4089224.54"); // ok
+        financialIncome.put("realised_gains_on_sale_of_cryptocurrencies", "4550874.99"); // ok
+        financialIncome.put("staking_rewards_income", "6500117.15"); // ok
+        financialIncome.put("net_income_options_sale", "103225.52"); // ok
         data.put("financial_income", financialIncome);
 
         // Extraordinary Income section
         val extraordinaryIncome = MetadataBuilder.createMap();
-        extraordinaryIncome.put("extraordinary_expenses", "1000000.00");
+        extraordinaryIncome.put("extraordinary_expenses", "0"); // ok
         data.put("extraordinary_income", extraordinaryIncome);
 
         // Tax Expenses section
         val taxExpenses = MetadataBuilder.createMap();
-        taxExpenses.put("income_tax_expense", "2500000.00");
+        taxExpenses.put("income_tax_expense", "-102451.91"); // ok
         data.put("tax_expenses", taxExpenses);
+
+        data.put("profit_for_the_year", "1113939.31");
 
         return data;
     }
