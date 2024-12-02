@@ -637,24 +637,23 @@ CREATE table accounting_core_report (
     -- USER or SYSTEM report
     mode accounting_core_report_mode_type NOT NULL,
 
-    -- main data fields
-
+    -- Main data fields
     -- Balance Sheet::Assets
-    data_balance_sheet__assets_non_current_property_plant_equipment DECIMAL(30, 8),
-    data_balance_sheet__assets_non_current_intangible_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_non_current_property_plant_equip DECIMAL(30, 8),
+    data_income_statement__operating_expenses_depreciation_ta DECIMAL(30, 8),
     data_balance_sheet__assets_non_current_investments DECIMAL(30, 8),
     data_balance_sheet__assets_non_current_financial_assets DECIMAL(30, 8),
 
-    data_balance_sheet__assets_current_prepayments_and_other_short_term_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_current_prepayments_short_assets DECIMAL(30, 8),
     data_balance_sheet__assets_current_other_receivables DECIMAL(30, 8),
     data_balance_sheet__assets_current_crypto_assets DECIMAL(30, 8),
-    data_balance_sheet__assets_current_cash_and_cash_equivalents DECIMAL(30, 8),
+    data_balance_sheet__assets_current_cash_and_equivalen DECIMAL(30, 8),
 
     -- Balance Sheet::Liabilities
     data_balance_sheet__liabilities_non_current_provisions DECIMAL(30, 8),
-    data_balance_sheet__liabilities_current_trade_accounts_payables DECIMAL(30, 8),
-    data_balance_sheet__liabilities_current_other_current_liabilities DECIMAL(30, 8),
-    data_balance_sheet__liabilities_current_accruals_and_short_term_provisions DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_trade_accounts DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_other_liabilit DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_accruals_and_short DECIMAL(30, 8),
 
     -- Balance Sheet::Capital
     data_balance_sheet__capital_capital DECIMAL(30, 8),
@@ -669,24 +668,23 @@ CREATE table accounting_core_report (
 
     -- Income Statement::Operating Expenses
     data_income_statement__operating_expenses_personnel_expenses DECIMAL(30, 8),
-    data_income_statement__operating_expenses_general_administrative_expenses DECIMAL(30, 8),
-    data_income_statement__operating_expenses_depreciation_impairment_tangible_assets DECIMAL(30, 8),
-    data_income_statement__operating_expenses_amortization_intangible_assets DECIMAL(30, 8),
+    data_income_statement__operating_expenses_general_admin_ex DECIMAL(30, 8),
+    data_income_statement__operating_expenses_depreciation_tang DECIMAL(30, 8),
+    data_income_statement__operating_expenses_amortization_int DECIMAL(30, 8),
 
     -- Income Statement::Financial Income
     data_income_statement__financial_income_finance_income DECIMAL(30, 8),
     data_income_statement__financial_income_finance_expenses DECIMAL(30, 8),
-    data_income_statement__financial_income_realised_gains_sale_cryptocurrencies DECIMAL(30, 8),
-    data_income_statement__financial_income_staking_rewards_income DECIMAL(30, 8),
-    data_income_statement__financial_income_net_income_options_sale DECIMAL(30, 8),
+    data_income_statement__financial_income_realised_gains DECIMAL(30, 8),
+    data_income_statement__financial_income_staking_rewards DECIMAL(30, 8),
+    data_income_statement__financial_income_net_income_opt DECIMAL(30, 8),
 
     -- Income Statement::Extraordinary Income
-    data_income_statement__extraordinary_income_extraordinary_expenses DECIMAL(30, 8),
+    data_income_statement__operating_expenses_extraordin_exp DECIMAL(30, 8),
 
     -- Income Statement::Tax Expenses
     data_income_statement__tax_expenses_income_tax_expense DECIMAL(30, 8),
-
-    -- end of main data fields
+    -- End of main data fields
 
     ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
     ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
@@ -717,23 +715,22 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
     mode accounting_core_report_mode_type NOT NULL, -- USER or SYSTEM report
 
     -- Main data fields
-
     -- Balance Sheet::Assets
-    data_balance_sheet__assets_non_current_property_plant_equipment DECIMAL(30, 8),
-    data_balance_sheet__assets_non_current_intangible_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_non_current_property_plant_equip DECIMAL(30, 8),
+    data_income_statement__operating_expenses_depreciation_ta DECIMAL(30, 8),
     data_balance_sheet__assets_non_current_investments DECIMAL(30, 8),
     data_balance_sheet__assets_non_current_financial_assets DECIMAL(30, 8),
 
-    data_balance_sheet__assets_current_prepayments_and_other_short_term_assets DECIMAL(30, 8),
+    data_balance_sheet__assets_current_prepayments_short_assets DECIMAL(30, 8),
     data_balance_sheet__assets_current_other_receivables DECIMAL(30, 8),
     data_balance_sheet__assets_current_crypto_assets DECIMAL(30, 8),
-    data_balance_sheet__assets_current_cash_and_cash_equivalents DECIMAL(30, 8),
+    data_balance_sheet__assets_current_cash_and_equivalen DECIMAL(30, 8),
 
     -- Balance Sheet::Liabilities
     data_balance_sheet__liabilities_non_current_provisions DECIMAL(30, 8),
-    data_balance_sheet__liabilities_current_trade_accounts_payables DECIMAL(30, 8),
-    data_balance_sheet__liabilities_current_other_current_liabilities DECIMAL(30, 8),
-    data_balance_sheet__liabilities_current_accruals_and_short_term_provisions DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_trade_accounts DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_other_liabilit DECIMAL(30, 8),
+    data_balance_sheet__liabilities_current_accruals_and_short DECIMAL(30, 8),
 
     -- Balance Sheet::Capital
     data_balance_sheet__capital_capital DECIMAL(30, 8),
@@ -748,23 +745,22 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
 
     -- Income Statement::Operating Expenses
     data_income_statement__operating_expenses_personnel_expenses DECIMAL(30, 8),
-    data_income_statement__operating_expenses_general_administrative_expenses DECIMAL(30, 8),
-    data_income_statement__operating_expenses_depreciation_impairment_tangible_assets DECIMAL(30, 8),
-    data_income_statement__operating_expenses_amortization_intangible_assets DECIMAL(30, 8),
+    data_income_statement__operating_expenses_general_admin_ex DECIMAL(30, 8),
+    data_income_statement__operating_expenses_depreciation_tang DECIMAL(30, 8),
+    data_income_statement__operating_expenses_amortization_int DECIMAL(30, 8),
 
     -- Income Statement::Financial Income
     data_income_statement__financial_income_finance_income DECIMAL(30, 8),
     data_income_statement__financial_income_finance_expenses DECIMAL(30, 8),
-    data_income_statement__financial_income_realised_gains_sale_cryptocurrencies DECIMAL(30, 8),
-    data_income_statement__financial_income_staking_rewards_income DECIMAL(30, 8),
-    data_income_statement__financial_income_net_income_options_sale DECIMAL(30, 8),
+    data_income_statement__financial_income_realised_gains DECIMAL(30, 8),
+    data_income_statement__financial_income_staking_rewards DECIMAL(30, 8),
+    data_income_statement__financial_income_net_income_opt DECIMAL(30, 8),
 
     -- Income Statement::Extraordinary Income
-    data_income_statement__extraordinary_income_extraordinary_expenses DECIMAL(30, 8),
+    data_income_statement__operating_expenses_extraordin_exp DECIMAL(30, 8),
 
     -- Income Statement::Tax Expenses
     data_income_statement__tax_expenses_income_tax_expense DECIMAL(30, 8),
-
     -- End of main data fields
 
     ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
