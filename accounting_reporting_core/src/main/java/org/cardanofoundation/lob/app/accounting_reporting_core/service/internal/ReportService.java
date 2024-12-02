@@ -21,9 +21,9 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType.MONTH;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType.YEAR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode.USER;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportRollupPeriodType.MONTHLY;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportRollupPeriodType.YEARLY;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.BALANCE_SHEET;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.INCOME_STATEMENT;
 
@@ -81,7 +81,7 @@ public class ReportService {
         val org = orgM.orElseThrow();
 
         val reportExample = new ReportEntity();
-        reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, MONTHLY, (short) 2023, Optional.of((short) 3)));
+        reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, MONTH, (short) 2023, Optional.of((short) 3)));
 
         reportExample.setOrganisation(Organisation.builder()
                 .id(organisationId)
@@ -93,26 +93,26 @@ public class ReportService {
         );
 
         reportExample.setType(INCOME_STATEMENT);
-        reportExample.setRollupPeriod(MONTHLY); // Assuming MONTHLY is a constant in ReportRollupPeriodType
+        reportExample.setIntervalType(MONTH); // Assuming MONTHLY is a constant in ReportRollupPeriodType
         reportExample.setYear((short) 2023);
         reportExample.setPeriod(Optional.of((short) 3)); // Representing March
         reportExample.setMode(USER); // Assuming USER is a constant in ReportMode enum
         reportExample.setDate(LocalDate.now(clock));
 
-        val incomeStatementReportData = IncomeStatementData.builder()
+        var incomeStatementReportData = IncomeStatementData.builder()
                 .revenues(IncomeStatementData.Revenues.builder()
                         .otherIncome(new BigDecimal("10000.90"))
                         .buildOfLongTermProvision(new BigDecimal("1000000.10"))
                         .build())
-                .cogs(IncomeStatementData.COGS.builder()
+                .costOfGoodsAndServices(IncomeStatementData.CostOfGoodsAndServices.builder()
                         .costOfProvidingServices(new BigDecimal("500000.15"))
                         .build())
                 .financialIncome(IncomeStatementData.FinancialIncome.builder()
-                        .financeIncome(new BigDecimal("200000.53"))
+                        .financialRevenues(new BigDecimal("200000.53"))
                         .netIncomeOptionsSale(new BigDecimal("100000.10"))
                         .realisedGainsOnSaleOfCryptocurrencies(new BigDecimal("50000.15"))
                         .stakingRewardsIncome(new BigDecimal("10000.53"))
-                        .financeExpenses(new BigDecimal("20000.10"))
+                        .financialExpenses(new BigDecimal("20000.10"))
                         .build())
                 .extraordinaryIncome(IncomeStatementData.ExtraordinaryIncome.builder()
                         .extraordinaryExpenses(new BigDecimal("10000.10"))
@@ -125,6 +125,8 @@ public class ReportService {
                         .generalAndAdministrativeExpenses(new BigDecimal("200000.53"))
                         .build())
                 .build();
+
+        incomeStatementReportData = incomeStatementReportData.toBuilder().profitForTheYear(incomeStatementReportData.sumOf()).build();
 
         reportExample.setIncomeStatementReportData(Optional.of(incomeStatementReportData));
 
@@ -151,7 +153,7 @@ public class ReportService {
         val org = orgM.orElseThrow();
 
         val reportExample = new ReportEntity();
-        reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, YEARLY, (short) 2024, Optional.empty()));
+        reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, YEAR, (short) 2024, Optional.empty()));
 
         reportExample.setOrganisation(Organisation.builder()
                 .id(organisationId)
@@ -163,7 +165,7 @@ public class ReportService {
         );
 
         reportExample.setType(BALANCE_SHEET);
-        reportExample.setRollupPeriod(MONTHLY); // Assuming MONTHLY is a constant in ReportRollupPeriodType
+        reportExample.setIntervalType(MONTH); // Assuming MONTHLY is a constant in ReportRollupPeriodType
         reportExample.setYear((short) 2023);
         reportExample.setPeriod(Optional.of((short) 3)); // Representing March
         reportExample.setMode(USER); // Assuming USER is a constant in ReportMode enum
@@ -196,7 +198,8 @@ public class ReportService {
                         .build())
                 .capital(BalanceSheetData.Capital.builder()
                         .capital(new BigDecimal("300000.00"))
-                        .retainedEarnings(new BigDecimal("300000.00"))
+                        .profitForTheYear(new BigDecimal("100000.00"))
+                        .resultsCarriedForward(new BigDecimal("200000.00"))
                         .build())
                 .build();
 

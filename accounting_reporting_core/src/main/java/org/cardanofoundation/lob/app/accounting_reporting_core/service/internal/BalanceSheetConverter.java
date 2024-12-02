@@ -66,8 +66,9 @@ public class BalanceSheetConverter {
 
     private Optional<Capital> convertCapital(Optional<org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.BalanceSheetData.Capital> capital) {
         return capital.map(c -> Capital.builder()
-                .retainedEarnings(c.getRetainedEarnings().orElse(null))
                 .capital(c.getCapital().orElse(null))
+                .profitForTheYear(c.getProfitForTheYear().orElse(null))
+                .resultsCarriedForward(c.getResultsCarriedForward().orElse(null))
                 .build());
     }
 

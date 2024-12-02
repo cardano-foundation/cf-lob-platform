@@ -15,12 +15,18 @@ public class OperatingExpenses {
 
     @Nullable
     private BigDecimal personnelExpenses;
+
     @Nullable
     private BigDecimal generalAndAdministrativeExpenses;
+
     @Nullable
     private BigDecimal depreciationAndImpairmentLossesOnTangibleAssets;
+
     @Nullable
     private BigDecimal amortizationOnIntangibleAssets;
+
+    @Nullable
+    private BigDecimal rentExpenses;
 
     public Optional<BigDecimal> getPersonnelExpenses() {
         return Optional.ofNullable(personnelExpenses);
@@ -36,6 +42,10 @@ public class OperatingExpenses {
 
     public Optional<BigDecimal> getAmortizationOnIntangibleAssets() {
         return Optional.ofNullable(amortizationOnIntangibleAssets);
+    }
+
+    public Optional<BigDecimal> getRentExpenses() {
+        return Optional.ofNullable(rentExpenses);
     }
 
 }

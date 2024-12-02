@@ -23,7 +23,7 @@ public class Report {
 
     private ReportType type;
 
-    private ReportRollupPeriodType rollupPeriod;
+    private IntervalType intervalType;
 
     private short year;
 
@@ -52,13 +52,13 @@ public class Report {
 
     public static String id(String organisationId,
                             ReportType reportType,
-                            ReportRollupPeriodType rollupPeriod,
+                            IntervalType intervalType,
                             short year,
                             Optional<Short> period) {
         return period.map(p -> {
-            return digestAsHex(STR."\{organisationId}::\{reportType}::\{rollupPeriod}::\{year}::\{p}");
+            return digestAsHex(STR."\{organisationId}::\{reportType}::\{intervalType}::\{year}::\{p}");
         }).orElseGet(() -> {
-            return digestAsHex(STR."\{organisationId}::\{reportType}::\{rollupPeriod}::\{year}");
+            return digestAsHex(STR."\{organisationId}::\{reportType}::\{intervalType}::\{year}");
         });
     }
 

@@ -14,9 +14,9 @@ import java.util.Optional;
 public class FinancialIncome {
 
     @Nullable
-    private BigDecimal financeIncome;
+    private BigDecimal financialRevenues;
     @Nullable
-    private BigDecimal financeExpenses;
+    private BigDecimal financialExpenses;
     @Nullable
     private BigDecimal realisedGainsOnSaleOfCryptocurrencies;
     @Nullable
@@ -24,12 +24,12 @@ public class FinancialIncome {
     @Nullable
     private BigDecimal netIncomeOptionsSale;
 
-    public Optional<BigDecimal> getFinanceIncome() {
-        return Optional.ofNullable(financeIncome);
+    public Optional<BigDecimal> getFinancialRevenues() {
+        return Optional.ofNullable(financialRevenues);
     }
 
-    public Optional<BigDecimal> getFinanceExpenses() {
-        return Optional.ofNullable(financeExpenses);
+    public Optional<BigDecimal> getFinancialExpenses() {
+        return Optional.ofNullable(financialExpenses);
     }
 
     public Optional<BigDecimal> getRealisedGainsOnSaleOfCryptocurrencies() {
