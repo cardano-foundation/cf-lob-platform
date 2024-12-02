@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportRollupPeriodType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
@@ -70,12 +70,12 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     private ReportType type;
 
     @Enumerated(STRING)
-    @Column(name = "rollup_period", nullable = false)
+    @Column(name = "interval_type", nullable = false)
     @JdbcType(PostgreSQLEnumJdbcType.class)
     @NotNull
     @Getter
     @Setter
-    private ReportRollupPeriodType rollupPeriod;
+    private IntervalType intervalType;
 
     @Column(name = "year", nullable = false)
     @Min(1900)
@@ -106,28 +106,29 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @Embedded
     @AttributeOverrides({
             // Balance Sheet::Assets - Non-Current Assets
-            @AttributeOverride(name = "assets.nonCurrentAssets.propertyPlantEquipment", column = @Column(name = "data_balance_sheet__assets_non_current_property_plant_equipment")),
-            @AttributeOverride(name = "assets.nonCurrentAssets.intangibleAssets", column = @Column(name = "data_balance_sheet__assets_non_current_intangible_assets")),
+            @AttributeOverride(name = "assets.nonCurrentAssets.propertyPlantEquipment", column = @Column(name = "data_balance_sheet__assets_non_current_property_plant_equip")),
+            @AttributeOverride(name = "assets.nonCurrentAssets.intangibleAssets", column = @Column(name = "data_balance_sheet__operating_expenses_depreciation_ta")),
             @AttributeOverride(name = "assets.nonCurrentAssets.investments", column = @Column(name = "data_balance_sheet__assets_non_current_investments")),
             @AttributeOverride(name = "assets.nonCurrentAssets.financialAssets", column = @Column(name = "data_balance_sheet__assets_non_current_financial_assets")),
 
             // Balance Sheet::Assets - Current Assets
-            @AttributeOverride(name = "assets.currentAssets.prepaymentsAndOtherShortTermAssets", column = @Column(name = "data_balance_sheet__assets_current_prepayments_and_other_short_term_assets")),
+            @AttributeOverride(name = "assets.currentAssets.prepaymentsAndOtherShortTermAssets", column = @Column(name = "data_balance_sheet__assets_current_prepayments_short_assets")),
             @AttributeOverride(name = "assets.currentAssets.otherReceivables", column = @Column(name = "data_balance_sheet__assets_current_other_receivables")),
             @AttributeOverride(name = "assets.currentAssets.cryptoAssets", column = @Column(name = "data_balance_sheet__assets_current_crypto_assets")),
-            @AttributeOverride(name = "assets.currentAssets.cashAndCashEquivalents", column = @Column(name = "data_balance_sheet__assets_current_cash_and_cash_equivalents")),
+            @AttributeOverride(name = "assets.currentAssets.cashAndCashEquivalents", column = @Column(name = "data_balance_sheet__assets_current_cash_and_equivalen")),
 
             // Balance Sheet::Liabilities - Non-Current Liabilities
             @AttributeOverride(name = "liabilities.nonCurrentLiabilities.provisions", column = @Column(name = "data_balance_sheet__liabilities_non_current_provisions")),
 
             // Balance Sheet::Liabilities - Current Liabilities
-            @AttributeOverride(name = "liabilities.currentLiabilities.tradeAccountsPayables", column = @Column(name = "data_balance_sheet__liabilities_current_trade_accounts_payables")),
-            @AttributeOverride(name = "liabilities.currentLiabilities.otherCurrentLiabilities", column = @Column(name = "data_balance_sheet__liabilities_current_other_current_liabilities")),
-            @AttributeOverride(name = "liabilities.currentLiabilities.accrualsAndShortTermProvisions", column = @Column(name = "data_balance_sheet__liabilities_current_accruals_and_short_term_provisions")),
+            @AttributeOverride(name = "liabilities.currentLiabilities.tradeAccountsPayables", column = @Column(name = "data_balance_sheet__liabilities_current_trade_accounts")),
+            @AttributeOverride(name = "liabilities.currentLiabilities.otherCurrentLiabilities", column = @Column(name = "data_balance_sheet__liabilities_current_other_liabilit")),
+            @AttributeOverride(name = "liabilities.currentLiabilities.accrualsAndShortTermProvisions", column = @Column(name = "data_balance_sheet__liabilities_current_accruals_and_short")),
 
             // Balance Sheet::Capital
             @AttributeOverride(name = "capital.capital", column = @Column(name = "data_balance_sheet__capital_capital")),
-            @AttributeOverride(name = "capital.retainedEarnings", column = @Column(name = "data_balance_sheet__capital_retained_earnings"))
+            @AttributeOverride(name = "capital.profitForTheYear", column = @Column(name = "data_balance_sheet__capital_profit_for_the_year")),
+            @AttributeOverride(name = "capital.resultsCarriedForward", column = @Column(name = "data_balance_sheet__capital_results_carried_forward"))
     })
     @Nullable
     private BalanceSheetData balanceSheetReportData;
@@ -138,26 +139,30 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
             @AttributeOverride(name = "revenues.otherIncome", column = @Column(name = "data_income_statement__revenues_other_income")),
             @AttributeOverride(name = "revenues.buildOfLongTermProvision", column = @Column(name = "data_income_statement__revenues_build_long_term_provision")),
 
-            // COGS (Cost of Goods Sold)
-            @AttributeOverride(name = "cogs.costOfProvidingServices", column = @Column(name = "data_income_statement__cogs_cost_providing_services")),
+            @AttributeOverride(name = "costOfGoodsAndServices.costOfProvidingServices", column = @Column(name = "data_income_statement__cost_goods_and_services_providing_serv")), // was too long
 
             // Operating Expenses
             @AttributeOverride(name = "operatingExpenses.personnelExpenses", column = @Column(name = "data_income_statement__operating_expenses_personnel_expenses")),
-            @AttributeOverride(name = "operatingExpenses.generalAndAdministrativeExpenses", column = @Column(name = "data_income_statement__operating_expenses_general_administrative_expenses")),
-            @AttributeOverride(name = "operatingExpenses.depreciationAndImpairmentLossesOnTangibleAssets", column = @Column(name = "data_income_statement__operating_expenses_depreciation_impairment_tangible_assets")),
-            @AttributeOverride(name = "operatingExpenses.amortizationOnIntangibleAssets", column = @Column(name = "data_income_statement__operating_expenses_amortization_intangible_assets")),
+            @AttributeOverride(name = "operatingExpenses.generalAndAdministrativeExpenses", column = @Column(name = "data_income_statement__operating_expenses_general_admin_ex")),
+            @AttributeOverride(name = "operatingExpenses.depreciationAndImpairmentLossesOnTangibleAssets", column = @Column(name = "data_income_statement__operating_expenses_depreciation_tang")),
+            @AttributeOverride(name = "operatingExpenses.amortizationOnIntangibleAssets", column = @Column(name = "data_income_statement__operating_expenses_amortization_int")),
+            @AttributeOverride(name = "operatingExpenses.rentExpenses", column = @Column(name = "data_income_statement__operating_expenses_rent_expenses")),
 
             // Financial Income
-            @AttributeOverride(name = "financialIncome.financeIncome", column = @Column(name = "data_income_statement__financial_income_finance_income")),
-            @AttributeOverride(name = "financialIncome.financeExpenses", column = @Column(name = "data_income_statement__financial_income_finance_expenses")),
-            @AttributeOverride(name = "financialIncome.realisedGainsOnSaleOfCryptocurrencies", column = @Column(name = "data_income_statement__financial_income_realised_gains_sale_cryptocurrencies")),
-            @AttributeOverride(name = "financialIncome.stakingRewardsIncome", column = @Column(name = "data_income_statement__financial_income_staking_rewards_income")),
-            @AttributeOverride(name = "financialIncome.netIncomeOptionsSale", column = @Column(name = "data_income_statement__financial_income_net_income_options_sale")),
+            @AttributeOverride(name = "financialIncome.financialRevenues", column = @Column(name = "data_income_statement__financial_income_financial_revenues")),
+            @AttributeOverride(name = "financialIncome.financialExpenses", column = @Column(name = "data_income_statement__financial_income_financial_expenses")),
+            @AttributeOverride(name = "financialIncome.realisedGainsOnSaleOfCryptocurrencies", column = @Column(name = "data_income_statement__financial_income_realised_gains")),
+            @AttributeOverride(name = "financialIncome.stakingRewardsIncome", column = @Column(name = "data_income_statement__financial_income_staking_rewards")),
+            @AttributeOverride(name = "financialIncome.netIncomeOptionsSale", column = @Column(name = "data_income_statement__financial_income_net_income_opt")),
 
-            @AttributeOverride(name = "extraordinaryIncome.extraordinaryExpenses", column = @Column(name = "data_income_statement__extraordinary_income_extraordinary_expenses")),
+            // Extraordinary Income
+            @AttributeOverride(name = "extraordinaryIncome.extraordinaryExpenses", column = @Column(name = "data_income_statement__operating_expenses_extraordin_exp")),
 
             // Tax Expenses
-            @AttributeOverride(name = "taxExpenses.incomeTaxExpense", column = @Column(name = "data_income_statement__tax_expenses_income_tax_expense"))
+            @AttributeOverride(name = "taxExpenses.incomeTaxExpense", column = @Column(name = "data_income_statement__tax_expenses_income_tax_expense")),
+
+            @AttributeOverride(name = "extraordinaryIncome.extraordinaryExpenses", column = @Column(name = "data_income_statement__operating_expenses_extraordin_exp")),
+            @AttributeOverride(name = "profitForTheYear", column = @Column(name = "data_income_statement__profit_for_the_year"))
     })
     @Nullable
     private IncomeStatementData incomeStatementReportData;

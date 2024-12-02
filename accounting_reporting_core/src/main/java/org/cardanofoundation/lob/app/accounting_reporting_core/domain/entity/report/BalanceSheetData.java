@@ -20,17 +20,15 @@ public class BalanceSheetData implements Validable {
 
     @Nullable
     private Assets assets;
-
     @Nullable
     private Liabilities liabilities;
-
     @Nullable
     private Capital capital;
 
     @Override
     public boolean isValid() {
         return getAssets().isPresent() && getLiabilities().isPresent() && getCapital().isPresent()
-                && assets.getValue().equals(BigDecimals.sum(liabilities, capital));
+                && assets.sumOf().equals(BigDecimals.sum(liabilities, capital));
     }
 
     public Optional<Assets> getAssets() {
@@ -55,10 +53,11 @@ public class BalanceSheetData implements Validable {
 
         @Nullable
         private NonCurrentAssets nonCurrentAssets;
+
         @Nullable
         private CurrentAssets currentAssets;
 
-        public BigDecimal getValue() {
+        public BigDecimal sumOf() {
             return BigDecimals.sum(nonCurrentAssets, currentAssets);
         }
 
@@ -90,7 +89,7 @@ public class BalanceSheetData implements Validable {
             @Nullable
             private BigDecimal financialAssets;
 
-            public BigDecimal getValue() {
+            public BigDecimal sumOf() {
                 return BigDecimals.sum(propertyPlantEquipment, intangibleAssets, investments, financialAssets);
             }
 
@@ -129,7 +128,7 @@ public class BalanceSheetData implements Validable {
             private BigDecimal cashAndCashEquivalents;
 
             @Override
-            public BigDecimal getValue() {
+            public BigDecimal sumOf() {
                 return BigDecimals.sum(prepaymentsAndOtherShortTermAssets, otherReceivables, cryptoAssets, cashAndCashEquivalents);
             }
 
@@ -165,7 +164,7 @@ public class BalanceSheetData implements Validable {
         private CurrentLiabilities currentLiabilities;
 
         @Override
-        public BigDecimal getValue() {
+        public BigDecimal sumOf() {
             return BigDecimals.sum(nonCurrentLiabilities, currentLiabilities);
         }
 
@@ -189,7 +188,7 @@ public class BalanceSheetData implements Validable {
             private BigDecimal provisions;
 
             @Override
-            public BigDecimal getValue() {
+            public BigDecimal sumOf() {
                 return BigDecimals.sum(provisions);
             }
 
@@ -215,7 +214,7 @@ public class BalanceSheetData implements Validable {
             private BigDecimal accrualsAndShortTermProvisions;
 
             @Override
-            public BigDecimal getValue() {
+            public BigDecimal sumOf() {
                 return BigDecimals.sum(tradeAccountsPayables, otherCurrentLiabilities, accrualsAndShortTermProvisions);
             }
 
@@ -244,20 +243,27 @@ public class BalanceSheetData implements Validable {
         @Nullable
         private BigDecimal capital;
         @Nullable
-        private BigDecimal retainedEarnings;
+        private BigDecimal profitForTheYear;
+        @Nullable
+        private BigDecimal resultsCarriedForward;
 
         @Override
-        public BigDecimal getValue() {
-            return BigDecimals.sum(capital, retainedEarnings);
+        public BigDecimal sumOf() {
+            return BigDecimals.sum(capital, profitForTheYear, resultsCarriedForward);
         }
 
         public Optional<BigDecimal> getCapital() {
             return Optional.ofNullable(capital);
         }
 
-        public Optional<BigDecimal> getRetainedEarnings() {
-            return Optional.ofNullable(retainedEarnings);
+        public Optional<BigDecimal> getProfitForTheYear() {
+            return Optional.ofNullable(profitForTheYear);
         }
+
+        public Optional<BigDecimal> getResultsCarriedForward() {
+            return Optional.ofNullable(resultsCarriedForward);
+        }
+
     }
 
 }

@@ -4,9 +4,10 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.function.BinaryOperator;
 
+@FunctionalInterface
 public interface Summable extends BinaryOperator<BigDecimal> {
 
-    BigDecimal getValue();
+    BigDecimal sumOf();
 
     default BigDecimal apply(BigDecimal a, BigDecimal b) {
         return a.add(b);
@@ -14,7 +15,7 @@ public interface Summable extends BinaryOperator<BigDecimal> {
 
     static BigDecimal sum(Summable... values) {
         return Arrays.stream(values)
-                .map(value -> value != null ? value.getValue() : BigDecimal.ZERO)
+                .map(value -> value != null ? value.sumOf() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

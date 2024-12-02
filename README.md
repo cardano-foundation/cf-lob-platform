@@ -22,43 +22,14 @@ For the project adopters, it will provide the opportunity to advance the use of 
 Prerequisties:
 - Java 21
 - 100GB of disk space
-- 10GB of RAM
+- 16GB of RAM
 
 ## How to build
 
 ```
-git clone git@github.com:cardano-foundation/cf-lob.git
-cd cf-lob
-cp cf-application/.env.template cf-application/.env
+git clone git@github.com:cardano-foundation/cf-lob-platform.git
+cd cf-lob-platform
 ./gradlew clean build
-```
-
-#### Docker:
-```shell
-# start the containers and run the command
-docker compose up --build -d
-cp cf-application/.env.template cf-application/.env
-docker exec -it app ./gradlew clean build
-```
-
-## How to run locally
-
-
-```
-git clone git@github.com:cardano-foundation/cf-lob.git
-cd cf-lob
-export SPRING_CONFIG_LOCATIONS=classpath:/application.yml,classpath:/application-dev--yaci-dev-kit.yml
-export SPRING_PROFILES_ACTIVE=dev--yaci-dev-kit
-cp cf-application/.env.template cf-application/.env
-./gradlew clean bootRun
-```
-
-#### Docker:
-```shell
-# start the containers and run the command
-docker compose up --build -d
-cp cf-application/.env.template cf-application/.env
-docker exec -it app ./gradlew clean bootRun
 ```
 
 ## Architecture
@@ -75,8 +46,8 @@ docker exec -it app ./gradlew clean bootRun
 
 | Link                                                                               | Audience                                                     |
 |------------------------------------------------------------------------------------|--------------------------------------------------------------|
-| [Code Of Conduct](https://github.com/cardano-foundation/cf-lob/CODE-OF-CONDUCT.md) | Developers                                                   |
-| [Contributing](https://github.com/cardano-foundation/cf-lob/CONTRIBUTING.md)       | Developers                                                   |
-| [Security](https://github.com/cardano-foundation/cf-lob/SECURITY.md)               | Developers                                                   |
+| [Code Of Conduct](https://github.com/cardano-foundation/cf-lob-platform/CODE-OF-CONDUCT.md) | Developers                                                   |
+| [Contributing](https://github.com/cardano-foundation/cf-lob-platform/CONTRIBUTING.md)       | Developers                                                   |
+| [Security](https://github.com/cardano-foundation/cf-lob-platform/SECURITY.md)               | Developers                                                   |
 
 <hr/>
