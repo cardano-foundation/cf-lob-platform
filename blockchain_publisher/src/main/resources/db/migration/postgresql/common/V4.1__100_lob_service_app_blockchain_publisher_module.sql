@@ -69,9 +69,6 @@ CREATE TABLE blockchain_publisher_transaction (
    l1_publish_status blockchain_publisher_blockchain_publish_status_type,
    l1_finality_score blockchain_publisher_finality_score_type,
 
-   created_by VARCHAR(255),
-   updated_by VARCHAR(255),
-
    created_at TIMESTAMP WITHOUT TIME ZONE,
    updated_at TIMESTAMP WITHOUT TIME ZONE,
 
@@ -106,8 +103,6 @@ CREATE TABLE blockchain_publisher_transaction_item (
    document_vat_customer_code VARCHAR(255),
    document_vat_rate DECIMAL(12, 8),
 
-   created_by VARCHAR(255),
-   updated_by VARCHAR(255),
    created_at TIMESTAMP WITHOUT TIME ZONE,
    updated_at TIMESTAMP WITHOUT TIME ZONE,
 
