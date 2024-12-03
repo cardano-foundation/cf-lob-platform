@@ -99,7 +99,7 @@ public class ReportService {
         reportExample.setMode(USER); // Assuming USER is a constant in ReportMode enum
         reportExample.setDate(LocalDate.now(clock));
 
-        val incomeStatementReportData = IncomeStatementData.builder()
+        var incomeStatementReportData = IncomeStatementData.builder()
                 .revenues(IncomeStatementData.Revenues.builder()
                         .otherIncome(new BigDecimal("10000.90"))
                         .buildOfLongTermProvision(new BigDecimal("1000000.10"))
@@ -125,6 +125,8 @@ public class ReportService {
                         .generalAndAdministrativeExpenses(new BigDecimal("200000.53"))
                         .build())
                 .build();
+
+        incomeStatementReportData = incomeStatementReportData.toBuilder().profitForTheYear(incomeStatementReportData.sumOf()).build();
 
         reportExample.setIncomeStatementReportData(Optional.of(incomeStatementReportData));
 

@@ -158,7 +158,10 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
             @AttributeOverride(name = "extraordinaryIncome.extraordinaryExpenses", column = @Column(name = "data_income_statement__operating_expenses_extraordin_exp")),
 
             // Tax Expenses
-            @AttributeOverride(name = "taxExpenses.incomeTaxExpense", column = @Column(name = "data_income_statement__tax_expenses_income_tax_expense"))
+            @AttributeOverride(name = "taxExpenses.incomeTaxExpense", column = @Column(name = "data_income_statement__tax_expenses_income_tax_expense")),
+
+            @AttributeOverride(name = "extraordinaryIncome.extraordinaryExpenses", column = @Column(name = "data_income_statement__operating_expenses_extraordin_exp")),
+            @AttributeOverride(name = "profitForTheYear", column = @Column(name = "data_income_statement__profit_for_the_year"))
     })
     @Nullable
     private IncomeStatementData incomeStatementReportData;

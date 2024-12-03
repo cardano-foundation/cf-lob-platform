@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
 import org.cardanofoundation.lob.app.support.calc.BigDecimals;
@@ -23,7 +24,7 @@ public class IncomeStatementData implements Validable, Summable {
     private FinancialIncome financialIncome;
     private ExtraordinaryIncome extraordinaryIncome;
     private TaxExpenses taxExpenses;
-    //private BigDecimal profitForTheYear;
+    private BigDecimal profitForTheYear;
 
     @Override
     public boolean isValid() {
@@ -55,11 +56,11 @@ public class IncomeStatementData implements Validable, Summable {
     }
 
     public Optional<BigDecimal> getProfitForTheYear() {
-        return Optional.of(getValue());
+        return Optional.of(sumOf());
     }
 
     @Override
-    public BigDecimal getValue() {
+    public BigDecimal sumOf() {
         return BigDecimals.sum(
                 revenues,
                 costOfGoodsAndServices,
@@ -90,7 +91,7 @@ public class IncomeStatementData implements Validable, Summable {
         }
 
         @Override
-        public BigDecimal getValue() {
+        public BigDecimal sumOf() {
             return BigDecimals.sum(otherIncome, buildOfLongTermProvision);
         }
 
@@ -111,7 +112,7 @@ public class IncomeStatementData implements Validable, Summable {
         }
 
         @Override
-        public BigDecimal getValue() {
+        public BigDecimal sumOf() {
             return BigDecimals.sum(costOfProvidingServices);
         }
 
@@ -152,7 +153,7 @@ public class IncomeStatementData implements Validable, Summable {
         }
 
         @Override
-        public BigDecimal getValue() {
+        public BigDecimal sumOf() {
             return BigDecimals.sum(personnelExpenses, generalAndAdministrativeExpenses, depreciationAndImpairmentLossesOnTangibleAssets, amortizationOnIntangibleAssets, rentExpenses);
         }
 
@@ -193,7 +194,7 @@ public class IncomeStatementData implements Validable, Summable {
         }
 
         @Override
-        public BigDecimal getValue() {
+        public BigDecimal sumOf() {
             return BigDecimals.sum(
                     financialRevenues,
                     financialExpenses,
@@ -220,7 +221,7 @@ public class IncomeStatementData implements Validable, Summable {
         }
 
         @Override
-        public BigDecimal getValue() {
+        public BigDecimal sumOf() {
             return BigDecimals.sum(extraordinaryExpenses);
         }
 
@@ -241,7 +242,7 @@ public class IncomeStatementData implements Validable, Summable {
         }
 
         @Override
-        public BigDecimal getValue() {
+        public BigDecimal sumOf() {
             return BigDecimals.sum(incomeTaxExpense);
         }
 

@@ -672,9 +672,12 @@ CREATE table accounting_core_report (
     data_income_statement__operating_expenses_amortization_int DECIMAL(30, 8),
     data_income_statement__operating_expenses_rent_expenses DECIMAL(30, 8),
 
+--            @AttributeOverride(name = "financialIncome.financialRevenues", column = @Column(name = "data_income_statement__financial_income_financial_revenues")),
+--            @AttributeOverride(name = "financialIncome.financialExpenses", column = @Column(name = "data_income_statement__financial_income_financial_expenses")),
+
     -- Income Statement::Financial Income
-    data_income_statement__financial_income_finance_income DECIMAL(30, 8),
-    data_income_statement__financial_income_finance_expenses DECIMAL(30, 8),
+    data_income_statement__financial_income_financial_revenues DECIMAL(30, 8),
+    data_income_statement__financial_income_financial_expenses DECIMAL(30, 8),
     data_income_statement__financial_income_realised_gains DECIMAL(30, 8),
     data_income_statement__financial_income_staking_rewards DECIMAL(30, 8),
     data_income_statement__financial_income_net_income_opt DECIMAL(30, 8),
@@ -685,6 +688,10 @@ CREATE table accounting_core_report (
 
     -- Income Statement::Tax Expenses
     data_income_statement__tax_expenses_income_tax_expense DECIMAL(30, 8),
+
+    -- Calculated field by the JPA
+    data_income_statement__profit_for_the_year DECIMAL(30, 8),
+
     -- End of main data fields
 
     ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
@@ -751,8 +758,8 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
     data_income_statement__operating_expenses_rent_expenses DECIMAL(30, 8),
 
     -- Income Statement::Financial Income
-    data_income_statement__financial_income_finance_income DECIMAL(30, 8),
-    data_income_statement__financial_income_finance_expenses DECIMAL(30, 8),
+    data_income_statement__financial_income_financial_revenues DECIMAL(30, 8),
+    data_income_statement__financial_income_financial_expenses DECIMAL(30, 8),
     data_income_statement__financial_income_realised_gains DECIMAL(30, 8),
     data_income_statement__financial_income_staking_rewards DECIMAL(30, 8),
     data_income_statement__financial_income_net_income_opt DECIMAL(30, 8),
@@ -762,6 +769,10 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
 
     -- Income Statement::Tax Expenses
     data_income_statement__tax_expenses_income_tax_expense DECIMAL(30, 8),
+
+    -- Calculated field by the JPA
+    data_income_statement__profit_for_the_year DECIMAL(30, 8),
+
     -- End of main data fields
 
     ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
