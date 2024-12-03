@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportRollupPeriodType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
@@ -70,12 +70,12 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     private ReportType type;
 
     @Enumerated(STRING)
-    @Column(name = "rollup_period", nullable = false)
+    @Column(name = "interval_type", nullable = false)
     @JdbcType(PostgreSQLEnumJdbcType.class)
     @NotNull
     @Getter
     @Setter
-    private ReportRollupPeriodType rollupPeriod;
+    private IntervalType intervalType;
 
     @Column(name = "year", nullable = false)
     @Min(1900)

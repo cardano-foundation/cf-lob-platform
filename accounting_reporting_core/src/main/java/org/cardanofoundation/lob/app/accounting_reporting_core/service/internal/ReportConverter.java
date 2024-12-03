@@ -29,7 +29,7 @@ public class ReportConverter {
                 .reportId(reportEntity.getReportId())
                 .organisation(organisationConverter.convert(reportEntity.getOrganisation()))
                 .type(reportEntity.getType())
-                .rollupPeriod(reportEntity.getRollupPeriod())
+                .intervalType(reportEntity.getIntervalType())
                 .year(reportEntity.getYear())
                 .period(reportEntity.getPeriod())
                 .mode(reportEntity.getMode())

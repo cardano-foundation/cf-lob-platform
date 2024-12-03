@@ -22,8 +22,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode.USER;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportRollupPeriodType.MONTHLY;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportRollupPeriodType.YEARLY;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType.MONTH;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType.YEAR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.BALANCE_SHEET;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.INCOME_STATEMENT;
 
@@ -81,7 +81,7 @@ public class ReportService {
         val org = orgM.orElseThrow();
 
         val reportExample = new ReportEntity();
-        reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, MONTHLY, (short) 2023, Optional.of((short) 3)));
+        reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, MONTH, (short) 2023, Optional.of((short) 3)));
 
         reportExample.setOrganisation(Organisation.builder()
                 .id(organisationId)
@@ -93,7 +93,7 @@ public class ReportService {
         );
 
         reportExample.setType(INCOME_STATEMENT);
-        reportExample.setRollupPeriod(MONTHLY); // Assuming MONTHLY is a constant in ReportRollupPeriodType
+        reportExample.setIntervalType(MONTH); // Assuming MONTHLY is a constant in ReportRollupPeriodType
         reportExample.setYear((short) 2023);
         reportExample.setPeriod(Optional.of((short) 3)); // Representing March
         reportExample.setMode(USER); // Assuming USER is a constant in ReportMode enum
@@ -151,7 +151,7 @@ public class ReportService {
         val org = orgM.orElseThrow();
 
         val reportExample = new ReportEntity();
-        reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, YEARLY, (short) 2024, Optional.empty()));
+        reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, YEAR, (short) 2024, Optional.empty()));
 
         reportExample.setOrganisation(Organisation.builder()
                 .id(organisationId)
@@ -163,7 +163,7 @@ public class ReportService {
         );
 
         reportExample.setType(BALANCE_SHEET);
-        reportExample.setRollupPeriod(MONTHLY); // Assuming MONTHLY is a constant in ReportRollupPeriodType
+        reportExample.setIntervalType(MONTH); // Assuming MONTHLY is a constant in ReportRollupPeriodType
         reportExample.setYear((short) 2023);
         reportExample.setPeriod(Optional.of((short) 3)); // Representing March
         reportExample.setMode(USER); // Assuming USER is a constant in ReportMode enum
