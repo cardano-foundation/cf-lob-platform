@@ -107,7 +107,7 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @AttributeOverrides({
             // Balance Sheet::Assets - Non-Current Assets
             @AttributeOverride(name = "assets.nonCurrentAssets.propertyPlantEquipment", column = @Column(name = "data_balance_sheet__assets_non_current_property_plant_equip")),
-            @AttributeOverride(name = "assets.nonCurrentAssets.intangibleAssets", column = @Column(name = "data_income_statement__operating_expenses_depreciation_ta")),
+            @AttributeOverride(name = "assets.nonCurrentAssets.intangibleAssets", column = @Column(name = "data_balance_sheet__operating_expenses_depreciation_ta")),
             @AttributeOverride(name = "assets.nonCurrentAssets.investments", column = @Column(name = "data_balance_sheet__assets_non_current_investments")),
             @AttributeOverride(name = "assets.nonCurrentAssets.financialAssets", column = @Column(name = "data_balance_sheet__assets_non_current_financial_assets")),
 

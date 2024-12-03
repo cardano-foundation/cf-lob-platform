@@ -640,7 +640,7 @@ CREATE table accounting_core_report (
     -- Main data fields
     -- Balance Sheet::Assets
     data_balance_sheet__assets_non_current_property_plant_equip DECIMAL(30, 8),
-    data_income_statement__operating_expenses_depreciation_ta DECIMAL(30, 8),
+    data_balance_sheet__operating_expenses_depreciation_ta DECIMAL(30, 8),
     data_balance_sheet__assets_non_current_investments DECIMAL(30, 8),
     data_balance_sheet__assets_non_current_financial_assets DECIMAL(30, 8),
 
@@ -673,16 +673,12 @@ CREATE table accounting_core_report (
     data_income_statement__operating_expenses_amortization_int DECIMAL(30, 8),
     data_income_statement__operating_expenses_rent_expenses DECIMAL(30, 8),
 
---            @AttributeOverride(name = "financialIncome.financialRevenues", column = @Column(name = "data_income_statement__financial_income_financial_revenues")),
---            @AttributeOverride(name = "financialIncome.financialExpenses", column = @Column(name = "data_income_statement__financial_income_financial_expenses")),
-
     -- Income Statement::Financial Income
     data_income_statement__financial_income_financial_revenues DECIMAL(30, 8),
     data_income_statement__financial_income_financial_expenses DECIMAL(30, 8),
     data_income_statement__financial_income_realised_gains DECIMAL(30, 8),
     data_income_statement__financial_income_staking_rewards DECIMAL(30, 8),
     data_income_statement__financial_income_net_income_opt DECIMAL(30, 8),
-
 
     -- Income Statement::Extraordinary Income
     data_income_statement__operating_expenses_extraordin_exp DECIMAL(30, 8),
@@ -726,7 +722,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
     -- Main data fields
     -- Balance Sheet::Assets
     data_balance_sheet__assets_non_current_property_plant_equip DECIMAL(30, 8),
-    data_income_statement__operating_expenses_depreciation_ta DECIMAL(30, 8),
+    data_balance_sheet__operating_expenses_depreciation_ta DECIMAL(30, 8),
     data_balance_sheet__assets_non_current_investments DECIMAL(30, 8),
     data_balance_sheet__assets_non_current_financial_assets DECIMAL(30, 8),
 
