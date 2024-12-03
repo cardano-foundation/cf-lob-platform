@@ -663,14 +663,14 @@ CREATE table accounting_core_report (
     data_income_statement__revenues_other_income DECIMAL(30, 8),
     data_income_statement__revenues_build_long_term_provision DECIMAL(30, 8),
 
-    -- Income Statement::COGS (Cost of Goods Sold)
-    data_income_statement__cogs_cost_providing_services DECIMAL(30, 8),
+    data_income_statement__cost_goods_and_services_providing_serv DECIMAL(30, 8),
 
     -- Income Statement::Operating Expenses
     data_income_statement__operating_expenses_personnel_expenses DECIMAL(30, 8),
     data_income_statement__operating_expenses_general_admin_ex DECIMAL(30, 8),
     data_income_statement__operating_expenses_depreciation_tang DECIMAL(30, 8),
     data_income_statement__operating_expenses_amortization_int DECIMAL(30, 8),
+    data_income_statement__operating_expenses_rent_expenses DECIMAL(30, 8),
 
     -- Income Statement::Financial Income
     data_income_statement__financial_income_finance_income DECIMAL(30, 8),
@@ -678,6 +678,7 @@ CREATE table accounting_core_report (
     data_income_statement__financial_income_realised_gains DECIMAL(30, 8),
     data_income_statement__financial_income_staking_rewards DECIMAL(30, 8),
     data_income_statement__financial_income_net_income_opt DECIMAL(30, 8),
+
 
     -- Income Statement::Extraordinary Income
     data_income_statement__operating_expenses_extraordin_exp DECIMAL(30, 8),
@@ -740,14 +741,14 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
     data_income_statement__revenues_other_income DECIMAL(30, 8),
     data_income_statement__revenues_build_long_term_provision DECIMAL(30, 8),
 
-    -- Income Statement::COGS (Cost of Goods Sold)
-    data_income_statement__cogs_cost_providing_services DECIMAL(30, 8),
+    data_income_statement__cost_goods_and_services_providing_serv DECIMAL(30, 8),
 
     -- Income Statement::Operating Expenses
     data_income_statement__operating_expenses_personnel_expenses DECIMAL(30, 8),
     data_income_statement__operating_expenses_general_admin_ex DECIMAL(30, 8),
     data_income_statement__operating_expenses_depreciation_tang DECIMAL(30, 8),
     data_income_statement__operating_expenses_amortization_int DECIMAL(30, 8),
+    data_income_statement__operating_expenses_rent_expenses DECIMAL(30, 8),
 
     -- Income Statement::Financial Income
     data_income_statement__financial_income_finance_income DECIMAL(30, 8),

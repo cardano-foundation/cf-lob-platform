@@ -138,18 +138,18 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
             @AttributeOverride(name = "revenues.otherIncome", column = @Column(name = "data_income_statement__revenues_other_income")),
             @AttributeOverride(name = "revenues.buildOfLongTermProvision", column = @Column(name = "data_income_statement__revenues_build_long_term_provision")),
 
-            // COGS (Cost of Goods Sold)
-            @AttributeOverride(name = "cogs.costOfProvidingServices", column = @Column(name = "data_income_statement__cogs_cost_providing_services")),
+            @AttributeOverride(name = "costOfGoodsAndServices.costOfProvidingServices", column = @Column(name = "data_income_statement__cost_goods_and_services_providing_serv")), // was too long
 
             // Operating Expenses
             @AttributeOverride(name = "operatingExpenses.personnelExpenses", column = @Column(name = "data_income_statement__operating_expenses_personnel_expenses")),
             @AttributeOverride(name = "operatingExpenses.generalAndAdministrativeExpenses", column = @Column(name = "data_income_statement__operating_expenses_general_admin_ex")),
             @AttributeOverride(name = "operatingExpenses.depreciationAndImpairmentLossesOnTangibleAssets", column = @Column(name = "data_income_statement__operating_expenses_depreciation_tang")),
             @AttributeOverride(name = "operatingExpenses.amortizationOnIntangibleAssets", column = @Column(name = "data_income_statement__operating_expenses_amortization_int")),
+            @AttributeOverride(name = "operatingExpenses.rentExpenses", column = @Column(name = "data_income_statement__operating_expenses_rent_expenses")),
 
             // Financial Income
-            @AttributeOverride(name = "financialIncome.financeIncome", column = @Column(name = "data_income_statement__financial_income_finance_income")),
-            @AttributeOverride(name = "financialIncome.financeExpenses", column = @Column(name = "data_income_statement__financial_income_finance_expenses")),
+            @AttributeOverride(name = "financialIncome.financialRevenues", column = @Column(name = "data_income_statement__financial_income_financial_revenues")),
+            @AttributeOverride(name = "financialIncome.financialExpenses", column = @Column(name = "data_income_statement__financial_income_financial_expenses")),
             @AttributeOverride(name = "financialIncome.realisedGainsOnSaleOfCryptocurrencies", column = @Column(name = "data_income_statement__financial_income_realised_gains")),
             @AttributeOverride(name = "financialIncome.stakingRewardsIncome", column = @Column(name = "data_income_statement__financial_income_staking_rewards")),
             @AttributeOverride(name = "financialIncome.netIncomeOptionsSale", column = @Column(name = "data_income_statement__financial_income_net_income_opt")),

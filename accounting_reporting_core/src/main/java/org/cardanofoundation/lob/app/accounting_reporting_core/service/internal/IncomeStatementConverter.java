@@ -15,12 +15,13 @@ public class IncomeStatementConverter {
         return incomeStatementData.map(entityData -> {
             return org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IncomeStatementData.builder()
                     .revenues(convertRevenues(entityData.getRevenues()).orElse(null))
-                    .cogs(convertCOGS(entityData.getCogs()).orElse(null))
+                    .costOfServicesAndGoods(convertCostOfServicesAndGoods(entityData.getCostOfGoodsAndServices()).orElse(null))
                     .operatingExpenses(convertOperatingExpenses(entityData.getOperatingExpenses()).orElse(null))
                     .financialIncome(convertFinancialIncome(entityData.getFinancialIncome()).orElse(null))
                     .taxExpenses(convertTaxExpenses(entityData.getTaxExpenses()).orElse(null))
                     .operatingExpenses(convertOperatingExpenses(entityData.getOperatingExpenses()).orElse(null))
                     .extraordinaryIncome(convertExtraordinaryIncome(entityData.getExtraordinaryIncome()).orElse(null))
+                    .profitForTheYear(entityData.getProfitForTheYear().orElse(null))
                     .build();
         });
     }
@@ -32,8 +33,8 @@ public class IncomeStatementConverter {
                 .build());
     }
 
-    private Optional<COGS> convertCOGS(Optional<IncomeStatementData.COGS> cogs) {
-        return cogs.map(c -> COGS.builder()
+    private Optional<CostOfServicesAndGoods> convertCostOfServicesAndGoods(Optional<IncomeStatementData.CostOfGoodsAndServices> costOfGoodsAndServices) {
+        return costOfGoodsAndServices.map(c -> CostOfServicesAndGoods.builder()
                 .costOfProvidingServices(c.getCostOfProvidingServices().orElse(null))
                 .build());
     }
@@ -44,13 +45,14 @@ public class IncomeStatementConverter {
                 .generalAndAdministrativeExpenses(oe.getGeneralAndAdministrativeExpenses().orElse(null))
                 .depreciationAndImpairmentLossesOnTangibleAssets(oe.getDepreciationAndImpairmentLossesOnTangibleAssets().orElse(null))
                 .amortizationOnIntangibleAssets(oe.getAmortizationOnIntangibleAssets().orElse(null))
+                .rentExpenses(oe.getRentExpenses().orElse(null))
                 .build());
     }
 
     private Optional<FinancialIncome> convertFinancialIncome(Optional<IncomeStatementData.FinancialIncome> financialIncome) {
         return financialIncome.map(op -> FinancialIncome.builder()
-                .financeIncome(op.getFinanceIncome().orElse(null))
-                .financeExpenses(op.getFinanceExpenses().orElse(null))
+                .financialRevenues(op.getFinancialRevenues().orElse(null))
+                .financialExpenses(op.getFinancialExpenses().orElse(null))
                 .realisedGainsOnSaleOfCryptocurrencies(op.getRealisedGainsOnSaleOfCryptocurrencies().orElse(null))
                 .stakingRewardsIncome(op.getStakingRewardsIncome().orElse(null))
                 .netIncomeOptionsSale(op.getNetIncomeOptionsSale().orElse(null))

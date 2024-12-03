@@ -11,7 +11,7 @@ import java.util.Optional;
 @EqualsAndHashCode
 @ToString
 @NoArgsConstructor
-public class COGS {
+public class CostOfServicesAndGoods {
 
     @Nullable
     private BigDecimal costOfProvidingServices;

@@ -3,6 +3,8 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.re
 import jakarta.persistence.Embeddable;
 import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
+import org.cardanofoundation.lob.app.support.calc.BigDecimals;
+import org.cardanofoundation.lob.app.support.calc.Summable;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -13,14 +15,15 @@ import java.util.Optional;
 @ToString
 @NoArgsConstructor
 @Embeddable
-public class IncomeStatementData implements Validable {
+public class IncomeStatementData implements Validable, Summable {
 
     private Revenues revenues;
-    private COGS cogs;
+    private CostOfGoodsAndServices costOfGoodsAndServices;
     private OperatingExpenses operatingExpenses;
     private FinancialIncome financialIncome;
     private ExtraordinaryIncome extraordinaryIncome;
     private TaxExpenses taxExpenses;
+    //private BigDecimal profitForTheYear;
 
     @Override
     public boolean isValid() {
@@ -31,8 +34,8 @@ public class IncomeStatementData implements Validable {
         return Optional.ofNullable(revenues);
     }
 
-    public Optional<COGS> getCogs() {
-        return Optional.ofNullable(cogs);
+    public Optional<CostOfGoodsAndServices> getCostOfGoodsAndServices() {
+        return Optional.ofNullable(costOfGoodsAndServices);
     }
 
     public Optional<OperatingExpenses> getOperatingExpenses() {
@@ -51,13 +54,29 @@ public class IncomeStatementData implements Validable {
         return Optional.ofNullable(extraordinaryIncome);
     }
 
+    public Optional<BigDecimal> getProfitForTheYear() {
+        return Optional.of(getValue());
+    }
+
+    @Override
+    public BigDecimal getValue() {
+        return BigDecimals.sum(
+                revenues,
+                costOfGoodsAndServices,
+                operatingExpenses,
+                financialIncome,
+                extraordinaryIncome,
+                taxExpenses
+        );
+    }
+
     @AllArgsConstructor
     @Builder(toBuilder = true)
     @EqualsAndHashCode
     @ToString
     @NoArgsConstructor
     @Embeddable
-    public static class Revenues {
+    public static class Revenues implements Summable {
 
         private BigDecimal otherIncome;
         private BigDecimal buildOfLongTermProvision;
@@ -69,6 +88,12 @@ public class IncomeStatementData implements Validable {
         public Optional<BigDecimal> getBuildOfLongTermProvision() {
             return Optional.ofNullable(buildOfLongTermProvision);
         }
+
+        @Override
+        public BigDecimal getValue() {
+            return BigDecimals.sum(otherIncome, buildOfLongTermProvision);
+        }
+
     }
 
     @AllArgsConstructor
@@ -77,13 +102,19 @@ public class IncomeStatementData implements Validable {
     @ToString
     @NoArgsConstructor
     @Embeddable
-    public static class COGS {
+    public static class CostOfGoodsAndServices implements Summable {
 
         private BigDecimal costOfProvidingServices;
 
         public Optional<BigDecimal> getCostOfProvidingServices() {
             return Optional.ofNullable(costOfProvidingServices);
         }
+
+        @Override
+        public BigDecimal getValue() {
+            return BigDecimals.sum(costOfProvidingServices);
+        }
+
     }
 
     @AllArgsConstructor
@@ -92,12 +123,13 @@ public class IncomeStatementData implements Validable {
     @ToString
     @NoArgsConstructor
     @Embeddable
-    public static class OperatingExpenses {
+    public static class OperatingExpenses implements Summable {
 
         private BigDecimal personnelExpenses;
         private BigDecimal generalAndAdministrativeExpenses;
         private BigDecimal depreciationAndImpairmentLossesOnTangibleAssets;
         private BigDecimal amortizationOnIntangibleAssets;
+        private BigDecimal rentExpenses;
 
         public Optional<BigDecimal> getPersonnelExpenses() {
             return Optional.ofNullable(personnelExpenses);
@@ -114,6 +146,16 @@ public class IncomeStatementData implements Validable {
         public Optional<BigDecimal> getAmortizationOnIntangibleAssets() {
             return Optional.ofNullable(amortizationOnIntangibleAssets);
         }
+
+        public Optional<BigDecimal> getRentExpenses() {
+            return Optional.ofNullable(rentExpenses);
+        }
+
+        @Override
+        public BigDecimal getValue() {
+            return BigDecimals.sum(personnelExpenses, generalAndAdministrativeExpenses, depreciationAndImpairmentLossesOnTangibleAssets, amortizationOnIntangibleAssets, rentExpenses);
+        }
+
     }
 
     @AllArgsConstructor
@@ -122,20 +164,20 @@ public class IncomeStatementData implements Validable {
     @ToString
     @NoArgsConstructor
     @Embeddable
-    public static class FinancialIncome {
+    public static class FinancialIncome implements Summable {
 
-        private BigDecimal financeIncome;
-        private BigDecimal financeExpenses;
+        private BigDecimal financialRevenues;
+        private BigDecimal financialExpenses;
         private BigDecimal realisedGainsOnSaleOfCryptocurrencies;
         private BigDecimal stakingRewardsIncome;
         private BigDecimal netIncomeOptionsSale;
 
-        public Optional<BigDecimal> getFinanceIncome() {
-            return Optional.ofNullable(financeIncome);
+        public Optional<BigDecimal> getFinancialRevenues() {
+            return Optional.ofNullable(financialRevenues);
         }
 
-        public Optional<BigDecimal> getFinanceExpenses() {
-            return Optional.ofNullable(financeExpenses);
+        public Optional<BigDecimal> getFinancialExpenses() {
+            return Optional.ofNullable(financialExpenses);
         }
 
         public Optional<BigDecimal> getRealisedGainsOnSaleOfCryptocurrencies() {
@@ -150,6 +192,17 @@ public class IncomeStatementData implements Validable {
             return Optional.ofNullable(netIncomeOptionsSale);
         }
 
+        @Override
+        public BigDecimal getValue() {
+            return BigDecimals.sum(
+                    financialRevenues,
+                    financialExpenses,
+                    realisedGainsOnSaleOfCryptocurrencies,
+                    stakingRewardsIncome,
+                    netIncomeOptionsSale
+            );
+        }
+
     }
 
     @AllArgsConstructor
@@ -158,7 +211,7 @@ public class IncomeStatementData implements Validable {
     @ToString
     @NoArgsConstructor
     @Embeddable
-    public static class ExtraordinaryIncome {
+    public static class ExtraordinaryIncome implements Summable {
 
         private BigDecimal extraordinaryExpenses;
 
@@ -166,6 +219,11 @@ public class IncomeStatementData implements Validable {
             return Optional.ofNullable(extraordinaryExpenses);
         }
 
+        @Override
+        public BigDecimal getValue() {
+            return BigDecimals.sum(extraordinaryExpenses);
+        }
+
     }
 
     @AllArgsConstructor
@@ -174,13 +232,19 @@ public class IncomeStatementData implements Validable {
     @ToString
     @NoArgsConstructor
     @Embeddable
-    public static class TaxExpenses {
+    public static class TaxExpenses implements Summable {
 
         private BigDecimal incomeTaxExpense;
 
         public Optional<BigDecimal> getIncomeTaxExpense() {
             return Optional.ofNullable(incomeTaxExpense);
         }
+
+        @Override
+        public BigDecimal getValue() {
+            return BigDecimals.sum(incomeTaxExpense);
+        }
+
     }
 
 }

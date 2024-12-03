@@ -21,9 +21,9 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode.USER;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType.MONTH;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType.YEAR;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode.USER;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.BALANCE_SHEET;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.INCOME_STATEMENT;
 
@@ -104,15 +104,15 @@ public class ReportService {
                         .otherIncome(new BigDecimal("10000.90"))
                         .buildOfLongTermProvision(new BigDecimal("1000000.10"))
                         .build())
-                .cogs(IncomeStatementData.COGS.builder()
+                .costOfGoodsAndServices(IncomeStatementData.CostOfGoodsAndServices.builder()
                         .costOfProvidingServices(new BigDecimal("500000.15"))
                         .build())
                 .financialIncome(IncomeStatementData.FinancialIncome.builder()
-                        .financeIncome(new BigDecimal("200000.53"))
+                        .financialRevenues(new BigDecimal("200000.53"))
                         .netIncomeOptionsSale(new BigDecimal("100000.10"))
                         .realisedGainsOnSaleOfCryptocurrencies(new BigDecimal("50000.15"))
                         .stakingRewardsIncome(new BigDecimal("10000.53"))
-                        .financeExpenses(new BigDecimal("20000.10"))
+                        .financialExpenses(new BigDecimal("20000.10"))
                         .build())
                 .extraordinaryIncome(IncomeStatementData.ExtraordinaryIncome.builder()
                         .extraordinaryExpenses(new BigDecimal("10000.10"))

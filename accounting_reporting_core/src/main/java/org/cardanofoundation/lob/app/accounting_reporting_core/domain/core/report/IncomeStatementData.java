@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.repo
 import lombok.*;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -16,7 +17,7 @@ public class IncomeStatementData {
     private Revenues revenues;
 
     @Nullable
-    private COGS cogs;
+    private CostOfServicesAndGoods costOfServicesAndGoods;
 
     @Nullable
     private OperatingExpenses operatingExpenses;
@@ -30,12 +31,15 @@ public class IncomeStatementData {
     @Nullable
     private TaxExpenses taxExpenses;
 
+    @Nullable
+    private BigDecimal profitForTheYear;
+
     public Optional<Revenues> getRevenues() {
         return Optional.ofNullable(revenues);
     }
 
-    public Optional<COGS> getCogs() {
-        return Optional.ofNullable(cogs);
+    public Optional<CostOfServicesAndGoods> getCostOfServicesAndGoods() {
+        return Optional.ofNullable(costOfServicesAndGoods);
     }
 
     public Optional<OperatingExpenses> getOperatingExpenses() {
@@ -48,6 +52,10 @@ public class IncomeStatementData {
 
     public Optional<TaxExpenses> getTaxExpenses() {
         return Optional.ofNullable(taxExpenses);
+    }
+
+    public Optional<BigDecimal> getProfitForTheYear() {
+        return Optional.ofNullable(profitForTheYear);
     }
 
 }
