@@ -657,7 +657,8 @@ CREATE table accounting_core_report (
 
     -- Balance Sheet::Capital
     data_balance_sheet__capital_capital DECIMAL(30, 8),
-    data_balance_sheet__capital_retained_earnings DECIMAL(30, 8),
+    data_balance_sheet__capital_profit_for_the_year DECIMAL(30, 8),
+    data_balance_sheet__capital_results_carried_forward DECIMAL(30, 8),
 
     -- Income Statement::Revenues
     data_income_statement__revenues_other_income DECIMAL(30, 8),
@@ -742,7 +743,8 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
 
     -- Balance Sheet::Capital
     data_balance_sheet__capital_capital DECIMAL(30, 8),
-    data_balance_sheet__capital_retained_earnings DECIMAL(30, 8),
+    data_balance_sheet__capital_profit_for_the_year DECIMAL(30, 8),
+    data_balance_sheet__capital_results_carried_forward DECIMAL(30, 8),
 
     -- Income Statement::Revenues
     data_income_statement__revenues_other_income DECIMAL(30, 8),

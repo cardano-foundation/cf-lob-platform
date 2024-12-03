@@ -127,7 +127,8 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
 
             // Balance Sheet::Capital
             @AttributeOverride(name = "capital.capital", column = @Column(name = "data_balance_sheet__capital_capital")),
-            @AttributeOverride(name = "capital.retainedEarnings", column = @Column(name = "data_balance_sheet__capital_retained_earnings"))
+            @AttributeOverride(name = "capital.profitForTheYear", column = @Column(name = "data_balance_sheet__capital_profit_for_the_year")),
+            @AttributeOverride(name = "capital.resultsCarriedForward", column = @Column(name = "data_balance_sheet__capital_results_carried_forward"))
     })
     @Nullable
     private BalanceSheetData balanceSheetReportData;

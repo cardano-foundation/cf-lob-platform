@@ -198,7 +198,8 @@ public class ReportService {
                         .build())
                 .capital(BalanceSheetData.Capital.builder()
                         .capital(new BigDecimal("300000.00"))
-                        .retainedEarnings(new BigDecimal("300000.00"))
+                        .profitForTheYear(new BigDecimal("100000.00"))
+                        .resultsCarriedForward(new BigDecimal("200000.00"))
                         .build())
                 .build();
 
