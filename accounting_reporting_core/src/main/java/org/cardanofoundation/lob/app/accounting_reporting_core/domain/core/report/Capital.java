@@ -15,15 +15,23 @@ public class Capital {
 
     @Nullable
     private BigDecimal capital;
+
     @Nullable
-    private BigDecimal retainedEarnings;
+    private BigDecimal profitForTheYear;
+
+    @Nullable
+    private BigDecimal resultsCarriedForward;
 
     public Optional<BigDecimal> getCapital() {
         return Optional.ofNullable(capital);
     }
 
-    public Optional<BigDecimal> getRetainedEarnings() {
-        return Optional.ofNullable(retainedEarnings);
+    public Optional<BigDecimal> getResultsCarriedForward() {
+        return Optional.ofNullable(resultsCarriedForward);
+    }
+
+    public Optional<BigDecimal> getProfitForTheYear() {
+        return Optional.ofNullable(profitForTheYear);
     }
 
 }

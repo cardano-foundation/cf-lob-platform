@@ -11,37 +11,37 @@
     "creation_slot": 10278
   },
   "data": {
-    "assets": {
-      "non_current_assets": {
-        "property_plant_equipment": "500000.00",
-        "intangible_assets": "200000.00",
-        "investments": "150000.00",
-        "financial_assets": "100000.00"
-      },
-      "current_assets": {
-        "prepayments_and_other_short_term_assets": "50000.00",
-        "other_receivables": "75000.00",
-        "crypto_assets": "25000.00",
-        "cash_and_cash_equivalents": "300000.00"
-      }
+    "revenues": {
+      "other_income": "5000000.00",
+      "build_of_long_term_provision": "1000000.00"
     },
-    "liabilities": {
-      "non_current_liabilities": {
-        "provisions": "250000.00"
-      },
-      "current_liabilities": {
-        "trade_accounts_payables": "50000.00",
-        "other_current_liabilities": "75000.00",
-        "accruals_and_short_term_provisions": "25000.00"
-      }
+    "cost_of_goods_and_services": {
+      "cost_of_providing_services": "15000000.00"
     },
-    "capital": {
-      "capital": "300000.00",
-      "retained_earnings": "200000.00"
-    }
+    "operating_expenses": {
+      "personnel_expenses": "20000000.00",
+      "general_and_administrative_expenses": "5000000.00",
+      "depreciation_and_impairment_losses_on_tangible_assets": "3000000.00",
+      "amortization_on_intangible_assets": "2000000.00",
+      "rentExpenses": "1111.00"
+    },
+    "financial_income": {
+      "financial_revenues": "3000000.00",
+      "financial_expenses": "1500000.00",
+      "realised_gains_on_sale_of_cryptocurrencies": "1000000.00",
+      "staking_rewards_income": "2000000.00",
+      "net_income_options_sale": "500000.00"
+    },
+    "extraordinary_income": {
+      "extraordinary_expenses": "1000000.00"
+    },
+    "tax_expenses": {
+      "income_tax_expense": "2500000.00"
+    },
+    "profit_for_the_year": "3000000.00"
   },
   "type": "REPORT",
-  "subType": "BALANCE_SHEET",
+  "subType": "INCOME_STATEMENT",
   "interval": "YEAR",
   "year": "2023",
   "mode": "USER"

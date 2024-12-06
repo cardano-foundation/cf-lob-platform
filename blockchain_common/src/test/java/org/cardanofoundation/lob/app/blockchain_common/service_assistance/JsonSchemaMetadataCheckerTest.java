@@ -73,10 +73,10 @@ public class JsonSchemaMetadataCheckerTest {
     @Test
     public void testAPI3CheckTransactionMetadata_IncomeStatement() throws IOException {
         // Load invalid JSON from test/resources
-        val invalidJson = Files.readString(Path.of("src/test/resources/api3_test_transactions_valid_is.json"));
+        val validJson = Files.readString(Path.of("src/test/resources/api3_test_transactions_valid_is.json"));
 
         // Check metadata
-        val result = api3JsonSchemaMetadataChecker.checkTransactionMetadata(invalidJson);
+        val result = api3JsonSchemaMetadataChecker.checkTransactionMetadata(validJson);
 
         // Assert that the validation passes
         assertThat(result).isTrue();
