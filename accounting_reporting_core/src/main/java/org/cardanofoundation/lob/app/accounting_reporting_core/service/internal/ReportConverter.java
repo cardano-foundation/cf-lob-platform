@@ -27,6 +27,8 @@ public class ReportConverter {
     private Report convertToDbDetached(ReportEntity reportEntity) {
         return Report.builder()
                 .reportId(reportEntity.getReportId())
+                .idReport(reportEntity.getReportId())
+                .ver(reportEntity.getVer())
                 .organisation(organisationConverter.convert(reportEntity.getOrganisation()))
                 .type(reportEntity.getType())
                 .intervalType(reportEntity.getIntervalType())

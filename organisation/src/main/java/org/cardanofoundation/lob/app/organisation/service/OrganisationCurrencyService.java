@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -23,4 +24,7 @@ public class OrganisationCurrencyService {
         return organisationCurrencyRepository.findById(new OrganisationCurrency.Id(organisationId, customerCode));
     }
 
+    public Set<OrganisationCurrency> findAllByOrganisationId(@Param("organisationId") String organisationId ){
+        return organisationCurrencyRepository.findAllByOrganisationId(organisationId);
+    }
 }

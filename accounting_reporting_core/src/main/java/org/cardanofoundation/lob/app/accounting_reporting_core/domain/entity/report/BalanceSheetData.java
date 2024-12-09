@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.re
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
 import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.cardanofoundation.lob.app.support.calc.Summable;
@@ -10,6 +11,7 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+@Slf4j
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @EqualsAndHashCode
@@ -30,7 +32,7 @@ public class BalanceSheetData implements Validable, Summable {
     @Override
     public boolean isValid() {
         return getAssets().isPresent() && getLiabilities().isPresent() && getCapital().isPresent()
-                && assets.sumOf().equals(BigDecimals.sum(liabilities, capital));
+                && 0 == assets.sumOf().compareTo(BigDecimals.sum(liabilities, capital));
     }
 
     public Optional<Assets> getAssets() {
