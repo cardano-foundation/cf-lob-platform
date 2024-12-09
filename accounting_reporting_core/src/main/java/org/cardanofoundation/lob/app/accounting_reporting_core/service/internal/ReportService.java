@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.Report;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.BalanceSheetData;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.IncomeStatementData;
@@ -18,6 +19,7 @@ import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -225,6 +227,248 @@ public class ReportService {
         return Either.right(null);
     }
 
+    @Transactional
+    public Either<Problem, Void> storeBalanceSheet(
+            String organisationId,
+            String propertyPlantEquipment,
+            String intangibleAssets,
+            String investments,
+            String financialAssets,
+            String prepaymentsAndOtherShortTermAssets,
+            String otherReceivables,
+            String cryptoAssets,
+            String cashAndCashEquivalents,
+            String provisions,
+            String tradeAccountsPayables,
+            String otherCurrentLiabilities,
+            String accrualsAndShortTermProvisions,
+            String capital,
+            String profitForTheYear,
+            String resultsCarriedForward,
+            ReportType reportType,
+            IntervalType intervalType,
+            short year,
+            short period
+    ) {
+        log.info("Balance Sheet:: Saving report...");
+
+        val orgM = organisationPublicApi.findByOrganisationId(organisationId);
+        if (orgM.isEmpty()) {
+            return Either.left(Problem.builder()
+                    .withTitle("ORGANISATION_NOT_FOUND")
+                    .withDetail(STR."Organisation with ID \{organisationId} does not exist.")
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("organisationId", organisationId)
+                    .build());
+        }
+        val org = orgM.orElseThrow();
+
+        val reportExampleE = exist(organisationId, reportType, intervalType, year, period);
+
+        ReportEntity reportExample = reportExampleE.fold(problem -> {
+            return new ReportEntity();
+        }, success -> {
+            return success;
+        });
+        log.info("\n\n SIGUE\n");
+        reportExample.setReportId(Report.id(organisationId, reportType, intervalType, year, Optional.of(period)));
+
+        reportExample.setOrganisation(Organisation.builder()
+                .id(organisationId)
+                .countryCode(org.getCountryCode())
+                .name(org.getName())
+                .taxIdNumber(org.getTaxIdNumber())
+                .currencyId(org.getCurrencyId())
+                .build()
+        );
+
+        reportExample.setType(reportType);
+        reportExample.setIntervalType(intervalType); // Assuming MONTHLY is a constant in ReportRollupPeriodType
+        reportExample.setYear(year);
+        reportExample.setPeriod(Optional.of(period)); // Representing March
+        reportExample.setMode(USER); // Assuming USER is a constant in ReportMode enum
+        reportExample.setDate(LocalDate.now(clock));
+
+        BalanceSheetData balanceSheetReportData = BalanceSheetData.builder()
+                .assets(BalanceSheetData.Assets.builder()
+                        .nonCurrentAssets(BalanceSheetData.Assets.NonCurrentAssets.builder()
+                                .propertyPlantEquipment(new BigDecimal(propertyPlantEquipment))
+                                .intangibleAssets(new BigDecimal(intangibleAssets))
+                                .investments(new BigDecimal(investments))
+                                .financialAssets(new BigDecimal(financialAssets))
+                                .build())
+                        .currentAssets(BalanceSheetData.Assets.CurrentAssets.builder()
+                                .prepaymentsAndOtherShortTermAssets(new BigDecimal(prepaymentsAndOtherShortTermAssets))
+                                .otherReceivables(new BigDecimal(otherReceivables))
+                                .cryptoAssets(new BigDecimal(cryptoAssets))
+                                .cashAndCashEquivalents(new BigDecimal(cashAndCashEquivalents))
+                                .build())
+                        .build())
+                .liabilities(BalanceSheetData.Liabilities.builder()
+                        .nonCurrentLiabilities(BalanceSheetData.Liabilities.NonCurrentLiabilities.builder()
+                                .provisions(new BigDecimal(provisions))
+                                .build())
+                        .currentLiabilities(BalanceSheetData.Liabilities.CurrentLiabilities.builder()
+                                .tradeAccountsPayables(new BigDecimal(tradeAccountsPayables))
+                                .otherCurrentLiabilities(new BigDecimal(otherCurrentLiabilities))
+                                .accrualsAndShortTermProvisions(new BigDecimal(accrualsAndShortTermProvisions))
+                                .build())
+                        .build())
+                .capital(BalanceSheetData.Capital.builder()
+                        .capital(new BigDecimal(capital))
+                        .profitForTheYear(new BigDecimal(profitForTheYear))
+                        .resultsCarriedForward(new BigDecimal(resultsCarriedForward))
+                        .build())
+                .build();
+
+        reportExample.setBalanceSheetReportData(Optional.of(balanceSheetReportData));
+        log.info("\n\n ANTES DEL INVALID\n");
+        if (!reportExample.isValid()) {
+            return Either.left(Problem.builder()
+                    .withTitle("INVALID_REPORT")
+                    .withDetail(STR."Report is not valid since it didn't pass through business checks.")
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("reportId", reportExample.getReportId())
+                    .with("reportType", reportExample.getType())
+                    .build());
+        }
+        val result = store(reportExample);
+        if (result.isLeft()) {
+            return Either.left(result.getLeft());
+        }
+        reportRepository.save(reportExample);
+
+        log.info("Balance Sheet::Report saved successfully: {}", reportExample.getReportId());
+
+        return Either.right(null);
+    }
+
+    @Transactional
+    public Either<Problem, Void> storeIncomeStatement(
+            String organisationId,
+            String otherIncome,
+            String buildOfLongTermProvision,
+            String costOfProvidingServices,
+            String financialRevenues,
+            String netIncomeOptionsSale,
+            String realisedGainsOnSaleOfCryptocurrencies,
+            String stakingRewardsIncome,
+            String financialExpenses,
+            String extraordinaryExpenses,
+            String incomeTaxExpense,
+            String personnelExpenses,
+            String generalAndAdministrativeExpenses,
+            String depreciationAndImpairmentLossesOnTangibleAssets,
+            String amortizationOnIntangibleAssets,
+            String rentExpenses,
+            ReportType reportType,
+            IntervalType intervalType,
+            short year,
+            short period
+    ) {
+        log.info("Income Statement::Saving report example...");
+
+        val orgM = organisationPublicApi.findByOrganisationId(organisationId);
+        if (orgM.isEmpty()) {
+            return Either.left(Problem.builder()
+                    .withTitle("ORGANISATION_NOT_FOUND")
+                    .withDetail(STR."Organisation with ID \{organisationId} does not exist.")
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("organisationId", organisationId)
+                    .build());
+        }
+        val org = orgM.orElseThrow();
+
+        val reportExampleE = exist(organisationId, reportType, intervalType, year, period);
+
+        ReportEntity reportExample = reportExampleE.fold(problem -> {
+            return new ReportEntity();
+        }, success -> {
+            return success;
+        });
+
+
+        reportExample.setReportId(Report.id(organisationId, reportType, intervalType, year, Optional.of(period)));
+
+        reportExample.setOrganisation(Organisation.builder()
+                .id(organisationId)
+                .countryCode(org.getCountryCode())
+                .name(org.getName())
+                .taxIdNumber(org.getTaxIdNumber())
+                .currencyId(org.getCurrencyId())
+                .build()
+        );
+
+        reportExample.setType(reportType);
+        reportExample.setIntervalType(intervalType); // Assuming MONTHLY is a constant in ReportRollupPeriodType
+        reportExample.setYear(year);
+        reportExample.setPeriod(Optional.of(period)); // Representing March
+        reportExample.setMode(USER); // Assuming USER is a constant in ReportMode enum
+        reportExample.setDate(LocalDate.now(clock));
+
+        var incomeStatementReportData = IncomeStatementData.builder()
+                .revenues(IncomeStatementData.Revenues.builder()
+                        .otherIncome(new BigDecimal(otherIncome))
+                        .buildOfLongTermProvision(new BigDecimal(buildOfLongTermProvision))
+                        .build())
+                .costOfGoodsAndServices(IncomeStatementData.CostOfGoodsAndServices.builder()
+                        .costOfProvidingServices(new BigDecimal(costOfProvidingServices))
+                        .build())
+                .financialIncome(IncomeStatementData.FinancialIncome.builder()
+                        .financialRevenues(new BigDecimal(financialRevenues))
+                        .netIncomeOptionsSale(new BigDecimal(netIncomeOptionsSale))
+                        .realisedGainsOnSaleOfCryptocurrencies(new BigDecimal(realisedGainsOnSaleOfCryptocurrencies))
+                        .stakingRewardsIncome(new BigDecimal(stakingRewardsIncome))
+                        .financialExpenses(new BigDecimal(financialExpenses))
+                        .build())
+                .extraordinaryIncome(IncomeStatementData.ExtraordinaryIncome.builder()
+                        .extraordinaryExpenses(new BigDecimal(extraordinaryExpenses))
+                        .build())
+                .taxExpenses(IncomeStatementData.TaxExpenses.builder()
+                        .incomeTaxExpense(new BigDecimal(incomeTaxExpense))
+                        .build())
+                .operatingExpenses(IncomeStatementData.OperatingExpenses.builder()
+                        .personnelExpenses(new BigDecimal(personnelExpenses))
+                        .generalAndAdministrativeExpenses(new BigDecimal(generalAndAdministrativeExpenses))
+                        .depreciationAndImpairmentLossesOnTangibleAssets(new BigDecimal(depreciationAndImpairmentLossesOnTangibleAssets))
+                        .amortizationOnIntangibleAssets(new BigDecimal(amortizationOnIntangibleAssets))
+                        .rentExpenses(new BigDecimal(rentExpenses))
+
+                        .build())
+                .build();
+
+        incomeStatementReportData = incomeStatementReportData.toBuilder().profitForTheYear(incomeStatementReportData.sumOf()).build();
+
+        reportExample.setIncomeStatementReportData(Optional.of(incomeStatementReportData));
+        val result = store(reportExample);
+        if (result.isLeft()) {
+            return Either.left(result.getLeft());
+        }
+        reportRepository.save(reportExample);
+
+        log.info("Income Statement::Report saved successfully: {}", reportExample);
+
+        return Either.right(null);
+    }
+
+    public Either<Problem, ReportEntity> exist(String organisationId, ReportType reportType, IntervalType intervalType, short year, short period) {
+        String reportId = Report.id(organisationId, reportType, intervalType, year, Optional.of(period));
+        val reportM = reportRepository.findById(reportId);
+
+        if (reportM.isEmpty()) {
+            return Either.left(Problem.builder()
+                    .withTitle("REPORT_NOT_FOUND")
+                    .withDetail(STR."Report with ID \{reportId} does not exist.")
+                    .withStatus(Status.NOT_FOUND)
+                    .with("reportId", reportId)
+                    .build());
+        }
+
+        val report = reportM.orElseThrow();
+
+        return Either.right(report);
+    }
+
     public Either<Problem, Boolean> isReportValid(String reportId) {
         val reportM = reportRepository.findById(reportId);
 
@@ -240,6 +484,48 @@ public class ReportService {
         val report = reportM.orElseThrow();
 
         return Either.right(report.isValid());
+    }
+
+    public Either<Problem, ReportEntity> store(ReportEntity reportEntity) {
+
+        val reportId = reportEntity.getId();
+        if (reportEntity.getLedgerDispatchApproved()) {
+            return Either.left(Problem.builder()
+                    .withTitle("REPORT_ALREADY_APPROVED")
+                    .withDetail(STR."Report with ID \{reportId} has already been approved for ledger dispatch.")
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("reportId", reportId)
+                    .build());
+        }
+        log.info("\n\n VALIDANDO\n");
+        // Validate profitForTheYear consistency between IncomeStatementData and BalanceSheetData
+        val relatedReportType = reportEntity.getType().equals(INCOME_STATEMENT) ? BALANCE_SHEET : INCOME_STATEMENT;
+        val relatedReportId = Report.id(reportEntity.getOrganisation().getId(), relatedReportType, reportEntity.getIntervalType(), reportEntity.getYear(), reportEntity.getPeriod());
+        val relatedReportM = reportRepository.findById(relatedReportId);
+
+        if (relatedReportM.isPresent()) {
+            val relatedReport = relatedReportM.orElseThrow();
+            val relatedProfit = relatedReport.getType().equals(INCOME_STATEMENT)
+                    ? relatedReport.getIncomeStatementReportData().flatMap(IncomeStatementData::getProfitForTheYear).orElse(BigDecimal.ZERO)
+                    : relatedReport.getBalanceSheetReportData().flatMap(BalanceSheetData::getCapital).flatMap(BalanceSheetData.Capital::getProfitForTheYear).orElse(BigDecimal.ZERO);
+
+
+            BigDecimal newProfit = reportEntity.getType().equals(INCOME_STATEMENT)
+                    ? reportEntity.getIncomeStatementReportData().flatMap(IncomeStatementData::getProfitForTheYear).orElse(BigDecimal.ZERO)
+                    : reportEntity.getBalanceSheetReportData().flatMap(BalanceSheetData::getCapital).flatMap(BalanceSheetData.Capital::getProfitForTheYear).orElse(BigDecimal.ZERO);
+            log.info("\n\n Los resultados \n new: {}\n old: {}\n\n", newProfit, relatedProfit);
+            if (0 != newProfit.compareTo(relatedProfit)) {
+                return Either.left(Problem.builder()
+                        .withTitle("PROFIT_FOR_THE_YEAR_MISMATCH")
+                        .withDetail(STR."Profit for the year does not match the related report.")
+                        .withStatus(Status.BAD_REQUEST)
+                        .with("reportId", reportId)
+                        .build());
+            }
+
+        }
+
+        return Either.right(reportEntity);
     }
 
     public Either<Problem, Void> store(String organisationId,

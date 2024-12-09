@@ -111,7 +111,7 @@ CREATE TYPE accounting_core_report_type AS ENUM (
 
 CREATE TYPE accounting_core_report_internal_type AS ENUM (
     'YEAR',
-    'QUATER',
+    'QUARTER',
     'MONTH'
 );
 
