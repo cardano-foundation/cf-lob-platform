@@ -42,9 +42,9 @@ public class OrganisationResource {
     public ResponseEntity<?> organisationList() {
         return ResponseEntity.ok().body(
                 organisationService.findAll().stream().map(organisation -> {
-                    LocalDate today = LocalDate.now();
-                    LocalDate monthsAgo = today.minusMonths(organisation.getAccountPeriodDays());
-                    LocalDate yesterday = today.minusDays(1);
+                    val today = LocalDate.now();
+                    val monthsAgo = today.minusMonths(organisation.getAccountPeriodDays());
+                    val yesterday = today.minusDays(1);
 
                     return new OrganisationView(
                             organisation.getId(),
