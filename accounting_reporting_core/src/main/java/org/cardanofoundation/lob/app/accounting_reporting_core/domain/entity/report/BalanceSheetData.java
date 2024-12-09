@@ -16,12 +16,14 @@ import java.util.Optional;
 @ToString
 @NoArgsConstructor
 @Embeddable
-public class BalanceSheetData implements Validable {
+public class BalanceSheetData implements Validable, Summable {
 
     @Nullable
     private Assets assets;
+
     @Nullable
     private Liabilities liabilities;
+
     @Nullable
     private Capital capital;
 
@@ -41,6 +43,11 @@ public class BalanceSheetData implements Validable {
 
     public Optional<Capital> getCapital() {
         return Optional.ofNullable(capital);
+    }
+
+    @Override
+    public BigDecimal sumOf() {
+        return BigDecimals.sum(assets, liabilities, capital);
     }
 
     @AllArgsConstructor

@@ -94,7 +94,7 @@ public class ExperimentalAccountingCoreResource {
     public ResponseEntity<?> exampleReportBs() {
         val orgId = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94";
 
-        return reportService.storeBalanceSheet(orgId).fold(problem -> {
+        return reportService.storeBalanceSheetAsExample(orgId).fold(problem -> {
             return ResponseEntity.status(problem.getStatus().getStatusCode()).body(problem);
         }, success -> {
             return ResponseEntity.ok().build();
@@ -105,7 +105,7 @@ public class ExperimentalAccountingCoreResource {
     public ResponseEntity<?> exampleReportIs() {
         val orgId = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94";
 
-        return reportService.storeIncomeStatement(orgId).fold(problem -> {
+        return reportService.storeIncomeStatementAsExample(orgId).fold(problem -> {
             return ResponseEntity.status(problem.getStatus().getStatusCode()).body(problem);
         }, success -> {
             return ResponseEntity.ok().build();
