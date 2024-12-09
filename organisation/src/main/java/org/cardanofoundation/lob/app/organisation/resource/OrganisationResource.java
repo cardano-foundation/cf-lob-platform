@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationCostCenterView;
 import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationView;
+import org.cardanofoundation.lob.app.organisation.service.OrganisationCurrencyService;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class OrganisationResource {
 
     private final OrganisationService organisationService;
+    private final OrganisationCurrencyService organisationCurrencyService;
 
     @Operation(description = "Transaction types", responses = {
             @ApiResponse(content =
@@ -54,6 +56,7 @@ public class OrganisationResource {
                             monthsAgo,
                             yesterday,
                             organisation.getAdminEmail(),
+                            new LinkedHashSet<>(),
                             new LinkedHashSet<>(),
                             new LinkedHashSet<>(),
                             organisation.getLogo()
@@ -100,6 +103,11 @@ public class OrganisationResource {
                                 organisationProject.getExternalCustomerCode(),
                                 organisationProject.getName()
                         );
+                    }).collect(Collectors.toSet()),
+                    organisationCurrencyService.findAllByOrganisationId("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
+                    .stream()
+                    .map(organisationCurrency -> {
+                        return organisationCurrency.getId() != null ? organisationCurrency.getId().getCustomerCode() : null;
                     }).collect(Collectors.toSet()),
                     organisation1.getLogo()
             );
