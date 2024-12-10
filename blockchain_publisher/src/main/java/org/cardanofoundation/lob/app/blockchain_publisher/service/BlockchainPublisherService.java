@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.Report;
+import org.cardanofoundation.lob.app.blockchain_publisher.repository.ReportEntityRepositoryGateway;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,10 @@ import java.util.stream.Collectors;
 public class BlockchainPublisherService {
 
     private final TransactionEntityRepositoryGateway transactionEntityRepositoryGateway;
+    private final ReportEntityRepositoryGateway reportEntityRepositoryGateway;
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
     private final TransactionConverter transactionConverter;
+    private final ReportConverter reportConverter;
 
     @Transactional
     public void storeTransactionForDispatchLater(String organisationId,
@@ -31,7 +34,7 @@ public class BlockchainPublisherService {
                 .map(transactionConverter::convertToDbDetached)
                 .collect(Collectors.toSet());
 
-        val storedTransactions = transactionEntityRepositoryGateway.storeOnlyNewTransactions(txEntities);
+        val storedTransactions = transactionEntityRepositoryGateway.storeOnlyNew(txEntities);
 
         ledgerUpdatedEventPublisher.sendTxLedgerUpdatedEvents(organisationId, storedTransactions);
     }
@@ -41,13 +44,11 @@ public class BlockchainPublisherService {
                                              Set<Report> reports) {
         log.info("storeReportsForDispatchLater..., orgId:{}", organisationId);
 
-//        val txEntities = reports.stream()
-//                .map(tx -> transactionConverter.convertToDbDetached(tx))
-//                .collect(Collectors.toSet());
+        val storedReports = reportEntityRepositoryGateway.storeOnlyNew(reports.stream()
+                .map(reportConverter::convertToDbDetached)
+                .collect(Collectors.toSet()));
 
-//        val storedTransactions = transactionEntityRepositoryGateway.storeOnlyNewTransactions(txEntities);
-
-        ledgerUpdatedEventPublisher.sendReportLedgerUpdatedEvents(organisationId, reports);
+        ledgerUpdatedEventPublisher.sendReportLedgerUpdatedEvents(organisationId, storedReports);
     }
 
 }

@@ -4,7 +4,7 @@ import com.bloxbean.cardano.client.account.Account;
 import com.bloxbean.cardano.client.backend.api.BackendService;
 import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.L1TransactionCreator;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.MetadataSerialiser;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.API1MetadataSerialiser;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit.*;
 import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,7 +39,7 @@ public class TransactionSubmissionConfig {
 
     @Bean
     public L1TransactionCreator l1TransactionCreator(@Qualifier("yaci_blockfrost") BackendService backendService,
-                                                     MetadataSerialiser metadataSerialiser,
+                                                     API1MetadataSerialiser API1MetadataSerialiser,
                                                      BlockchainReaderPublicApiIF blockchainReaderPublicApi,
                                                      MetadataChecker metadataChecker,
                                                      Account organiserAccount,
@@ -47,7 +47,7 @@ public class TransactionSubmissionConfig {
                                                      @Value("${l1.transaction.debug_store_output_tx:false}") boolean debugStoreOutputTx
                                                      ) {
         return new L1TransactionCreator(backendService,
-                metadataSerialiser,
+                API1MetadataSerialiser,
                 blockchainReaderPublicApi,
                 metadataChecker,
                 organiserAccount,

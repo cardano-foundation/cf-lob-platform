@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReportStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
@@ -56,6 +57,24 @@ public class LedgerService {
         accountingCoreTransactionRepository.saveAll(transactionEntities);
 
         log.info("Updated dispatch status for statusMapCount: {} completed.", statuses.size());
+    }
+
+    @Transactional
+    public void updateReportsWithNewStatuses(Map<String, ReportStatusUpdate> reportStatusUpdateMap) {
+        log.info("Updating dispatch status for statusMapCount: {}", reportStatusUpdateMap.size());
+
+        val reportIds = reportStatusUpdateMap.keySet();
+
+        val reports = reportRepository.findAllById(reportIds);
+
+        for (val report : reports) {
+            val reportsLedgerUpdatedEvent = reportStatusUpdateMap.get(report.getId());
+            report.setLedgerDispatchStatus(reportsLedgerUpdatedEvent.getStatus());
+        }
+
+        reportRepository.saveAll(reports);
+
+        log.info("Updated dispatch status for statusMapCount: {} completed.", reportStatusUpdateMap.size());
     }
 
     @Transactional

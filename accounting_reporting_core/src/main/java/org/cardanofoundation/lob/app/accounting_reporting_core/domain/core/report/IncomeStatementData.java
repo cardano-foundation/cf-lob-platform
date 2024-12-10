@@ -58,4 +58,8 @@ public class IncomeStatementData {
         return Optional.ofNullable(profitForTheYear);
     }
 
+    public Optional<ExtraordinaryIncome> getExtraordinaryIncome() {
+        return Optional.ofNullable(extraordinaryIncome);
+    }
+
 }
