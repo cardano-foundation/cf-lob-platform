@@ -21,6 +21,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.zalando.problem.Problem;
 
@@ -35,6 +36,7 @@ import static org.zalando.problem.Status.OK;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("hasRole('viewer') or hasRole('auditor')")
 public class AccountingCoreResource {
 
     private final AccountingCorePresentationViewService accountingCorePresentationService;
@@ -83,6 +85,7 @@ public class AccountingCoreResource {
             )
     })
     @GetMapping(value = "/transaction-types", produces = APPLICATION_JSON_VALUE, name = "Transaction types")
+    @PreAuthorize("hasRole('auditor')")
     public ResponseEntity<?> transactionType() throws JsonProcessingException {
         val jsonArray = objectMapper.createArrayNode();
 
