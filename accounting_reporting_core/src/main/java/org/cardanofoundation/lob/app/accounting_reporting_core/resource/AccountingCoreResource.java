@@ -36,7 +36,7 @@ import static org.zalando.problem.Status.OK;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
-@PreAuthorize("hasRole('viewer') or hasRole('auditor')")
+// TODO Should this endpoint be only accessible for registered users? If so, we should add the @PreAuthorize("authenticated()") annotation
 public class AccountingCoreResource {
 
     private final AccountingCorePresentationViewService accountingCorePresentationService;
@@ -50,9 +50,9 @@ public class AccountingCoreResource {
             )
     })
     @PostMapping(value = "/transactions", produces = APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
     public ResponseEntity<?> listAllAction(@Valid @RequestBody SearchRequest body) {
         List<TransactionView> transactions = accountingCorePresentationService.allTransactions(body);
-
         return ResponseEntity.ok().body(transactions);
     }
 
@@ -63,6 +63,7 @@ public class AccountingCoreResource {
             )
     })
     @GetMapping(value = "/transactions/{id}", produces = APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
     public ResponseEntity<?> transactionDetailSpecific(@Valid @PathVariable("id") @Parameter(example = "7e9e8bcbb38a283b41eab57add98278561ab51d23a16f3e3baf3daa461b84ab4") String id) {
         val transactionEntity = accountingCorePresentationService.transactionDetailSpecific(id);
         if (transactionEntity.isEmpty()) {
@@ -85,7 +86,6 @@ public class AccountingCoreResource {
             )
     })
     @GetMapping(value = "/transaction-types", produces = APPLICATION_JSON_VALUE, name = "Transaction types")
-    @PreAuthorize("hasRole('auditor')")
     public ResponseEntity<?> transactionType() throws JsonProcessingException {
         val jsonArray = objectMapper.createArrayNode();
 
@@ -120,6 +120,7 @@ public class AccountingCoreResource {
                     responseCode = "202"
             )
     })
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> extractionTrigger(@Valid @RequestBody ExtractionRequest body) {
         val orgM = organisationPublicApi.findByOrganisationId(body.getOrganisationId());
 
@@ -167,6 +168,7 @@ public class AccountingCoreResource {
                     })
             }
     )
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> approveTransactions(@Valid @RequestBody TransactionsRequest transactionsRequest) {
         val transactionProcessViews = accountingCorePresentationService.approveTransactions(transactionsRequest);
 
@@ -184,6 +186,7 @@ public class AccountingCoreResource {
                     })
             }
     )
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> approveTransactionsPublish(@Valid @RequestBody TransactionsRequest transactionsRequest) {
         val transactionProcessViewList = accountingCorePresentationService.approveTransactionsPublish(transactionsRequest);
 
@@ -201,6 +204,7 @@ public class AccountingCoreResource {
                     })
             }
     )
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> rejectTransactionItems(@Valid @RequestBody TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
         val transactionProcessViewsResult = accountingCorePresentationService.rejectTransactionItems(transactionItemsRejectionRequest);
 
@@ -218,6 +222,7 @@ public class AccountingCoreResource {
                     })
             }
     )
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
     public ResponseEntity<?> listAllBatches(@Valid @RequestBody BatchSearchRequest body,
                                             @RequestParam(name = "page", defaultValue = "0") int page,
                                             @RequestParam(name = "limit", defaultValue = "10") int limit) {
@@ -240,6 +245,7 @@ public class AccountingCoreResource {
                             "}"))})
             }
     )
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
     public ResponseEntity<?> batchesDetail(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
         val txBatchM = accountingCorePresentationService.batchDetail(batchId);
         if (txBatchM.isEmpty()) {
@@ -270,6 +276,7 @@ public class AccountingCoreResource {
                             "}"))})
             }
     )
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> batchReprocess(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
         val transactionProcessViewsResult = accountingCorePresentationService.scheduleReIngestionForFailed(batchId);
 
@@ -288,6 +295,7 @@ public class AccountingCoreResource {
                     })
             }
     )
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
     public ResponseEntity<?> listAllBatch(@Valid @RequestBody BatchSearchRequest body,
                                           @RequestParam(name = "page", defaultValue = "0") int page,
                                           @RequestParam(name = "limit", defaultValue = "10") int limit) {
@@ -311,6 +319,7 @@ public class AccountingCoreResource {
                             "}"))})
             }
     )
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
     public ResponseEntity<?> batchDetail(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
         val txBatchM = accountingCorePresentationService.batchDetail(batchId);
         if (txBatchM.isEmpty()) {
