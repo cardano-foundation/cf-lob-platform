@@ -8,7 +8,6 @@ import com.bloxbean.cardano.client.exception.CborSerializationException;
 import com.bloxbean.cardano.client.function.helper.SignerProviders;
 import com.bloxbean.cardano.client.metadata.Metadata;
 import com.bloxbean.cardano.client.metadata.MetadataBuilder;
-import com.bloxbean.cardano.client.metadata.MetadataMap;
 import com.bloxbean.cardano.client.metadata.cbor.CBORMetadataMap;
 import com.bloxbean.cardano.client.metadata.helper.MetadataToJsonNoSchemaConverter;
 import com.bloxbean.cardano.client.quicktx.QuickTxBuilder;
@@ -22,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainTransactions;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.zalando.problem.Problem;
 
@@ -47,7 +46,7 @@ public class L1TransactionCreator {
     private static final int CARDANO_MAX_TRANSACTION_SIZE_BYTES = 16384;
 
     private final BackendService backendService;
-    private final MetadataSerialiser metadataSerialiser;
+    private final API1MetadataSerialiser api1MetadataSerialiser;
     private final BlockchainReaderPublicApiIF blockchainReaderPublicApi;
     private final MetadataChecker jsonSchemaMetadataChecker;
     private final Account organiserAccount;
@@ -196,7 +195,7 @@ public class L1TransactionCreator {
                                                                              long creationSlot) {
         try {
             val metadataMap =
-                    metadataSerialiser.serialiseToMetadataMap(organisationId, transactionsBatch, creationSlot);
+                    api1MetadataSerialiser.serialiseToMetadataMap(organisationId, transactionsBatch, creationSlot);
 
             val data = metadataMap.getMap();
             val bytes = CborSerializationUtil.serialize(data);

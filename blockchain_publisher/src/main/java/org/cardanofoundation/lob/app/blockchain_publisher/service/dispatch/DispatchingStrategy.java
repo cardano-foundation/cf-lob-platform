@@ -1,6 +1,6 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service.dispatch;
 
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 
 import java.util.Set;
 import java.util.function.BiFunction;

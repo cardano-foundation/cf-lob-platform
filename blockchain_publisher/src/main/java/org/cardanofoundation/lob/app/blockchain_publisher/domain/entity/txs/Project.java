@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity;
+package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +11,7 @@ import lombok.*;
 @ToString
 @Builder
 @AllArgsConstructor
-public class CostCenter {
+public class Project {
 
     @NotBlank
     private String customerCode;

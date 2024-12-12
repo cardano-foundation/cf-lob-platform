@@ -109,6 +109,64 @@ CREATE TABLE blockchain_publisher_transaction_item (
    PRIMARY KEY (transaction_item_id)
 );
 
+CREATE TABLE blockchain_publisher_report (
+    report_id VARCHAR(64) NOT NULL PRIMARY KEY,
+    organisation_id VARCHAR(64),
+    organisation_name VARCHAR(255),
+    organisation_country_code VARCHAR(3),
+    organisation_tax_id_number VARCHAR(64),
+    organisation_currency_id VARCHAR(64),
+    type VARCHAR(255) NOT NULL,
+    interval_type VARCHAR(255) NOT NULL,
+    year SMALLINT NOT NULL CHECK (year >= 1900 AND year <= 4000),
+    period SMALLINT CHECK (period >= 1 AND period <= 12),
+    mode VARCHAR(255) NOT NULL,
+    date DATE NOT NULL,
+
+    data_balance_sheet__assets_non_current_property_plant_equip NUMERIC,
+    data_balance_sheet__operating_expenses_depreciation_ta NUMERIC,
+    data_balance_sheet__assets_non_current_investments NUMERIC,
+    data_balance_sheet__assets_non_current_financial_assets NUMERIC,
+    data_balance_sheet__assets_current_prepayments_short_assets NUMERIC,
+    data_balance_sheet__assets_current_other_receivables NUMERIC,
+    data_balance_sheet__assets_current_crypto_assets NUMERIC,
+    data_balance_sheet__assets_current_cash_and_equivalen NUMERIC,
+    data_balance_sheet__liabilities_non_current_provisions NUMERIC,
+    data_balance_sheet__liabilities_current_trade_accounts NUMERIC,
+    data_balance_sheet__liabilities_current_other_liabilit NUMERIC,
+    data_balance_sheet__liabilities_current_accruals_and_short NUMERIC,
+    data_balance_sheet__capital_capital NUMERIC,
+    data_balance_sheet__capital_profit_for_the_year NUMERIC,
+    data_balance_sheet__capital_results_carried_forward NUMERIC,
+    data_income_statement__revenues_other_income NUMERIC,
+    data_income_statement__revenues_build_long_term_provision NUMERIC,
+    data_income_statement__cost_goods_and_services_providing_serv NUMERIC,
+    data_income_statement__operating_expenses_personnel_expenses NUMERIC,
+    data_income_statement__operating_expenses_general_admin_ex NUMERIC,
+    data_income_statement__operating_expenses_depreciation_tang NUMERIC,
+    data_income_statement__operating_expenses_amortization_int NUMERIC,
+    data_income_statement__operating_expenses_rent_expenses NUMERIC,
+    data_income_statement__financial_income_financial_revenues NUMERIC,
+    data_income_statement__financial_income_financial_expenses NUMERIC,
+    data_income_statement__financial_income_realised_gains NUMERIC,
+    data_income_statement__financial_income_staking_rewards NUMERIC,
+    data_income_statement__financial_income_net_income_opt NUMERIC,
+    data_income_statement__operating_expenses_extraordin_exp NUMERIC,
+    data_income_statement__tax_expenses_income_tax_expense NUMERIC,
+    data_income_statement__profit_for_the_year NUMERIC,
+
+    l1_transaction_hash CHAR(64),
+    l1_absolute_slot BIGINT,
+    l1_creation_slot BIGINT,
+    l1_publish_status blockchain_publisher_blockchain_publish_status_type,
+    l1_finality_score blockchain_publisher_finality_score_type,
+
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    updated_at TIMESTAMP WITHOUT TIME ZONE
+);
+
+-- TODO mczeladka: adding indices for blockchain_publisher_report depends on read queries we have...
+
 -- blockchain_publisher.TransactionEntity.findTransactionsByStatus
 CREATE INDEX idx_transaction_entity_publish_status
 ON blockchain_publisher_transaction (organisation_id, l1_publish_status, created_at, transaction_id);

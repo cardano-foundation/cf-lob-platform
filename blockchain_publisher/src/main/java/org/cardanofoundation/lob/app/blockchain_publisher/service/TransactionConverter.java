@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionItem;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.*;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

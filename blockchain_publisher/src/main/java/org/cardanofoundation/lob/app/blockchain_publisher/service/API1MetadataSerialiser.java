@@ -4,7 +4,7 @@ import com.bloxbean.cardano.client.metadata.MetadataBuilder;
 import com.bloxbean.cardano.client.metadata.MetadataMap;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.*;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.*;
 import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class MetadataSerialiser {
+public class API1MetadataSerialiser {
 
     public static final String VERSION = "1.0";
 

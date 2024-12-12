@@ -6,6 +6,7 @@ import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchChunkEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchFailedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchStartedEvent;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.ReportsLedgerUpdatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.TxsLedgerUpdatedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationChunkEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationFailedEvent;
@@ -39,6 +40,17 @@ public class AccountingCoreEventHandler {
         transactionBatchService.updateBatchesPerTransactions(txStatusUpdatesMap);
 
         log.info("Finished processing handleLedgerUpdatedEvent event, event: {}", event.getStatusUpdates());
+    }
+
+    @ApplicationModuleListener
+    public void handleReportsLedgerUpdated(ReportsLedgerUpdatedEvent event) {
+        log.info("Received handleReportsLedgerUpdated, event: {}", event);
+
+        val reportStatusUpdatesMap = event.statusUpdatesMap();
+
+        ledgerService.updateReportsWithNewStatuses(reportStatusUpdatesMap);
+
+        log.info("Finished processing handleReportsLedgerUpdated, event: {}", event);
     }
 
     @ApplicationModuleListener
@@ -90,7 +102,6 @@ public class AccountingCoreEventHandler {
 
         log.info("Finished processing handleTransactionBatchChunkEvent event...., event, batch_id: {}", batchId);
     }
-
 
     @ApplicationModuleListener
     public void handleReconcilationChunkFailedEvent(ReconcilationFailedEvent event) {

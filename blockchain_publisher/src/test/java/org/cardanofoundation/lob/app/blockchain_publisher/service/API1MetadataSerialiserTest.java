@@ -3,7 +3,7 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service;
 import com.bloxbean.cardano.client.metadata.MetadataMap;
 import com.bloxbean.cardano.client.metadata.cbor.CBORMetadataList;
 import lombok.val;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.*;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.*;
 import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,18 +16,18 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.FxRevaluation;
-import static org.cardanofoundation.lob.app.blockchain_publisher.service.MetadataSerialiser.VERSION;
+import static org.cardanofoundation.lob.app.blockchain_publisher.service.API1MetadataSerialiser.VERSION;
 
-class MetadataSerialiserTest {
+class API1MetadataSerialiserTest {
 
     private Clock fixedClock;
 
-    private MetadataSerialiser metadataSerialiser;
+    private API1MetadataSerialiser API1MetadataSerialiser;
 
     @BeforeEach
     void setUp() {
         fixedClock = Clock.fixed(Instant.parse("2023-06-01T10:15:30.00Z"), ZoneId.of("UTC"));
-        metadataSerialiser = new MetadataSerialiser(fixedClock);
+        API1MetadataSerialiser = new API1MetadataSerialiser(fixedClock);
     }
 
     @Test
@@ -113,7 +113,7 @@ class MetadataSerialiserTest {
         long creationSlot = 12345;
 
         // When
-        MetadataMap result = metadataSerialiser.serialiseToMetadataMap(organisationId, transactions, creationSlot);
+        MetadataMap result = API1MetadataSerialiser.serialiseToMetadataMap(organisationId, transactions, creationSlot);
 
         // Then
         assertThat(result).isNotNull();

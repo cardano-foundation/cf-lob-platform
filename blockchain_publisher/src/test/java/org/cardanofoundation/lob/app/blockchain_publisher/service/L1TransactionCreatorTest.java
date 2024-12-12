@@ -7,7 +7,7 @@
 //import lombok.val;
 //import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
 //import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainTransactions;
-//import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
+//import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 //import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;

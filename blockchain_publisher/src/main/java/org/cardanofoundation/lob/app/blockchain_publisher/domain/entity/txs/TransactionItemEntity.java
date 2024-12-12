@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity;
+package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
 import com.google.common.base.Objects;
 import jakarta.persistence.*;
