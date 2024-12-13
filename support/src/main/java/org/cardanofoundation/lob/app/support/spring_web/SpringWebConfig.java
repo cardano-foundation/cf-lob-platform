@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.OAuthFlow;
 import io.swagger.v3.oas.models.security.OAuthFlows;
+import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import jakarta.annotation.PostConstruct;
@@ -26,6 +27,8 @@ public class SpringWebConfig {
 
     @Value("${keycloak.token-url}")
     private String tokenUrl;
+    @Value("${keycloak.authorization-url}")
+    private String authorizationUrl;
 
     @PostConstruct
     public void init() {
@@ -53,9 +56,15 @@ public class SpringWebConfig {
         return new OpenAPI()
                 .components(new Components()
                         .addSecuritySchemes("keycloakAuth", new SecurityScheme()
+                                .name("keycloak")
                                 .type(SecurityScheme.Type.OAUTH2)
+                                .bearerFormat("JWT")
+                                .scheme("bearer")
                                 .flows(new OAuthFlows()
-                                        .password(new OAuthFlow().tokenUrl(tokenUrl)))))
+                                        .authorizationCode(new OAuthFlow()
+                                                .authorizationUrl(authorizationUrl)
+                                                .tokenUrl(tokenUrl)
+                                                .scopes(new Scopes().addString("openid", "openid"))))))
                 .addSecurityItem(new SecurityRequirement().addList("keycloakAuth"))
                 .info(new Info().title("Lob Service")
                         .license(new License().name("Apache License 2.0")
