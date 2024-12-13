@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +52,7 @@ public class TransactionEntityRepositoryGateway {
      * @return stored transactions
      */
     @Transactional
-    public Set<TransactionEntity> storeOnlyNewTransactions(Set<TransactionEntity> transactionEntities) {
+    public Set<TransactionEntity> storeOnlyNew(Set<TransactionEntity> transactionEntities) {
         log.info("StoreOnlyNewTransactions..., storeOnlyNewTransactions:{}", transactionEntities.size());
 
         val txIds = transactionEntities.stream()

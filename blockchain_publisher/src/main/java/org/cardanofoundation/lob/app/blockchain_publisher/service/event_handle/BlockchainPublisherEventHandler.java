@@ -30,11 +30,6 @@ public class BlockchainPublisherEventHandler {
     public void handleLedgerUpdateCommand(ReportLedgerUpdateCommand command) {
         log.info("Received ReportLedgerUpdateCommand: {}", command);
 
-//        blockchainPublisherService.storeTransactionForDispatchLater(
-//                command.getOrganisationId(),
-//                command.getTransactions()
-//        );
-
         blockchainPublisherService.storeReportsForDispatchLater(
                 command.getOrganisationId(),
                 command.getReports()

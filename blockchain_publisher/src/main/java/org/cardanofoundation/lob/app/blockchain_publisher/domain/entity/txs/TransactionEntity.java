@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity;
+package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ import static jakarta.persistence.FetchType.EAGER;
 
 @Getter
 @Setter
-@Entity(name = "blockchain_publisher.TransactionEntity")
+@Entity(name = "blockchain_publisher.txs.TransactionEntity")
 @Table(name = "blockchain_publisher_transaction")
 @NoArgsConstructor
 @AllArgsConstructor

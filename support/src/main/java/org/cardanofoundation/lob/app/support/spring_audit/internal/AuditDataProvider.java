@@ -24,7 +24,6 @@ public class AuditDataProvider implements AuditorAware<String>, DateTimeProvider
 
     @Override
     public Optional<String> getCurrentAuditor() {
-
 //        return Optional.ofNullable(SecurityContextHolder.getContext())
 //                .map(SecurityContext::getAuthentication)
 //                .filter(Authentication::isAuthenticated)
