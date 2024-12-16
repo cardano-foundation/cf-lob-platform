@@ -32,7 +32,7 @@ public class BlockchainTransactionsDispatcher {
     private final L1TransactionCreator l1TransactionCreator;
     private final TransactionSubmissionService transactionSubmissionService;
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
-    private final DispatchingStrategy dispatchingStrategy;
+    private final DispatchingStrategy<TransactionEntity> dispatchingStrategy;
 
     @Value("${lob.blockchain_publisher.dispatcher.pullBatchSize:50}")
     private int pullTransactionsBatchSize = 50;

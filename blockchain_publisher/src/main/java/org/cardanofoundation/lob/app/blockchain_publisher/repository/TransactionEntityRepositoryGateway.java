@@ -43,7 +43,6 @@ public class TransactionEntityRepositoryGateway {
         return transactionEntityRepository.findDispatchedTransactionsThatAreNotFinalizedYet(organisationId, notFinalisedButVisibleOnChain, limit);
     }
 
-
     /**
      * Store only new transactions. We want our interface to be idempotent so if somebody sents the same transaction
      * we will ignore it.

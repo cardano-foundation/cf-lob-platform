@@ -1,14 +1,12 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service.dispatch;
 
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
-
 import java.util.Set;
 import java.util.function.BiFunction;
 
-public interface DispatchingStrategy extends BiFunction<String, Set<TransactionEntity>, Set<TransactionEntity>> {
+public interface DispatchingStrategy<T> extends BiFunction<String, Set<T>, Set<T>> {
 
-    default Set<TransactionEntity> apply(String organisationId, Set<TransactionEntity> transactions) {
-        return transactions;
+    default Set<T> apply(String organisationId, Set<T> entries) {
+        return entries;
     }
 
 }
