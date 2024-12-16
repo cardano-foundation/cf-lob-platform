@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 @Slf4j
 @RequiredArgsConstructor
 @ConditionalOnProperty(prefix = "lob.dispatching_strategy", name = "type", havingValue = "DELAYED", matchIfMissing = true)
-public class DelayedDispatchingStrategy implements DispatchingStrategy {
+public class DelayedDispatchingStrategy<T extends CommonEntity> implements DispatchingStrategy<T> {
 
     @Value("${lob.blockchain_publisher.minTransactions:30}")
     private int minTxCount = 30;
@@ -37,8 +37,8 @@ public class DelayedDispatchingStrategy implements DispatchingStrategy {
     }
 
     @Override
-    public Set<TransactionEntity> apply(String organisationId,
-                                        Set<TransactionEntity> txs) {
+    public Set<T> apply(String organisationId,
+                                        Set<T> txs) {
         val now = LocalDateTime.now(clock);
 
         val prioritisedTransactions = txs.stream()
@@ -60,6 +60,7 @@ public class DelayedDispatchingStrategy implements DispatchingStrategy {
 
         if (txs.size() < minTxCount) {
             log.warn("Not enough passedTransactions to dispatch for organisationId:{}", organisationId);
+
             return Set.of();
         }
 
