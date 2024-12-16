@@ -111,6 +111,7 @@ CREATE TABLE blockchain_publisher_transaction_item (
 
 CREATE TABLE blockchain_publisher_report (
     report_id VARCHAR(64) NOT NULL PRIMARY KEY,
+    ver SMALLINT NOT NULL,
     organisation_id VARCHAR(64),
     organisation_name VARCHAR(255),
     organisation_country_code VARCHAR(3),

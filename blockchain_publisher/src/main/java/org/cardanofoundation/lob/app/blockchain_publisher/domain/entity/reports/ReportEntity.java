@@ -100,6 +100,12 @@ public class ReportEntity extends CommonDateOnlyEntity implements Persistable<St
     @Setter
     private LocalDate date;
 
+    @Column(name = "ver", nullable = false)
+    @NotNull
+    @Getter
+    @Setter
+    private Integer ver;
+
     @Nullable
     @Embedded
     @AttributeOverrides({

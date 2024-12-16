@@ -7,8 +7,9 @@
     "id": "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94"
   },
   "metadata": {
-    "format": "1.0",
-    "creation_slot": 10278
+    "version": "1.1",
+    "creation_slot": 10278,
+    "timestamp": "2023-10-03T12:00:00Z"
   },
   "data": {
     "revenues": {
@@ -44,5 +45,6 @@
   "subType": "INCOME_STATEMENT",
   "interval": "YEAR",
   "year": "2023",
-  "mode": "USER"
+  "mode": "USER",
+  "ver": 1
 }

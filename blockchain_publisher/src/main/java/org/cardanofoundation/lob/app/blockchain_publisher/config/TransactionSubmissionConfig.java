@@ -3,8 +3,10 @@ package org.cardanofoundation.lob.app.blockchain_publisher.config;
 import com.bloxbean.cardano.client.account.Account;
 import com.bloxbean.cardano.client.backend.api.BackendService;
 import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.L1TransactionCreator;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.API1L1TransactionCreator;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.API1MetadataSerialiser;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.API3L1TransactionCreator;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.API3MetadataSerialiser;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit.*;
 import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,16 +40,35 @@ public class TransactionSubmissionConfig {
     }
 
     @Bean
-    public L1TransactionCreator l1TransactionCreator(@Qualifier("yaci_blockfrost") BackendService backendService,
-                                                     API1MetadataSerialiser API1MetadataSerialiser,
-                                                     BlockchainReaderPublicApiIF blockchainReaderPublicApi,
-                                                     MetadataChecker metadataChecker,
-                                                     Account organiserAccount,
-                                                     @Value("${l1.transaction.metadata_label:1447}") int metadataLabel,
-                                                     @Value("${l1.transaction.debug_store_output_tx:false}") boolean debugStoreOutputTx
-                                                     ) {
-        return new L1TransactionCreator(backendService,
-                API1MetadataSerialiser,
+    public API1L1TransactionCreator api1L1TransactionCreator(@Qualifier("yaci_blockfrost") BackendService backendService,
+                                                             API1MetadataSerialiser metadataSerialiser,
+                                                             BlockchainReaderPublicApiIF blockchainReaderPublicApi,
+                                                             @Qualifier("api1JsonSchemaMetadataChecker") MetadataChecker metadataChecker,
+                                                             Account organiserAccount,
+                                                             @Value("${l1.transaction.metadata_label:1447}") int metadataLabel,
+                                                             @Value("${l1.transaction.debug_store_output_tx:false}") boolean debugStoreOutputTx
+    ) {
+        return new API1L1TransactionCreator(backendService,
+                metadataSerialiser,
+                blockchainReaderPublicApi,
+                metadataChecker,
+                organiserAccount,
+                metadataLabel,
+                debugStoreOutputTx
+        );
+    }
+
+    @Bean
+    public API3L1TransactionCreator api3L1TransactionCreator(@Qualifier("yaci_blockfrost") BackendService backendService,
+                                                             API3MetadataSerialiser metadataSerialiser,
+                                                             BlockchainReaderPublicApiIF blockchainReaderPublicApi,
+                                                             @Qualifier("api3JsonSchemaMetadataChecker") MetadataChecker metadataChecker,
+                                                             Account organiserAccount,
+                                                             @Value("${l1.transaction.metadata_label:1447}") int metadataLabel,
+                                                             @Value("${l1.transaction.debug_store_output_tx:false}") boolean debugStoreOutputTx
+    ) {
+        return new API3L1TransactionCreator(backendService,
+                metadataSerialiser,
                 blockchainReaderPublicApi,
                 metadataChecker,
                 organiserAccount,
