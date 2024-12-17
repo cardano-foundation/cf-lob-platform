@@ -4,10 +4,11 @@ import com.bloxbean.cardano.client.api.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.API3BlockchainTransaction;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.reports.ReportEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1SubmissionData;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.ReportEntityRepositoryGateway;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.ReportSerializer;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.API3L1TransactionCreator;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit.TransactionSubmissionService;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
@@ -28,7 +29,7 @@ public class BlockchainReportsDispatcher {
     private final OrganisationPublicApi organisationPublicApi;
     private final ReportEntityRepositoryGateway reportEntityRepositoryGateway;
     private final DispatchingStrategy<ReportEntity> dispatchingStrategy = new ImmediateDispatchingStrategy<>();
-    private final ReportSerializer reportSerializer;
+    private final API3L1TransactionCreator api3L1TransactionCreator;
     private final TransactionSubmissionService transactionSubmissionService;
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
 
@@ -71,41 +72,66 @@ public class BlockchainReportsDispatcher {
     public void dispatchReport(String organisationId, ReportEntity reportEntity) {
         log.info("Dispatching report for organisation: {}", organisationId);
 
-        try {
-            sendReportOnChainAndUpdateDb(reportEntity);
-        } catch (InterruptedException | ApiException e) {
-            log.error("Error sending report on chain and / or updating db", e);
+        val api3BlockchainTransactionE = createAndSendBlockchainTransactions(reportEntity);
+        if (api3BlockchainTransactionE.isEmpty()) {
+            log.info("No more reports to dispatch for organisationId, success or error?, organisationId: {}", organisationId);
         }
     }
 
     @Transactional
-    private void sendReportOnChainAndUpdateDb(ReportEntity reportEntity) throws InterruptedException, ApiException {
-        log.info("Sending report on chain and updating db, reportId:{}", reportEntity.getReportId());
+    private Optional<API3BlockchainTransaction> createAndSendBlockchainTransactions(ReportEntity reportEntity) {
+        log.info("Creating and sending blockchain transactions for report:{}", reportEntity.getReportId());
 
-        val reportTxData = reportSerializer.serialize();
-        if (reportTxData.length > 0) {
-            val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(reportTxData);
+        val serialisedTxE = api3L1TransactionCreator.pullBlockchainTransaction(reportEntity);
 
-            val txHash = l1SubmissionData.txHash();
-            val txAbsoluteSlotM = l1SubmissionData.absoluteSlot();
+        if (serialisedTxE.isLeft()) {
+            val problem = serialisedTxE.getLeft();
 
-            updateTransactionStatuses(txHash, txAbsoluteSlotM, reportEntity);
-            ledgerUpdatedEventPublisher.sendReportLedgerUpdatedEvents(reportEntity.getOrganisation().getId(), Set.of(reportEntity));
+            log.error("Error pulling blockchain transaction, problem: {}", problem);
 
-            log.info("Blockchain transaction submitted (report), l1SubmissionData:{}", l1SubmissionData);
+            return Optional.empty();
         }
 
-        log.info("No report data to send to blockchain, since tx building failed.");
+        val serialisedTx = serialisedTxE.get();
+        try {
+            sendTransactionOnChainAndUpdateDb(serialisedTx);
+
+            return Optional.of(serialisedTx);
+        } catch (InterruptedException | ApiException e) {
+            log.error("Error sending transaction on chain and / or updating db", e);
+        }
+
+        return Optional.empty();
+    }
+
+    @Transactional
+    private void sendTransactionOnChainAndUpdateDb(API3BlockchainTransaction api3BlockchainTransaction) throws InterruptedException, ApiException {
+        val reportTxData = api3BlockchainTransaction.serialisedTxData();
+
+        val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(reportTxData);
+
+        val txHash = l1SubmissionData.txHash();
+        val txAbsoluteSlotM = l1SubmissionData.absoluteSlot();
+
+        val report = api3BlockchainTransaction.report();
+        val creationSlot = api3BlockchainTransaction.creationSlot();
+
+        updateTransactionStatuses(txHash, txAbsoluteSlotM, creationSlot, report);
+        ledgerUpdatedEventPublisher.sendReportLedgerUpdatedEvents(report.getOrganisation().getId(), Set.of(report));
+
+        log.info("Blockchain transaction submitted (report), l1SubmissionData:{}", l1SubmissionData);
     }
 
     @Transactional
     private void updateTransactionStatuses(String txHash,
                                            Optional<Long> absoluteSlot,
+                                           long creationSlot,
                                            ReportEntity reportEntity) {
+
         reportEntity.setL1SubmissionData(Optional.of(L1SubmissionData.builder()
                     .transactionHash(txHash)
                     .absoluteSlot(absoluteSlot.orElse(null)) // if tx is not confirmed yet, slot will not be available
-                    .creationSlot(1L) // TODO find out the right creation slot
+                    .creationSlot(creationSlot)
                     .publishStatus(SUBMITTED)
                     .build())
             );
