@@ -19,6 +19,8 @@ public class Report {
 
     private String reportId;
 
+    private String idReport;
+
     private Organisation organisation;
 
     private ReportType type;
@@ -26,6 +28,8 @@ public class Report {
     private IntervalType intervalType;
 
     private short year;
+
+    private Integer ver;
 
     @Builder.Default
     private Optional<Short> period = Optional.empty();
@@ -51,6 +55,19 @@ public class Report {
     private LedgerDispatchStatus ledgerDispatchStatus = LedgerDispatchStatus.NOT_DISPATCHED;
 
     public static String id(String organisationId,
+                            ReportType reportType,
+                            IntervalType intervalType,
+                            short year,
+                            Integer ver,
+                            Optional<Short> period) {
+        return period.map(p -> {
+            return digestAsHex(STR."\{organisationId}::\{reportType}::\{intervalType}::\{year}::\{ver}::\{p}");
+        }).orElseGet(() -> {
+            return digestAsHex(STR."\{organisationId}::\{reportType}::\{intervalType}::\{year}::\{ver}");
+        });
+    }
+
+    public static String idControl(String organisationId,
                             ReportType reportType,
                             IntervalType intervalType,
                             short year,
