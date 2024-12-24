@@ -44,6 +44,17 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @Setter
     private String reportId;
 
+    @Column(name = "id_control", nullable = false, length = 64)
+    @NotBlank
+    @Getter
+    @Setter
+    private String idControl;
+
+    @Column(name = "ver", nullable = false)
+    @Getter
+    @Setter
+    private Integer ver = 1;
+
     @Override
     public String getId() {
         return reportId;

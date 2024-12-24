@@ -4,6 +4,7 @@ import io.vavr.control.Either;
 import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.Report;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.BalanceSheetData;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.IncomeStatementData;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
@@ -47,19 +48,35 @@ class ReportServiceTest {
     }
 
     @Test
-    void approveReportForLedgerDispatch_whenReportExists_shouldSetLedgerDispatchApproved() {
+    void approveReportForLedgerDispatch_whenReportExists_shouldNotSetLedgerDispatchApproved() {
         // Arrange
         ReportEntity reportEntity = new ReportEntity();
-        reportEntity.setReportId(REPORT_ID);
-        when(reportRepository.findById(REPORT_ID)).thenReturn(Optional.of(reportEntity));
+        ReportEntity reportEntityVerify = new ReportEntity();
 
+        val organisation = org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation.builder()
+                .id("theOrgId")
+                .name("Org Name")
+                .countryCode("US")
+                .currencyId("ISO_4217:CHF")
+                .taxIdNumber("12345").build();
+
+
+        reportEntity.setReportId(REPORT_ID);
+        reportEntity.setType(INCOME_STATEMENT);
+        reportEntity.setOrganisation(organisation);
+        reportEntity.setYear((short) 2023);
+
+
+        reportEntityVerify.setReportId("another");
+        when(reportRepository.findById(REPORT_ID)).thenReturn(Optional.of(reportEntity));
+        when(reportRepository.findLatestByIdControl(Mockito.anyString(), Mockito.anyString())).thenReturn(Optional.of(reportEntityVerify));
         // Act
-        Either<Problem, Void> result = reportService.approveReportForLedgerDispatch(REPORT_ID);
+        Either<Problem, ReportEntity> result = reportService.approveReportForLedgerDispatch(REPORT_ID);
 
         // Assert
-        assertThat(result.isRight()).isTrue();
-        assertThat(reportEntity.getLedgerDispatchApproved()).isTrue();
-        verify(reportRepository).save(reportEntity);
+        assertThat(result.isRight()).isFalse();
+        assertThat(reportEntity.getLedgerDispatchApproved()).isFalse();
+        verify(reportRepository,never()).save(reportEntity);
     }
 
     @Test
@@ -68,7 +85,7 @@ class ReportServiceTest {
         when(reportRepository.findById(REPORT_ID)).thenReturn(Optional.empty());
 
         // Act
-        Either<Problem, Void> result = reportService.approveReportForLedgerDispatch(REPORT_ID);
+        Either<Problem, ReportEntity> result = reportService.approveReportForLedgerDispatch(REPORT_ID);
 
         // Assert
         assertThat(result.isLeft()).isTrue();
@@ -182,6 +199,7 @@ class ReportServiceTest {
         val organisationId = "org-1";
         val intervalType = IntervalType.YEAR;
         short year = 2024;
+        val ver = 1;
         val periodM = Optional.<Short>empty();
 
         val balanceSheetData = BalanceSheetData.builder()
@@ -203,7 +221,7 @@ class ReportServiceTest {
         when(organisationPublicApi.findByOrganisationId(organisationId)).thenReturn(Optional.of(organisation));
         when(reportRepository.findById(any())).thenReturn(Optional.empty());
 
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         assertThat(resultE.isLeft()).isTrue();
         assertThat(resultE.getLeft().getTitle()).isEqualTo("EMPTY_REPORT_DATA");
@@ -217,6 +235,7 @@ class ReportServiceTest {
         val intervalType = IntervalType.MONTH;
         short year = 2023;
         val periodM = Optional.of((short) 3);
+        val ver = 1;
 
         val emptyIncomeStatementData = IncomeStatementData.builder()
                 .revenues(IncomeStatementData.Revenues.builder().build())
@@ -240,7 +259,7 @@ class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.empty());
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isLeft()).isTrue();
@@ -255,6 +274,7 @@ class ReportServiceTest {
         val intervalType = IntervalType.YEAR;
         short year = 2024;
         val periodM = Optional.<Short>empty();
+        val ver = 1;
 
         val balanceSheetReportData = BalanceSheetData.builder()
                 .assets(BalanceSheetData.Assets.builder()
@@ -301,7 +321,7 @@ class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.empty());
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isRight()).isTrue();
@@ -314,6 +334,8 @@ class ReportServiceTest {
         val organisationId = "org-3";
         val intervalType = IntervalType.YEAR;
         short year = 2024;
+        val ver = 1;
+
         val periodM = Optional.<Short>empty();
 
         val balanceSheetReportData = BalanceSheetData.builder()
@@ -361,7 +383,7 @@ class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.empty());
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isRight()).isTrue();
@@ -374,6 +396,8 @@ class ReportServiceTest {
         val organisationId = "org-3";
         val intervalType = IntervalType.YEAR;
         short year = 2024;
+        val ver = 1;
+
         val periodM = Optional.<Short>empty();
 
         // Invalid balance sheet data: Assets ≠ Liabilities + Capital
@@ -422,7 +446,7 @@ class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.empty());
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isLeft()).isTrue();
@@ -436,6 +460,7 @@ class ReportServiceTest {
         val organisationId = "org-3";
         val intervalType = IntervalType.YEAR;
         short year = 2024;
+        val ver = 1;
         val periodM = Optional.<Short>empty();
 
         var incomeStatementReportData = IncomeStatementData.builder()
@@ -479,7 +504,7 @@ class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.empty());
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isRight()).isTrue();
@@ -492,6 +517,7 @@ class ReportServiceTest {
         val organisationId = "org-4";
         val intervalType = IntervalType.MONTH;
         short year = 2023;
+        val ver = 1;
         val periodM = Optional.of((short) 3);
 
         var incomeStatementReportData = IncomeStatementData.builder()
@@ -537,7 +563,7 @@ class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.of(dispatchedReport));
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isLeft()).isTrue();
@@ -551,6 +577,7 @@ class ReportServiceTest {
         val organisationId = "org-5";
         val intervalType = IntervalType.YEAR;
         short year = 2024;
+        val ver = 1;
         val periodM = Optional.<Short>empty();
 
         val balanceSheetReportData = BalanceSheetData.builder()
@@ -601,7 +628,7 @@ class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.of(dispatchedReport));
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isLeft()).isTrue();
@@ -615,6 +642,7 @@ class ReportServiceTest {
         val organisationId = "org-overwrite-1";
         val intervalType = IntervalType.MONTH;
         short year = 2023;
+        val ver = 1;
         val periodM = Optional.of((short) 3);
 
         var incomeStatementReportData = IncomeStatementData.builder()
@@ -662,7 +690,7 @@ class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.of(existingReport));
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isRight()).isTrue();
@@ -675,6 +703,8 @@ class ReportServiceTest {
         val organisationId = "org-overwrite-2";
         val intervalType = IntervalType.YEAR;
         short year = 2024;
+        val ver = 1;
+
         val periodM = Optional.<Short>empty();
 
         val balanceSheetReportData = BalanceSheetData.builder()
@@ -727,7 +757,7 @@ class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.of(existingReport));
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isRight()).isTrue();
@@ -740,8 +770,10 @@ class ReportServiceTest {
         val organisationId = "org-different-reports";
         val intervalType = IntervalType.MONTH;
         short year = 2023;
+        val ver = 1;
         val periodMarch = Optional.of((short) 3); // March
         val periodApril = Optional.of((short) 4); // April
+
 
         var incomeStatementMarchData = IncomeStatementData.builder()
                 .revenues(IncomeStatementData.Revenues.builder()
@@ -805,14 +837,14 @@ class ReportServiceTest {
         organisation.setTaxIdNumber("12345");
 
         when(organisationPublicApi.findByOrganisationId(organisationId)).thenReturn(Optional.of(organisation));
-        when(reportRepository.findById(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, periodMarch)))
+        when(reportRepository.findById(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, ver, periodMarch)))
                 .thenReturn(Optional.empty());
-        when(reportRepository.findById(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, periodApril)))
+        when(reportRepository.findById(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, ver, periodApril)))
                 .thenReturn(Optional.empty());
 
         // Act
-        val resultMarch = reportService.store(organisationId, intervalType, year, periodMarch, Either.left(incomeStatementMarchData));
-        val resultApril = reportService.store(organisationId, intervalType, year, periodApril, Either.left(incomeStatementAprilData));
+        val resultMarch = reportService.store(organisationId, intervalType, year, ver, periodMarch, Either.left(incomeStatementMarchData));
+        val resultApril = reportService.store(organisationId, intervalType, year, ver, periodApril, Either.left(incomeStatementAprilData));
 
         // Assert
         assertThat(resultMarch.isRight()).isTrue();
@@ -824,10 +856,10 @@ class ReportServiceTest {
         var savedReports = captor.getAllValues();
         assertThat(savedReports).hasSize(2);
         assertThat(savedReports.get(0).getReportId())
-                .isEqualTo(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, periodMarch));
+                .isEqualTo(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, ver, periodMarch));
 
         assertThat(savedReports.get(1).getReportId())
-                .isEqualTo(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, periodApril));
+                .isEqualTo(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, ver, periodApril));
     }
 
     @Test
@@ -836,6 +868,7 @@ class ReportServiceTest {
         val organisationId = "org-different-reports";
         val intervalType = IntervalType.MONTH;
         short year = 2023;
+        val ver = 1;
         val periodMarch = Optional.of((short) 3); // March
         val periodApril = Optional.of((short) 4); // April
 
@@ -911,14 +944,14 @@ class ReportServiceTest {
         organisation.setTaxIdNumber("12345");
 
         when(organisationPublicApi.findByOrganisationId(organisationId)).thenReturn(Optional.of(organisation));
-        when(reportRepository.findById(Report.id(organisationId, BALANCE_SHEET, intervalType, year, periodMarch)))
+        when(reportRepository.findById(Report.id(organisationId, BALANCE_SHEET, intervalType, year, ver, periodMarch)))
                 .thenReturn(Optional.empty());
-        when(reportRepository.findById(Report.id(organisationId, BALANCE_SHEET, intervalType, year, periodApril)))
+        when(reportRepository.findById(Report.id(organisationId, BALANCE_SHEET, intervalType, year, ver, periodApril)))
                 .thenReturn(Optional.empty());
 
         // Act
-        val resultMarch = reportService.store(organisationId, intervalType, year, periodMarch, Either.right(balanceSheetMarchData));
-        val resultApril = reportService.store(organisationId, intervalType, year, periodApril, Either.right(balanceSheetAprilData));
+        val resultMarch = reportService.store(organisationId, intervalType, year, ver, periodMarch, Either.right(balanceSheetMarchData));
+        val resultApril = reportService.store(organisationId, intervalType, year, ver, periodApril, Either.right(balanceSheetAprilData));
 
         // Assert
         assertThat(resultMarch.isRight()).isTrue();
@@ -930,10 +963,10 @@ class ReportServiceTest {
         var savedReports = captor.getAllValues();
         assertThat(savedReports).hasSize(2);
         assertThat(savedReports.get(0).getReportId())
-                .isEqualTo(Report.id(organisationId, BALANCE_SHEET, intervalType, year, periodMarch));
+                .isEqualTo(Report.id(organisationId, BALANCE_SHEET, intervalType, year, ver, periodMarch));
 
         assertThat(savedReports.get(1).getReportId())
-                .isEqualTo(Report.id(organisationId, BALANCE_SHEET, intervalType, year, periodApril));
+                .isEqualTo(Report.id(organisationId, BALANCE_SHEET, intervalType, year, ver, periodApril));
     }
 
     @Test
@@ -942,6 +975,7 @@ class ReportServiceTest {
         val organisationId = "org-profit-mismatch";
         val intervalType = IntervalType.YEAR;
         short year = 2024;
+        val ver = 1;
         val periodM = Optional.of((short) 3); // March
 
         val organisation = new Organisation();
@@ -977,11 +1011,11 @@ class ReportServiceTest {
         val reportDataE = Either.<IncomeStatementData, BalanceSheetData>left(newIncomeStatement);
 
         // Mocking the repository behavior
-        when(reportRepository.findById(Report.id(organisationId, BALANCE_SHEET, intervalType, year, periodM)))
+        when(reportRepository.findById(Report.id(organisationId, BALANCE_SHEET, intervalType, year, ver, periodM)))
                 .thenReturn(Optional.of(existingBalanceSheet));
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isLeft()).isTrue();
@@ -996,6 +1030,7 @@ class ReportServiceTest {
         val intervalType = IntervalType.YEAR;
         short year = 2024;
         val periodM = Optional.of((short) 3); // March
+        val ver = 1;
 
         val organisation = new Organisation();
         organisation.setId(organisationId);
@@ -1056,11 +1091,11 @@ class ReportServiceTest {
         val reportDataE = Either.<IncomeStatementData, BalanceSheetData>right(newBalanceSheet);
 
         // Mocking the repository behavior
-        when(reportRepository.findById(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, periodM)))
+        when(reportRepository.findById(Report.id(organisationId, INCOME_STATEMENT, intervalType, year, ver, periodM)))
                 .thenReturn(Optional.of(existingIncomeStatement));
 
         // Act
-        val resultE = reportService.store(organisationId, intervalType, year, periodM, reportDataE);
+        val resultE = reportService.store(organisationId, intervalType, year, ver, periodM, reportDataE);
 
         // Assert
         assertThat(resultE.isLeft()).isTrue();
