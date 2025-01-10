@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.MetricDataResponse;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.MetricView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.MetricService;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class MetricController {
 
     @Tag(name = "Dashboard", description = "Get Data for Dashboard")
     @PostMapping(value = "/data", produces = "application/json")
-    public ResponseEntity<Map<String, List<Object>>> getDashboardData(@RequestBody MetricView metricView) {
-        return ResponseEntity.ok(metricService.getData(metricView.getMetrics()));
+    public ResponseEntity<MetricDataResponse> getDashboardData(@RequestBody MetricView metricView) {
+        return ResponseEntity.ok(new MetricDataResponse(metricService.getData(metricView.getMetrics())));
     }
 }
