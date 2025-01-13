@@ -23,7 +23,7 @@ public abstract class MetricExecutor {
 
     public Object getData(String id, Date startDate, Date endDate) {
         Map<String, MetricFunction> metricsNotInitialized = Optional.ofNullable(metrics).orElseThrow(() -> new MetricNotFoundException("Metrics not initialized"));
-        MetricFunction metricFunction = metricsNotInitialized.getOrDefault(id, () -> {
+        MetricFunction metricFunction = metricsNotInitialized.getOrDefault(id, (Date start, Date end) -> {
             throw new MetricNotFoundException(String.format("Metric Function %s not found in %s", id, name));
         });
         return metricFunction.getData(startDate, endDate);
