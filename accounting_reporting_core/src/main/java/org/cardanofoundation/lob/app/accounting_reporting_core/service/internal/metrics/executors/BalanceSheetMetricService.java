@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.MetricExecutor;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Map;
 
 @Component
@@ -19,7 +20,7 @@ public class BalanceSheetMetricService extends MetricExecutor {
         );
     }
 
-    private Map<String, Integer> getAssets() {
+    private Map<String, Integer> getAssets(Date startDate, Date endDate) {
         return Map.of(
                 "totalAssets", 1000
         );

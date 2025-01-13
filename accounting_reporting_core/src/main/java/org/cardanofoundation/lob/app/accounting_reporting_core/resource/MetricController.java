@@ -35,6 +35,6 @@ public class MetricController {
     @Tag(name = "Dashboard", description = "Get Data for Dashboard")
     @PostMapping(value = "/data", produces = "application/json")
     public ResponseEntity<MetricDataResponse> getDashboardData(@RequestBody MetricView metricView) {
-        return ResponseEntity.ok(new MetricDataResponse(metricService.getData(metricView.getMetrics())));
+        return ResponseEntity.ok(new MetricDataResponse(metricService.getData(metricView.getMetrics(), metricView.getStartDate(), metricView.getEndDate())));
     }
 }
