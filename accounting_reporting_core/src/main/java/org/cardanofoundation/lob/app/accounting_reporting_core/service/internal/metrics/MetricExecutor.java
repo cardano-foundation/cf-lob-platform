@@ -3,7 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import lombok.Getter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.exception.MetricNotFoundException;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,12 +21,12 @@ public abstract class MetricExecutor {
                 .keySet().stream().toList();
     }
 
-    public Object getData(String id, Date startDate, Date endDate) {
+    public Object getData(String id, String organisationID, Optional<LocalDateTime> startDate, Optional<LocalDateTime> endDate) {
         Map<String, MetricFunction> metricsNotInitialized = Optional.ofNullable(metrics).orElseThrow(() -> new MetricNotFoundException("Metrics not initialized"));
-        MetricFunction metricFunction = metricsNotInitialized.getOrDefault(id, (Date start, Date end) -> {
+        MetricFunction metricFunction = metricsNotInitialized.getOrDefault(id, (String orgId, Optional<LocalDateTime> start, Optional<LocalDateTime> end) -> {
             throw new MetricNotFoundException(String.format("Metric Function %s not found in %s", id, name));
         });
-        return metricFunction.getData(startDate, endDate);
+        return metricFunction.getData(organisationID, startDate, endDate);
     }
 
 }

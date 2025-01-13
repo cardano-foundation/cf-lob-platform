@@ -16,11 +16,5 @@ import java.util.Map;
 public class MetricView {
 
     Map<String, List<String>> metrics;
-    Date startDate;
-    Date endDate;
-
-    public MetricView(Map<String, List<String>> metrics) {
-        this.metrics = metrics;
-    }
 
 }

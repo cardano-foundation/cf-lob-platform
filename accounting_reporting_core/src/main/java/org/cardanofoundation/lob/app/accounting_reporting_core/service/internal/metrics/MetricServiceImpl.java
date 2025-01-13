@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.lob.app.accounting_reporting_core.exception.MetricNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,11 +24,11 @@ public class MetricServiceImpl implements MetricService{
     }
 
     @Override
-    public Map<String, List<Object>> getData(Map<String, List<String>> metrics, Date startDate, Date endDate) {
+    public Map<String, List<Object>> getData(Map<String, List<String>> metrics, String organisationID, Optional<LocalDateTime> startDate, Optional<LocalDateTime> endDate) {
         return metrics.entrySet().stream()
                 .map(metric -> {
                     MetricExecutor metricExecutor = getMetricExecutor(metric.getKey());
-                    List<Object> metricData = metric.getValue().stream().map(s -> metricExecutor.getData(s, startDate, endDate)).toList();
+                    List<Object> metricData = metric.getValue().stream().map(s -> metricExecutor.getData(s,organisationID, startDate, endDate)).toList();
 
                     return Map.entry(metric.getKey(), metricData);
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
