@@ -46,7 +46,8 @@ public interface ReportRepository extends JpaRepository<ReportEntity, String> {
     @Query("""
         SELECT r FROM accounting_reporting_core.report.ReportEntity r
         WHERE r.organisation.id = :organisationId
-        AND r.date >= :startDate AND r.date <= :endDate
+        AND (CAST(:startDate AS date) IS NULL OR r.date >= :startDate)
+        AND (CAST(:endDate AS date)  IS NULL OR r.date <= :endDate)
         """)
     List<ReportEntity> getReportEntitiesByDateBetween(@Param("organisationId") String organisationId,
                                                       @Param("startDate") LocalDate startDate,
