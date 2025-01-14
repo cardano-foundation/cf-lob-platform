@@ -1,24 +1,28 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.VendorBill;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.VALIDATED;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
+
 import lombok.val;
+
+import org.mockito.Mockito;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import java.util.List;
-
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.VendorBill;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.VALIDATED;
-import static org.mockito.Mockito.*;
 
 class CustomBlockchainReaderAccountingCoreTransactionRepositoryImplTestView {
 

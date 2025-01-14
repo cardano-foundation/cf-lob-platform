@@ -1,11 +1,12 @@
 package org.cardanofoundation.lob.app.support.jakarta_validation;
 
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
-import lombok.val;
-
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+import lombok.val;
 
 public class EnumNamePatternValidator implements ConstraintValidator<EnumNamePattern, Enum<?>> {
 

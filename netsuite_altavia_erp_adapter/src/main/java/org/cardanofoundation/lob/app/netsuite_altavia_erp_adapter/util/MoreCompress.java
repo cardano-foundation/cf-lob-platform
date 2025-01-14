@@ -1,8 +1,7 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util;
 
-import lombok.extern.slf4j.Slf4j;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,7 +9,9 @@ import java.util.HexFormat;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import javax.annotation.Nullable;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MoreCompress {

@@ -1,11 +1,11 @@
 package org.cardanofoundation.lob.app.support.reactive;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class Debouncer {
 

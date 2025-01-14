@@ -1,10 +1,11 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
 
-import java.time.LocalDate;
+import lombok.*;
 
 @Getter
 @Builder(toBuilder = true)

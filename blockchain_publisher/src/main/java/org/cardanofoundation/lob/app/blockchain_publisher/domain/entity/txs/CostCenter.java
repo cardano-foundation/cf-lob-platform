@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
+
 import lombok.*;
 
 @Embeddable

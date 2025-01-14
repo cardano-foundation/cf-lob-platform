@@ -1,19 +1,20 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.items;
 
+import static java.util.stream.Collectors.groupingBy;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.ERASED_SUM_APPLIED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.OK;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
+
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.groupingBy;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.ERASED_SUM_APPLIED;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.OK;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 
 /**
  * Task item that collapses transaction items with the same key by summing their amounts.

@@ -1,9 +1,29 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
-import io.vavr.control.Either;
+import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus.ROLLBACKED;
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
+import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
+
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import jakarta.annotation.PostConstruct;
+
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import io.vavr.control.Either;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
+
 import org.cardanofoundation.lob.app.blockchain_common.domain.ChainTip;
 import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
@@ -12,22 +32,6 @@ import org.cardanofoundation.lob.app.blockchain_publisher.repository.Transaction
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
 import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Limit;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
-
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus.ROLLBACKED;
-import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
-import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
 @RequiredArgsConstructor
 @Service

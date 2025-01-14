@@ -1,12 +1,10 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.GetMetricDataRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.MetricDataResponse;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.MetricView;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.MetricService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.GetMetricDataRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.MetricDataResponse;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.MetricView;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.MetricService;
 
 @RestController
 @RequestMapping("/api/metrics")

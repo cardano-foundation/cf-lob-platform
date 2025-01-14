@@ -1,13 +1,15 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
-import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+
+import lombok.val;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 
 @Converter(autoApply = true)
 public class TransactionTypeConverter implements AttributeConverter<List<TransactionType>, Integer> {

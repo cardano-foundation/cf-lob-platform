@@ -33,6 +33,9 @@ jobs:
       - name: Test
         run: |
          ./gradlew clean test
+      - name: Spotless
+        run : |
+          ./gradlew spotlessCheck
 
 #  mutation-test:
 #    needs: test

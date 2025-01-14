@@ -1,16 +1,14 @@
 package org.cardanofoundation.lob.app.organisation.domain.view;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Lob;
+import java.time.LocalDate;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCurrency;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Builder

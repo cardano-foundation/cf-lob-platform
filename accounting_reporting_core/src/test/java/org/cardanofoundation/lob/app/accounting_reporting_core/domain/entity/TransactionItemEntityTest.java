@@ -1,14 +1,15 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import lombok.val;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.CREDIT;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.DEBIT;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.CREDIT;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.DEBIT;
+import lombok.val;
+
+import org.junit.jupiter.api.Test;
 
 class TransactionItemEntityTest {
 

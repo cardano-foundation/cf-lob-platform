@@ -1,12 +1,14 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
+import static jakarta.persistence.EnumType.STRING;
+
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Enumerated;
+
 import lombok.*;
+
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
-
-import static jakarta.persistence.EnumType.STRING;
 
 @Embeddable
 @AllArgsConstructor

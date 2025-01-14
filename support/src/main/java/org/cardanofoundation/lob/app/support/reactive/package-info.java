@@ -2,5 +2,3 @@
 
 @org.springframework.modulith.NamedInterface("reactive")
 package org.cardanofoundation.lob.app.support.reactive;
-
-

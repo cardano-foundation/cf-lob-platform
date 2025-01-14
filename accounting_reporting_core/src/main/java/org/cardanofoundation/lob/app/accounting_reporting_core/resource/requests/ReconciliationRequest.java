@@ -1,14 +1,14 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nullable;
-import java.time.LocalDate;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Setter

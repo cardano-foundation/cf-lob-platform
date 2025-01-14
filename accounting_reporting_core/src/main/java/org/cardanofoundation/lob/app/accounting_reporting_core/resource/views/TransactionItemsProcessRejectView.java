@@ -1,20 +1,17 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.vavr.control.Either;
-import jakarta.annotation.Nullable;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
-import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.zalando.problem.Problem;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView;
 
 @Getter
 @Setter

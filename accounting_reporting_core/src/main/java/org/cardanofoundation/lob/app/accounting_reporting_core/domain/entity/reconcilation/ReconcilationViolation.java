@@ -1,22 +1,26 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.reconcilation;
 
+import static jakarta.persistence.EnumType.STRING;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import javax.annotation.Nullable;
+
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.Type;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
 
-import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Optional;
-
-import static jakarta.persistence.EnumType.STRING;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 
 @Embeddable
 @AllArgsConstructor
