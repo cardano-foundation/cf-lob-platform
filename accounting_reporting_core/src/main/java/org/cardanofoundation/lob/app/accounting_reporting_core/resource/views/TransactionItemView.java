@@ -1,10 +1,11 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 
-import java.math.BigDecimal;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter

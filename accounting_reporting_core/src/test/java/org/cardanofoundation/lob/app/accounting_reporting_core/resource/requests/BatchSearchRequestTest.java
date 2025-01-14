@@ -1,9 +1,10 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class BatchSearchRequestTest {
 

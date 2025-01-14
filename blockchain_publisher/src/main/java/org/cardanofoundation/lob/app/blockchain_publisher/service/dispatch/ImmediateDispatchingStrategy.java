@@ -1,12 +1,11 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service.dispatch;
 
-import java.util.Set;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 @Service
 @Slf4j

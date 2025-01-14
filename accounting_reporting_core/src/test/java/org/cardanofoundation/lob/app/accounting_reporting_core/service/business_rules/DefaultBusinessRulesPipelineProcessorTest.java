@@ -1,18 +1,17 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags.Trigger.IMPORT;
-import static org.mockito.Mockito.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OrganisationTransactions;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OrganisationTransactions;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags.Trigger.IMPORT;
+import static org.mockito.Mockito.*;
 
 class DefaultBusinessRulesPipelineProcessorTest {
 

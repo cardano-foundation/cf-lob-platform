@@ -1,10 +1,9 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report;
 
-
-
-import java.util.Optional;
+import lombok.*;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Builder(toBuilder = true)

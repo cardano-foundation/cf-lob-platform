@@ -1,9 +1,9 @@
 package org.cardanofoundation.lob.app.support.collections;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.Optional;
 import java.util.function.BiFunction;
-
-import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class Optionals {

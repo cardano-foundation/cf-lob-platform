@@ -1,12 +1,10 @@
 package org.cardanofoundation.lob.app.organisation.domain.entity;
 
 import jakarta.persistence.Embeddable;
-
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import org.hibernate.envers.Audited;
 
 @Embeddable

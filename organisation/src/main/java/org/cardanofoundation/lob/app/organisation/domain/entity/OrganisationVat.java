@@ -1,19 +1,16 @@
 package org.cardanofoundation.lob.app.organisation.domain.entity;
 
-
-import java.math.BigDecimal;
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import org.hibernate.envers.Audited;
-
-import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import java.math.BigDecimal;
 
 @AllArgsConstructor
 @NoArgsConstructor

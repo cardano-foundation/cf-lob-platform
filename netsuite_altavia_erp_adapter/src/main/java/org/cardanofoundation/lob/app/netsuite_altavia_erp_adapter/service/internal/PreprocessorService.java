@@ -1,16 +1,14 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal;
 
-import java.util.Map;
-import java.util.function.Function;
-
+import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
-import io.vavr.control.Either;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.FieldType;
 import org.zalando.problem.Problem;
 
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.FieldType;
+import java.util.Map;
+import java.util.function.Function;
 
 @RequiredArgsConstructor
 @Slf4j

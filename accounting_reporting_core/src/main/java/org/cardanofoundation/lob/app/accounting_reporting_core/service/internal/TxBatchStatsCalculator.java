@@ -1,20 +1,18 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.*;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
-
-import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
-import org.springframework.stereotype.Service;
-
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.BatchStatistics;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionBatchEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.*;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 
 @Service
 @Slf4j

@@ -1,12 +1,12 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
+import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Getter

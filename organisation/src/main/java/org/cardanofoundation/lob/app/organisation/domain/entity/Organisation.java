@@ -1,22 +1,20 @@
 package org.cardanofoundation.lob.app.organisation.domain.entity;
 
-import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
-
-import java.util.Optional;
-
+import io.hypersistence.utils.hibernate.type.basic.PostgreSQLCITextType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.annotations.Type;
+import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import io.hypersistence.utils.hibernate.type.basic.PostgreSQLCITextType;
-import org.hibernate.annotations.Type;
-import org.hibernate.envers.Audited;
+import java.util.Optional;
 
-import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
 
 @AllArgsConstructor
 @NoArgsConstructor

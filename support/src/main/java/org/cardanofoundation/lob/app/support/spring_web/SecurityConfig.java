@@ -1,7 +1,7 @@
 package org.cardanofoundation.lob.app.support.spring_web;
 
 import lombok.Getter;
-
+import org.cardanofoundation.lob.app.support.security.KeycloakRoleConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +11,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
-
-import org.cardanofoundation.lob.app.support.security.KeycloakRoleConverter;
 
 @Configuration("securityConfig")
 @EnableMethodSecurity

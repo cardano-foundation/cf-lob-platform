@@ -1,10 +1,9 @@
 package org.cardanofoundation.lob.app.support.javers;
 
-import java.math.BigDecimal;
-
+import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.javers.core.diff.custom.CustomValueComparator;
 
-import org.cardanofoundation.lob.app.support.calc.BigDecimals;
+import java.math.BigDecimal;
 
 public class LOBBigDecimalComparator implements CustomValueComparator<BigDecimal> {
 

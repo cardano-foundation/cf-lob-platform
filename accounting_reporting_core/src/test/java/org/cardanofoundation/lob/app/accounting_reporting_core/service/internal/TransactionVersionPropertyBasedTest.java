@@ -1,8 +1,11 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
+import lombok.val;
+import net.jqwik.api.*;
+import net.jqwik.time.api.Dates;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,11 +13,8 @@ import java.time.YearMonth;
 import java.util.Optional;
 import java.util.Set;
 
-import lombok.val;
-
-import net.jqwik.time.api.Dates;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 
 class TransactionVersionPropertyBasedTest {
 

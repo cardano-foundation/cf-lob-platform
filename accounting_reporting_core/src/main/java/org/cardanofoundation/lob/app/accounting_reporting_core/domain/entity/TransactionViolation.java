@@ -1,26 +1,24 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import static jakarta.persistence.EnumType.STRING;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import javax.annotation.Nullable;
-
+import lombok.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.Type;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
 import org.javers.core.metamodel.annotation.DiffIgnore;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode;
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import static jakarta.persistence.EnumType.STRING;
 
 @Embeddable
 @Getter

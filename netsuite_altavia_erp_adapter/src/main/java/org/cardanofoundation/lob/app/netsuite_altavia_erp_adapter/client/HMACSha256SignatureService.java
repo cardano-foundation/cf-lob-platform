@@ -1,19 +1,18 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.scribe.exceptions.OAuthSignatureException;
+import org.scribe.services.SignatureService;
+import org.scribe.utils.OAuthEncoder;
+import org.scribe.utils.Preconditions;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
-import org.scribe.exceptions.OAuthSignatureException;
-import org.scribe.services.SignatureService;
-import org.scribe.utils.OAuthEncoder;
-import org.scribe.utils.Preconditions;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HMACSha256SignatureService implements SignatureService {
 

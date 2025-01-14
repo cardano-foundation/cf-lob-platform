@@ -1,14 +1,13 @@
 package org.cardanofoundation.lob.app.support.reactive;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import lombok.val;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 
-import lombok.val;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class DebouncerManager {
 

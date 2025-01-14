@@ -1,15 +1,15 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
-import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
 
 @Builder(toBuilder = true)
 @Getter

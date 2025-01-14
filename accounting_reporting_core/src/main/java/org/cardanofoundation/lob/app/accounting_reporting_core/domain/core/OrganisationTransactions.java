@@ -1,9 +1,9 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 
 /**
  * Helper to indicate that all passedTransactions belong to the same organisation

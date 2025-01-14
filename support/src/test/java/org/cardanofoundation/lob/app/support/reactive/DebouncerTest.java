@@ -1,13 +1,13 @@
 package org.cardanofoundation.lob.app.support.reactive;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.mockito.Mockito.*;
-
-import java.time.Duration;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.mockito.Mockito.*;
 
 public class DebouncerTest {
 

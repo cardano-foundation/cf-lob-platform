@@ -1,10 +1,10 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
-import java.util.Map;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+
+import java.util.Map;
 
 @Getter
 @RequiredArgsConstructor

@@ -1,8 +1,10 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.CardCharge;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.FxRevaluation;
+import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal.ExtractionParametersFilteringService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -11,12 +13,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import lombok.val;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal.ExtractionParametersFilteringService;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.CardCharge;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.FxRevaluation;
 
 class ExtractionParametersFilteringServiceTest {
 

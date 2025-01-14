@@ -1,21 +1,18 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
-import static java.util.Locale.ENGLISH;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency.IsoStandard.ISO_24165;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency.IsoStandard.ISO_4217;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
-
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import org.springframework.stereotype.Service;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency;
+import static java.util.Locale.ENGLISH;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency.IsoStandard.ISO_24165;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency.IsoStandard.ISO_4217;
 
 @Service
 @Slf4j

@@ -1,11 +1,10 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal;
 
+import lombok.extern.slf4j.Slf4j;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+
 import java.util.Optional;
 import java.util.function.Function;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 
 @Slf4j
 public class TransactionTypeMapper implements Function<String, Optional<TransactionType>> {

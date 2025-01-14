@@ -1,7 +1,6 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit;
 
 import com.bloxbean.cardano.client.api.exception.ApiException;
-
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.L1Submission;
 
 public interface TransactionSubmissionService {

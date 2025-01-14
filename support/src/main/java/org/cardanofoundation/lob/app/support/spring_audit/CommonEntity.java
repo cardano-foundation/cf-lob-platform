@@ -1,21 +1,19 @@
 package org.cardanofoundation.lob.app.support.spring_audit;
 
-
-import static jakarta.persistence.TemporalType.TIMESTAMP;
-
-import java.time.LocalDateTime;
-
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.hibernate.envers.Audited;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import org.hibernate.envers.Audited;
-import org.javers.core.metamodel.annotation.DiffIgnore;
+import java.time.LocalDateTime;
+
+import static jakarta.persistence.TemporalType.TIMESTAMP;
 
 @Setter
 @Getter

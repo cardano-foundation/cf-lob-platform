@@ -1,14 +1,13 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.*;
 
 public class TransactionViewTypeConverterTest {
 

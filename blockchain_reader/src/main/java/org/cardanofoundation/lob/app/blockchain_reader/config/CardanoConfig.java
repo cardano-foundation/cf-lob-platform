@@ -1,12 +1,10 @@
 package org.cardanofoundation.lob.app.blockchain_reader.config;
 
 import lombok.extern.slf4j.Slf4j;
-
+import org.cardanofoundation.lob.app.blockchain_common.domain.CardanoNetwork;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import org.cardanofoundation.lob.app.blockchain_common.domain.CardanoNetwork;
 
 @Configuration
 @Slf4j

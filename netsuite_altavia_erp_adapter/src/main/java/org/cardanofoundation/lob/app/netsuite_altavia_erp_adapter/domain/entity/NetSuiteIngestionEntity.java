@@ -4,15 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import org.springframework.data.domain.Persistable;
-
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.springframework.data.domain.Persistable;
 
 @Entity
 @Table(name = "netsuite_adapter_ingestion")

@@ -1,12 +1,11 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
-
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.IncomeStatementData;
 import org.springframework.stereotype.Service;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.IncomeStatementData;
+import java.util.Optional;
 
 @Service("accounting_reporting_core.IncomeStatementConverter")
 @RequiredArgsConstructor

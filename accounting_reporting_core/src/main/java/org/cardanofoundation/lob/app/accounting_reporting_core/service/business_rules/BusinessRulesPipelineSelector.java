@@ -1,10 +1,9 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags.Trigger.REPROCESSING;
-
 import lombok.RequiredArgsConstructor;
-
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OrganisationTransactions;
+
+import static org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags.Trigger.REPROCESSING;
 
 @RequiredArgsConstructor
 public class BusinessRulesPipelineSelector implements BusinessRulesPipelineProcessor {

@@ -1,10 +1,9 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util;
 
-import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.Optional;
 
 public final class MoreString {
 

@@ -1,35 +1,31 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.reports;
 
-import static jakarta.persistence.EnumType.STRING;
-
-import java.time.LocalDate;
-import java.util.Optional;
-
+import io.vavr.control.Either;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import javax.annotation.Nullable;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import org.springframework.data.domain.Persistable;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import io.vavr.control.Either;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.PostgreSQLEnumJdbcType;
-
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1SubmissionData;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.Organisation;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonDateOnlyEntity;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.annotation.Nullable;
+import java.time.LocalDate;
+import java.util.Optional;
+
+import static jakarta.persistence.EnumType.STRING;
 
 @Entity(name = "blockchain_publisher.report.ReportEntity")
 @Table(name = "blockchain_publisher_report")

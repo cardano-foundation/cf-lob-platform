@@ -1,6 +1,6 @@
 package org.cardanofoundation.lob.app.blockchain_common.domain;
 
-
+import lombok.*;
 
 @AllArgsConstructor
 @Getter

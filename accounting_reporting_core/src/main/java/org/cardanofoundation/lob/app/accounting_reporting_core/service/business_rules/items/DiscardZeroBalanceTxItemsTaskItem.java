@@ -1,8 +1,8 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.items;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.ERASED_ZERO_BALANCE;
-
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus.ERASED_ZERO_BALANCE;
 
 public class DiscardZeroBalanceTxItemsTaskItem implements PipelineTaskItem {
 

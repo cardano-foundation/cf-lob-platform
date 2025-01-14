@@ -1,15 +1,14 @@
 package org.cardanofoundation.lob.app.support.collections;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.val;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class Partitions {
 

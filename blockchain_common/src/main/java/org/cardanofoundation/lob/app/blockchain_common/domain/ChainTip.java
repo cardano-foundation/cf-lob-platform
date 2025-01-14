@@ -1,8 +1,9 @@
 package org.cardanofoundation.lob.app.blockchain_common.domain;
 
-import java.util.Optional;
-
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
+import java.util.Optional;
 
 @AllArgsConstructor
 @NoArgsConstructor

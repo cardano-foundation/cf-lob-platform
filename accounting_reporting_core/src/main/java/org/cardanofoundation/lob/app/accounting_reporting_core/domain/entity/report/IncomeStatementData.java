@@ -1,13 +1,14 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
 import jakarta.persistence.Embeddable;
-
+import jakarta.persistence.Transient;
+import lombok.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
 import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.cardanofoundation.lob.app.support.calc.Summable;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Builder(toBuilder = true)

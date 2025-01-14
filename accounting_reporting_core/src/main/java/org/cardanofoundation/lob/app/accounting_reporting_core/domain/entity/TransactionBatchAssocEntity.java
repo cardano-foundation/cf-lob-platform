@@ -1,12 +1,12 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
+import com.google.common.base.Objects;
+import jakarta.persistence.*;
+import lombok.*;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import org.hibernate.envers.Audited;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.google.common.base.Objects;
-import org.hibernate.envers.Audited;
-
-import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 
 @Getter
 @Setter

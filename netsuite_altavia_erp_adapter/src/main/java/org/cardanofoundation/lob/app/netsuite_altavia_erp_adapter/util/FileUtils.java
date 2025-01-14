@@ -1,11 +1,11 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 @Slf4j
 public class FileUtils {

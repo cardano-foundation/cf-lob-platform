@@ -1,10 +1,11 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 
-import javax.annotation.Nullable;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.annotation.Nullable;
 
 @Getter
 @Setter

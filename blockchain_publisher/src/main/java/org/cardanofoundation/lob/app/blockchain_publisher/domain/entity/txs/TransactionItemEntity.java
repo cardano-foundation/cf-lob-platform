@@ -1,23 +1,20 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
-import static jakarta.persistence.FetchType.EAGER;
-
-import java.math.BigDecimal;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Objects;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.cardanofoundation.lob.app.support.spring_audit.CommonDateOnlyEntity;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.google.common.base.Objects;
+import javax.annotation.Nullable;
+import java.math.BigDecimal;
+import java.util.Optional;
 
-import org.cardanofoundation.lob.app.support.spring_audit.CommonDateOnlyEntity;
+import static jakarta.persistence.FetchType.EAGER;
 
 @Getter
 @Setter

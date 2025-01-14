@@ -1,20 +1,18 @@
 package org.cardanofoundation.lob.app.blockchain_reader;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-
-import io.vavr.control.Either;
-import org.zalando.problem.Problem;
-
 import org.cardanofoundation.lob.app.blockchain_common.domain.CardanoNetwork;
 import org.cardanofoundation.lob.app.blockchain_common.domain.ChainTip;
 import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_common.domain.OnChainTxDetails;
+import org.zalando.problem.Problem;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public interface BlockchainReaderPublicApiIF {
 

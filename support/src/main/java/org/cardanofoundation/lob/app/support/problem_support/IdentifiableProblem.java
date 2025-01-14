@@ -3,7 +3,6 @@ package org.cardanofoundation.lob.app.support.problem_support;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-
 import org.zalando.problem.Problem;
 
 @RequiredArgsConstructor

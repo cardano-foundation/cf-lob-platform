@@ -1,11 +1,11 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
-import java.util.Optional;
-
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import lombok.*;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Getter
 @Setter

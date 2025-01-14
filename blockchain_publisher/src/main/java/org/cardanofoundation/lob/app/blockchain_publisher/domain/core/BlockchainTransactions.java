@@ -1,8 +1,8 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.core;
 
-import java.util.Set;
-
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
+
+import java.util.Set;
 
 public record BlockchainTransactions(String organisationId,
                                      Set<TransactionEntity> submittedTransactions,

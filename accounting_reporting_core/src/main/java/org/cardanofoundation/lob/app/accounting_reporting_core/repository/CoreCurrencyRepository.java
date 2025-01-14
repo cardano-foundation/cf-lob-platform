@@ -1,9 +1,9 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency;
+
 import java.util.List;
 import java.util.Optional;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency;
 
 public interface CoreCurrencyRepository {
 

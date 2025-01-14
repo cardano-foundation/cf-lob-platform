@@ -1,23 +1,19 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
-
-import javax.annotation.Nullable;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.envers.Audited;
 import org.hibernate.type.SqlTypes;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import javax.annotation.Nullable;
+import java.time.LocalDate;
+import java.util.List;
 
 @Embeddable
 @AllArgsConstructor

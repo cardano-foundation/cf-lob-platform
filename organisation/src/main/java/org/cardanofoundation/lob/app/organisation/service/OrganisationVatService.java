@@ -1,15 +1,13 @@
 package org.cardanofoundation.lob.app.organisation.service;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationVat;
+import org.cardanofoundation.lob.app.organisation.repository.OrganisationVatRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationVat;
-import org.cardanofoundation.lob.app.organisation.repository.OrganisationVatRepository;
+import java.util.Optional;
 
 @Slf4j
 @Service

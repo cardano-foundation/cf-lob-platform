@@ -1,12 +1,12 @@
 package org.cardanofoundation.lob.app.support.crypto;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import lombok.experimental.UtilityClass;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
-import lombok.experimental.UtilityClass;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @UtilityClass
 public class SHA3 {

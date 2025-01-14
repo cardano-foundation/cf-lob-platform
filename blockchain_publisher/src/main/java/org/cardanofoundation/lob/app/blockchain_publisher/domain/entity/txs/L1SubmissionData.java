@@ -1,19 +1,17 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
-import static jakarta.persistence.EnumType.STRING;
-
-import java.util.Optional;
-
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Enumerated;
-
-import javax.annotation.Nullable;
-
+import lombok.*;
+import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
-import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
+import javax.annotation.Nullable;
+import java.util.Optional;
+
+import static jakarta.persistence.EnumType.STRING;
 
 @Embeddable
 @Getter

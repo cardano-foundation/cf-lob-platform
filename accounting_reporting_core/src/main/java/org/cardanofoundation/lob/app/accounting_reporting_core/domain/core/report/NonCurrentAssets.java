@@ -1,11 +1,11 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
 import jakarta.persistence.Embeddable;
+import lombok.*;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Builder(toBuilder = true)

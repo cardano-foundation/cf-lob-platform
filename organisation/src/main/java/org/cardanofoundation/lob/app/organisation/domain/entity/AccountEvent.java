@@ -1,10 +1,9 @@
 package org.cardanofoundation.lob.app.organisation.domain.entity;
 
-
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.envers.Audited;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @AllArgsConstructor
 @NoArgsConstructor

@@ -1,12 +1,12 @@
 package org.cardanofoundation.lob.app.organisation.repository;
 
-import java.util.Set;
-
+import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCostCenter;
+import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCurrency;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCurrency;
+import java.util.Set;
 
 public interface OrganisationCurrencyRepository extends JpaRepository<OrganisationCurrency, OrganisationCurrency.Id> {
 

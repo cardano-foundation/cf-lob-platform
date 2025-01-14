@@ -1,27 +1,23 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-
+import com.google.common.base.Objects;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-
-import javax.annotation.Nullable;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import org.springframework.data.domain.Persistable;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.google.common.base.Objects;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionBatchStatus;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionBatchStatus;
-import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
+import javax.annotation.Nullable;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Getter
 @Setter
