@@ -1,10 +1,11 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.items;
 
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.Journal;
+
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.Journal;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 
 @Slf4j
 public class JournalAccountAmountsEnrichmentTaskItem implements PipelineTaskItem {

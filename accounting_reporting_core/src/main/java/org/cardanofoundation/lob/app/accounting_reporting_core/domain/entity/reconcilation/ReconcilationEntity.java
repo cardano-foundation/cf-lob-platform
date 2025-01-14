@@ -1,26 +1,31 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.reconcilation;
 
-import com.google.common.base.Objects;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reconcilation.ReconcilationStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Details;
-import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.PostgreSQLEnumJdbcType;
-import org.hibernate.envers.Audited;
-import org.springframework.data.domain.Persistable;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
+import javax.annotation.Nullable;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.val;
+
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.google.common.base.Objects;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.hibernate.envers.Audited;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reconcilation.ReconcilationStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Details;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 
 @Entity(name = "accounting_reporting_core.reconcilation.ReconcilationEntity")
 @Table(name = "accounting_core_reconcilation")

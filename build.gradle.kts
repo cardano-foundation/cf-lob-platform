@@ -163,12 +163,6 @@ subprojects {
             // Remove wildcard imports
             removeUnusedImports()
 
-            // Replacing wildcard imports with no imports (if wildcard imports found)
-            replaceRegex("Remove wildcard imports",
-                "import\\s+[^\\*\\s]+\\*;(\\r\\n|\\r|\\n)",
-                "$1"
-            )
-
             // Define the import order
             importOrder("java", "jakarta", "javax", "lombok", "org.springframework", "", "org.junit", "org.cardanofoundation", "#")
 

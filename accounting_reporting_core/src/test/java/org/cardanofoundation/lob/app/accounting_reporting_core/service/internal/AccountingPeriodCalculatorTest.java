@@ -1,18 +1,20 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
-import org.apache.commons.lang3.Range;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.assistance.AccountingPeriodCalculator;
-import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.commons.lang3.Range;
+import org.mockito.Mockito;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.assistance.AccountingPeriodCalculator;
+import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 
 class AccountingPeriodCalculatorTest {
 

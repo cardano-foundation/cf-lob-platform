@@ -1,9 +1,10 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
-import jakarta.persistence.Embeddable;
-import lombok.*;
-
 import java.math.BigDecimal;
+
+import jakarta.persistence.Embeddable;
+
+import lombok.*;
 
 @Embeddable
 @AllArgsConstructor

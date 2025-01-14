@@ -1,26 +1,28 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vavr.control.Either;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.scribe.model.OAuthRequest;
-import org.scribe.model.Response;
-import org.scribe.model.Token;
-import org.scribe.oauth.OAuthService;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+import static org.scribe.model.Verb.GET;
 
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static org.scribe.model.Verb.GET;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
+import org.springframework.web.util.UriComponentsBuilder;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vavr.control.Either;
+import org.scribe.model.OAuthRequest;
+import org.scribe.model.Response;
+import org.scribe.model.Token;
+import org.scribe.oauth.OAuthService;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
 
 @Slf4j
 @RequiredArgsConstructor

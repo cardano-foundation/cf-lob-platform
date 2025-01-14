@@ -1,11 +1,13 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.reports;
 
-import jakarta.persistence.Embeddable;
-import lombok.*;
-
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Optional;
+
+import jakarta.persistence.Embeddable;
+
+import javax.annotation.Nullable;
+
+import lombok.*;
 
 @AllArgsConstructor
 @Builder(toBuilder = true)

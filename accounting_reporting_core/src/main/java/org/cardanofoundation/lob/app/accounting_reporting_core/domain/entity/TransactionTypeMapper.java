@@ -1,8 +1,8 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-
 import java.util.function.Function;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 
 public final class TransactionTypeMapper {
 

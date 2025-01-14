@@ -1,8 +1,10 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
 import lombok.RequiredArgsConstructor;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.ReportService;
+
 import org.springframework.stereotype.Service;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.ReportService;
 
 @RequiredArgsConstructor
 @Service

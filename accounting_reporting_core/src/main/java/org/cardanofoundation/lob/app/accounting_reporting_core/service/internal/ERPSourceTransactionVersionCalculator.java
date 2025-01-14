@@ -1,12 +1,13 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
+import java.util.Comparator;
+
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.support.calc.BigDecimals;
 import org.cardanofoundation.lob.app.support.crypto.SHA3;
-
-import java.util.Comparator;
 
 @Slf4j
 public class ERPSourceTransactionVersionCalculator {

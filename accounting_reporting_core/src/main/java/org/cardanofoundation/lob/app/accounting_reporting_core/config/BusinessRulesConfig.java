@@ -1,18 +1,21 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.validation.Validator;
+
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.repository.CoreCurrencyRepository;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.items.*;
-import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.CoreCurrencyRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.items.*;
+import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 
 @Configuration
 @RequiredArgsConstructor

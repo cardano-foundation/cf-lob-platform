@@ -1,13 +1,14 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests;
 
+import java.util.List;
+
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
+
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 
-import java.util.List;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 
 @Getter
 @Setter

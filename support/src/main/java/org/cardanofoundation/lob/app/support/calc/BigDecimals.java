@@ -1,10 +1,10 @@
 package org.cardanofoundation.lob.app.support.calc;
 
-import lombok.experimental.UtilityClass;
-
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Objects;
+
+import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class BigDecimals {
