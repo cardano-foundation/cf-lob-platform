@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
 
 import java.util.List;
 import java.util.Map;
@@ -14,5 +15,5 @@ import java.util.Map;
 @NoArgsConstructor
 public class MetricDataResponse {
 
-    Map<String, List<Object>> data;
+    Map<MetricEnum, List<Object>> data;
 }
