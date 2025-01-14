@@ -10,6 +10,22 @@ plugins {
     id("maven-publish")
 }
 
+allprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = "sonatypeSnapshots"
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+        }
+        maven {
+            name = "local"
+            url = uri("file://${project.layout.buildDirectory}/repo")
+        }
+    }
+
+}
+
 subprojects {
     apply(plugin = "java")
     apply(plugin = "java-library")
