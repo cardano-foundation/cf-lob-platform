@@ -14,25 +14,10 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration("securityConfig")
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = false)
 @Getter
-@ConditionalOnProperty(value = "keycloak.enabled", havingValue = "true")
-public class SecurityConfig {
-
-    @Value("${keycloak.cert-url}")
-    private String certUrl;
-
-    @Value("${keycloak.roles.manager}")
-    private String managerRole;
-
-    @Value("${keycloak.roles.auditor}")
-    private String auditorRole;
-
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withJwkSetUri(certUrl)
-                .build();
-    }
+@ConditionalOnProperty(value = "keycloak.enabled", havingValue = "false")
+public class DisabledSecurity {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,16 +25,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().permitAll() // allowing all access
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
-                        jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
-                ));
+                );
         return http.build();
     }
 
-    private JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(new KeycloakRoleConverter());
-        return converter;
-    }
 }
