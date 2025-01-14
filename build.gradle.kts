@@ -6,6 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.5"
     id("com.github.ben-manes.versions") version "0.51.0"
     id("info.solidsoft.pitest") version "1.15.0"
+    id("com.diffplug.spotless") version "6.19.0"
     id("maven-publish")
 }
 
@@ -15,6 +16,7 @@ subprojects {
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "com.github.ben-manes.versions")
     apply(plugin = "info.solidsoft.pitest")
+    apply(plugin = "com.diffplug.spotless")
     apply(plugin = "maven-publish")
 
     sourceSets {
@@ -151,6 +153,36 @@ subprojects {
 
     }
 
+    spotless {
+        java {
+            target("**/src/**/*.java")
+
+            // Exclude target directory
+            targetExclude("**/target/**/*.java")
+
+            // Remove wildcard imports
+            removeUnusedImports()
+
+            // Replacing wildcard imports with no imports (if wildcard imports found)
+            replaceRegex("Remove wildcard imports",
+                "import\\s+[^\\*\\s]+\\*;(\\r\\n|\\r|\\n)",
+                "$1"
+            )
+
+            // Define the import order
+            importOrder("java", "jakarta", "javax", "lombok", "org.springframework", "", "org.junit", "org.cardanofoundation", "#")
+
+            // Trim trailing whitespace
+            trimTrailingWhitespace()
+
+            // Set indentation: 2 spaces per tab
+            indentWithSpaces(2)
+
+            // Ensure files end with a newline
+            endWithNewline()
+        }
+    }
+
     pitest {
         //adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
         jvmArgs.add("--enable-preview")
@@ -175,7 +207,5 @@ subprojects {
                 url = uri("${System.getProperty("user.home")}/.m2/repository")
             }
         }
-
     }
-
 }
