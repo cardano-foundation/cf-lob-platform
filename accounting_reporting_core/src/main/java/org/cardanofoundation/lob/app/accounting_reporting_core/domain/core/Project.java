@@ -1,10 +1,10 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
-import jakarta.validation.constraints.Size;
-import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
-
 import java.util.Optional;
+
+import jakarta.validation.constraints.Size;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 
 @AllArgsConstructor
 @Getter

@@ -1,15 +1,17 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.PostgreSQLEnumJdbcType;
-import org.springframework.data.domain.Persistable;
+
+
+import static jakarta.persistence.EnumType.STRING;
 
 import java.io.Serializable;
 
-import static jakarta.persistence.EnumType.STRING;
+import org.springframework.data.domain.Persistable;
+
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 
 @Getter
 @Setter

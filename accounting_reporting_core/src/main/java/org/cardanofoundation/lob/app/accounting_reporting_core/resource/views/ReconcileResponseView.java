@@ -1,13 +1,14 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDate;
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.zalando.problem.Problem;
 
-import java.time.LocalDate;
-import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.zalando.problem.Problem;
 
 @Getter
 @Setter

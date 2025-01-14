@@ -1,12 +1,12 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import jakarta.persistence.Embeddable;
-import lombok.*;
-import org.hibernate.annotations.Type;
-import org.hibernate.envers.Audited;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import jakarta.persistence.Embeddable;
+
+import org.hibernate.annotations.Type;
+import org.hibernate.envers.Audited;
 
 @Embeddable
 @NoArgsConstructor

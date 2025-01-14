@@ -1,13 +1,13 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report;
 
-import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Organisation;
+
+import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Organisation;
 
 @AllArgsConstructor
 @Getter

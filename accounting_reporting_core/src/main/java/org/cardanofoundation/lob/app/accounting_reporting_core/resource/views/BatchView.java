@@ -1,19 +1,16 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionBatchStatus;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.BatchStatistics;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.FilteringParameters;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionBatchStatus;
 
 /**
  * Rename the class name BatchView

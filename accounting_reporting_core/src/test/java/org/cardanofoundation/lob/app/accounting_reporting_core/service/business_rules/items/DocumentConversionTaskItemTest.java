@@ -1,28 +1,30 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.items;
 
-import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionItem;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.repository.CoreCurrencyRepository;
-import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCurrency;
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationVat;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency.IsoStandard.ISO_4217;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.CURRENCY_DATA_NOT_FOUND;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.VAT_DATA_NOT_FOUND;
 import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+
+import lombok.val;
+
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.CoreCurrency;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionItem;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.CoreCurrencyRepository;
+import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
+import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCurrency;
+import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationVat;
 
 @ExtendWith(MockitoExtension.class)
 public class DocumentConversionTaskItemTest {

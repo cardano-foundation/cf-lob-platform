@@ -2,11 +2,12 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ext
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+
+import org.jmolecules.event.annotation.DomainEvent;
+
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
-import org.jmolecules.event.annotation.DomainEvent;
 
 @AllArgsConstructor
 @Builder

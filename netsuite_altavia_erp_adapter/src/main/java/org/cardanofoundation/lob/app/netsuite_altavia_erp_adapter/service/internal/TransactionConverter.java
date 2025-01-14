@@ -1,29 +1,30 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal;
 
-import io.vavr.control.Either;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Currency;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.FinancialPeriodSource;
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.Transactions;
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.TxLine;
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreBigDecimal;
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreString;
-import org.cardanofoundation.lob.app.support.collections.Optionals;
-
-import java.time.YearMonth;
-import java.util.*;
-
 import static java.util.stream.Collectors.groupingBy;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError.Code.ADAPTER_ERROR;
 import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.FieldType.*;
 import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity.CodeMappingType.ORGANISATION;
 import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreString.normaliseString;
+
+import java.time.YearMonth;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
+import io.vavr.control.Either;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Currency;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.FinancialPeriodSource;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.Transactions;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.TxLine;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreBigDecimal;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreString;
+import org.cardanofoundation.lob.app.support.collections.Optionals;
 
 @RequiredArgsConstructor
 @Slf4j

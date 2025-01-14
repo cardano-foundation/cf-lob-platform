@@ -1,6 +1,6 @@
 package org.cardanofoundation.lob.app.organisation;
 
-import org.cardanofoundation.lob.app.organisation.domain.entity.*;
+
 
 import java.util.List;
 import java.util.Optional;

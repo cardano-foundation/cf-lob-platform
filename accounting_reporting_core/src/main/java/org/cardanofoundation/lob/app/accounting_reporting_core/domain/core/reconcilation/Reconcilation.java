@@ -1,14 +1,15 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.reconcilation;
 
-import jakarta.persistence.Enumerated;
-import lombok.*;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import static jakarta.persistence.EnumType.STRING;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
-import static jakarta.persistence.EnumType.STRING;
+import jakarta.persistence.Enumerated;
+
+import javax.annotation.Nullable;
+
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 @AllArgsConstructor
 @Getter

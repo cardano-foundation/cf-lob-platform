@@ -1,9 +1,8 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
-import jakarta.validation.constraints.Pattern;
-import lombok.*;
-
 import java.util.Optional;
+
+import jakarta.validation.constraints.Pattern;
 
 @AllArgsConstructor
 @Getter

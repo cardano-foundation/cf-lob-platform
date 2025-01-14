@@ -1,12 +1,13 @@
 package org.cardanofoundation.lob.app.support.orm;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import java.time.YearMonth;
+
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 import javax.annotation.Nullable;
-import java.time.YearMonth;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Converter(autoApply = true)
 public class YearMonthStringAttributeConverter implements AttributeConverter<YearMonth, String> {

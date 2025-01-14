@@ -1,9 +1,15 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
+
+import org.springframework.stereotype.Service;
+
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Account;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.AccountEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.CostCenter;
@@ -12,12 +18,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Cur
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Document;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Project;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Vat;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service("accounting_reporting_core.TransactionConverter")
 @Slf4j

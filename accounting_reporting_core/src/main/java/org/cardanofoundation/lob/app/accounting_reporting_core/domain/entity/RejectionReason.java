@@ -1,13 +1,14 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import lombok.Getter;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
+import lombok.Getter;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source;
 
 @Getter
 public enum RejectionReason {

@@ -1,21 +1,22 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
+
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import com.google.common.base.Objects;
-import jakarta.persistence.*;
-import lombok.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.hibernate.envers.Audited;
+
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.PostgreSQLEnumJdbcType;
-import org.hibernate.envers.Audited;
-import org.springframework.data.domain.Persistable;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.util.Optional;
 
 @Entity(name = "accounting_reporting_core.TransactionItemEntity")
 @Table(name = "accounting_core_transaction_item")
@@ -29,7 +30,7 @@ public class TransactionItemEntity extends CommonEntity implements Persistable<S
     @Id
     @Column(name = "transaction_item_id", nullable = false)
     @LOBVersionSourceRelevant
-    
+
     @Setter
     private String id;
 

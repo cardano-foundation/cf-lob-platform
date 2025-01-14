@@ -1,12 +1,13 @@
 package org.cardanofoundation.lob.app.support.spring_audit.internal;
 
-import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
 import lombok.Getter;
+
 import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "revinfo")

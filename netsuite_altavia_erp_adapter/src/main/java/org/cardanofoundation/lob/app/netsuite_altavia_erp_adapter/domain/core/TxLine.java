@@ -1,17 +1,17 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.*;
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.Dates.ISO_8601_FORMAT_QUASI;
 
-import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
-import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.Dates.ISO_8601_FORMAT_QUASI;
+import javax.annotation.Nullable;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 // https://docs.google.com/spreadsheets/d/1iGo1t2bLuWSONOYo6kG9uXSzt7laCrM8gluKkx8tmn0/edit#gid=501685631
 @JsonIgnoreProperties(ignoreUnknown = true)

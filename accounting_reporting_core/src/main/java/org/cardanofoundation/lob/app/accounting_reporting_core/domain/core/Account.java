@@ -1,11 +1,10 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.core;
 
-import jakarta.validation.constraints.Size;
-import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
-import org.javers.core.metamodel.annotation.DiffInclude;
-
 import java.util.Optional;
+
+import jakarta.validation.constraints.Size;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 
 @AllArgsConstructor
 @Getter
@@ -16,7 +15,7 @@ import java.util.Optional;
 public class Account {
 
     @LOBVersionSourceRelevant
-    
+
     private String code;
 
     @Builder.Default

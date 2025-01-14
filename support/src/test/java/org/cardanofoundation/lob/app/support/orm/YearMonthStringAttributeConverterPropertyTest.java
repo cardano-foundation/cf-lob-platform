@@ -1,12 +1,12 @@
 package org.cardanofoundation.lob.app.support.orm;
 
-import lombok.val;
-import net.jqwik.api.*;
-import net.jqwik.api.constraints.IntRange;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.YearMonth;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import lombok.val;
+
+import net.jqwik.api.constraints.IntRange;
 
 public class YearMonthStringAttributeConverterPropertyTest {
 

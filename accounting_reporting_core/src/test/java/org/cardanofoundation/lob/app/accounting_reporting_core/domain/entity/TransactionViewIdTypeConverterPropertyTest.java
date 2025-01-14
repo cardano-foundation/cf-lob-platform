@@ -1,11 +1,12 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import net.jqwik.api.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.junit.jupiter.api.Assertions;
 
 import java.util.HashSet;
 import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 
 class TransactionViewIdTypeConverterPropertyTest {
 
