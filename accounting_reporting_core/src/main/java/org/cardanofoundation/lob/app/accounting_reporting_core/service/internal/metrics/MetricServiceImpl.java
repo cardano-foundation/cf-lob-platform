@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.metric.DashboardEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.exception.MetricNotFoundException;
-import org.cardanofoundation.lob.app.accounting_reporting_core.mapper.DashboardViewToEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.mapper.DashboardViewMapper;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.DashboardRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.DashboardView;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +21,7 @@ public class MetricServiceImpl implements MetricService{
 
     private final List<MetricExecutor> metricExecutors;
     private final DashboardRepository dashboardRepository;
-    private final DashboardViewToEntity dashboardViewToEntity;
+    private final DashboardViewMapper dashboardViewMapper;
 
     @Override
     public Map<MetricEnum, List<MetricEnum.SubMetric>> getAvailableMetrics() {
@@ -46,11 +45,23 @@ public class MetricServiceImpl implements MetricService{
     @Override
     public boolean saveDashboard(List<DashboardView> dashboards, String organisationID) {
         List<DashboardEntity> dashboardsEntities = dashboards.stream()
-                .map(dashboardView -> dashboardViewToEntity.mapToDashboardEntity(dashboardView, organisationID))
+                .map(dashboardView -> {
+                    DashboardEntity dashboardEntity = dashboardViewMapper.mapToDashboardEntity(dashboardView, organisationID);
+                    dashboardEntity.getCharts().forEach(chartEntity -> chartEntity.setDashboard(dashboardEntity));
+                    return dashboardEntity;
+                })
                 .toList();
 
         List<DashboardEntity> dashboardEntities = dashboardRepository.saveAll(dashboardsEntities);
         return dashboardEntities.size() == dashboards.size();
+    }
+
+    @Override
+    public List<DashboardView> getAllDashboards(String organisationID) {
+        List<DashboardEntity> allByOrganisationID = dashboardRepository.findAllByOrganisationID(organisationID);
+        return allByOrganisationID.stream()
+                .map(dashboardViewMapper::mapToDashboardView)
+                .toList();
     }
 
     private MetricExecutor getMetricExecutor(MetricEnum metricName) {

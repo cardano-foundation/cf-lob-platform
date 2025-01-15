@@ -5,12 +5,14 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.me
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
-public interface DashboardViewToEntity {
+@Mapper(componentModel = "spring", uses = ChartViewMapper.class)
+public interface DashboardViewMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "xPos", source = "dashboardView.XPos")
-    @Mapping(target = "yPos", source = "dashboardView.YPos")
+    @Mapping(target = "organisationID", source = "organisationID")
+    @Mapping(target = "charts", source = "dashboardView.charts")
     DashboardEntity mapToDashboardEntity(DashboardView dashboardView, String organisationID);
+
+    DashboardView mapToDashboardView(DashboardEntity dashboardEntity);
 
 }

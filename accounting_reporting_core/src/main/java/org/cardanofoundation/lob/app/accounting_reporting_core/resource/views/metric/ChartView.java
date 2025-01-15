@@ -6,16 +6,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DashboardView {
+public class ChartView {
 
-    private Long id;
-    private String name;
-    private String description;
-    private List<ChartView> charts;
+    private Double xPos;
+    private Double yPos;
+    private Double width;
+    private Double height;
+    private MetricEnum metric;
+    private MetricEnum.SubMetric subMetric;
 }

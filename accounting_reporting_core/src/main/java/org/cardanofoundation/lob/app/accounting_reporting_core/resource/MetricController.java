@@ -6,16 +6,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.GetMetricDataRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.SaveDashboardRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.response.metric.MetricDataResponse;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.DashboardView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.MetricView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.MetricService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -48,5 +51,11 @@ public class MetricController {
     public ResponseEntity<Void> saveDashboard(@RequestBody SaveDashboardRequest saveDashboardRequest) {
         metricService.saveDashboard(saveDashboardRequest.getDashboards(), saveDashboardRequest.getOrganisationID());
         return ResponseEntity.ok().build();
+    }
+
+    @Tag(name = "Get Dashboards", description = "Get Dashboards")
+    @GetMapping(value = "/dashboards/{organisationID}", produces = "application/json")
+    public ResponseEntity<List<DashboardView>> getDashboards(@PathVariable("organisationID") String organisationID) {
+        return ResponseEntity.ok(metricService.getAllDashboards(organisationID));
     }
 }
