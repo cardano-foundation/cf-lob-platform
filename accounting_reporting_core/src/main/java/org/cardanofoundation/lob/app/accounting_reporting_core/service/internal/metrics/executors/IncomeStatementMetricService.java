@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.IncomeStatemenCategories;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.IncomeStatementData;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
@@ -22,12 +23,6 @@ public class IncomeStatementMetricService extends MetricExecutor {
 
     private final ReportRepository reportRepository;
 
-    private static final String COST_OF_SERVICE = "Cost of Service";
-    private static final String PERSONNEL_EXPENSES = "Personnel Expenses";
-    private static final String FINANCIAL_EXPENSES = "Financial Expenses";
-    private static final String TAX_EXPENSES = "Tax Expenses";
-    private static final String OTHER_OPERATING_EXPENSES = "Other Operating Expenses";
-
     @PostConstruct
     public void init() {
         name = MetricEnum.INCOME_STATEMENT;
@@ -37,42 +32,42 @@ public class IncomeStatementMetricService extends MetricExecutor {
         );
     }
 
-    private Map<String, Integer> getTotalExpenses(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
+    private Map<IncomeStatemenCategories, Integer> getTotalExpenses(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
+        List<ReportEntity> reportEntities = reportRepository.getReportEntitiesByDateBetween(organisationID,
+                startDate.orElse(null),
+                endDate.orElse(null));
+        Map<IncomeStatemenCategories, Integer> totalExpenses = new HashMap<>();
 
-
-        List<ReportEntity> reportEntitiesByDateBetween = reportRepository.getReportEntitiesByDateBetween(organisationID,
-                startDate.orElse(LocalDate.MIN),
-                endDate.orElse(LocalDate.MAX));
-        Map<String, Integer> totalExpenses = new HashMap<>();
-
-        reportEntitiesByDateBetween.forEach(reportEntity -> {
+        reportEntities.forEach(reportEntity -> {
             if(reportEntity.getIncomeStatementReportData().isPresent()) {
                 IncomeStatementData incomeStatementData = reportEntity.getIncomeStatementReportData().get();
-                totalExpenses.merge(COST_OF_SERVICE, incomeStatementData.getCostOfGoodsAndServices()
+                totalExpenses.merge(IncomeStatemenCategories.COST_OF_SERVICE, incomeStatementData.getCostOfGoodsAndServices()
                         .orElse(new IncomeStatementData.CostOfGoodsAndServices()).getCostOfProvidingServices()
                         .orElse(BigDecimal.ZERO).intValue(),
                         Integer::sum);
-                totalExpenses.merge(PERSONNEL_EXPENSES, incomeStatementData.getOperatingExpenses()
+                totalExpenses.merge(IncomeStatemenCategories.PERSONNEL_EXPENSES, incomeStatementData.getOperatingExpenses()
                         .orElse(new IncomeStatementData.OperatingExpenses()).getPersonnelExpenses()
                         .orElse(BigDecimal.ZERO).intValue(),
                         Integer::sum);
-                totalExpenses.merge(FINANCIAL_EXPENSES, incomeStatementData.getFinancialIncome()
+                totalExpenses.merge(IncomeStatemenCategories.FINANCIAL_EXPENSES, incomeStatementData.getFinancialIncome()
                         .orElse(new IncomeStatementData.FinancialIncome()).getFinancialExpenses()
                         .orElse(BigDecimal.ZERO).intValue(),
                         Integer::sum);
-                totalExpenses.merge(TAX_EXPENSES, incomeStatementData.getTaxExpenses()
+                totalExpenses.merge(IncomeStatemenCategories.TAX_EXPENSES, incomeStatementData.getTaxExpenses()
                         .orElse(new IncomeStatementData.TaxExpenses()).getIncomeTaxExpense()
                         .orElse(BigDecimal.ZERO).intValue(),
                         Integer::sum);
                 // Other Expenses
-                totalExpenses.put(OTHER_OPERATING_EXPENSES, 0);
+                totalExpenses.put(IncomeStatemenCategories.OTHER_OPERATING_EXPENSES, 0);
                 if(incomeStatementData.getOperatingExpenses().isPresent()) {
                     IncomeStatementData.OperatingExpenses operatingExpenses = incomeStatementData.getOperatingExpenses().get();
                     int otherExpenses = 0;
-                    // TODO Check what's in other Expenses as well
                     otherExpenses += operatingExpenses.getRentExpenses().orElse(BigDecimal.ZERO).intValue();
                     otherExpenses += operatingExpenses.getGeneralAndAdministrativeExpenses().orElse(BigDecimal.ZERO).intValue();
-                    totalExpenses.merge(OTHER_OPERATING_EXPENSES, otherExpenses, Integer::sum);
+                    otherExpenses += operatingExpenses.getAmortizationOnIntangibleAssets().orElse(BigDecimal.ZERO).intValue();
+                    otherExpenses += operatingExpenses.getDepreciationAndImpairmentLossesOnTangibleAssets().orElse(BigDecimal.ZERO).intValue();
+                    otherExpenses += operatingExpenses.getRentExpenses().orElse(BigDecimal.ZERO).intValue();
+                    totalExpenses.merge(IncomeStatemenCategories.OTHER_OPERATING_EXPENSES, otherExpenses, Integer::sum);
                 }
 
             }
@@ -80,10 +75,29 @@ public class IncomeStatementMetricService extends MetricExecutor {
         return totalExpenses;
     }
 
-    private Map<String, Integer> getIncomeStream(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
-        return Map.of(
-                "IncomeStreams", 1000
-        );
+    private Map<IncomeStatemenCategories, Integer> getIncomeStream(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
+        List<ReportEntity> reportEntities = reportRepository.getReportEntitiesByDateBetween(organisationID,
+                startDate.orElse(null),
+                endDate.orElse(null));
+        Map<IncomeStatemenCategories, Integer> incomeStream = new HashMap<>();
+
+
+        reportEntities.forEach(reportEntity -> {
+            reportEntity.getIncomeStatementReportData().ifPresent(incomeStatementData -> {
+                incomeStatementData.getFinancialIncome().ifPresent(financialIncome -> {
+                    incomeStream.merge(IncomeStatemenCategories.STAKING_REWARDS, financialIncome.getStakingRewardsIncome().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                    incomeStream.merge(IncomeStatemenCategories.OTHER, financialIncome.getNetIncomeOptionsSale().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                    incomeStream.merge(IncomeStatemenCategories.FINANCIAL_INCOME, financialIncome.getFinancialRevenues().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                    incomeStream.merge(IncomeStatemenCategories.GAINS_ON_SALES_OF_CRYPTO_CURRENCIES, financialIncome.getRealisedGainsOnSaleOfCryptocurrencies().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                });
+                incomeStatementData.getRevenues().ifPresent(revenues -> {
+                    incomeStream.merge(IncomeStatemenCategories.BUILDING_OF_PROVISIONS, revenues.getBuildOfLongTermProvision().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                    incomeStream.merge(IncomeStatemenCategories.OTHER, revenues.getOtherIncome().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                });
+            });
+        });
+
+        return incomeStream;
     }
 
 }
