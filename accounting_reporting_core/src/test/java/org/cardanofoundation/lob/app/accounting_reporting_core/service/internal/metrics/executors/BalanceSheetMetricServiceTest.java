@@ -61,11 +61,15 @@ class BalanceSheetMetricServiceTest {
         when(reportRepository.getReportEntitiesByDateBetween(anyString(), any(), any()))
                 .thenReturn(List.of(reportEntity));
 
-        Map<BalanceSheetCategories, Map<BalanceSheetCategories, Double>> balanceSheetOverview = (Map<BalanceSheetCategories, Map<BalanceSheetCategories, Double>>) balanceSheetMetricService.getData(MetricEnum.SubMetric.BALANCE_SHEET_OVERVIEW, "organisationId", Optional.empty(), Optional.empty());
+        Map<BalanceSheetCategories, Map<BalanceSheetCategories, Integer>> balanceSheetOverview = (Map<BalanceSheetCategories, Map<BalanceSheetCategories, Integer>>) balanceSheetMetricService.getData(MetricEnum.SubMetric.BALANCE_SHEET_OVERVIEW, "organisationId", Optional.empty(), Optional.empty());
 
         assertThat(balanceSheetOverview).containsKey(BalanceSheetCategories.ASSETS);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.CURRENT, 40);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.NON_CURRENT, 40);
         assertThat(balanceSheetOverview).containsKey(BalanceSheetCategories.LIABILITIES);
-        assertThat(balanceSheetOverview).containsKey(BalanceSheetCategories.CAPITAL);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.CURRENT, 30);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.NON_CURRENT, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.CAPITAL, 10);
     }
 
     private BalanceSheetData getTestBalanceSheetData() {
