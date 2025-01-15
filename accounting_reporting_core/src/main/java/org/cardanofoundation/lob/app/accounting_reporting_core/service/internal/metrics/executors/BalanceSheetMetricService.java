@@ -45,11 +45,33 @@ public class BalanceSheetMetricService extends MetricExecutor {
         reportEntities.forEach(reportEntity ->
                 reportEntity.getBalanceSheetReportData().flatMap(BalanceSheetData::getAssets).ifPresent(assets -> {
             assets.getCurrentAssets().ifPresent(currentAssets -> {
-                assetCategories.merge(BalanceSheetCategories.CASH, currentAssets.getCashAndCashEquivalents().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
-                assetCategories.merge(BalanceSheetCategories.CRYPTO_ASSETS, currentAssets.getCryptoAssets().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                currentAssets.getCashAndCashEquivalents().ifPresent(cash -> {
+                    assetCategories.merge(BalanceSheetCategories.CASH, cash.intValue(), Integer::sum);
+                });
+                currentAssets.getCryptoAssets().ifPresent(cryptoAssets -> {
+                    assetCategories.merge(BalanceSheetCategories.CRYPTO_ASSETS, cryptoAssets.intValue(), Integer::sum);
+                });
+                currentAssets.getOtherReceivables().ifPresent(otherReceivables -> {
+                    assetCategories.merge(BalanceSheetCategories.OTHER, otherReceivables.intValue(), Integer::sum);
+                });
+                currentAssets.getPrepaymentsAndOtherShortTermAssets().ifPresent(prepayments -> {
+                    assetCategories.merge(BalanceSheetCategories.OTHER, prepayments.intValue(), Integer::sum);
+                });
             });
+
             assets.getNonCurrentAssets().ifPresent(nonCurrentAssets -> {
-                assetCategories.merge(BalanceSheetCategories.FINANCIAL_ASSETS, nonCurrentAssets.getFinancialAssets().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                nonCurrentAssets.getFinancialAssets().ifPresent(financialAssets -> {
+                    assetCategories.merge(BalanceSheetCategories.FINANCIAL_ASSETS, financialAssets.intValue(), Integer::sum);
+                });
+                nonCurrentAssets.getIntangibleAssets().ifPresent(intangibleAssets -> {
+                    assetCategories.merge(BalanceSheetCategories.OTHER, intangibleAssets.intValue(), Integer::sum);
+                });
+                nonCurrentAssets.getInvestments().ifPresent(investments -> {
+                    assetCategories.merge(BalanceSheetCategories.OTHER, investments.intValue(), Integer::sum);
+                });
+                nonCurrentAssets.getPropertyPlantEquipment().ifPresent(propertyPlantEquipment -> {
+                    assetCategories.merge(BalanceSheetCategories.OTHER, propertyPlantEquipment.intValue(), Integer::sum);
+                });
             });
         }));
 
