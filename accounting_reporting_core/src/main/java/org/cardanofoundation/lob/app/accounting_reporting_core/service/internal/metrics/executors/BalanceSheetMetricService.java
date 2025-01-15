@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum.BALANCE_SHEET;
 
@@ -55,57 +56,69 @@ public class BalanceSheetMetricService extends MetricExecutor {
         return assetCategories;
     }
 
-    private Map<BalanceSheetCategories, Map<BalanceSheetCategories, Double>> getBalanceSheetOverview(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
+    private Map<BalanceSheetCategories, Map<BalanceSheetCategories, Integer>> getBalanceSheetOverview(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
         List<ReportEntity> reportEntities = reportRepository.getReportEntitiesByDateBetween(organisationID,
                 startDate.orElse(null),
                 endDate.orElse(null));
 
-        Map<BalanceSheetCategories, Map<BalanceSheetCategories, Double>> balanceSheetOverview = new HashMap<>();
+        Map<BalanceSheetCategories, Map<BalanceSheetCategories, Integer>> balanceSheetOverview = new HashMap<>();
 
         reportEntities.forEach(reportEntity -> {
             reportEntity.getBalanceSheetReportData().ifPresent(balanceSheetData -> {
                 balanceSheetData.getAssets().ifPresent(assets -> {
-                    Map<BalanceSheetCategories, Double> assetMap = balanceSheetOverview.getOrDefault(BalanceSheetCategories.ASSETS, new HashMap<>());
+                    Map<BalanceSheetCategories, Integer> assetMap = balanceSheetOverview.getOrDefault(BalanceSheetCategories.ASSETS, new HashMap<>());
                     assets.getCurrentAssets().ifPresent(currentAssets -> {
-                        BigDecimal currentAssetSum = BigDecimal.ZERO;
-                        currentAssetSum = currentAssetSum.add(currentAssets.getCryptoAssets().orElse(BigDecimal.ZERO));
-                        currentAssetSum = currentAssetSum.add(currentAssets.getCashAndCashEquivalents().orElse(BigDecimal.ZERO));
-                        currentAssetSum = currentAssetSum.add(currentAssets.getOtherReceivables().orElse(BigDecimal.ZERO));
-                        currentAssetSum = currentAssetSum.add(currentAssets.getPrepaymentsAndOtherShortTermAssets().orElse(BigDecimal.ZERO));
-                        assetMap.merge(BalanceSheetCategories.CURRENT, currentAssetSum.doubleValue(), Double::sum);
+                        int currentAssetSum = sumUpOptionalFields(
+                                currentAssets.getCryptoAssets(),
+                                currentAssets.getCashAndCashEquivalents(), currentAssets.getOtherReceivables(),
+                                currentAssets.getPrepaymentsAndOtherShortTermAssets());
+                        assetMap.merge(BalanceSheetCategories.CURRENT, currentAssetSum, Integer::sum);
                     });
                     assets.getNonCurrentAssets().ifPresent(nonCurrentAssets -> {
-                        BigDecimal nonCurrentAssetSum = BigDecimal.ZERO;
-                        nonCurrentAssetSum = nonCurrentAssetSum.add(nonCurrentAssets.getFinancialAssets().orElse(BigDecimal.ZERO));
-                        nonCurrentAssetSum = nonCurrentAssetSum.add(nonCurrentAssets.getInvestments().orElse(BigDecimal.ZERO));
-                        nonCurrentAssetSum = nonCurrentAssetSum.add(nonCurrentAssets.getIntangibleAssets().orElse(BigDecimal.ZERO));
-                        nonCurrentAssetSum = nonCurrentAssetSum.add(nonCurrentAssets.getPropertyPlantEquipment().orElse(BigDecimal.ZERO));
-                        assetMap.merge(BalanceSheetCategories.NON_CURRENT, nonCurrentAssetSum.doubleValue(), Double::sum);
+                        int nonCurrentAssetSum = sumUpOptionalFields(
+                                nonCurrentAssets.getFinancialAssets(),
+                                nonCurrentAssets.getInvestments(),
+                                nonCurrentAssets.getIntangibleAssets(),
+                                nonCurrentAssets.getPropertyPlantEquipment());
+                        assetMap.merge(BalanceSheetCategories.NON_CURRENT, nonCurrentAssetSum, Integer::sum);
                     });
                     balanceSheetOverview.put(BalanceSheetCategories.ASSETS, assetMap);
                 });
 
                 balanceSheetData.getLiabilities().ifPresent(liabilities -> {
-                    Map<BalanceSheetCategories, Double> liabilityMap = balanceSheetOverview.getOrDefault(BalanceSheetCategories.LIABILITIES, new HashMap<>());
+                    Map<BalanceSheetCategories, Integer> liabilityMap = balanceSheetOverview.getOrDefault(BalanceSheetCategories.LIABILITIES, new HashMap<>());
                     liabilities.getCurrentLiabilities().ifPresent(currentLiabilities -> {
-                        BigDecimal currentLiabilitySum = BigDecimal.ZERO;
-                        currentLiabilitySum = currentLiabilitySum.add(currentLiabilities.getTradeAccountsPayables().orElse(BigDecimal.ZERO));
-                        currentLiabilitySum = currentLiabilitySum.add(currentLiabilities.getAccrualsAndShortTermProvisions().orElse(BigDecimal.ZERO));
-                        currentLiabilitySum = currentLiabilitySum.add(currentLiabilities.getOtherCurrentLiabilities().orElse(BigDecimal.ZERO));
-                        liabilityMap.merge(BalanceSheetCategories.CURRENT, currentLiabilitySum.doubleValue(), Double::sum);
+                        int currentLiabilitySum = sumUpOptionalFields(
+                                currentLiabilities.getTradeAccountsPayables(),
+                                currentLiabilities.getAccrualsAndShortTermProvisions(),
+                                currentLiabilities.getOtherCurrentLiabilities());
+                        liabilityMap.merge(BalanceSheetCategories.CURRENT, currentLiabilitySum, Integer::sum);
                     });
                     liabilities.getNonCurrentLiabilities().ifPresent(nonCurrentLiabilities -> {
-                        liabilityMap.merge(BalanceSheetCategories.NON_CURRENT, nonCurrentLiabilities.getProvisions().orElse(BigDecimal.ZERO).doubleValue(), Double::sum);
+                        int nonCurrentLiabilitySum = sumUpOptionalFields(
+                                nonCurrentLiabilities.getProvisions());
+                        liabilityMap.merge(BalanceSheetCategories.NON_CURRENT, nonCurrentLiabilitySum, Integer::sum);
                     });
                     balanceSheetOverview.put(BalanceSheetCategories.LIABILITIES, liabilityMap);
                 });
                 balanceSheetData.getCapital().ifPresent(capital -> {
-                    Map<BalanceSheetCategories, Double> liabilityMap = balanceSheetOverview.getOrDefault(BalanceSheetCategories.LIABILITIES, new HashMap<>());
-                    liabilityMap.merge(BalanceSheetCategories.CAPITAL, capital.getCapital().orElse(BigDecimal.ZERO).doubleValue(), Double::sum);
+                    Map<BalanceSheetCategories, Integer> liabilityMap = balanceSheetOverview.getOrDefault(BalanceSheetCategories.LIABILITIES, new HashMap<>());
+                    int capitalSum = sumUpOptionalFields(
+                            capital.getCapital());
+                    liabilityMap.merge(BalanceSheetCategories.CAPITAL, capitalSum, Integer::sum);
                     balanceSheetOverview.put(BalanceSheetCategories.LIABILITIES, liabilityMap);
                 });
             });
         });
         return balanceSheetOverview;
+    }
+
+    @SafeVarargs
+    private int sumUpOptionalFields(Optional<BigDecimal>... fields) {
+        return Stream.of(fields)
+                .map(field -> field.orElse(BigDecimal.ZERO))
+                .map(BigDecimal::intValue)
+                .reduce(Integer::sum)
+                .orElse(0);
     }
 }

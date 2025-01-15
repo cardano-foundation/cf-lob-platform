@@ -62,9 +62,11 @@ public class IncomeStatementMetricService extends MetricExecutor {
                 if(incomeStatementData.getOperatingExpenses().isPresent()) {
                     IncomeStatementData.OperatingExpenses operatingExpenses = incomeStatementData.getOperatingExpenses().get();
                     int otherExpenses = 0;
-                    // TODO Check what's in other Expenses as well
                     otherExpenses += operatingExpenses.getRentExpenses().orElse(BigDecimal.ZERO).intValue();
                     otherExpenses += operatingExpenses.getGeneralAndAdministrativeExpenses().orElse(BigDecimal.ZERO).intValue();
+                    otherExpenses += operatingExpenses.getAmortizationOnIntangibleAssets().orElse(BigDecimal.ZERO).intValue();
+                    otherExpenses += operatingExpenses.getDepreciationAndImpairmentLossesOnTangibleAssets().orElse(BigDecimal.ZERO).intValue();
+                    otherExpenses += operatingExpenses.getRentExpenses().orElse(BigDecimal.ZERO).intValue();
                     totalExpenses.merge(IncomeStatemenCategories.OTHER_OPERATING_EXPENSES, otherExpenses, Integer::sum);
                 }
 
@@ -84,7 +86,9 @@ public class IncomeStatementMetricService extends MetricExecutor {
             reportEntity.getIncomeStatementReportData().ifPresent(incomeStatementData -> {
                 incomeStatementData.getFinancialIncome().ifPresent(financialIncome -> {
                     incomeStream.merge(IncomeStatemenCategories.STAKING_REWARDS, financialIncome.getStakingRewardsIncome().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
-
+                    incomeStream.merge(IncomeStatemenCategories.OTHER, financialIncome.getNetIncomeOptionsSale().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                    incomeStream.merge(IncomeStatemenCategories.FINANCIAL_INCOME, financialIncome.getFinancialRevenues().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                    incomeStream.merge(IncomeStatemenCategories.GAINS_ON_SALES_OF_CRYPTO_CURRENCIES, financialIncome.getRealisedGainsOnSaleOfCryptocurrencies().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
                 });
                 incomeStatementData.getRevenues().ifPresent(revenues -> {
                     incomeStream.merge(IncomeStatemenCategories.BUILDING_OF_PROVISIONS, revenues.getBuildOfLongTermProvision().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
