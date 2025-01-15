@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
+package org.cardanofoundation.lob.app.accounting_reporting_core.resource.response.metric;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
