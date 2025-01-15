@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.GetMetricDataRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.SaveDashboardRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.response.metric.MetricDataResponse;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.MetricView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.MetricService;
@@ -40,5 +41,12 @@ public class MetricController {
                 getMetricDataRequest.getOrganisationID(),
                 Optional.ofNullable(getMetricDataRequest.getStartDate()),
                 Optional.ofNullable(getMetricDataRequest.getEndDate()))));
+    }
+
+    @Tag(name = "Save Dashboards", description = "Save Dashboards")
+    @PostMapping(value = "/saveDashboard", produces = "application/json")
+    public ResponseEntity<Void> saveDashboard(@RequestBody SaveDashboardRequest saveDashboardRequest) {
+        metricService.saveDashboard(saveDashboardRequest.getDashboards());
+        return ResponseEntity.ok().build();
     }
 }

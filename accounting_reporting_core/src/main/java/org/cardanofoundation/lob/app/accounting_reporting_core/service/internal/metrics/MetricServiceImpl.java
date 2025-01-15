@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
 import org.cardanofoundation.lob.app.accounting_reporting_core.exception.MetricNotFoundException;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.DashboardView;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class MetricServiceImpl implements MetricService{
 
     private final List<MetricExecutor> metricExecutors;
+    private final
 
     @Override
     public Map<MetricEnum, List<MetricEnum.SubMetric>> getAvailableMetrics() {
@@ -35,6 +37,11 @@ public class MetricServiceImpl implements MetricService{
 
                     return Map.entry(metric.getKey(), metricData);
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public boolean saveDashboard(List<DashboardView> dashboards) {
+        return false;
     }
 
     private MetricExecutor getMetricExecutor(MetricEnum metricName) {
