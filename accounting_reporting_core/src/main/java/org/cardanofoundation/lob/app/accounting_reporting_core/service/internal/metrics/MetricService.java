@@ -13,5 +13,5 @@ public interface MetricService {
     Map<MetricEnum, List<MetricEnum.SubMetric>> getAvailableMetrics();
     Map<MetricEnum, List<Object>> getData(Map<MetricEnum, List<MetricEnum.SubMetric>>  metrics, String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate);
 
-    boolean saveDashboard(List<DashboardView> dashboards);
+    boolean saveDashboard(List<DashboardView> dashboards, String organisationID);
 }

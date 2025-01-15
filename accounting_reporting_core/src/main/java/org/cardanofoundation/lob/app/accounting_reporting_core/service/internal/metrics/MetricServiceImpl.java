@@ -2,7 +2,10 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 
 import lombok.RequiredArgsConstructor;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.metric.DashboardEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.exception.MetricNotFoundException;
+import org.cardanofoundation.lob.app.accounting_reporting_core.mapper.DashboardViewToEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.DashboardRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.DashboardView;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +21,8 @@ import java.util.stream.Collectors;
 public class MetricServiceImpl implements MetricService{
 
     private final List<MetricExecutor> metricExecutors;
-    private final
+    private final DashboardRepository dashboardRepository;
+    private final DashboardViewToEntity dashboardViewToEntity;
 
     @Override
     public Map<MetricEnum, List<MetricEnum.SubMetric>> getAvailableMetrics() {
@@ -40,8 +44,13 @@ public class MetricServiceImpl implements MetricService{
     }
 
     @Override
-    public boolean saveDashboard(List<DashboardView> dashboards) {
-        return false;
+    public boolean saveDashboard(List<DashboardView> dashboards, String organisationID) {
+        List<DashboardEntity> dashboardsEntities = dashboards.stream()
+                .map(dashboardView -> dashboardViewToEntity.mapToDashboardEntity(dashboardView, organisationID))
+                .toList();
+
+        List<DashboardEntity> dashboardEntities = dashboardRepository.saveAll(dashboardsEntities);
+        return dashboardEntities.size() == dashboards.size();
     }
 
     private MetricExecutor getMetricExecutor(MetricEnum metricName) {

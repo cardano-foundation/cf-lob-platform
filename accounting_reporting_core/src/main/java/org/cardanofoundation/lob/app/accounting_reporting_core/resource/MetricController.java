@@ -46,7 +46,7 @@ public class MetricController {
     @Tag(name = "Save Dashboards", description = "Save Dashboards")
     @PostMapping(value = "/saveDashboard", produces = "application/json")
     public ResponseEntity<Void> saveDashboard(@RequestBody SaveDashboardRequest saveDashboardRequest) {
-        metricService.saveDashboard(saveDashboardRequest.getDashboards());
+        metricService.saveDashboard(saveDashboardRequest.getDashboards(), saveDashboardRequest.getOrganisationID());
         return ResponseEntity.ok().build();
     }
 }

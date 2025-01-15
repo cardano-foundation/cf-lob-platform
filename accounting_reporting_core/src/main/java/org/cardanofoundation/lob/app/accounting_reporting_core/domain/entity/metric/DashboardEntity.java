@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
 import org.springframework.data.domain.Persistable;
 
 @Getter
@@ -16,7 +17,7 @@ import org.springframework.data.domain.Persistable;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "dashboard")
+@Table(name = "accounting_core_dashboards")
 public class DashboardEntity{
 
     @Id
@@ -25,5 +26,10 @@ public class DashboardEntity{
 
     private String name;
     private String description;
-    private String userID;
+    private Double xPos;
+    private Double yPos;
+    private Double width;
+    private Double height;
+    private MetricEnum metric;
+    private MetricEnum.SubMetric subMetric;
 }
