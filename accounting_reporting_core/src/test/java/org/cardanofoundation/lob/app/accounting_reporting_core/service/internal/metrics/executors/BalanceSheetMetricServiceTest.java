@@ -64,12 +64,18 @@ class BalanceSheetMetricServiceTest {
         Map<BalanceSheetCategories, Map<BalanceSheetCategories, Integer>> balanceSheetOverview = (Map<BalanceSheetCategories, Map<BalanceSheetCategories, Integer>>) balanceSheetMetricService.getData(MetricEnum.SubMetric.BALANCE_SHEET_OVERVIEW, "organisationId", Optional.empty(), Optional.empty());
 
         assertThat(balanceSheetOverview).containsKey(BalanceSheetCategories.ASSETS);
-        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.CURRENT, 40);
-        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.NON_CURRENT, 40);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.FINANCIAL_ASSETS, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.CASH, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.CRYPTO_ASSETS, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.OTHER, 50);
         assertThat(balanceSheetOverview).containsKey(BalanceSheetCategories.LIABILITIES);
-        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.CURRENT, 30);
-        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.NON_CURRENT, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.PROFIT_OF_THE_YEAR, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.ACCRUSAL_AND_SHORT_TERM_PROVISIONS, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.TRADE_ACCOUNTS_PAYABLE, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.RESULTS_CARRIED_FORWARD, 10);
         assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.CAPITAL, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.OTHER, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.PROVISIONS, 10);
     }
 
     private BalanceSheetData getTestBalanceSheetData() {
