@@ -42,7 +42,7 @@ class BalanceSheetMetricServiceTest {
         reportEntity.setType(ReportType.BALANCE_SHEET);
         reportEntity.setBalanceSheetReportData(Optional.of(getTestBalanceSheetData()));
 
-        when(reportRepository.getReportEntitiesByDateBetween(anyString(), any(), any()))
+        when(reportRepository.getNewestReportsInRange(anyString(), any(), any()))
                 .thenReturn(List.of(reportEntity));
 
         Map<BalanceSheetCategories, Integer> assetCategories = (Map<BalanceSheetCategories, Integer>) balanceSheetMetricService.getData(MetricEnum.SubMetric.ASSET_CATEGORIES, "organisationId", Optional.empty(), Optional.empty());
@@ -58,7 +58,7 @@ class BalanceSheetMetricServiceTest {
         reportEntity.setType(ReportType.BALANCE_SHEET);
         reportEntity.setBalanceSheetReportData(Optional.of(getTestBalanceSheetData()));
 
-        when(reportRepository.getReportEntitiesByDateBetween(anyString(), any(), any()))
+        when(reportRepository.getNewestReportsInRange(anyString(), any(), any()))
                 .thenReturn(List.of(reportEntity));
 
         Map<BalanceSheetCategories, Map<BalanceSheetCategories, Integer>> balanceSheetOverview = (Map<BalanceSheetCategories, Map<BalanceSheetCategories, Integer>>) balanceSheetMetricService.getData(MetricEnum.SubMetric.BALANCE_SHEET_OVERVIEW, "organisationId", Optional.empty(), Optional.empty());
