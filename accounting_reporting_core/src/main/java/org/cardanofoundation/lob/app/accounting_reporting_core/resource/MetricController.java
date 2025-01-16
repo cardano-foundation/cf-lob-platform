@@ -10,6 +10,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.me
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.MetricView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.MetricService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,6 +49,7 @@ public class MetricController {
 
     @Tag(name = "Save Dashboards", description = "Save Dashboards")
     @PostMapping(value = "/saveDashboard", produces = "application/json")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> saveDashboard(@RequestBody SaveDashboardRequest saveDashboardRequest) {
         metricService.saveDashboard(saveDashboardRequest.getDashboards(), saveDashboardRequest.getOrganisationID());
         return ResponseEntity.ok().build();
