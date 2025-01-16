@@ -49,14 +49,14 @@ public interface ReportRepository extends JpaRepository<ReportEntity, String> {
             WHERE r2.organisation.id = :organisationId
             AND (CAST(:startDate AS date) IS NULL OR r2.date >= :startDate)
             AND (CAST(:endDate AS date)  IS NULL OR r2.date <= :endDate)
-            AND r2.ledgerDispatchStatus = 'DISPATCHED'
+            AND r2.ledgerDispatchApproved = true
             GROUP BY r2.reportId
             ) AS latest
         ON r.ver = latest.ver AND r.reportId = latest.id
         WHERE r.organisation.id = :organisationId
         AND (CAST(:startDate AS date) IS NULL OR r.date >= :startDate)
         AND (CAST(:endDate AS date)  IS NULL OR r.date <= :endDate)
-        AND r.ledgerDispatchStatus = 'DISPATCHED'
+        AND r.ledgerDispatchApproved = true
         """)
     List<ReportEntity> getNewestReportsInRange(@Param("organisationId") String organisationId,
                                                @Param("startDate") LocalDate startDate,
