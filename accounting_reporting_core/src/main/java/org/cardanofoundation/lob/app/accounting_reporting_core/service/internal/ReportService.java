@@ -378,7 +378,7 @@ public class ReportService {
     ) {
         log.info("Income Statement::Saving report example...");
 
-        val orgM = organisationPublicApi.findByOrganisationId(organisationId);
+        Optional<org.cardanofoundation.lob.app.organisation.domain.entity.Organisation> orgM = organisationPublicApi.findByOrganisationId(organisationId);
         if (orgM.isEmpty()) {
             return Either.left(Problem.builder()
                     .withTitle("ORGANISATION_NOT_FOUND")
@@ -387,7 +387,7 @@ public class ReportService {
                     .with("organisationId", organisationId)
                     .build());
         }
-        val org = orgM.orElseThrow();
+        org.cardanofoundation.lob.app.organisation.domain.entity.Organisation org = orgM.orElseThrow();
 
         val reportEntityE = exist(organisationId, reportType, intervalType, year, period);
 

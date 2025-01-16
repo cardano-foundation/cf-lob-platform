@@ -12,10 +12,11 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -33,71 +34,64 @@ public class IncomeStatementMetricService extends MetricExecutor {
     }
 
     private Map<IncomeStatemenCategories, Integer> getTotalExpenses(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
-        List<ReportEntity> reportEntities = reportRepository.getReportEntitiesByDateBetween(organisationID,
+        List<ReportEntity> reportEntities = reportRepository.getNewestReportsInRange(organisationID,
                 startDate.orElse(null),
                 endDate.orElse(null));
-        Map<IncomeStatemenCategories, Integer> totalExpenses = new HashMap<>();
+        Map<IncomeStatemenCategories, Integer> totalExpenses = new EnumMap<>(IncomeStatemenCategories.class);
 
         reportEntities.forEach(reportEntity -> {
             if(reportEntity.getIncomeStatementReportData().isPresent()) {
                 IncomeStatementData incomeStatementData = reportEntity.getIncomeStatementReportData().get();
-                totalExpenses.merge(IncomeStatemenCategories.COST_OF_SERVICE, incomeStatementData.getCostOfGoodsAndServices()
-                        .orElse(new IncomeStatementData.CostOfGoodsAndServices()).getCostOfProvidingServices()
-                        .orElse(BigDecimal.ZERO).intValue(),
-                        Integer::sum);
-                totalExpenses.merge(IncomeStatemenCategories.PERSONNEL_EXPENSES, incomeStatementData.getOperatingExpenses()
-                        .orElse(new IncomeStatementData.OperatingExpenses()).getPersonnelExpenses()
-                        .orElse(BigDecimal.ZERO).intValue(),
-                        Integer::sum);
-                totalExpenses.merge(IncomeStatemenCategories.FINANCIAL_EXPENSES, incomeStatementData.getFinancialIncome()
-                        .orElse(new IncomeStatementData.FinancialIncome()).getFinancialExpenses()
-                        .orElse(BigDecimal.ZERO).intValue(),
-                        Integer::sum);
-                totalExpenses.merge(IncomeStatemenCategories.TAX_EXPENSES, incomeStatementData.getTaxExpenses()
-                        .orElse(new IncomeStatementData.TaxExpenses()).getIncomeTaxExpense()
-                        .orElse(BigDecimal.ZERO).intValue(),
-                        Integer::sum);
-                // Other Expenses
-                totalExpenses.put(IncomeStatemenCategories.OTHER_OPERATING_EXPENSES, 0);
-                if(incomeStatementData.getOperatingExpenses().isPresent()) {
-                    IncomeStatementData.OperatingExpenses operatingExpenses = incomeStatementData.getOperatingExpenses().get();
-                    int otherExpenses = 0;
-                    otherExpenses += operatingExpenses.getRentExpenses().orElse(BigDecimal.ZERO).intValue();
-                    otherExpenses += operatingExpenses.getGeneralAndAdministrativeExpenses().orElse(BigDecimal.ZERO).intValue();
-                    otherExpenses += operatingExpenses.getAmortizationOnIntangibleAssets().orElse(BigDecimal.ZERO).intValue();
-                    otherExpenses += operatingExpenses.getDepreciationAndImpairmentLossesOnTangibleAssets().orElse(BigDecimal.ZERO).intValue();
-                    otherExpenses += operatingExpenses.getRentExpenses().orElse(BigDecimal.ZERO).intValue();
-                    totalExpenses.merge(IncomeStatemenCategories.OTHER_OPERATING_EXPENSES, otherExpenses, Integer::sum);
-                }
-
+                incomeStatementData.getCostOfGoodsAndServices().ifPresent(costOfGoodsAndServices -> totalExpenses.merge(IncomeStatemenCategories.COST_OF_SERVICE, costOfGoodsAndServices.getCostOfProvidingServices().orElse(BigDecimal.ZERO).intValue(), Integer::sum));
+                incomeStatementData.getOperatingExpenses().ifPresent(operatingExpenses -> {
+                    totalExpenses.merge(IncomeStatemenCategories.PERSONNEL_EXPENSES, operatingExpenses.getPersonnelExpenses().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                    // Other Operating Expenses
+                    int otherOperatingExpenses = sumUpOptionalFields(
+                            operatingExpenses.getRentExpenses(),
+                            operatingExpenses.getGeneralAndAdministrativeExpenses(),
+                            operatingExpenses.getAmortizationOnIntangibleAssets(),
+                            operatingExpenses.getDepreciationAndImpairmentLossesOnTangibleAssets(),
+                            operatingExpenses.getRentExpenses());
+                    totalExpenses.merge(IncomeStatemenCategories.OTHER_OPERATING_EXPENSES, otherOperatingExpenses, Integer::sum);
+                });
+                incomeStatementData.getFinancialIncome().ifPresent(financialIncome -> totalExpenses.merge(IncomeStatemenCategories.FINANCIAL_EXPENSES, financialIncome.getFinancialExpenses().orElse(BigDecimal.ZERO).intValue(), Integer::sum));
+                incomeStatementData.getTaxExpenses().ifPresent(taxExpenses -> totalExpenses.merge(IncomeStatemenCategories.TAX_EXPENSES, taxExpenses.getIncomeTaxExpense().orElse(BigDecimal.ZERO).intValue(), Integer::sum));
             }
         });
         return totalExpenses;
     }
 
     private Map<IncomeStatemenCategories, Integer> getIncomeStream(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
-        List<ReportEntity> reportEntities = reportRepository.getReportEntitiesByDateBetween(organisationID,
+        List<ReportEntity> reportEntities = reportRepository.getNewestReportsInRange(organisationID,
                 startDate.orElse(null),
                 endDate.orElse(null));
-        Map<IncomeStatemenCategories, Integer> incomeStream = new HashMap<>();
+        Map<IncomeStatemenCategories, Integer> incomeStream = new EnumMap<>(IncomeStatemenCategories.class);
 
 
-        reportEntities.forEach(reportEntity -> {
-            reportEntity.getIncomeStatementReportData().ifPresent(incomeStatementData -> {
-                incomeStatementData.getFinancialIncome().ifPresent(financialIncome -> {
-                    incomeStream.merge(IncomeStatemenCategories.STAKING_REWARDS, financialIncome.getStakingRewardsIncome().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
-                    incomeStream.merge(IncomeStatemenCategories.OTHER, financialIncome.getNetIncomeOptionsSale().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
-                    incomeStream.merge(IncomeStatemenCategories.FINANCIAL_INCOME, financialIncome.getFinancialRevenues().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
-                    incomeStream.merge(IncomeStatemenCategories.GAINS_ON_SALES_OF_CRYPTO_CURRENCIES, financialIncome.getRealisedGainsOnSaleOfCryptocurrencies().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
-                });
-                incomeStatementData.getRevenues().ifPresent(revenues -> {
-                    incomeStream.merge(IncomeStatemenCategories.BUILDING_OF_PROVISIONS, revenues.getBuildOfLongTermProvision().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
-                    incomeStream.merge(IncomeStatemenCategories.OTHER, revenues.getOtherIncome().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
-                });
+        reportEntities.forEach(reportEntity ->
+                reportEntity.getIncomeStatementReportData().ifPresent(incomeStatementData -> {
+            incomeStatementData.getFinancialIncome().ifPresent(financialIncome -> {
+                incomeStream.merge(IncomeStatemenCategories.STAKING_REWARDS, financialIncome.getStakingRewardsIncome().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                incomeStream.merge(IncomeStatemenCategories.OTHER, financialIncome.getNetIncomeOptionsSale().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                incomeStream.merge(IncomeStatemenCategories.FINANCIAL_INCOME, financialIncome.getFinancialRevenues().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                incomeStream.merge(IncomeStatemenCategories.GAINS_ON_SALES_OF_CRYPTO_CURRENCIES, financialIncome.getRealisedGainsOnSaleOfCryptocurrencies().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
             });
-        });
+            incomeStatementData.getRevenues().ifPresent(revenues -> {
+                incomeStream.merge(IncomeStatemenCategories.BUILDING_OF_PROVISIONS, revenues.getBuildOfLongTermProvision().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+                incomeStream.merge(IncomeStatemenCategories.OTHER, revenues.getOtherIncome().orElse(BigDecimal.ZERO).intValue(), Integer::sum);
+            });
+        }));
 
         return incomeStream;
+    }
+
+    @SafeVarargs
+    private int sumUpOptionalFields(Optional<BigDecimal>... fields) {
+        return Stream.of(fields)
+                .map(field -> field.orElse(BigDecimal.ZERO))
+                .map(BigDecimal::intValue)
+                .reduce(Integer::sum)
+                .orElse(0);
     }
 
 }
