@@ -334,6 +334,9 @@ public class ReportService {
                 .build();
 
         reportEntity.setBalanceSheetReportData(Optional.of(balanceSheetReportData));
+        /**
+         * Todo: Bug: Always save even when error is triggered.
+
         if (!reportEntity.isValid()) {
             return Either.left(Problem.builder()
                     .withTitle("INVALID_REPORT")
@@ -343,6 +346,7 @@ public class ReportService {
                     .with("reportType", reportEntity.getType())
                     .build());
         }
+         */
         val result = store(reportEntity);
         if (result.isLeft()) {
             return Either.left(result.getLeft());
@@ -394,9 +398,13 @@ public class ReportService {
         ReportEntity reportEntity = reportEntityE.fold(problem -> {
             return new ReportEntity();
         }, success -> {
+            if (success.getLedgerDispatchApproved()) {
+                val report = new ReportEntity();
+                report.setVer(success.getVer() + 1);
+                return report;
+            }
             return success;
         });
-
 
         reportEntity.setReportId(Report.id(organisationId, reportType, intervalType, year, reportEntity.getVer(), Optional.of(period)));
         reportEntity.setIdControl(Report.idControl(organisationId, reportType, intervalType, year, Optional.of(period)));
@@ -514,32 +522,7 @@ public class ReportService {
                     .with("reportId", reportId)
                     .build());
         }
-        // Validate profitForTheYear consistency between IncomeStatementData and BalanceSheetData
-        val relatedReportType = reportEntity.getType().equals(INCOME_STATEMENT) ? BALANCE_SHEET : INCOME_STATEMENT;
-        val relatedReportId = Report.idControl(reportEntity.getOrganisation().getId(), relatedReportType, reportEntity.getIntervalType(), reportEntity.getYear(), reportEntity.getPeriod());
-        val relatedReportM = reportRepository.findLatestByIdControl(reportEntity.getOrganisation().getId(), relatedReportId);
 
-        if (relatedReportM.isPresent()) {
-            val relatedReport = relatedReportM.orElseThrow();
-            val relatedProfit = relatedReport.getType().equals(INCOME_STATEMENT)
-                    ? relatedReport.getIncomeStatementReportData().flatMap(IncomeStatementData::getProfitForTheYear).orElse(BigDecimal.ZERO)
-                    : relatedReport.getBalanceSheetReportData().flatMap(BalanceSheetData::getCapital).flatMap(BalanceSheetData.Capital::getProfitForTheYear).orElse(BigDecimal.ZERO);
-
-
-            BigDecimal newProfit = reportEntity.getType().equals(INCOME_STATEMENT)
-                    ? reportEntity.getIncomeStatementReportData().flatMap(IncomeStatementData::getProfitForTheYear).orElse(BigDecimal.ZERO)
-                    : reportEntity.getBalanceSheetReportData().flatMap(BalanceSheetData::getCapital).flatMap(BalanceSheetData.Capital::getProfitForTheYear).orElse(BigDecimal.ZERO);
-            if (0 != newProfit.compareTo(relatedProfit)) {
-                reportRepository.save(reportEntity);
-                return Either.left(Problem.builder()
-                        .withTitle("PROFIT_FOR_THE_YEAR_MISMATCH")
-                        .withDetail(STR."Profit for the year does not match the related report. \{newProfit} != \{relatedProfit}")
-                        .withStatus(Status.BAD_REQUEST)
-                        .with("reportId", reportId)
-                        .build());
-            }
-
-        }
         reportRepository.save(reportEntity);
         return Either.right(reportEntity);
     }
@@ -681,7 +664,7 @@ public class ReportService {
                 .build());
     }
 
-    private Either<Problem, Boolean> canPublish(ReportEntity reportEntity) {
+    public Either<Problem, Boolean> canPublish(ReportEntity reportEntity) {
 
         // Validate profitForTheYear consistency between IncomeStatementData and BalanceSheetData
         val relatedReportType = reportEntity.getType().equals(INCOME_STATEMENT) ? BALANCE_SHEET : INCOME_STATEMENT;
@@ -724,13 +707,7 @@ public class ReportService {
                         .with("reportId", reportEntity.getReportId())
                         .build());
             }
-            return Either.right(true);
         }
-        return Either.left(Problem.builder()
-                .withTitle("NO_RELATED_REPORT")
-                .withDetail(STR."Profit for the year does not match the related report.")
-                .withStatus(Status.BAD_REQUEST)
-                .with("reportId", reportEntity.getReportId())
-                .build());
+        return Either.right(true);
     }
 }

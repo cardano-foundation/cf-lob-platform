@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
+import org.zalando.problem.Problem;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -29,6 +30,10 @@ public class ReportView {
     private Integer ver;
 
     private Boolean publish;
+
+    private Boolean canBePublish;
+
+    private Optional<Problem> error;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
