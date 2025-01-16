@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,10 +44,21 @@ public interface ReportRepository extends JpaRepository<ReportEntity, String> {
 
     @Query("""
         SELECT r FROM accounting_reporting_core.report.ReportEntity r
+        JOIN (
+            SELECT MAX(r2.ver) AS ver, r2.reportId as id FROM accounting_reporting_core.report.ReportEntity r2
+            WHERE r2.organisation.id = :organisationId
+            AND (CAST(:startDate AS date) IS NULL OR r2.date >= :startDate)
+            AND (CAST(:endDate AS date)  IS NULL OR r2.date <= :endDate)
+            AND r2.ledgerDispatchApproved = true
+            GROUP BY r2.reportId
+            ) AS latest
+        ON r.ver = latest.ver AND r.reportId = latest.id
         WHERE r.organisation.id = :organisationId
-        AND r.date >= :startDate AND r.date <= :endDate
+        AND (CAST(:startDate AS date) IS NULL OR r.date >= :startDate)
+        AND (CAST(:endDate AS date)  IS NULL OR r.date <= :endDate)
+        AND r.ledgerDispatchApproved = true
         """)
-    List<ReportEntity> getReportEntitiesByDateBetween(@Param("organisationId") String organisationId,
-                                                      @Param("startDate") LocalDate startDate,
-                                                      @Param("endDate") LocalDate endDate);
+    List<ReportEntity> getNewestReportsInRange(@Param("organisationId") String organisationId,
+                                               @Param("startDate") LocalDate startDate,
+                                               @Param("endDate") LocalDate endDate);
 }

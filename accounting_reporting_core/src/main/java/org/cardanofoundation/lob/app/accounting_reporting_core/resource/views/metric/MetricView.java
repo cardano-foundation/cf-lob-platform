@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
+package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +13,8 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MetricDataResponse {
+public class MetricView {
 
-    Map<MetricEnum, List<Object>> data;
+    Map<MetricEnum, List<MetricEnum.SubMetric>> metrics;
+
 }
