@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Validable;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
 import org.hibernate.annotations.JdbcType;
@@ -26,6 +27,7 @@ import java.util.List;
 import static jakarta.persistence.EnumType.STRING;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

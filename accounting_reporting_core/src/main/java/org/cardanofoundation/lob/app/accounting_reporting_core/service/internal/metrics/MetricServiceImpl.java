@@ -71,5 +71,23 @@ public class MetricServiceImpl implements MetricService{
                 .orElseThrow(() -> new MetricNotFoundException(String.format("Metric %s not found", metricName)));
     }
 
+    @Override
+    public void deleteDashboard(String organisationID, Long dashboardID) {
+        DashboardEntity dashboardEntity = dashboardRepository.findByIdAndAndOrganisationID(dashboardID, organisationID)
+                .orElseThrow(() -> new MetricNotFoundException(String.format("Dashboard %s not found", dashboardID)));
+        dashboardRepository.delete(dashboardEntity);
+    }
+
+    @Override
+    public void updateDashboard(DashboardView dashboard, String organisationID) {
+        DashboardEntity dashboardEntity = dashboardRepository.findByIdAndAndOrganisationID(dashboard.getId(), organisationID)
+                .orElseThrow(() -> new MetricNotFoundException(String.format("Dashboard %s not found", dashboard.getId())));
+
+        DashboardEntity updatedEntity = dashboardViewMapper.mapToDashboardEntity(dashboard, organisationID);
+        updatedEntity.getCharts().forEach(chartEntity -> chartEntity.setDashboard(updatedEntity));
+        updatedEntity.setId(dashboardEntity.getId());
+        dashboardRepository.save(updatedEntity);
+    }
+
 
 }

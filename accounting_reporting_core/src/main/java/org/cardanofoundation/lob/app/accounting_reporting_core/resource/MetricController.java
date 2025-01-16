@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.GetMetricDataRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.SaveDashboardRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.UpdateDashboardRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.response.metric.MetricDataResponse;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.DashboardView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.MetricView;
@@ -12,6 +13,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.name;
 
 @RestController
 @RequestMapping("/api/metrics")
@@ -47,17 +51,37 @@ public class MetricController {
                 Optional.ofNullable(getMetricDataRequest.getEndDate()))));
     }
 
-    @Tag(name = "Save Dashboards", description = "Save Dashboards")
+    @Tag(name = "Dashboards", description = "Save Dashboards")
     @PostMapping(value = "/saveDashboard", produces = "application/json")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> saveDashboard(@RequestBody SaveDashboardRequest saveDashboardRequest) {
-        metricService.saveDashboard(saveDashboardRequest.getDashboards(), saveDashboardRequest.getOrganisationID());
-        return ResponseEntity.ok().build();
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Boolean> saveDashboard(@RequestBody SaveDashboardRequest saveDashboardRequest) {
+        boolean success = metricService.saveDashboard(saveDashboardRequest.getDashboards(), saveDashboardRequest.getOrganisationID());
+        if (success) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    @Tag(name = "Get Dashboards", description = "Get Dashboards")
+    @Tag(name = "Dashboards", description = "Get Dashboards")
     @GetMapping(value = "/dashboards/{organisationID}", produces = "application/json")
     public ResponseEntity<List<DashboardView>> getDashboards(@PathVariable("organisationID") String organisationID) {
         return ResponseEntity.ok(metricService.getAllDashboards(organisationID));
+    }
+
+    @Tag(name = "Dashboards", description = "Delete Dashboards")
+    @DeleteMapping(value = "/deleteDashboard/{organisationID}/{dashboardID}", produces = "application/json")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteDashboard(@PathVariable("organisationID") String organisationID, @PathVariable("dashboardID") Long dashboardID) {
+        metricService.deleteDashboard(organisationID, dashboardID);
+        return ResponseEntity.ok().build();
+    }
+
+    @Tag(name = "Dashboards", description = "Update Dashboards")
+    @PostMapping(value = "/updateDashboard", produces = "application/json")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Boolean> updateDashboard(@RequestBody UpdateDashboardRequest updateDashboardRequest) {
+        metricService.updateDashboard(updateDashboardRequest.getDashboard(), updateDashboardRequest.getOrganisationID());
+        return ResponseEntity.ok().build();
     }
 }

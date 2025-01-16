@@ -18,4 +18,7 @@ public interface MetricService {
 
     List<DashboardView> getAllDashboards(String organisationID);
 
+    void deleteDashboard(String organisationID, Long dashboardID);
+
+    void updateDashboard(DashboardView dashboard, String organisationID);
 }
