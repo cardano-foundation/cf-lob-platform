@@ -7,8 +7,11 @@
 ![GitHub release (with filter)](https://img.shields.io/github/v/release/cardano-foundation/cf-lob)
 ![Discord](https://img.shields.io/discord/1022471509173882950)
 
+[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B45571%2Fgithub.com%2Fcardano-foundation%2Fcf-lob-platform.svg?type=shield&issueType=license)](https://app.fossa.com/projects/custom%2B45571%2Fgithub.com%2Fcardano-foundation%2Fcf-lob-platform?ref=badge_shield&issueType=license)
+
 [![Build](https://github.com/cardano-foundation/cf-lob/actions/workflows/build.yml/badge.svg)](https://github.com/cardano-foundation/cf-lob/actions/workflows/build.yml)
 [![Build with tests](https://github.com/cardano-foundation/cf-lob/actions/workflows/build.yml/badge.svg)](https://github.com/cardano-foundation/cf-lob/actions/workflows/build-with-tests.yaml)
+
 
 <hr />
 </div>
