@@ -13,7 +13,3 @@ jobs:
       - uses: fossas/fossa-action@main # Use a specific version if locking is preferred
         with:
           api-key: ${{secrets.FOSSA_API_KEY}}
-      - uses: fossas/fossa-action@main # Use a specific version if locking is preferred
-        with:
-          api-key: ${{secrets.FOSSA_API_KEY}}
-          run-tests: true
