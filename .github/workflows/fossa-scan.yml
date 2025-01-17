@@ -2,7 +2,7 @@ name: Fossa Scan
 
 on:
   push:
-    branches: [ main, feat/LOB-842-Add-FOSS-Scans-to-github-pipeline ]
+    branches: [ main ]
   pull_request:
 
 jobs:
