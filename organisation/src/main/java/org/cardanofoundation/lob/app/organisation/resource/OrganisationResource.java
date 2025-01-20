@@ -105,10 +105,10 @@ public class OrganisationResource {
                         );
                     }).collect(Collectors.toSet()),
                     organisationCurrencyService.findAllByOrganisationId("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
-                    .stream()
-                    .map(organisationCurrency -> {
-                        return organisationCurrency.getId() != null ? organisationCurrency.getId().getCustomerCode() : null;
-                    }).collect(Collectors.toSet()),
+                            .stream()
+                            .map(organisationCurrency -> {
+                                return organisationCurrency.getId() != null ? organisationCurrency.getId().getCustomerCode() : null;
+                            }).collect(Collectors.toSet()),
                     organisation1.getLogo()
             );
         });

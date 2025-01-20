@@ -34,7 +34,7 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 @NoArgsConstructor
 @AllArgsConstructor
 @Audited
-@EntityListeners({ AuditingEntityListener.class })
+@EntityListeners({AuditingEntityListener.class})
 public class ReportEntity extends CommonEntity implements Persistable<String>, Validable {
 
     @Id
@@ -207,6 +207,13 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
         this.incomeStatementReportData = incomeStatementReportData.orElse(null);
     }
 
+    public void setIntervalType(IntervalType intervalType){
+        if (intervalType.equals(IntervalType.YEAR)) {
+            this.period = null;
+        }
+
+        this.intervalType = intervalType;
+    }
     public Optional<BalanceSheetData> getBalanceSheetReportData() {
         return Optional.ofNullable(balanceSheetReportData);
     }
@@ -235,6 +242,10 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     }
 
     public void setPeriod(Optional<@Min(1) @Max(12) Short> period) {
+        if (this.intervalType.equals(IntervalType.YEAR)) {
+            this.period = null;
+            return;
+        }
         this.period = period.orElse(null);
     }
 

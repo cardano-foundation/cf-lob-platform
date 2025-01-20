@@ -199,6 +199,7 @@ CREATE TABLE IF NOT EXISTS organisation_chart_of_account (
    ref_code VARCHAR(255) NOT NULL,
    event_ref_code VARCHAR(255) NOT NULL,
    name VARCHAR(255) NOT NULL,
+   sub_type CHAR(64),
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
@@ -214,6 +215,8 @@ CREATE TABLE IF NOT EXISTS organisation_chart_of_account_aud (
    ref_code VARCHAR(255) NOT NULL,
    event_ref_code VARCHAR(255) NOT NULL,
    name VARCHAR(255) NOT NULL,
+   sub_type CHAR(64),
+
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
@@ -261,6 +264,77 @@ CREATE TABLE IF NOT EXISTS organisation_account_event_aud (
 
    -- Primary Key for the audit table
    CONSTRAINT pk_organisation_account_event_aud PRIMARY KEY (organisation_id, customer_code, rev, revtype),
+
+   -- Foreign Key to the revision information table
+   FOREIGN KEY (rev) REFERENCES revinfo (rev) MATCH SIMPLE
+   ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+ CREATE TABLE IF NOT EXISTS organisation_chart_of_account_type (
+    id CHAR(64) PRIMARY KEY,
+    organisation_id CHAR(64) NOT NULL,
+    name VARCHAR(255),
+
+
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    updated_at TIMESTAMP WITHOUT TIME ZONE
+
+ );
+
+CREATE TABLE IF NOT EXISTS organisation_chart_of_account_type_aud (
+        id CHAR(64),
+       organisation_id CHAR(64) NOT NULL,
+       name VARCHAR(255),
+
+   created_by VARCHAR(255),
+   updated_by VARCHAR(255),
+   created_at TIMESTAMP WITHOUT TIME ZONE,
+   updated_at TIMESTAMP WITHOUT TIME ZONE,
+
+   -- Special columns for audit tables
+   rev INTEGER NOT NULL,
+   revtype SMALLINT,
+
+   -- Primary Key for the audit table
+   CONSTRAINT pk_organisation_chart_of_account_type_aud PRIMARY KEY (id, rev, revtype),
+
+   -- Foreign Key to the revision information table
+   FOREIGN KEY (rev) REFERENCES revinfo (rev) MATCH SIMPLE
+   ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+ CREATE TABLE IF NOT EXISTS organisation_chart_of_account_sub_type (
+    id CHAR(64) PRIMARY KEY,
+    organisation_id CHAR(64) NOT NULL,
+    name VARCHAR(255),
+    type CHAR(64),
+
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    updated_at TIMESTAMP WITHOUT TIME ZONE
+
+ );
+
+CREATE TABLE IF NOT EXISTS organisation_chart_of_account_sub_type_aud (
+   id CHAR(64),
+   organisation_id CHAR(64) NOT NULL,
+   name VARCHAR(255),
+   type CHAR(64),
+
+   created_by VARCHAR(255),
+   updated_by VARCHAR(255),
+   created_at TIMESTAMP WITHOUT TIME ZONE,
+   updated_at TIMESTAMP WITHOUT TIME ZONE,
+
+   -- Special columns for audit tables
+   rev INTEGER NOT NULL,
+   revtype SMALLINT,
+
+   -- Primary Key for the audit table
+   CONSTRAINT pk_organisation_chart_of_account_sub_type_aud PRIMARY KEY (id, rev, revtype),
 
    -- Foreign Key to the revision information table
    FOREIGN KEY (rev) REFERENCES revinfo (rev) MATCH SIMPLE
