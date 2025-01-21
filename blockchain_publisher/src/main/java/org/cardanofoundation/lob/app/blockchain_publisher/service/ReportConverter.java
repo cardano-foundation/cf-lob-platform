@@ -32,6 +32,7 @@ public class ReportConverter {
         reportEntity.setMode(report.getMode());
         reportEntity.setPeriod(report.getPeriod());
         reportEntity.setYear(report.getYear());
+        reportEntity.setVer(report.getVer());
 
         if (report.getType() == INCOME_STATEMENT) {
             reportEntity.setIncomeStatementReportData(report.getIncomeStatementData().map(ReportConverter::convertIncomeStatementData));

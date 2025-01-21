@@ -17,7 +17,7 @@
     },
     "timestampPattern": {
       "type": "string",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$"
     }
   },
   "properties": {
@@ -28,14 +28,14 @@
           "type": "integer",
           "minimum": 0
         },
-        "format": {
+        "version": {
           "type": "string"
         },
         "timestamp": {
           "$ref": "#/definitions/timestampPattern"
         }
       },
-      "required": ["creation_slot", "format"]
+      "required": ["creation_slot", "version", "timestamp"]
     },
     "org": {
       "type": "object",
@@ -84,204 +84,229 @@
       "enum": ["USER", "SYSTEM"]
     },
     "data": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "revenues": {
-              "type": "object",
-              "properties": {
-                "other_income": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "build_of_long_term_provision": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                }
-              }
-            },
-            "cost_of_goods_and_services": {
-              "type": "object",
-              "properties": {
-                "cost_of_providing_services": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                }
-              }
-            },
-            "operating_expenses": {
-              "type": "object",
-              "properties": {
-                "personnel_expenses": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "general_and_administrative_expenses": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "depreciation_and_impairment_losses_on_tangible_assets": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "amortization_on_intangible_assets": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "rentExpenses": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                }
-              }
-            },
-            "financial_income": {
-              "type": "object",
-              "properties": {
-                "financial_revenues": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "financial_expenses": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "realised_gains_on_sale_of_cryptocurrencies": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "staking_rewards_income": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "net_income_options_sale": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                }
-              }
-            },
-            "extraordinary_income": {
-              "type": "object",
-              "properties": {
-                "extraordinary_expenses": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                }
-              }
-            },
-            "tax_expenses": {
-              "type": "object",
-              "properties": {
-                "income_tax_expense": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                }
-              }
-            },
-            "profit_for_the_year": {
-              "$ref": "#/definitions/bigDecimalPattern"
-            }
-          },
-          "required": [
-            "revenues",
-            "cost_of_goods_and_services",
-            "operating_expenses",
-            "financial_income",
-            "extraordinary_income",
-            "tax_expenses",
-            "profit_for_the_year"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "assets": {
-              "type": "object",
-              "properties": {
-                "non_current_assets": {
-                  "type": "object",
-                  "properties": {
-                    "property_plant_equipment": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    },
-                    "intangible_assets": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    },
-                    "investments": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    },
-                    "financial_assets": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    }
-                  }
-                },
-                "current_assets": {
-                  "type": "object",
-                  "properties": {
-                    "prepayments_and_other_short_term_assets": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    },
-                    "other_receivables": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    },
-                    "crypto_assets": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    },
-                    "cash_and_cash_equivalents": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    }
-                  }
-                }
-              }
-            },
-            "liabilities": {
-              "type": "object",
-              "properties": {
-                "non_current_liabilities": {
-                  "type": "object",
-                  "properties": {
-                    "provisions": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    }
-                  }
-                },
-                "current_liabilities": {
-                  "type": "object",
-                  "properties": {
-                    "trade_accounts_payables": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    },
-                    "other_current_liabilities": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    },
-                    "accruals_and_short_term_provisions": {
-                      "$ref": "#/definitions/bigDecimalPattern"
-                    }
-                  }
-                }
-              }
-            },
-            "capital": {
-              "type": "object",
-              "properties": {
-                "capital": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "profit_for_the_year": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                },
-                "results_carried_forward": {
-                  "$ref": "#/definitions/bigDecimalPattern"
-                }
-              }
-            }
-          },
-          "required": ["assets", "liabilities", "capital"]
-        }
-      ]
+      "description": "The data property shape depends on subType"
     }
   },
-  "required": ["metadata", "org", "type", "subType", "data", "interval", "year", "mode"],
+  "required": ["metadata", "org", "type", "subType", "data", "interval", "year", "mode", "ver"],
   "allOf": [
     {
       "if": {
-        "properties": { "interval": { "const": "YEAR" } }
+        "properties": {
+          "interval": {
+            "const": "YEAR"
+          }
+        }
       },
       "then": {
-        "not": { "required": ["period"] }
+        "not": {
+          "required": ["period"]
+        }
       }
     },
     {
       "if": {
-        "properties": { "interval": { "enum": ["MONTH", "QUARTER"] } }
+        "properties": {
+          "interval": {
+            "enum": ["MONTH", "QUARTER"]
+          }
+        }
       },
       "then": {
         "required": ["period"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "subType": {
+            "const": "INCOME_STATEMENT"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "revenues": {
+                "type": "object",
+                "properties": {
+                  "other_income": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "build_of_long_term_provision": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  }
+                }
+              },
+              "cost_of_goods_and_services": {
+                "type": "object",
+                "properties": {
+                  "cost_of_providing_services": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  }
+                }
+              },
+              "operating_expenses": {
+                "type": "object",
+                "properties": {
+                  "personnel_expenses": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "general_and_administrative_expenses": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "depreciation_and_impairment_losses_on_tangible_assets": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "amortization_on_intangible_assets": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "rentExpenses": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  }
+                }
+              },
+              "financial_income": {
+                "type": "object",
+                "properties": {
+                  "financial_revenues": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "financial_expenses": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "realised_gains_on_sale_of_cryptocurrencies": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "staking_rewards_income": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "net_income_options_sale": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  }
+                }
+              },
+              "extraordinary_income": {
+                "type": "object",
+                "properties": {
+                  "extraordinary_expenses": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  }
+                }
+              },
+              "tax_expenses": {
+                "type": "object",
+                "properties": {
+                  "income_tax_expense": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  }
+                }
+              },
+              "profit_for_the_year": {
+                "$ref": "#/definitions/bigDecimalPattern"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "subType": {
+            "const": "BALANCE_SHEET"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "assets": {
+                "type": "object",
+                "properties": {
+                  "non_current_assets": {
+                    "type": "object",
+                    "properties": {
+                      "property_plant_equipment": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      },
+                      "intangible_assets": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      },
+                      "investments": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      },
+                      "financial_assets": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      }
+                    }
+                  },
+                  "current_assets": {
+                    "type": "object",
+                    "properties": {
+                      "prepayments_and_other_short_term_assets": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      },
+                      "other_receivables": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      },
+                      "crypto_assets": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      },
+                      "cash_and_cash_equivalents": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      }
+                    }
+                  }
+                }
+              },
+              "liabilities": {
+                "type": "object",
+                "properties": {
+                  "non_current_liabilities": {
+                    "type": "object",
+                    "properties": {
+                      "provisions": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      }
+                    }
+                  },
+                  "current_liabilities": {
+                    "type": "object",
+                    "properties": {
+                      "trade_accounts_payables": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      },
+                      "other_current_liabilities": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      },
+                      "accruals_and_short_term_provisions": {
+                        "$ref": "#/definitions/bigDecimalPattern"
+                      }
+                    }
+                  }
+                }
+              },
+              "capital": {
+                "type": "object",
+                "properties": {
+                  "capital": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "profit_for_the_year": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  },
+                  "results_carried_forward": {
+                    "$ref": "#/definitions/bigDecimalPattern"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   ]
