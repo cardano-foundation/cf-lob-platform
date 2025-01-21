@@ -1,6 +1,8 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
+import org.cardanofoundation.lob.app.accounting_reporting_core.mapper.DashboardViewMapper;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.DashboardRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.executors.BalanceSheetMetricService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.executors.IncomeStatementMetricService;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,10 +28,14 @@ class MetricServiceTest {
 
     @Mock
     IncomeStatementMetricService incomeStatementMetricService;
+    @Mock
+    DashboardRepository dashboardRepository;
+    @Mock
+    DashboardViewMapper dashboardViewMapper;
 
     @BeforeEach
     void setup() {
-        metricService = new MetricServiceImpl(List.of(balanceSheetMetricService, incomeStatementMetricService));
+        metricService = new MetricServiceImpl(List.of(balanceSheetMetricService, incomeStatementMetricService), dashboardRepository, dashboardViewMapper);
     }
 
     @Test

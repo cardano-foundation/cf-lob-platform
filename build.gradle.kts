@@ -118,6 +118,10 @@ subprojects {
         implementation("com.bloxbean.cardano:cardano-client-backend-blockfrost:0.6.0")
         implementation("com.bloxbean.cardano:cardano-client-quicktx:0.6.0")
 
+        implementation("org.mapstruct:mapstruct:1.5.5.Final")
+        annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+        annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
         compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")
         implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
