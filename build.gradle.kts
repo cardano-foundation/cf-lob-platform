@@ -7,6 +7,8 @@ plugins {
     id("com.github.ben-manes.versions") version "0.51.0"
     id("info.solidsoft.pitest") version "1.15.0"
     id("maven-publish")
+    id("jacoco")
+    id("org.sonarqube") version "4.3.0.3225"
 }
 
 allprojects {
@@ -23,6 +25,7 @@ allprojects {
         }
     }
 
+
 }
 
 subprojects {
@@ -32,6 +35,8 @@ subprojects {
     apply(plugin = "com.github.ben-manes.versions")
     apply(plugin = "info.solidsoft.pitest")
     apply(plugin = "maven-publish")
+    apply(plugin = "jacoco")
+    apply(plugin = "org.sonarqube")
 
     sourceSets {
         named("main") {
@@ -159,6 +164,7 @@ subprojects {
         withType<Test> {
             useJUnitPlatform()
             jvmArgs(ENABLE_PREVIEW)
+            finalizedBy("jacocoTestReport")
         }
 
         withType<PitestTask> {
@@ -169,6 +175,40 @@ subprojects {
             jvmArgs(ENABLE_PREVIEW)
         }
 
+        withType<JacocoReport> {
+            reports {
+                xml.required.set(true) // XML report for SonarCloud
+                html.required.set(true) // HTML report for local use
+            }
+            classDirectories.setFrom(
+                fileTree("${buildDir}/classes/java/main") {
+                    exclude(
+                        "**/generated/**",
+                        "**/entity/**",
+                        "**/config/**"
+                    )
+                }
+            )
+
+            sourceDirectories.setFrom(files("src/main/java"))
+            executionData.setFrom(fileTree(buildDir).include("jacoco/test.exec"))
+        }
+    }
+
+    sonar {
+        properties {
+            property("sonar.projectKey", "cardano-foundation_cf-lob-platform") // Replace with your SonarCloud project key
+            property("sonar.organization", "cardano-foundation") // Replace with your organization
+            property("sonar.host.url", "https://sonarcloud.io")
+
+            property("sonar.sources", "src/main/java")
+            property("sonar.tests", "")
+
+            property("sonar.exclusions", "organisation/**")
+
+            // Link to JaCoCo XML report
+            property("sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/xml")
+        }
     }
 
     pitest {

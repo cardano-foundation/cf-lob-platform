@@ -1,0 +1,29 @@
+name: Run Tests
+
+on:
+  push:
+    branches-ignore:
+      - main
+  workflow_dispatch:
+
+jobs:
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: Test
+        run: |
+          ./gradlew clean test jacocoTestReport
+
+      - name: SonarCloud Scan
+        run: ./gradlew sonar \
+        -Dsonar.token=${{ secrets.SONARCLOUD_TOKEN }} \
+        -Dsonar.host.url=https://sonarcloud.io \
+        -Dsonar.organization=cardano-foundation \
+        -Dsonar.projectKey=cardano-foundation_cardano-rosetta-java
