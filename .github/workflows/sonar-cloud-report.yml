@@ -4,7 +4,8 @@ on:
   push:
     branches-ignore:
       - main
-  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
     steps:
@@ -27,3 +28,4 @@ jobs:
         -Dsonar.host.url=https://sonarcloud.io \
         -Dsonar.organization=cardano-foundation \
         -Dsonar.projectKey=cardano-foundation_cardano-rosetta-java
+        -Dsonar.branch.name=${{ github.head_ref }}

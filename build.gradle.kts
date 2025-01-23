@@ -180,18 +180,9 @@ subprojects {
                 xml.required.set(true) // XML report for SonarCloud
                 html.required.set(true) // HTML report for local use
             }
-            classDirectories.setFrom(
-                fileTree("${buildDir}/classes/java/main") {
-                    exclude(
-                        "**/generated/**",
-                        "**/entity/**",
-                        "**/config/**"
-                    )
-                }
-            )
 
             sourceDirectories.setFrom(files("src/main/java"))
-            executionData.setFrom(fileTree(buildDir).include("jacoco/test.exec"))
+            executionData.setFrom(fileTree(layout.buildDirectory).include("jacoco/test.exec"))
         }
     }
 
@@ -204,10 +195,17 @@ subprojects {
             property("sonar.sources", "src/main/java")
             property("sonar.tests", "")
 
-            property("sonar.exclusions", "organisation/**")
+            property("sonar.exclusions", "" +
+                    "organisation/**, " +
+                    "**/entity/**, " +
+                    "**/config/**, " +
+                    "**/domain/**, " +
+                    "**/repository/**, " +
+                    "**/spring_web/**," +
+                    "**/spring_audit/**")
 
             // Link to JaCoCo XML report
-            property("sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/xml")
+            property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory}/reports/jacoco/test/xml")
         }
     }
 
