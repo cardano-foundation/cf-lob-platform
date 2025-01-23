@@ -31,5 +31,5 @@ jobs:
           ./gradlew sonar \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.organization=cardano-foundation \
-          -Dsonar.projectKey=cardano-foundation_cardano-rosetta-java \
+          -Dsonar.projectKey=cardano-foundation_cf-lob-platform \
           -Dsonar.branch.name=${{ github.head_ref }}
