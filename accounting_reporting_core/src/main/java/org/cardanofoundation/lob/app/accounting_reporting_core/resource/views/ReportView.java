@@ -27,7 +27,7 @@ public class ReportView {
 
     private Optional<Short> period;
 
-    private Integer ver;
+    private Long ver;
 
     private Boolean publish;
 

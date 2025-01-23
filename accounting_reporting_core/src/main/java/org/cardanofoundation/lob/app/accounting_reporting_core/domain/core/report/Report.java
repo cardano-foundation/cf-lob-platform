@@ -29,7 +29,7 @@ public class Report {
 
     private short year;
 
-    private Integer ver;
+    private long ver;
 
     @Builder.Default
     private Optional<Short> period = Optional.empty();
@@ -58,7 +58,7 @@ public class Report {
                             ReportType reportType,
                             IntervalType intervalType,
                             short year,
-                            Integer ver,
+                            long ver,
                             Optional<Short> period) {
         return period.map(p -> {
             return digestAsHex(STR."\{organisationId}::\{reportType}::\{intervalType}::\{year}::\{ver}::\{p}");
