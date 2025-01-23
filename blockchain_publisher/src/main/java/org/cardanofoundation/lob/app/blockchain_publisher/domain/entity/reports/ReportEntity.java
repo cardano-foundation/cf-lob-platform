@@ -104,7 +104,7 @@ public class ReportEntity extends CommonDateOnlyEntity implements Persistable<St
     @NotNull
     @Getter
     @Setter
-    private Integer ver;
+    private long ver;
 
     @Nullable
     @Embedded

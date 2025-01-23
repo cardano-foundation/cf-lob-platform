@@ -53,7 +53,7 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @Column(name = "ver", nullable = false)
     @Getter
     @Setter
-    private Integer ver = 1;
+    private long ver = 1;
 
     @Override
     public String getId() {

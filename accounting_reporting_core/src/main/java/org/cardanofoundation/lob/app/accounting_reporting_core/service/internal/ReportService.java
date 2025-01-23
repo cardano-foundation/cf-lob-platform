@@ -19,10 +19,8 @@ import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -91,6 +89,7 @@ public class ReportService {
         val org = orgM.orElseThrow();
 
         val reportExample = new ReportEntity();
+        reportExample.setVer(clock.millis());
         reportExample.setIdControl(Report.idControl(organisationId, INCOME_STATEMENT, MONTH, (short) 2023, Optional.of((short) 3)));
         reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, MONTH, (short) 2023, reportExample.getVer(), Optional.of((short) 3)));
 
@@ -165,6 +164,7 @@ public class ReportService {
         val org = orgM.orElseThrow();
 
         val reportExample = new ReportEntity();
+        reportExample.setVer(clock.millis());
         reportExample.setIdControl(Report.idControl(organisationId, BALANCE_SHEET, MONTH, (short) 2023, Optional.of((short) 3)));
         reportExample.setReportId(Report.id(organisationId, INCOME_STATEMENT, YEAR, (short) 2024, reportExample.getVer(), Optional.empty()));
 
@@ -274,11 +274,14 @@ public class ReportService {
         val reportEntityE = exist(organisationId, reportType, intervalType, year, period);
 
         ReportEntity reportEntity = reportEntityE.fold(problem -> {
+            // question: is it safe to assume that problem will always be because it already exists?
+
             return new ReportEntity();
         }, success -> {
             if (success.getLedgerDispatchApproved()) {
                 val report = new ReportEntity();
-                report.setVer(success.getVer() + 1);
+                report.setVer(clock.millis());
+
                 return report;
             }
             return success;
@@ -402,7 +405,8 @@ public class ReportService {
         }, success -> {
             if (success.getLedgerDispatchApproved()) {
                 val report = new ReportEntity();
-                report.setVer(success.getVer() + 1);
+                report.setVer(clock.millis());
+
                 return report;
             }
             return success;
@@ -471,11 +475,8 @@ public class ReportService {
         return Either.right(reportEntity);
     }
 
-    public Set<ReportEntity> findByOrgId(String organisationId) {
-
-        val report = reportRepository.findByOrganisationId(organisationId);
-
-        return report;
+    public Set<ReportEntity> findAllByOrgId(String organisationId) {
+        return reportRepository.findAllByOrganisationId(organisationId);
     }
 
     public Either<Problem, ReportEntity> exist(String organisationId, ReportType reportType, IntervalType intervalType, short year, short period) {

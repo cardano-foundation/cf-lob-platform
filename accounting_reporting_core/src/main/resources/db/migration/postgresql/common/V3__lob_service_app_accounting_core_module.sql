@@ -622,7 +622,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_reconcilation_violation_aud (
 CREATE table accounting_core_report (
     report_id CHAR(64) NOT NULL,
     id_control CHAR(64) NOT NULL,
-    ver SMALLINT NOT NULL,
+    ver BIGINT NOT NULL,
     organisation_id CHAR(64) NOT NULL,
     organisation_name VARCHAR(255) NOT NULL,
     organisation_country_code accounting_core_country_code_type NOT NULL,
@@ -706,7 +706,7 @@ CREATE table accounting_core_report (
 CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
     report_id CHAR(64) NOT NULL,
     id_control CHAR(64) NOT NULL,
-    ver SMALLINT NOT NULL,
+    ver BIGINT NOT NULL,
     organisation_id CHAR(64) NOT NULL,
     organisation_name VARCHAR(255) NOT NULL,
     organisation_country_code accounting_core_country_code_type NOT NULL,

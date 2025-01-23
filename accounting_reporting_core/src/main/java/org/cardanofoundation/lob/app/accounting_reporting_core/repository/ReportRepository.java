@@ -28,7 +28,7 @@ public interface ReportRepository extends JpaRepository<ReportEntity, String> {
              WHERE r.organisation.id = :organisationId
              AND r2.idControl IS NULL
              ORDER BY r.createdAt ASC, r.reportId ASC""")
-    Set<ReportEntity> findByOrganisationId(@Param("organisationId") String organisationId);
+    Set<ReportEntity> findAllByOrganisationId(@Param("organisationId") String organisationId);
 
     @Query("""
             SELECT r FROM accounting_reporting_core.report.ReportEntity r

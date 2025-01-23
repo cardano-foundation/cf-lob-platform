@@ -90,8 +90,7 @@ public class ReportController {
     @Tag(name = "Reporting", description = "Report list")
     @GetMapping(value = "/report-list/{orgId}", produces = "application/json")
     public ResponseEntity<?> reportList(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
-
-        return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findByOrgId(
+        return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findAllByOrgId(
                         orgId
                 ).stream().map(reportViewService::responseView).collect(Collectors.toSet()))
         );
