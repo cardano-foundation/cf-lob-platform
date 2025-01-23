@@ -181,19 +181,17 @@ subprojects {
                 html.required.set(true) // HTML report for local use
             }
 
-            sourceDirectories.setFrom(files("src/main/java"))
+//            sourceDirectories.setFrom(files("src/main/java"))
             executionData.setFrom(fileTree(layout.buildDirectory).include("jacoco/test.exec"))
         }
     }
 
     sonar {
         properties {
-            property("sonar.projectKey", "cardano-foundation_cf-lob-platform") // Replace with your SonarCloud project key
-            property("sonar.organization", "cardano-foundation") // Replace with your organization
-            property("sonar.host.url", "https://sonarcloud.io")
 
+            property("sonar.java.enablePreview", "false")
             property("sonar.sources", "src/main/java")
-            property("sonar.tests", "")
+            property("sonar.tests", "src/test/java")
 
             property("sonar.exclusions", "" +
                     "organisation/**, " +
@@ -203,9 +201,6 @@ subprojects {
                     "**/repository/**, " +
                     "**/spring_web/**," +
                     "**/spring_audit/**")
-
-            // Link to JaCoCo XML report
-            property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory}/reports/jacoco/test/xml")
         }
     }
 
