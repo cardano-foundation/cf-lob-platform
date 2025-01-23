@@ -25,9 +25,11 @@ jobs:
           ./gradlew clean test jacocoTestReport
 
       - name: SonarCloud Scan
-        run: ./gradlew sonar \
-        -Dsonar.token=${{ secrets.SONARCLOUD_TOKEN }} \
-        -Dsonar.host.url=https://sonarcloud.io \
-        -Dsonar.organization=cardano-foundation \
-        -Dsonar.projectKey=cardano-foundation_cardano-rosetta-java
-        -Dsonar.branch.name=${{ github.head_ref }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./gradlew sonar \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.organization=cardano-foundation \
+          -Dsonar.projectKey=cardano-foundation_cardano-rosetta-java \
+          -Dsonar.branch.name=${{ github.head_ref }}
