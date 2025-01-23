@@ -10,6 +10,7 @@
 [![Build](https://github.com/cardano-foundation/cf-lob/actions/workflows/build.yml/badge.svg)](https://github.com/cardano-foundation/cf-lob/actions/workflows/build.yml)
 [![Build with tests](https://github.com/cardano-foundation/cf-lob/actions/workflows/build.yml/badge.svg)](https://github.com/cardano-foundation/cf-lob/actions/workflows/build-with-tests.yaml)
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=cardano-foundation_cf-lob-platform&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=cardano-foundation_cf-lob-platform)
 <hr />
 </div>
 
