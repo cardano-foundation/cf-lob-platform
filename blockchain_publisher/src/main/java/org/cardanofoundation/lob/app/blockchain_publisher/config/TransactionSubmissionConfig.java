@@ -1,7 +1,9 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.config;
 
 import com.bloxbean.cardano.client.account.Account;
+import com.bloxbean.cardano.client.api.UtxoSupplier;
 import com.bloxbean.cardano.client.backend.api.BackendService;
+import com.bloxbean.cardano.client.backend.api.DefaultUtxoSupplier;
 import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.API1L1TransactionCreator;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.API1MetadataSerialiser;
@@ -29,14 +31,27 @@ public class TransactionSubmissionConfig {
     }
 
     @Bean
+    @Profile(value = { "dev--yaci-dev-kit", "test"} )
+    public UtxoSupplier utxoSupplier(@Qualifier("yaci_blockfrost") BackendService backendService) {
+        return new DefaultUtxoSupplier(backendService.getUtxoService());
+    }
+
+    @Bean
     public TransactionSubmissionService transactionSubmissionService(
             BlockchainTransactionSubmissionService trxSubmissionService,
             @Qualifier("yaci_blockfrost") BackendService backendService,
+            UtxoSupplier utxoSupplier,
             Clock clock,
             @Value("${lob.transaction.submission.sleep.seconds:5}") int sleepTimeSeconds,
             @Value("${lob.transaction.submission.timeout.in.seconds:300}") int timeoutInSeconds
     ) {
-        return new DefaultTransactionSubmissionService(trxSubmissionService, backendService, clock, sleepTimeSeconds, timeoutInSeconds);
+        return new DefaultTransactionSubmissionService(trxSubmissionService,
+                backendService,
+                utxoSupplier,
+                clock,
+                sleepTimeSeconds,
+                timeoutInSeconds
+        );
     }
 
     @Bean

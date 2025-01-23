@@ -111,7 +111,7 @@ public class BlockchainReportsDispatcher {
     private void sendTransactionOnChainAndUpdateDb(API3BlockchainTransaction api3BlockchainTransaction) throws InterruptedException, ApiException {
         byte[] reportTxData = api3BlockchainTransaction.serialisedTxData();
 
-        L1Submission l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(reportTxData);
+        L1Submission l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(reportTxData, api3BlockchainTransaction.receiverAddress());
 
         String txHash = l1SubmissionData.txHash();
         Optional<Long> txAbsoluteSlotM = l1SubmissionData.absoluteSlot();
