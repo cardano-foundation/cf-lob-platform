@@ -85,7 +85,6 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @JdbcType(PostgreSQLEnumJdbcType.class)
     @NotNull
     @Getter
-    @Setter
     private IntervalType intervalType;
 
     @Column(name = "year", nullable = false)
