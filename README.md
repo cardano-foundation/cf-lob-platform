@@ -8,6 +8,7 @@
 ![Discord](https://img.shields.io/discord/1022471509173882950)
 
 [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B45571%2Fgithub.com%2Fcardano-foundation%2Fcf-lob-platform.svg?type=shield&issueType=license)](https://app.fossa.com/projects/custom%2B45571%2Fgithub.com%2Fcardano-foundation%2Fcf-lob-platform?ref=badge_shield&issueType=license)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=cardano-foundation_cf-lob-platform&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=cardano-foundation_cf-lob-platform)
 
 [![Build](https://github.com/cardano-foundation/cf-lob/actions/workflows/build.yml/badge.svg)](https://github.com/cardano-foundation/cf-lob/actions/workflows/build.yml)
 [![Build with tests](https://github.com/cardano-foundation/cf-lob/actions/workflows/build.yml/badge.svg)](https://github.com/cardano-foundation/cf-lob/actions/workflows/build-with-tests.yaml)

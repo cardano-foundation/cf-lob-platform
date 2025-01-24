@@ -7,6 +7,8 @@ plugins {
     id("com.github.ben-manes.versions") version "0.51.0"
     id("info.solidsoft.pitest") version "1.15.0"
     id("maven-publish")
+    id("jacoco")
+    id("org.sonarqube") version "4.3.0.3225"
 }
 
 allprojects {
@@ -23,6 +25,7 @@ allprojects {
         }
     }
 
+
 }
 
 subprojects {
@@ -32,6 +35,8 @@ subprojects {
     apply(plugin = "com.github.ben-manes.versions")
     apply(plugin = "info.solidsoft.pitest")
     apply(plugin = "maven-publish")
+    apply(plugin = "jacoco")
+    apply(plugin = "org.sonarqube")
 
     sourceSets {
         named("main") {
@@ -159,6 +164,7 @@ subprojects {
         withType<Test> {
             useJUnitPlatform()
             jvmArgs(ENABLE_PREVIEW)
+            finalizedBy("jacocoTestReport")
         }
 
         withType<PitestTask> {
@@ -169,6 +175,38 @@ subprojects {
             jvmArgs(ENABLE_PREVIEW)
         }
 
+        withType<JacocoReport> {
+            reports {
+                xml.required.set(true) // XML report for SonarCloud
+                html.required.set(true) // HTML report for local use
+            }
+
+//            sourceDirectories.setFrom(files("src/main/java"))
+            executionData.setFrom(fileTree(layout.buildDirectory).include("jacoco/test.exec"))
+        }
+    }
+
+    sonar {
+        properties {
+
+            property("sonar.java.enablePreview", "false")
+            property("sonar.sources", "src/main/java")
+            // Excluding test dir scan, if they don't exist
+            if(!File(project.projectDir, "src/test").exists()) {
+                property("sonar.tests", "")
+            } else {
+                property("sonar.tests", "src/test/java")
+            }
+
+            property("sonar.exclusions", "" +
+                    "organisation/**, " +
+                    "**/entity/**, " +
+                    "**/config/**, " +
+                    "**/domain/**, " +
+                    "**/repository/**, " +
+                    "**/spring_web/**," +
+                    "**/spring_audit/**")
+        }
     }
 
     pitest {
