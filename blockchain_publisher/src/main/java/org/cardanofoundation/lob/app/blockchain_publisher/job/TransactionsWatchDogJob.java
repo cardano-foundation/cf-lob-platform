@@ -1,15 +1,20 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.job;
 
+import io.vavr.control.Either;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_common.BlockchainException;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.TransactionsWatchDogService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
+
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -34,15 +39,15 @@ public class TransactionsWatchDogJob {
     public void execute() {
         log.info("Inspecting all organisations transactions for on chain transaction status changes...");
 
-        val organisationResultsE = transactionsWatchDogService.checkTransactionStatusesForOrganisation(txStatusInspectionLimitPerOrgPullSize);
+        List<Either<Problem, Set<TransactionEntity>>> organisationResultsE = transactionsWatchDogService.checkTransactionStatusesForOrganisation(txStatusInspectionLimitPerOrgPullSize);
 
-        for (val orgResult : organisationResultsE) {
+        for (Either<Problem, Set<TransactionEntity>> orgResult : organisationResultsE) {
             if (orgResult.isLeft()) {
                 throw new BlockchainException(STR."Failed to check transaction statuses for organisation., title:\{orgResult.getLeft().getTitle()}, msg:\{orgResult.getLeft().getDetail()}");
             }
         }
 
-        for (val orgResult : organisationResultsE) {
+        for (Either<Problem, Set<TransactionEntity>> orgResult : organisationResultsE) {
             if (orgResult.isRight()) {
                 log.info(STR."Number of transactions for org with tx count: \{orgResult.get().size()}");
             }

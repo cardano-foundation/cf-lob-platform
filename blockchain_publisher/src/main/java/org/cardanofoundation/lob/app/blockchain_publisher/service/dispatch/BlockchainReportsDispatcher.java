@@ -1,10 +1,11 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service.dispatch;
 
 import com.bloxbean.cardano.client.api.exception.ApiException;
+import io.vavr.control.Either;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.API3BlockchainTransaction;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.L1Submission;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.reports.ReportEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1SubmissionData;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.ReportEntityRepositoryGateway;
@@ -12,9 +13,11 @@ import org.cardanofoundation.lob.app.blockchain_publisher.service.API3L1Transact
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit.TransactionSubmissionService;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
+import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zalando.problem.Problem;
 
 import java.util.Optional;
 import java.util.Set;
@@ -40,16 +43,16 @@ public class BlockchainReportsDispatcher {
     public void dispatchReports() {
         log.info("Pooling for blockchain reports to be send to the blockchain...");
 
-        for (val organisation : organisationPublicApi.listAll()) {
-            val organisationId = organisation.getId();
+        for (Organisation organisation : organisationPublicApi.listAll()) {
+            String organisationId = organisation.getId();
 
-            val reports = reportEntityRepositoryGateway.findReportsByStatus(organisationId, pullTransactionsBatchSize);
-            val reportsCount = reports.size();
+            Set<ReportEntity> reports = reportEntityRepositoryGateway.findReportsByStatus(organisationId, pullTransactionsBatchSize);
+            int reportsCount = reports.size();
 
             log.info("Dispatching reports for organisationId: {}, report count:{}", organisationId, reportsCount);
 
             if (reportsCount > 0) {
-                val toDispatch = dispatchingStrategy.apply(organisationId, reports);
+                Set<ReportEntity> toDispatch = dispatchingStrategy.apply(organisationId, reports);
 
                 dispatchReports(organisationId, toDispatch);
             }
@@ -63,7 +66,7 @@ public class BlockchainReportsDispatcher {
                                    Set<ReportEntity> reportEntities) {
         log.info("Dispatching reports for organisation: {}", organisationId);
 
-        for (val reportEntity : reportEntities) {
+        for (ReportEntity reportEntity : reportEntities) {
             dispatchReport(organisationId, reportEntity);
         }
     }
@@ -72,7 +75,7 @@ public class BlockchainReportsDispatcher {
     public void dispatchReport(String organisationId, ReportEntity reportEntity) {
         log.info("Dispatching report for organisation: {}", organisationId);
 
-        val api3BlockchainTransactionE = createAndSendBlockchainTransactions(reportEntity);
+        Optional<API3BlockchainTransaction> api3BlockchainTransactionE = createAndSendBlockchainTransactions(reportEntity);
         if (api3BlockchainTransactionE.isEmpty()) {
             log.info("No more reports to dispatch for organisationId, success or error?, organisationId: {}", organisationId);
         }
@@ -82,17 +85,17 @@ public class BlockchainReportsDispatcher {
     private Optional<API3BlockchainTransaction> createAndSendBlockchainTransactions(ReportEntity reportEntity) {
         log.info("Creating and sending blockchain transactions for report:{}", reportEntity.getReportId());
 
-        val serialisedTxE = api3L1TransactionCreator.pullBlockchainTransaction(reportEntity);
+        Either<Problem, API3BlockchainTransaction> serialisedTxE = api3L1TransactionCreator.pullBlockchainTransaction(reportEntity);
 
         if (serialisedTxE.isLeft()) {
-            val problem = serialisedTxE.getLeft();
+            Problem problem = serialisedTxE.getLeft();
 
             log.error("Error pulling blockchain transaction, problem: {}", problem);
 
             return Optional.empty();
         }
 
-        val serialisedTx = serialisedTxE.get();
+        API3BlockchainTransaction serialisedTx = serialisedTxE.get();
         try {
             sendTransactionOnChainAndUpdateDb(serialisedTx);
 
@@ -106,15 +109,15 @@ public class BlockchainReportsDispatcher {
 
     @Transactional
     private void sendTransactionOnChainAndUpdateDb(API3BlockchainTransaction api3BlockchainTransaction) throws InterruptedException, ApiException {
-        val reportTxData = api3BlockchainTransaction.serialisedTxData();
+        byte[] reportTxData = api3BlockchainTransaction.serialisedTxData();
 
-        val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(reportTxData);
+        L1Submission l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(reportTxData);
 
-        val txHash = l1SubmissionData.txHash();
-        val txAbsoluteSlotM = l1SubmissionData.absoluteSlot();
+        String txHash = l1SubmissionData.txHash();
+        Optional<Long> txAbsoluteSlotM = l1SubmissionData.absoluteSlot();
 
-        val report = api3BlockchainTransaction.report();
-        val creationSlot = api3BlockchainTransaction.creationSlot();
+        ReportEntity report = api3BlockchainTransaction.report();
+        long creationSlot = api3BlockchainTransaction.creationSlot();
 
         updateTransactionStatuses(txHash, txAbsoluteSlotM, creationSlot, report);
         ledgerUpdatedEventPublisher.sendReportLedgerUpdatedEvents(report.getOrganisation().getId(), Set.of(report));

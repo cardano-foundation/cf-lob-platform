@@ -2,11 +2,17 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
 import io.vavr.control.Either;
 import jakarta.annotation.PostConstruct;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.lob.app.blockchain_common.domain.ChainTip;
 import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
+import org.cardanofoundation.lob.app.blockchain_common.domain.OnChainTxDetails;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1SubmissionData;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
@@ -69,7 +75,7 @@ public class TransactionsWatchDogService {
     public Either<Problem, Set<TransactionEntity>> inspectOrganisationTransactions(String organisationId, int limitPerOrg) {
         log.info("Polling for to check for transaction statuses...");
 
-        val chainTipE = blockchainReaderPublicApi.getChainTip();
+        Either<Problem, ChainTip> chainTipE = blockchainReaderPublicApi.getChainTip();
         if (chainTipE.isEmpty()) {
             log.error("Could not get cardano chain tip, exiting...");
             return Either.left(Problem.builder()
@@ -81,19 +87,19 @@ public class TransactionsWatchDogService {
                     .build()
             );
         }
-        val chainTip = chainTipE.get();
+        ChainTip chainTip = chainTipE.get();
         if (!chainTip.isSynced()) {
             log.warn("Chain tip is not synced, exiting...");
 
             return Either.right(Set.of());
         }
 
-        val rollbackEndangeredTransactions = transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(organisationId, Limit.of(limitPerOrg));
+        Set<TransactionEntity> rollbackEndangeredTransactions = transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(organisationId, Limit.of(limitPerOrg));
         log.info("Found {} transactions that are not finalised yet.", rollbackEndangeredTransactions.size());
 
-        val txEntitiesSetE = new LinkedHashSet<Either<Problem, Optional<TransactionEntity>>>();
+        LinkedHashSet<Either<Problem, Optional<TransactionEntity>>> txEntitiesSetE = new LinkedHashSet<>();
 
-        for (val tx : rollbackEndangeredTransactions) {
+        for (TransactionEntity tx : rollbackEndangeredTransactions) {
             log.info("Transaction with id: {} is not finalised yet", tx.getId());
 
             try {
@@ -107,7 +113,7 @@ public class TransactionsWatchDogService {
             log.error("Problem while updating transaction status, issue: {}", problem);
         });
 
-        val successfullyUpdatedTxEntities = txEntitiesSetE
+        Set<TransactionEntity> successfullyUpdatedTxEntities = txEntitiesSetE
                 .stream()
                 .filter(Either::isRight)
                 .map(Either::get)
@@ -122,15 +128,15 @@ public class TransactionsWatchDogService {
     }
 
     @Transactional(propagation = REQUIRES_NEW)
-    private Either<Problem, Optional<TransactionEntity>> checkTransactionStatusAndUpdateInDb(TransactionEntity txEntity,
-                                                                                             ChainTip chainTip) {
+    protected Either<Problem, Optional<TransactionEntity>> checkTransactionStatusAndUpdateInDb(TransactionEntity txEntity,
+                                                                                               ChainTip chainTip) {
         log.info("Checking transaction status for txId:{}", txEntity.getId());
-        val txUpdateRequestE = checkTransactionStatusChange(txEntity, chainTip);
+        Either<Problem, TransactionUpdateCommand> txUpdateRequestE = checkTransactionStatusChange(txEntity, chainTip);
         if (txUpdateRequestE.isLeft()) {
             return Either.left(txUpdateRequestE.getLeft());
         }
-        val txUpdateRequest = txUpdateRequestE.get();
-        val tx = txUpdateRequest.getTransactionEntity();
+        TransactionUpdateCommand txUpdateRequest = txUpdateRequestE.get();
+        TransactionEntity tx = txUpdateRequest.getTransactionEntity();
 
         return switch (txUpdateRequest.getTransactionUpdateType()) {
             case NONE -> {
@@ -139,15 +145,15 @@ public class TransactionsWatchDogService {
                 yield Either.right(Optional.<TransactionEntity>empty()); // no changes to the entity since status has not been changed
             }
             case FINALITY_PROGRESSED -> {
-                val cardanoFinalityScore = txUpdateRequest.finalityScore.orElseThrow();
-                val blockchainPublishStatus = txUpdateRequest.blockchainPublishStatus.orElseThrow();
+                FinalityScore cardanoFinalityScore = txUpdateRequest.finalityScore.orElseThrow();
+                BlockchainPublishStatus blockchainPublishStatus = txUpdateRequest.blockchainPublishStatus.orElseThrow();
 
                 log.info("Updating transaction with id: {} to status: {}, finality: {}", tx.getId(), blockchainPublishStatus, cardanoFinalityScore);
 
                 tx.setL1SubmissionData(tx.getL1SubmissionData().map(l1SubmissionData -> {
-                    val newBlockchainPublishStatusM = Optional.of(blockchainPublishStatus);
-                    val newCardanoFinalityScoreM = Optional.of(cardanoFinalityScore);
-                    val txAbsoluteSlotM = Optional.of(txUpdateRequest.absoluteSlot.orElseThrow());
+                    Optional<BlockchainPublishStatus> newBlockchainPublishStatusM = Optional.of(blockchainPublishStatus);
+                    Optional<FinalityScore> newCardanoFinalityScoreM = Optional.of(cardanoFinalityScore);
+                    Optional<Long> txAbsoluteSlotM = Optional.of(txUpdateRequest.absoluteSlot.orElseThrow());
 
                     l1SubmissionData.setAbsoluteSlot(txAbsoluteSlotM);
                     l1SubmissionData.setPublishStatus(newBlockchainPublishStatusM);
@@ -161,7 +167,7 @@ public class TransactionsWatchDogService {
                 yield Either.right(Optional.of(txUpdateRequest.transactionEntity));
             }
             case ROLLBACKED -> {
-                val blockchainPublishStatus = txUpdateRequest.getBlockchainPublishStatus().orElseThrow();
+                BlockchainPublishStatus blockchainPublishStatus = txUpdateRequest.getBlockchainPublishStatus().orElseThrow();
 
                 log.info("Updating transaction with id: {} to blockchain publish status: {}", tx.getId(), blockchainPublishStatus);
 
@@ -183,10 +189,10 @@ public class TransactionsWatchDogService {
     }
 
     @Transactional(propagation = SUPPORTS)
-    private Either<Problem, TransactionUpdateCommand> checkTransactionStatusChange(TransactionEntity tx,
-                                                                                   ChainTip chainTip) {
-        val txId = tx.getId();
-        val l1SubmissionDataM = tx.getL1SubmissionData();
+    protected Either<Problem, TransactionUpdateCommand> checkTransactionStatusChange(TransactionEntity tx,
+                                                                                     ChainTip chainTip) {
+        String txId = tx.getId();
+        Optional<L1SubmissionData> l1SubmissionDataM = tx.getL1SubmissionData();
         if (l1SubmissionDataM.isEmpty() || l1SubmissionDataM.get().getCreationSlot().isEmpty()) {
             log.warn("Transaction with id: {} has no L1 submission data, this should never happen", txId);
 
@@ -198,27 +204,27 @@ public class TransactionsWatchDogService {
                     .build()
             );
         }
-        val l1SubmissionData = l1SubmissionDataM.orElseThrow();
-        val txCreationSlot = l1SubmissionData.getCreationSlot().orElseThrow();
+        L1SubmissionData l1SubmissionData = l1SubmissionDataM.orElseThrow();
+        Long txCreationSlot = l1SubmissionData.getCreationSlot().orElseThrow();
 
-        val txHash = l1SubmissionData.getTransactionHash().orElseThrow();
+        String txHash = l1SubmissionData.getTransactionHash().orElseThrow();
         log.info("Checking transaction status changes for txHash:{}", txHash);
 
-        val cardanoOnChainDataE = blockchainReaderPublicApi.getTxDetails(txHash);
+        Either<Problem, Optional<OnChainTxDetails>> cardanoOnChainDataE = blockchainReaderPublicApi.getTxDetails(txHash);
         if (cardanoOnChainDataE.isLeft()) {
             return Either.left(cardanoOnChainDataE.getLeft());
         }
-        val cardanoOnChainDataM = cardanoOnChainDataE.get();
+        Optional<OnChainTxDetails> cardanoOnChainDataM = cardanoOnChainDataE.get();
 
         // means that transaction is visible on chain
         if (cardanoOnChainDataM.isPresent()) {
             log.info("Found transaction with id: {} on chain", txHash);
-            val cardanoOnChainData = cardanoOnChainDataM.orElseThrow();
+            OnChainTxDetails cardanoOnChainData = cardanoOnChainDataM.orElseThrow();
             log.info("Cardano on chain data: {}", cardanoOnChainData);
-            val txAbsoluteSlot = cardanoOnChainData.getAbsoluteSlot();
+            long txAbsoluteSlot = cardanoOnChainData.getAbsoluteSlot();
 
-            val cardanoFinalityScore = cardanoOnChainData.getFinalityScore();
-            val blockchainPublishStatus = blockchainPublishStatusMapper.convert(cardanoFinalityScore);
+            FinalityScore cardanoFinalityScore = cardanoOnChainData.getFinalityScore();
+            BlockchainPublishStatus blockchainPublishStatus = blockchainPublishStatusMapper.convert(cardanoFinalityScore);
 
             // check if new status is different than the one we have in the db
             if (l1SubmissionData.getPublishStatus().isPresent() && l1SubmissionData.getPublishStatus().orElseThrow().equals(blockchainPublishStatus)
@@ -231,16 +237,16 @@ public class TransactionsWatchDogService {
             return Either.right(TransactionUpdateCommand.of(tx, txAbsoluteSlot, blockchainPublishStatus, cardanoFinalityScore));
         }
 
-        val txAgeInSlots = chainTip.getAbsoluteSlot() - txCreationSlot;
+        long txAgeInSlots = chainTip.getAbsoluteSlot() - txCreationSlot;
         // we have a grace period for rollback, this is to avoid premature rollbacks (e.g. when transaction is in the mempool still)
-        val isRollbackReadyTimewise = txAgeInSlots > gracePeriodInSeconds(rollbackGracePeriodMinutes);
+        boolean isRollbackReadyTimewise = txAgeInSlots > gracePeriodInSeconds(rollbackGracePeriodMinutes);
 
         // this means rollback scenario since we have L1 submission data but no on chain data
         // we do not want to prematurely raise ROLLBACK, so we have a grade period but if we are past it, we can safely rollback
         if (isRollbackReadyTimewise && rollbackSupportEnabled) {
             log.warn("Transaction with id: {} is not on chain anymore, rollback?", txId);
 
-            val txUpdate = new TransactionUpdateCommand(tx,
+            TransactionUpdateCommand txUpdate = new TransactionUpdateCommand(tx,
                     Optional.of(ROLLBACKED),
                     Optional.empty(),
                     Optional.empty(),
