@@ -1,7 +1,6 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
 import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
@@ -26,7 +25,7 @@ public class BlockchainPublishStatusMapper {
 
     protected LedgerDispatchStatus convertToLedgerDispatchStatus(FinalityScore finalityScore) {
         return switch (finalityScore) {
-            case VERY_LOW, LOW, MEDIUM -> LedgerDispatchStatus.DISPATCHED;
+            case NONE, VERY_LOW, LOW, MEDIUM -> LedgerDispatchStatus.DISPATCHED;
             case HIGH, VERY_HIGH, ULTRA_HIGH -> LedgerDispatchStatus.COMPLETED;
             case FINAL -> LedgerDispatchStatus.FINALIZED;
         };
@@ -34,6 +33,7 @@ public class BlockchainPublishStatusMapper {
 
     public BlockchainPublishStatus convert(FinalityScore finalityScore) {
         return switch (finalityScore) {
+            case NONE -> BlockchainPublishStatus.ROLLBACKED;
             case VERY_LOW, LOW, MEDIUM -> BlockchainPublishStatus.VISIBLE_ON_CHAIN;
             case HIGH, VERY_HIGH, ULTRA_HIGH -> BlockchainPublishStatus.COMPLETED;
             case FINAL -> BlockchainPublishStatus.FINALIZED;
@@ -41,7 +41,7 @@ public class BlockchainPublishStatusMapper {
     }
 
     public BlockchainPublishStatus convert(LedgerDispatchStatus ledgerDispatchStatus) {
-        val blockchainPublishStatusM = switch (ledgerDispatchStatus) {
+        Optional<BlockchainPublishStatus> blockchainPublishStatusM = switch (ledgerDispatchStatus) {
             case NOT_DISPATCHED -> Optional.<BlockchainPublishStatus>empty();
             case MARK_DISPATCH -> Optional.of(BlockchainPublishStatus.STORED);
             case DISPATCHED -> Optional.of(BlockchainPublishStatus.VISIBLE_ON_CHAIN);
