@@ -632,7 +632,7 @@ CREATE table accounting_core_report (
     type accounting_core_report_type NOT NULL,
     interval_type accounting_core_report_internal_type NOT NULL,
     year SMALLINT CHECK (year BETWEEN 1970 AND 4000) NOT NULL,
-    period SMALLINT CHECK (period BETWEEN 1 AND 12) NOT NULL,
+    period SMALLINT CHECK (period BETWEEN 1 AND 12),
     date DATE NOT NULL, -- report date
 
     -- USER or SYSTEM report
@@ -716,7 +716,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
     type accounting_core_report_type NOT NULL,
     interval_type accounting_core_report_internal_type NOT NULL,
     year SMALLINT CHECK (year BETWEEN 1970 AND 4000) NOT NULL,
-    period SMALLINT CHECK (period BETWEEN 1 AND 12) NOT NULL,
+    period SMALLINT CHECK (period BETWEEN 1 AND 12),
     date DATE NOT NULL, -- Report date
 
     mode accounting_core_report_mode_type NOT NULL, -- USER or SYSTEM report
