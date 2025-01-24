@@ -25,7 +25,7 @@ public class BlockchainPublishStatusMapper {
 
     protected LedgerDispatchStatus convertToLedgerDispatchStatus(FinalityScore finalityScore) {
         return switch (finalityScore) {
-            case NONE, VERY_LOW, LOW, MEDIUM -> LedgerDispatchStatus.DISPATCHED;
+            case VERY_LOW, LOW, MEDIUM -> LedgerDispatchStatus.DISPATCHED;
             case HIGH, VERY_HIGH, ULTRA_HIGH -> LedgerDispatchStatus.COMPLETED;
             case FINAL -> LedgerDispatchStatus.FINALIZED;
         };
@@ -33,7 +33,6 @@ public class BlockchainPublishStatusMapper {
 
     public BlockchainPublishStatus convert(FinalityScore finalityScore) {
         return switch (finalityScore) {
-            case NONE -> BlockchainPublishStatus.ROLLBACKED;
             case VERY_LOW, LOW, MEDIUM -> BlockchainPublishStatus.VISIBLE_ON_CHAIN;
             case HIGH, VERY_HIGH, ULTRA_HIGH -> BlockchainPublishStatus.COMPLETED;
             case FINAL -> BlockchainPublishStatus.FINALIZED;

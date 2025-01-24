@@ -87,17 +87,17 @@ public class WatchDogService {
 
     private OnChainStatus getOnChainStatus(Optional<OnChainTxDetails> onChainTxDetails, Long txCreationSlot, ChainTip chainTip) {
         if (onChainTxDetails.isPresent()) {
-            return new OnChainStatus(blockchainPublishStatusMapper.convert(onChainTxDetails.get().getFinalityScore()), onChainTxDetails.get().getFinalityScore());
+            return new OnChainStatus(blockchainPublishStatusMapper.convert(onChainTxDetails.get().getFinalityScore()), Optional.of(onChainTxDetails.get().getFinalityScore()));
         } else {
             // means tx is not on chain yet or was rolledback
             long txAgeInSlots = chainTip.getAbsoluteSlot() - txCreationSlot;
             // we have a grace period for rollback, this is to avoid premature rollbacks (e.g. when transaction is in the mempool still)
             boolean isRollbackReadyTimewise = txAgeInSlots > (rollbackGracePeriodMinutes * 60L);
             if (isRollbackReadyTimewise) {
-                return new OnChainStatus(BlockchainPublishStatus.ROLLBACKED, FinalityScore.NONE);
+                return new OnChainStatus(BlockchainPublishStatus.ROLLBACKED, Optional.empty());
             } else {
                 // Is very low here correct? Should we have a different status e.g. NONE?
-                return new OnChainStatus(BlockchainPublishStatus.SUBMITTED, FinalityScore.VERY_LOW);
+                return new OnChainStatus(BlockchainPublishStatus.SUBMITTED, Optional.of(FinalityScore.VERY_LOW));
             }
         }
     }
@@ -122,7 +122,7 @@ public class WatchDogService {
             submissionData.setTransactionHash(Optional.empty());
             submissionData.setFinalityScore(Optional.empty());
         } else {
-            submissionData.setFinalityScore(Optional.of(onChainStatus.finalityScore()));
+            submissionData.setFinalityScore(onChainStatus.finalityScore());
             submissionData.setPublishStatus(Optional.of(onChainStatus.status()));
         }
         return submissionData;
