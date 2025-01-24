@@ -99,7 +99,7 @@ public class API3L1TransactionCreator {
 
             potentiallyStoreTxs(creationSlot, serializedTx);
 
-            return Either.right(new API3BlockchainTransaction(reportEntity, creationSlot, serialisedTxBytes));
+            return Either.right(new API3BlockchainTransaction(reportEntity, creationSlot, serialisedTxBytes, organiserAccount.baseAddress()));
         } catch (Exception e) {
             log.error("Error serialising metadata to cbor", e);
             return Either.left(Problem.builder()

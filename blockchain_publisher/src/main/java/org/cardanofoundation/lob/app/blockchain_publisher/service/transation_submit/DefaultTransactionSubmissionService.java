@@ -1,6 +1,8 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit;
 
+import com.bloxbean.cardano.client.api.UtxoSupplier;
 import com.bloxbean.cardano.client.api.exception.ApiException;
+import com.bloxbean.cardano.client.api.model.Utxo;
 import com.bloxbean.cardano.client.backend.api.BackendService;
 import com.bloxbean.cardano.client.transaction.util.TransactionUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
     private final BlockchainTransactionSubmissionService transactionSubmissionService;
 
     private final BackendService backendService;
+    private final UtxoSupplier utxoSupplier;
 
     private final Clock clock;
 
@@ -34,7 +37,7 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
     }
 
     @Override
-    public L1Submission submitTransactionWithPossibleConfirmation(byte[] txData) throws InterruptedException, ApiException {
+    public L1Submission submitTransactionWithPossibleConfirmation(byte[] txData, String receiverAddress) throws InterruptedException, ApiException {
         log.info("Submitting transaction with confirmation.., txId:{}", TransactionUtil.getTxHash(txData));
         val txHash = submitTransaction(txData);
 
@@ -52,11 +55,35 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
 
             val transactionContent = transactionDetailsR.getValue();
             val absoluteSlot = transactionContent.getSlot();
+            checkIfUtxoAvailable(txHash, receiverAddress);
 
             return new L1Submission(txHash, Optional.of(absoluteSlot), true);
         }
 
         return new L1Submission(txHash, Optional.empty(), false);
+    }
+
+    protected void checkIfUtxoAvailable(String txHash, String address) {
+        Optional<Utxo> utxo = Optional.empty();
+        int count = 0;
+
+        while (utxo.isEmpty()) {
+            if (count++ >= 50)
+                break;
+
+            val utxos = utxoSupplier.getAll(address);
+
+            utxo = utxos
+                    .stream()
+                    .filter(u -> u.getTxHash().equals(txHash))
+                    .findFirst();
+
+            log.info(STR."Try to get new output... txhash: \{txHash}");
+
+            try {
+                Thread.sleep(5000);
+            } catch (Exception e) {}
+        }
     }
 
 }

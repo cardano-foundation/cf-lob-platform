@@ -119,7 +119,7 @@ public class BlockchainTransactionsDispatcher {
 
     private void sendTransactionOnChainAndUpdateDb(API1BlockchainTransactions blockchainTransactions) throws InterruptedException, ApiException {
         val txData = blockchainTransactions.serialisedTxData();
-        val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(txData);
+        val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(txData, blockchainTransactions.receiverAddress());
         val organisationId = blockchainTransactions.organisationId();
         val allTxs = blockchainTransactions.submittedTransactions();
 

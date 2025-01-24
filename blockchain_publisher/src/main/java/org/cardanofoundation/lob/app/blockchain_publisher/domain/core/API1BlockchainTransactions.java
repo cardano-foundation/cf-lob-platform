@@ -10,7 +10,8 @@ public record API1BlockchainTransactions(String organisationId,
                                          Set<TransactionEntity> submittedTransactions,
                                          Set<TransactionEntity> remainingTransactions,
                                          long creationSlot,
-                                         byte[] serialisedTxData) {
+                                         byte[] serialisedTxData,
+                                         String receiverAddress) {
 
     @Override
     public boolean equals(Object o) {
@@ -22,13 +23,16 @@ public record API1BlockchainTransactions(String organisationId,
                 Objects.equals(organisationId, that.organisationId) &&
                 Objects.equals(submittedTransactions, that.submittedTransactions) &&
                 Objects.equals(remainingTransactions, that.remainingTransactions) &&
-                Arrays.equals(serialisedTxData, that.serialisedTxData);
+                Arrays.equals(serialisedTxData, that.serialisedTxData)
+                && receiverAddress.equals(that.receiverAddress)
+                ;
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(organisationId, submittedTransactions, remainingTransactions, creationSlot);
         result = 31 * result + Arrays.hashCode(serialisedTxData);
+        result = 31 * result + Objects.hashCode(receiverAddress);
 
         return result;
     }

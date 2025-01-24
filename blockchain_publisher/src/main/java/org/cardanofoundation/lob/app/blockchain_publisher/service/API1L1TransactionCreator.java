@@ -137,7 +137,7 @@ public class API1L1TransactionCreator {
 
                 val remainingTxs = calculateRemainingTransactions(transactions, transactionsBatch);
 
-                return Either.right(Optional.of(new API1BlockchainTransactions(organisationId, transactionsBatch, remainingTxs, creationSlot, txBytes)));
+                return Either.right(Optional.of(new API1BlockchainTransactions(organisationId, transactionsBatch, remainingTxs, creationSlot, txBytes, organiserAccount.baseAddress())));
             }
         }
 
@@ -163,7 +163,14 @@ public class API1L1TransactionCreator {
 
             val remaining = calculateRemainingTransactions(transactions, transactionsBatch);
 
-            return Either.right(Optional.of(new API1BlockchainTransactions(organisationId, transactionsBatch, remaining, creationSlot, txBytes)));
+            return Either.right(Optional.of(new API1BlockchainTransactions(
+                    organisationId,
+                    transactionsBatch,
+                    remaining,
+                    creationSlot,
+                    txBytes,
+                    organiserAccount.baseAddress()
+            )));
         }
 
         // no transactions to process
@@ -194,8 +201,8 @@ public class API1L1TransactionCreator {
     }
 
     private Either<Problem, SerializedCardanoL1Transaction> serialiseTransactionChunk(String organisationId,
-                                                                             Set<TransactionEntity> transactionsBatch,
-                                                                             long creationSlot) {
+                                                                                      Set<TransactionEntity> transactionsBatch,
+                                                                                      long creationSlot) {
         try {
             val metadataMap =
                     api1MetadataSerialiser.serialiseToMetadataMap(organisationId, transactionsBatch, creationSlot);
