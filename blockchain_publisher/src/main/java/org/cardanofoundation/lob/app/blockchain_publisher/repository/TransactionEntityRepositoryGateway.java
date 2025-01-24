@@ -3,13 +3,13 @@ package org.cardanofoundation.lob.app.blockchain_publisher.repository;
 import com.google.common.collect.Sets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -31,14 +31,14 @@ public class TransactionEntityRepositoryGateway {
     }
 
     public Set<TransactionEntity> findTransactionsByStatus(String organisationId, int pullTransactionsBatchSize) {
-        val dispatchStatuses = BlockchainPublishStatus.toDispatchStatuses();
-        val limit = Limit.of(pullTransactionsBatchSize);
+        Set<BlockchainPublishStatus> dispatchStatuses = BlockchainPublishStatus.toDispatchStatuses();
+        Limit limit = Limit.of(pullTransactionsBatchSize);
 
         return transactionEntityRepository.findTransactionsByStatus(organisationId, dispatchStatuses, limit);
     }
 
     public Set<TransactionEntity> findDispatchedTransactionsThatAreNotFinalizedYet(String organisationId, Limit limit) {
-        val notFinalisedButVisibleOnChain = notFinalisedButVisibleOnChain();
+        Set<BlockchainPublishStatus> notFinalisedButVisibleOnChain = notFinalisedButVisibleOnChain();
 
         return transactionEntityRepository.findDispatchedTransactionsThatAreNotFinalizedYet(organisationId, notFinalisedButVisibleOnChain, limit);
     }
@@ -47,29 +47,27 @@ public class TransactionEntityRepositoryGateway {
      * Store only new transactions. We want our interface to be idempotent so if somebody sents the same transaction
      * we will ignore it.
      *
-     * @param transactionEntities
+     * @param transactionEntities transactionEntities to be stored
      * @return stored transactions
      */
     @Transactional
     public Set<TransactionEntity> storeOnlyNew(Set<TransactionEntity> transactionEntities) {
         log.info("StoreOnlyNewTransactions..., storeOnlyNewTransactions:{}", transactionEntities.size());
 
-        val txIds = transactionEntities.stream()
+        Set<String> txIds = transactionEntities.stream()
                 .map(TransactionEntity::getId)
                 .collect(toSet());
 
-        val existingTransactions = transactionEntityRepository
-                .findAllById(txIds)
-                .stream()
-                .collect(toSet());
+        Set<TransactionEntity> existingTransactions = new HashSet<>(transactionEntityRepository
+                .findAllById(txIds));
 
-        val newTransactions = Sets.difference(transactionEntities, existingTransactions);
+        Sets.SetView<TransactionEntity> newTransactions = Sets.difference(transactionEntities, existingTransactions);
 
-        val newTxs = Stream.concat(transactionEntityRepository.saveAll(newTransactions)
+        Set<TransactionEntity> newTxs = Stream.concat(transactionEntityRepository.saveAll(newTransactions)
                         .stream(), existingTransactions.stream())
                 .collect(toSet());
 
-        for (val tx : newTxs) {
+        for (TransactionEntity tx : newTxs) {
             transactionItemEntityRepository.saveAll(tx.getItems());
         }
 
