@@ -55,7 +55,7 @@ public class API1MetadataSerialiser {
 
         metadataMap.put("creation_slot", BigInteger.valueOf(creationSlot));
         metadataMap.put("timestamp", DateTimeFormatter.ISO_INSTANT.format(now));
-        metadataMap.put("ver", VERSION);
+        metadataMap.put("version", VERSION);
 
         return metadataMap;
     }

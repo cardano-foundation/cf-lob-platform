@@ -122,7 +122,7 @@ class API1MetadataSerialiserTest {
 
         assertThat(metadata.get("creation_slot")).isEqualTo(BigInteger.valueOf(creationSlot));
         assertThat(metadata.get("timestamp")).isEqualTo("2023-06-01T10:15:30Z");
-        assertThat(metadata.get("ver")).isEqualTo(VERSION);
+        assertThat(metadata.get("version")).isEqualTo(VERSION);
 
         assertThat(result.get("org")).isInstanceOf(MetadataMap.class);
         MetadataMap orgMap = (MetadataMap) result.get("org");
