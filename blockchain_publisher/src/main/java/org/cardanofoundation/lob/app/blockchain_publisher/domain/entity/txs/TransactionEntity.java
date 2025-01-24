@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,7 @@ import static jakarta.persistence.FetchType.EAGER;
 @Setter
 @Entity(name = "blockchain_publisher.txs.TransactionEntity")
 @Table(name = "blockchain_publisher_transaction")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners({ AuditingEntityListener.class })
