@@ -40,14 +40,9 @@ public class WatchDogService {
     @Setter
     private int rollbackGracePeriodMinutes = 15;
 
-    @Value("${lob.blockchain_publisher.watchdog.rollbacks.enabled:true}")
-    @Getter
-    @Setter
-    private boolean rollbackSupportEnabled = true;
-
     @PostConstruct
     public void init() {
-        log.info("TransactionsWatchDogService configuration: rollbackGracePeriodMinutes={}, rollbacksEnabled={}", rollbackGracePeriodMinutes, rollbackSupportEnabled);
+        log.info("TransactionsWatchDogService configuration: rollbackGracePeriodMinutes={}, rollbacksEnabled={}", rollbackGracePeriodMinutes);
 
         log.info("TransactionsWatchDogService started");
     }
@@ -111,7 +106,6 @@ public class WatchDogService {
             if (isRollbackReadyTimewise) {
                 return new OnChainStatus(BlockchainPublishStatus.ROLLBACKED, Optional.empty());
             } else {
-                // Is very low here correct? Should we have a different status e.g. NONE?
                 return new OnChainStatus(BlockchainPublishStatus.SUBMITTED, Optional.of(FinalityScore.VERY_LOW));
             }
         }
