@@ -52,10 +52,34 @@ public class WatchDogService {
         log.info("TransactionsWatchDogService started");
     }
 
-    public void checkTxStatusesForOrganisations(int txStatusInspectionLimitPerOrgPullSize) {
+    public void checkReportStatusForOrganisations(int txStatusInspectionLimitPerOrgPullSize) {
+        organisationPublicApiIF.listAll().forEach(org -> {
+            log.info("Checking report statuses for organisation: {}", org.getName());
+            checkReportStatusForOrganisation(org, txStatusInspectionLimitPerOrgPullSize);
+        });
+    }
+
+    public void checkTransactionStatusForOrganisations(int txStatusInspectionLimitPerOrgPullSize) {
         organisationPublicApiIF.listAll().forEach(org -> {
             log.info("Checking transaction statuses for organisation: {}", org.getName());
             checkTransactionStatusesForOrganisation(org, txStatusInspectionLimitPerOrgPullSize);
+        });
+    }
+
+    private void checkReportStatusForOrganisation(Organisation org, int txStatusInspectionLimitPerOrgPullSize) {
+        ChainTip chainTip = getChainTip();
+        if (!chainTip.isSynced()) {
+            log.info("Chain is not synced, skipping transaction status check for organisation: {}", org.getName());
+            return;
+        }
+
+        reportEntityRepositoryGateway.findDispatchedReportsThatAreNotFinalizedYet(org.getId(), Limit.of(txStatusInspectionLimitPerOrgPullSize)).forEach(report -> {
+            log.info("Checking transaction status for report: {}", report.getId());
+            L1SubmissionData l1SubmissionData = report.getL1SubmissionData().orElseThrow(() -> new RuntimeException("Failed to get L1 submission data"));
+            report.setL1SubmissionData(Optional.of(updateL1SubmissionData(l1SubmissionData, chainTip)));
+
+            reportEntityRepositoryGateway.storeReport(report);
+            log.info("Status updated for report: {}", report.getId());
         });
     }
 
@@ -73,15 +97,6 @@ public class WatchDogService {
 
             transactionEntityRepositoryGateway.storeTransaction(tx);
             log.info("Status updated for transaction: {}", tx.getId());
-        });
-
-        reportEntityRepositoryGateway.findDispatchedReportsThatAreNotFinalizedYet(org.getId(), Limit.of(txStatusInspectionLimitPerOrgPullSize)).forEach(report -> {
-            log.info("Checking transaction status for report: {}", report.getId());
-            L1SubmissionData l1SubmissionData = report.getL1SubmissionData().orElseThrow(() -> new RuntimeException("Failed to get L1 submission data"));
-            report.setL1SubmissionData(Optional.of(updateL1SubmissionData(l1SubmissionData, chainTip)));
-
-            reportEntityRepositoryGateway.storeReport(report);
-            log.info("Status updated for report: {}", report.getId());
         });
     }
 

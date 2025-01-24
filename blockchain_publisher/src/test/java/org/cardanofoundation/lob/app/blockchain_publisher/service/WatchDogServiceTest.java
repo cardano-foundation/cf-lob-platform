@@ -37,7 +37,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class WatchDogServiceTest {
 
-
     @InjectMocks
     private WatchDogService watchDogService;
 
@@ -63,7 +62,7 @@ class WatchDogServiceTest {
         when(blockchainReaderPublicApi.getChainTip()).thenReturn(Either.right(ChainTip.builder().isSynced(false).build()));
 
 
-        watchDogService.checkTxStatusesForOrganisations(1);
+        watchDogService.checkTransactionStatusForOrganisations(1);
 
         verify(organisationPublicApiIF).listAll();
         verify(blockchainReaderPublicApi).getChainTip();
@@ -79,7 +78,7 @@ class WatchDogServiceTest {
         when(organisationPublicApiIF.listAll()).thenReturn(List.of(new Organisation()));
         when(blockchainReaderPublicApi.getChainTip()).thenReturn(Either.left(null));
 
-        assertThrows(RuntimeException.class, () -> watchDogService.checkTxStatusesForOrganisations(1));
+        assertThrows(RuntimeException.class, () -> watchDogService.checkTransactionStatusForOrganisations(1));
 
         verify(organisationPublicApiIF).listAll();
         verify(blockchainReaderPublicApi).getChainTip();
@@ -103,7 +102,7 @@ class WatchDogServiceTest {
         when(blockchainReaderPublicApi.getChainTip()).thenReturn(Either.right(ChainTip.builder().isSynced(true).absoluteSlot(2L).build()));
         when(blockchainReaderPublicApi.getTxDetails(anyString())).thenReturn(Either.left(null));
 
-        assertThrows(RuntimeException.class, () -> watchDogService.checkTxStatusesForOrganisations(1));
+        assertThrows(RuntimeException.class, () -> watchDogService.checkTransactionStatusForOrganisations(1));
 
         verify(organisationPublicApiIF).listAll();
         verify(blockchainReaderPublicApi).getChainTip();
@@ -132,7 +131,7 @@ class WatchDogServiceTest {
         when(blockchainReaderPublicApi.getTxDetails(anyString())).thenReturn(Either.right(Optional.of(OnChainTxDetails.builder().finalityScore(FinalityScore.FINAL).build())));
         when(blockchainPublishStatusMapper.convert(FinalityScore.FINAL)).thenReturn(BlockchainPublishStatus.FINALIZED);
 
-        watchDogService.checkTxStatusesForOrganisations(1);
+        watchDogService.checkTransactionStatusForOrganisations(1);
 
         verify(organisationPublicApiIF).listAll();
         verify(blockchainReaderPublicApi).getChainTip();
@@ -151,8 +150,6 @@ class WatchDogServiceTest {
         verifyNoMoreInteractions(blockchainPublishStatusMapper);
         verifyNoMoreInteractions(blockchainReaderPublicApi);
         verifyNoMoreInteractions(transactionEntityRepositoryGateway);
-        // we don't care for the reportEntityRepositoryGateway in this test
-//        verifyNoInteractions(reportEntityRepositoryGateway);
     }
 
     @Test
@@ -176,7 +173,7 @@ class WatchDogServiceTest {
 
         when(blockchainReaderPublicApi.getTxDetails(anyString())).thenReturn(Either.right(Optional.empty()));
 
-        watchDogService.checkTxStatusesForOrganisations(1);
+        watchDogService.checkTransactionStatusForOrganisations(1);
 
         verify(organisationPublicApiIF).listAll();
         verify(blockchainReaderPublicApi).getChainTip();
@@ -194,8 +191,6 @@ class WatchDogServiceTest {
         verifyNoInteractions(blockchainPublishStatusMapper);
         verifyNoMoreInteractions(blockchainReaderPublicApi);
         verifyNoMoreInteractions(transactionEntityRepositoryGateway);
-        // we don't care for the reportEntityRepositoryGateway in this test
-//        verifyNoInteractions(reportEntityRepositoryGateway);
     }
 
     @Test
@@ -219,7 +214,7 @@ class WatchDogServiceTest {
 
         when(blockchainReaderPublicApi.getTxDetails(anyString())).thenReturn(Either.right(Optional.empty()));
 
-        watchDogService.checkTxStatusesForOrganisations(1);
+        watchDogService.checkTransactionStatusForOrganisations(1);
 
         verify(organisationPublicApiIF).listAll();
         verify(blockchainReaderPublicApi).getChainTip();
@@ -237,8 +232,6 @@ class WatchDogServiceTest {
         verifyNoInteractions(blockchainPublishStatusMapper);
         verifyNoMoreInteractions(blockchainReaderPublicApi);
         verifyNoMoreInteractions(transactionEntityRepositoryGateway);
-        // we don't care for the reportEntityRepositoryGateway in this test
-//        verifyNoInteractions(reportEntityRepositoryGateway);
     }
 
     @Test
@@ -257,11 +250,11 @@ class WatchDogServiceTest {
         when(blockchainReaderPublicApi.getTxDetails(anyString())).thenReturn(Either.right(Optional.of(OnChainTxDetails.builder().finalityScore(FinalityScore.FINAL).build())));
         when(blockchainPublishStatusMapper.convert(FinalityScore.FINAL)).thenReturn(BlockchainPublishStatus.FINALIZED);
 
-        watchDogService.checkTxStatusesForOrganisations(1);
+        watchDogService.checkReportStatusForOrganisations(1);
 
         verify(organisationPublicApiIF).listAll();
         verify(blockchainReaderPublicApi).getChainTip();
-        verify(transactionEntityRepositoryGateway).findDispatchedTransactionsThatAreNotFinalizedYet(null, Limit.of(1));
+        verify(reportEntityRepositoryGateway).findDispatchedReportsThatAreNotFinalizedYet(null, Limit.of(1));
         verify(blockchainReaderPublicApi).getTxDetails(anyString());
         verify(blockchainPublishStatusMapper).convert(FinalityScore.FINAL);
         reportEntity.setL1SubmissionData(Optional.of(L1SubmissionData.builder()
@@ -276,8 +269,6 @@ class WatchDogServiceTest {
         verifyNoMoreInteractions(blockchainPublishStatusMapper);
         verifyNoMoreInteractions(blockchainReaderPublicApi);
         verifyNoMoreInteractions(reportEntityRepositoryGateway);
-        // we don't care for the reportEntityRepositoryGateway in this test
-//        verifyNoInteractions(transactionEntityRepositoryGateway);
     }
 
 }
