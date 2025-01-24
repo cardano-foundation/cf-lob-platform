@@ -13,6 +13,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.Re
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.ReportService;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationCurrencyService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -54,6 +55,7 @@ public class ReportController {
 
     @Tag(name = "Reporting", description = "Create Balance Sheet")
     @PostMapping(value = "/report-create", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> reportCreate(@Valid @RequestBody ReportRequest reportSaveRequest) {
 
         return reportViewService.reportCreate(reportSaveRequest)
@@ -100,6 +102,7 @@ public class ReportController {
 
     @Tag(name = "Reporting", description = "Report publish")
     @PostMapping(value = "/report-publish", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> reportPublish(@Valid @RequestBody ReportPublishRequest reportPublishRequest) {
 
         return reportViewService.reportPublish(reportPublishRequest).fold(

@@ -276,17 +276,14 @@ public class ReportService {
         ReportEntity reportEntity = reportEntityE.fold(problem -> {
             // question: is it safe to assume that problem will always be because it already exists?
 
-            return new ReportEntity();
+            return newReport();
         }, success -> {
             if (success.getLedgerDispatchApproved()) {
-                val report = new ReportEntity();
-                report.setVer(clock.millis());
-
-                return report;
+                return newReport();
             }
             return success;
         });
-        
+
         reportEntity.setReportId(Report.id(organisationId, reportType, intervalType, year, reportEntity.getVer(), Optional.of(period)));
         reportEntity.setIdControl(Report.idControl(organisationId, reportType, intervalType, year, Optional.of(period)));
 
@@ -342,15 +339,15 @@ public class ReportService {
         /**
          * Todo: Bug: Always save even when error is triggered.
 
-        if (!reportEntity.isValid()) {
-            return Either.left(Problem.builder()
-                    .withTitle("INVALID_REPORT")
-                    .withDetail(STR."Report is not valid since it didn't pass through business checks.")
-                    .withStatus(Status.BAD_REQUEST)
-                    .with("reportId", reportEntity.getReportId())
-                    .with("reportType", reportEntity.getType())
-                    .build());
-        }
+         if (!reportEntity.isValid()) {
+         return Either.left(Problem.builder()
+         .withTitle("INVALID_REPORT")
+         .withDetail(STR."Report is not valid since it didn't pass through business checks.")
+         .withStatus(Status.BAD_REQUEST)
+         .with("reportId", reportEntity.getReportId())
+         .with("reportType", reportEntity.getType())
+         .build());
+         }
          */
         val result = store(reportEntity);
         if (result.isLeft()) {
@@ -401,13 +398,10 @@ public class ReportService {
         val reportEntityE = exist(organisationId, reportType, intervalType, year, period);
 
         ReportEntity reportEntity = reportEntityE.fold(problem -> {
-            return new ReportEntity();
+            return newReport();
         }, success -> {
             if (success.getLedgerDispatchApproved()) {
-                val report = new ReportEntity();
-                report.setVer(clock.millis());
-
-                return report;
+                return newReport();
             }
             return success;
         });
@@ -712,5 +706,11 @@ public class ReportService {
             }
         }
         return Either.right(true);
+    }
+
+    private ReportEntity newReport(){
+        ReportEntity report = new ReportEntity();
+        report.setVer(clock.millis());
+        return report;
     }
 }
