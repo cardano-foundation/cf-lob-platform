@@ -1,12 +1,12 @@
 package org.cardanofoundation.lob.app.support.modulith;
 
+import java.lang.annotation.*;
+
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
-
-import java.lang.annotation.*;
 
 @Transactional(
         propagation = Propagation.REQUIRES_NEW

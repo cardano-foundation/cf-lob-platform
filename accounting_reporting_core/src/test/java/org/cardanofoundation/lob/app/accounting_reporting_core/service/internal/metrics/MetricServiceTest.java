@@ -1,22 +1,24 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Map;
+
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
 import org.cardanofoundation.lob.app.accounting_reporting_core.mapper.DashboardViewMapper;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.DashboardRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.executors.BalanceSheetMetricService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.executors.IncomeStatementMetricService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MetricServiceTest {

@@ -1,14 +1,17 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
+import java.util.Optional;
+
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
-import org.hibernate.envers.Audited;
-import org.javers.core.metamodel.annotation.DiffInclude;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
+
+import lombok.*;
+
+import org.hibernate.envers.Audited;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 
 @Embeddable
 @AllArgsConstructor
@@ -21,7 +24,7 @@ public class Project {
 
     @NotBlank
     @LOBVersionSourceRelevant
-    
+
     private String customerCode;
 
     @Nullable

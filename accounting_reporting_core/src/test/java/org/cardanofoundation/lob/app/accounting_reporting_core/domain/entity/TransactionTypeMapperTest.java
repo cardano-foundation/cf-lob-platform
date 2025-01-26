@@ -1,10 +1,11 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
-import lombok.val;
-import org.junit.jupiter.api.Test;
-
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import lombok.val;
+
+import org.junit.jupiter.api.Test;
 
 class TransactionTypeMapperTest {
 

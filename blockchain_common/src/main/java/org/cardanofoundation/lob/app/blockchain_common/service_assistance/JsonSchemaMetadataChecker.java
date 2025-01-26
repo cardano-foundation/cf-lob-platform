@@ -1,17 +1,20 @@
 package org.cardanofoundation.lob.app.blockchain_common.service_assistance;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.JsonSchemaFactory;
+import static com.networknt.schema.SpecVersion.VersionFlag.V7;
+
+import java.io.IOException;
+
 import jakarta.annotation.PostConstruct;
+
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+
 import org.springframework.core.io.Resource;
 
-import java.io.IOException;
-
-import static com.networknt.schema.SpecVersion.VersionFlag.V7;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.JsonSchemaFactory;
 
 @Slf4j
 @RequiredArgsConstructor

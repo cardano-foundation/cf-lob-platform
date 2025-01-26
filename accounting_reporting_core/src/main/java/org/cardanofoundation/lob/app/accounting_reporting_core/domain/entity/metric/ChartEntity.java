@@ -1,5 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.metric;
 
+import static jakarta.persistence.EnumType.STRING;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -8,16 +10,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
+
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
-import static jakarta.persistence.EnumType.STRING;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum;
 
 @Getter
 @Setter

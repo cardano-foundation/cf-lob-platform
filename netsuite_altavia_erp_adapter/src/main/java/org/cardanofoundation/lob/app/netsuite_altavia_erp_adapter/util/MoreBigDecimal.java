@@ -1,8 +1,8 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util;
 
-import io.micrometer.common.lang.Nullable;
-
 import java.math.BigDecimal;
+
+import io.micrometer.common.lang.Nullable;
 
 public class MoreBigDecimal {
 

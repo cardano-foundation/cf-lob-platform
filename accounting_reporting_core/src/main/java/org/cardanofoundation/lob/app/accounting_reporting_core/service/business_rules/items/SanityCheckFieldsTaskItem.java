@@ -1,17 +1,19 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.items;
 
-import jakarta.validation.Validator;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.TX_TECHNICAL_FAILURE;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
 
 import java.util.Map;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.TX_TECHNICAL_FAILURE;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation.Severity.ERROR;
+import jakarta.validation.Validator;
+
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 
 @RequiredArgsConstructor
 public class SanityCheckFieldsTaskItem implements PipelineTaskItem {

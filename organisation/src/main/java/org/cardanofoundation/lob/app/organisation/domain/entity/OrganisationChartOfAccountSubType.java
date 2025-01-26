@@ -1,13 +1,16 @@
 package org.cardanofoundation.lob.app.organisation.domain.entity;
 
+import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
-import org.hibernate.envers.Audited;
-import org.springframework.data.domain.Persistable;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
+import org.hibernate.envers.Audited;
+
+import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 
 @AllArgsConstructor
 @NoArgsConstructor

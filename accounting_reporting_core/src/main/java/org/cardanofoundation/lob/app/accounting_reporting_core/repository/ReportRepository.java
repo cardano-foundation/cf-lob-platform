@@ -1,15 +1,16 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
 
 public interface ReportRepository extends JpaRepository<ReportEntity, String> {
 

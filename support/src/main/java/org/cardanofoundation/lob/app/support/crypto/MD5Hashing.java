@@ -1,9 +1,10 @@
 package org.cardanofoundation.lob.app.support.crypto;
 
-import lombok.experimental.UtilityClass;
-import org.bouncycastle.crypto.digests.MD5Digest;
-
 import java.util.HexFormat;
+
+import lombok.experimental.UtilityClass;
+
+import org.bouncycastle.crypto.digests.MD5Digest;
 
 @UtilityClass
 public class MD5Hashing {

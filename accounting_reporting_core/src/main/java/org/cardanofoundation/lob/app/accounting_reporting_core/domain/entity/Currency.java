@@ -1,12 +1,15 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity;
 
+import java.util.Optional;
+
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Embeddable;
+
 import lombok.*;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
+
 import org.hibernate.envers.Audited;
 
-import java.util.Optional;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.annotations.LOBVersionSourceRelevant;
 
 @Embeddable
 @NoArgsConstructor

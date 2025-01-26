@@ -9,7 +9,7 @@ public enum LedgerDispatchStatusView {
     PENDING, /** when exist a violation or a rejection related to LOB problem */
 
     INVALID, /** when exist a violation or a rejection related to ERP problem*/
-    
+
     PUBLISH, /** Ready to published */
 
     PUBLISHED, /** Sent to the published */

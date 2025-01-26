@@ -1,9 +1,27 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service;
 
-import io.vavr.control.Either;
+import static java.math.BigDecimal.ZERO;
+import static java.util.stream.Collectors.toSet;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.*;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.transactionNotFoundResponse;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import io.vavr.control.Either;
+import org.zalando.problem.Problem;
+
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
@@ -17,22 +35,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.TransactionRepositoryGateway;
 import org.cardanofoundation.lob.app.support.problem_support.IdentifiableProblem;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.zalando.problem.Problem;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.math.BigDecimal.ZERO;
-import static java.util.stream.Collectors.toSet;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Counterparty.Type.VENDOR;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.LedgerDispatchStatusView.*;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.FailureResponses.transactionNotFoundResponse;
 
 @Service
 @org.jmolecules.ddd.annotation.Service

@@ -1,15 +1,17 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Document;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
-import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
+import org.springframework.stereotype.Service;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Document;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 
 @Service
 @Slf4j

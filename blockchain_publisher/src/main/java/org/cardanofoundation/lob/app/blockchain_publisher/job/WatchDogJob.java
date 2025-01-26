@@ -1,13 +1,16 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.job;
 
 import jakarta.annotation.PostConstruct;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.WatchDogService;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import org.cardanofoundation.lob.app.blockchain_publisher.service.WatchDogService;
 
 @Service
 @Slf4j

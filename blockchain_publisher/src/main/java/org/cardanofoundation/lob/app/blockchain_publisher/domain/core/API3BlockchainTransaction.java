@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.blockchain_publisher.domain.core;
 
 import java.util.Arrays;
 import java.util.Objects;
+
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.reports.ReportEntity;
 
 public record API3BlockchainTransaction(ReportEntity report,

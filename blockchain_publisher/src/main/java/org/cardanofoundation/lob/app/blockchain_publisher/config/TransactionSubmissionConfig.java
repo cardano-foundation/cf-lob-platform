@@ -1,9 +1,19 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.config;
 
+import java.net.http.HttpClient;
+import java.time.Clock;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
 import com.bloxbean.cardano.client.account.Account;
 import com.bloxbean.cardano.client.api.UtxoSupplier;
 import com.bloxbean.cardano.client.backend.api.BackendService;
 import com.bloxbean.cardano.client.backend.api.DefaultUtxoSupplier;
+
 import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.API1L1TransactionCreator;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.API1MetadataSerialiser;
@@ -11,14 +21,6 @@ import org.cardanofoundation.lob.app.blockchain_publisher.service.API3L1Transact
 import org.cardanofoundation.lob.app.blockchain_publisher.service.API3MetadataSerialiser;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit.*;
 import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-
-import java.net.http.HttpClient;
-import java.time.Clock;
 
 @Configuration
 public class TransactionSubmissionConfig {
