@@ -18,6 +18,8 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReportView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.ReportService;
 
+import java.util.Optional;
+
 @Service
 @org.jmolecules.ddd.annotation.Service
 @Slf4j
@@ -92,6 +94,13 @@ public class ReportViewService {
         reportResponseView.setPeriod(reportEntity.getPeriod());
         reportResponseView.setDate(reportEntity.getDate());
         reportResponseView.setPublish(reportEntity.getLedgerDispatchApproved());
+        reportResponseView.setCanBePublish(true);
+        Either<Problem, Boolean> left = reportService.canPublish(reportEntity);
+        reportResponseView.setError(Optional.empty());
+        if (left.isLeft()) {
+            reportResponseView.setCanBePublish(false);
+            reportResponseView.setError(Optional.of(left.getLeft()));
+        }
         reportResponseView.setVer(reportEntity.getVer());
         //BalanceSheet
         reportEntity.getBalanceSheetReportData().flatMap(balanceSheetData -> balanceSheetData.getAssets().flatMap(assets -> assets.getNonCurrentAssets().flatMap(nonCurrentAssets -> nonCurrentAssets.getPropertyPlantEquipment()))).ifPresent(bigDecimal -> reportResponseView.setPropertyPlantEquipment(bigDecimal.toString()));

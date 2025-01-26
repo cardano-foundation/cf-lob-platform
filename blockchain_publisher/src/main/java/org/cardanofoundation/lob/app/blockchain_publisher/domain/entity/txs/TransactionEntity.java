@@ -1,8 +1,19 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs;
 
-import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.EAGER;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonDateOnlyEntity;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.LinkedHashSet;
@@ -10,28 +21,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.persistence.*;
-
-import javax.annotation.Nullable;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import org.springframework.data.domain.Persistable;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.PostgreSQLEnumJdbcType;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.support.spring_audit.CommonDateOnlyEntity;
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.EAGER;
 
 @Getter
 @Setter
 @Entity(name = "blockchain_publisher.txs.TransactionEntity")
 @Table(name = "blockchain_publisher_transaction")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners({ AuditingEntityListener.class })

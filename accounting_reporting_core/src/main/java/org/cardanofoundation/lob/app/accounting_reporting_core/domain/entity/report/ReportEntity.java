@@ -39,7 +39,7 @@ import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 @Audited
-@EntityListeners({ AuditingEntityListener.class })
+@EntityListeners({AuditingEntityListener.class})
 public class ReportEntity extends CommonEntity implements Persistable<String>, Validable {
 
     @Id
@@ -58,7 +58,7 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @Column(name = "ver", nullable = false)
     @Getter
     @Setter
-    private Integer ver = 1;
+    private long ver = 1;
 
     @Override
     public String getId() {
@@ -90,7 +90,6 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @JdbcType(PostgreSQLEnumJdbcType.class)
     @NotNull
     @Getter
-    @Setter
     private IntervalType intervalType;
 
     @Column(name = "year", nullable = false)
@@ -212,6 +211,13 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
         this.incomeStatementReportData = incomeStatementReportData.orElse(null);
     }
 
+    public void setIntervalType(IntervalType intervalType){
+        if (intervalType.equals(IntervalType.YEAR)) {
+            this.period = null;
+        }
+
+        this.intervalType = intervalType;
+    }
     public Optional<BalanceSheetData> getBalanceSheetReportData() {
         return Optional.ofNullable(balanceSheetReportData);
     }
@@ -240,6 +246,10 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     }
 
     public void setPeriod(Optional<@Min(1) @Max(12) Short> period) {
+        if (this.intervalType.equals(IntervalType.YEAR)) {
+            this.period = null;
+            return;
+        }
         this.period = period.orElse(null);
     }
 

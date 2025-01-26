@@ -32,6 +32,7 @@ public class ReportRequest {
     private short year;
 
     @Schema(example = "3")
+    @Nullable
     private short period;
 
     /**

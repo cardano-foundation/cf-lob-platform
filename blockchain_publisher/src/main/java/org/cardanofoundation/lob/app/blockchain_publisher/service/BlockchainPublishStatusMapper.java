@@ -1,17 +1,14 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.NOT_DISPATCHED;
-
-import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
-import org.springframework.stereotype.Service;
-
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
 import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.NOT_DISPATCHED;
 
 @Service
 @Slf4j
@@ -43,7 +40,7 @@ public class BlockchainPublishStatusMapper {
     }
 
     public BlockchainPublishStatus convert(LedgerDispatchStatus ledgerDispatchStatus) {
-        val blockchainPublishStatusM = switch (ledgerDispatchStatus) {
+        Optional<BlockchainPublishStatus> blockchainPublishStatusM = switch (ledgerDispatchStatus) {
             case NOT_DISPATCHED -> Optional.<BlockchainPublishStatus>empty();
             case MARK_DISPATCH -> Optional.of(BlockchainPublishStatus.STORED);
             case DISPATCHED -> Optional.of(BlockchainPublishStatus.VISIBLE_ON_CHAIN);

@@ -1,21 +1,10 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import jakarta.validation.Valid;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.ReportViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
@@ -23,6 +12,14 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.Re
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReportingParametersView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.ReportService;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationCurrencyService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -58,6 +55,7 @@ public class ReportController {
 
     @Tag(name = "Reporting", description = "Create Balance Sheet")
     @PostMapping(value = "/report-create", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> reportCreate(@Valid @RequestBody ReportRequest reportSaveRequest) {
 
         return reportViewService.reportCreate(reportSaveRequest)
@@ -94,8 +92,7 @@ public class ReportController {
     @Tag(name = "Reporting", description = "Report list")
     @GetMapping(value = "/report-list/{orgId}", produces = "application/json")
     public ResponseEntity<?> reportList(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
-
-        return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findByOrgId(
+        return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findAllByOrgId(
                         orgId
                 ).stream().map(reportViewService::responseView).collect(Collectors.toSet()))
         );
@@ -105,6 +102,7 @@ public class ReportController {
 
     @Tag(name = "Reporting", description = "Report publish")
     @PostMapping(value = "/report-publish", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> reportPublish(@Valid @RequestBody ReportPublishRequest reportPublishRequest) {
 
         return reportViewService.reportPublish(reportPublishRequest).fold(

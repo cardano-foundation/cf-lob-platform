@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.support.spring_web;
 import lombok.Getter;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -17,6 +18,7 @@ import org.cardanofoundation.lob.app.support.security.KeycloakRoleConverter;
 @Configuration("securityConfig")
 @EnableMethodSecurity
 @Getter
+@ConditionalOnProperty(value = "keycloak.enabled", havingValue = "true")
 public class SecurityConfig {
 
     @Value("${keycloak.cert-url}")

@@ -1,30 +1,26 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service.dispatch;
 
-import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus.SUBMITTED;
-
-import java.util.Optional;
-import java.util.Set;
-
+import com.bloxbean.cardano.client.api.exception.ApiException;
 import jakarta.annotation.PostConstruct;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.API1BlockchainTransactions;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1SubmissionData;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
+import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.API1L1TransactionCreator;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit.TransactionSubmissionService;
+import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.bloxbean.cardano.client.api.exception.ApiException;
+import java.util.Optional;
+import java.util.Set;
 
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainTransactions;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1SubmissionData;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
-import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.L1TransactionCreator;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
-import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit.TransactionSubmissionService;
-import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
+import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus.SUBMITTED;
 
 @Service
 @Slf4j
@@ -33,7 +29,7 @@ public class BlockchainTransactionsDispatcher {
 
     private final TransactionEntityRepositoryGateway transactionEntityRepositoryGateway;
     private final OrganisationPublicApi organisationPublicApi;
-    private final L1TransactionCreator l1TransactionCreator;
+    private final API1L1TransactionCreator l1TransactionCreator;
     private final TransactionSubmissionService transactionSubmissionService;
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
     private final DispatchingStrategy<TransactionEntity> dispatchingStrategy;
@@ -65,7 +61,7 @@ public class BlockchainTransactionsDispatcher {
     }
 
     @Transactional
-    protected void dispatchTransactionsBatch(String organisationId,
+    private void dispatchTransactionsBatch(String organisationId,
                                              Set<TransactionEntity> transactionEntitiesBatch) {
         log.info("Dispatching passedTransactions for organisation: {}", organisationId);
 
@@ -84,9 +80,8 @@ public class BlockchainTransactionsDispatcher {
         log.info("Submitted tx count:{}, remainingTxCount:{}", submittedTxCount, remainingTxCount);
     }
 
-    @Transactional
-    private Optional<BlockchainTransactions> createAndSendBlockchainTransactions(String organisationId,
-                                                                                 Set<TransactionEntity> transactions) {
+    private Optional<API1BlockchainTransactions> createAndSendBlockchainTransactions(String organisationId,
+                                                                                     Set<TransactionEntity> transactions) {
         log.info("Processing passedTransactions for organisation:{}, remaining size:{}", organisationId, transactions.size());
 
         if (transactions.isEmpty()) {
@@ -113,6 +108,8 @@ public class BlockchainTransactionsDispatcher {
         val serialisedTx = serialisedTxM.orElseThrow();
         try {
             sendTransactionOnChainAndUpdateDb(serialisedTx);
+
+            return Optional.of(serialisedTx);
         } catch (InterruptedException | ApiException e) {
             log.error("Error sending transaction on chain and / or updating db", e);
         }
@@ -120,10 +117,9 @@ public class BlockchainTransactionsDispatcher {
         return Optional.empty();
     }
 
-    @Transactional
-    private void sendTransactionOnChainAndUpdateDb(BlockchainTransactions blockchainTransactions) throws InterruptedException, ApiException {
+    private void sendTransactionOnChainAndUpdateDb(API1BlockchainTransactions blockchainTransactions) throws InterruptedException, ApiException {
         val txData = blockchainTransactions.serialisedTxData();
-        val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(txData);
+        val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(txData, blockchainTransactions.receiverAddress());
         val organisationId = blockchainTransactions.organisationId();
         val allTxs = blockchainTransactions.submittedTransactions();
 
@@ -137,10 +133,9 @@ public class BlockchainTransactionsDispatcher {
         log.info("Blockchain transaction submitted, l1SubmissionData:{}", l1SubmissionData);
     }
 
-    @Transactional
     private void updateTransactionStatuses(String txHash,
                                            Optional<Long> absoluteSlot,
-                                           BlockchainTransactions blockchainTransactions) {
+                                           API1BlockchainTransactions blockchainTransactions) {
         for (val txEntity : blockchainTransactions.submittedTransactions()) {
             txEntity.setL1SubmissionData(Optional.of(L1SubmissionData.builder()
                     .transactionHash(txHash)

@@ -1,20 +1,18 @@
 package org.cardanofoundation.lob.app.organisation.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+import org.cardanofoundation.lob.app.organisation.domain.entity.*;
+import org.cardanofoundation.lob.app.organisation.repository.OrganisationChartOfAccountSubTypeRepository;
+import org.cardanofoundation.lob.app.organisation.repository.OrganisationChartOfAccountTypeRepository;
+import org.cardanofoundation.lob.app.organisation.repository.OrganisationRepository;
+import org.cardanofoundation.lob.app.organisation.repository.ProjectMappingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCostCenter;
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationProject;
-import org.cardanofoundation.lob.app.organisation.repository.OrganisationRepository;
-import org.cardanofoundation.lob.app.organisation.repository.ProjectMappingRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +23,8 @@ public class OrganisationService {
     private final OrganisationRepository organisationRepository;
     private final CostCenterService costCenterService;
     private final ProjectMappingRepository projectMappingRepository;
+    private final OrganisationChartOfAccountTypeRepository organisationChartOfAccountTypeRepository;
+    private final OrganisationChartOfAccountSubTypeRepository organisationChartOfAccountSubTypeRepository;
 
     public Optional<Organisation> findById(String organisationId) {
         return organisationRepository.findById(organisationId);
@@ -34,11 +34,11 @@ public class OrganisationService {
         return organisationRepository.findAll();
     }
 
-    public Set<OrganisationCostCenter> getAllCostCenter(String organisationId){
+    public Set<OrganisationCostCenter> getAllCostCenter(String organisationId) {
         return costCenterService.getAllCostCenter(organisationId);
     }
 
-    public Set<OrganisationProject> getAllProjects(String organisationId){
+    public Set<OrganisationProject> getAllProjects(String organisationId) {
         return projectMappingRepository.findAllByOrganisationId(organisationId);
     }
 

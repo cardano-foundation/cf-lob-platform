@@ -8,6 +8,8 @@ plugins {
     id("info.solidsoft.pitest") version "1.15.0"
     id("com.diffplug.spotless") version "6.19.0"
     id("maven-publish")
+    id("jacoco")
+    id("org.sonarqube") version "4.3.0.3225"
 }
 
 allprojects {
@@ -24,6 +26,7 @@ allprojects {
         }
     }
 
+
 }
 
 subprojects {
@@ -34,6 +37,8 @@ subprojects {
     apply(plugin = "info.solidsoft.pitest")
     apply(plugin = "com.diffplug.spotless")
     apply(plugin = "maven-publish")
+    apply(plugin = "jacoco")
+    apply(plugin = "org.sonarqube")
 
     sourceSets {
         named("main") {
@@ -120,6 +125,10 @@ subprojects {
         implementation("com.bloxbean.cardano:cardano-client-backend-blockfrost:0.6.0")
         implementation("com.bloxbean.cardano:cardano-client-quicktx:0.6.0")
 
+        implementation("org.mapstruct:mapstruct:1.5.5.Final")
+        annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+        annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
         compileOnly("org.projectlombok:lombok:1.18.32")
         annotationProcessor("org.projectlombok:lombok:1.18.32")
         implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
@@ -157,6 +166,7 @@ subprojects {
         withType<Test> {
             useJUnitPlatform()
             jvmArgs(ENABLE_PREVIEW)
+            finalizedBy("jacocoTestReport")
         }
 
         withType<PitestTask> {
@@ -167,6 +177,38 @@ subprojects {
             jvmArgs(ENABLE_PREVIEW)
         }
 
+        withType<JacocoReport> {
+            reports {
+                xml.required.set(true) // XML report for SonarCloud
+                html.required.set(true) // HTML report for local use
+            }
+
+//            sourceDirectories.setFrom(files("src/main/java"))
+            executionData.setFrom(fileTree(layout.buildDirectory).include("jacoco/test.exec"))
+        }
+    }
+
+    sonar {
+        properties {
+
+            property("sonar.java.enablePreview", "false")
+            property("sonar.sources", "src/main/java")
+            // Excluding test dir scan, if they don't exist
+            if(!File(project.projectDir, "src/test").exists()) {
+                property("sonar.tests", "")
+            } else {
+                property("sonar.tests", "src/test/java")
+            }
+
+            property("sonar.exclusions", "" +
+                    "organisation/**, " +
+                    "**/entity/**, " +
+                    "**/config/**, " +
+                    "**/domain/**, " +
+                    "**/repository/**, " +
+                    "**/spring_web/**," +
+                    "**/spring_audit/**")
+        }
     }
 
     spotless {

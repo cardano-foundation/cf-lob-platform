@@ -1,25 +1,5 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
-import static org.apache.commons.collections4.iterators.PeekingIterator.peekingIterator;
-import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import jakarta.annotation.PostConstruct;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-
 import com.bloxbean.cardano.client.account.Account;
 import com.bloxbean.cardano.client.api.model.Amount;
 import com.bloxbean.cardano.client.backend.api.BackendService;
@@ -35,16 +15,35 @@ import com.bloxbean.cardano.client.quicktx.Tx;
 import com.bloxbean.cardano.client.transaction.util.TransactionUtil;
 import com.google.common.collect.Sets;
 import io.vavr.control.Either;
-import org.zalando.problem.Problem;
-
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainTransactions;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.API1BlockchainTransactions;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.SerializedCardanoL1Transaction;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
+import org.springframework.stereotype.Service;
+import org.zalando.problem.Problem;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.apache.commons.collections4.iterators.PeekingIterator.peekingIterator;
+import static org.zalando.problem.Status.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @RequiredArgsConstructor
-public class L1TransactionCreator {
+public class API1L1TransactionCreator {
 
     private static final int CARDANO_MAX_TRANSACTION_SIZE_BYTES = 16384;
 
@@ -61,24 +60,24 @@ public class L1TransactionCreator {
 
     @PostConstruct
     public void init() {
-        log.info("L1TransactionCreator::metadata label: {}", metadataLabel);
-        log.info("L1TransactionCreator::debug store output tx: {}", debugStoreOutputTx);
+        log.info("API1L1TransactionCreator::metadata label: {}", metadataLabel);
+        log.info("API1L1TransactionCreator::debug store output tx: {}", debugStoreOutputTx);
 
         runId = UUID.randomUUID().toString();
-        log.info("L1TransactionCreator::runId: {}", runId);
+        log.info("API1L1TransactionCreator::runId: {}", runId);
 
-        log.info("L1TransactionCreator is initialised.");
+        log.info("API1L1TransactionCreator is initialised.");
     }
 
-    public Either<Problem, Optional<BlockchainTransactions>> pullBlockchainTransaction(String organisationId,
-                                                                                       Set<TransactionEntity> txs) {
+    public Either<Problem, Optional<API1BlockchainTransactions>> pullBlockchainTransaction(String organisationId,
+                                                                                           Set<TransactionEntity> txs) {
         return blockchainReaderPublicApi.getChainTip()
                 .flatMap(chainTip -> handleTransactionCreation(organisationId, txs, chainTip.getAbsoluteSlot()));
     }
 
-    private Either<Problem, Optional<BlockchainTransactions>> handleTransactionCreation(String organisationId,
-                                                                                        Set<TransactionEntity> transactions,
-                                                                                        long creationSlot) {
+    private Either<Problem, Optional<API1BlockchainTransactions>> handleTransactionCreation(String organisationId,
+                                                                                            Set<TransactionEntity> transactions,
+                                                                                            long creationSlot) {
         try {
             return createTransaction(organisationId, transactions, creationSlot);
         } catch (IOException e) {
@@ -93,9 +92,9 @@ public class L1TransactionCreator {
     }
 
     // error or transactions to process or no more transactions to process in case of blockchain transaction creation
-    private Either<Problem, Optional<BlockchainTransactions>> createTransaction(String organisationId,
-                                                               Set<TransactionEntity> transactions,
-                                                               long creationSlot) throws IOException {
+    private Either<Problem, Optional<API1BlockchainTransactions>> createTransaction(String organisationId,
+                                                                                    Set<TransactionEntity> transactions,
+                                                                                    long creationSlot) throws IOException {
         log.info("Splitting {} passedTransactions into blockchain passedTransactions", transactions.size());
 
         val transactionsBatch = new LinkedHashSet<TransactionEntity>();
@@ -113,7 +112,7 @@ public class L1TransactionCreator {
             }
 
             val serializedTransaction = serializedTransactionsE.get();
-            val txBytes = serializedTransaction.txBytes;
+            val txBytes = serializedTransaction.txBytes();
 
             val transactionLinePeek = it.peek();
             if (transactionLinePeek == null) { // next one is last element
@@ -128,7 +127,7 @@ public class L1TransactionCreator {
                 return Either.left(newChunkTxBytesE.getLeft());
             }
             val newSerializedTransaction = newChunkTxBytesE.get();
-            val newChunkTxBytes = newSerializedTransaction.txBytes;
+            val newChunkTxBytes = newSerializedTransaction.txBytes();
 
             if (newChunkTxBytes.length >= CARDANO_MAX_TRANSACTION_SIZE_BYTES) {
                 log.info("Blockchain transaction created, id:{}", TransactionUtil.getTxHash(txBytes));
@@ -138,7 +137,7 @@ public class L1TransactionCreator {
 
                 val remainingTxs = calculateRemainingTransactions(transactions, transactionsBatch);
 
-                return Either.right(Optional.of(new BlockchainTransactions(organisationId, transactionsBatch, remainingTxs, creationSlot, txBytes)));
+                return Either.right(Optional.of(new API1BlockchainTransactions(organisationId, transactionsBatch, remainingTxs, creationSlot, txBytes, organiserAccount.baseAddress())));
             }
         }
 
@@ -155,15 +154,23 @@ public class L1TransactionCreator {
             }
 
             val serTx = serializedTxE.get();
-            log.info("Blockchain transaction created, id:{}, debugTxOutput:{}", TransactionUtil.getTxHash(serTx.txBytes), this.debugStoreOutputTx);
+            val txBytes = serTx.txBytes();
+            log.info("Blockchain transaction created, id:{}, debugTxOutput:{}", TransactionUtil.getTxHash(txBytes), this.debugStoreOutputTx);
+
             potentiallyStoreTxs(creationSlot, serTx);
-            val txBytes = serTx.txBytes;
 
             log.info("Transaction size: {}", txBytes.length);
 
             val remaining = calculateRemainingTransactions(transactions, transactionsBatch);
 
-            return Either.right(Optional.of(new BlockchainTransactions(organisationId, transactionsBatch, remaining, creationSlot, txBytes)));
+            return Either.right(Optional.of(new API1BlockchainTransactions(
+                    organisationId,
+                    transactionsBatch,
+                    remaining,
+                    creationSlot,
+                    txBytes,
+                    organiserAccount.baseAddress()
+            )));
         }
 
         // no transactions to process
@@ -174,15 +181,15 @@ public class L1TransactionCreator {
     private void potentiallyStoreTxs(long creationSlot, SerializedCardanoL1Transaction tx) throws IOException {
         if (debugStoreOutputTx) {
             val timestamp = DateTimeFormatter.ISO_INSTANT.format(Instant.now());
-            val name = STR."lob-txs-metadata-\{runId}-\{timestamp}-\{creationSlot}";
+            val name = STR."lob-txs-api1-metadata-\{runId}-\{timestamp}-\{creationSlot}";
             val tmpJsonTxFile = Files.createTempFile(name, ".json");
             val tmpCborFile = Files.createTempFile(name, ".cbor");
 
             log.info("DebugStoreTx enabled, storing JSON tx metadata to file: {}", tmpJsonTxFile);
-            Files.writeString(tmpJsonTxFile, tx.metadataJson);
+            Files.writeString(tmpJsonTxFile, tx.metadataJson());
 
             log.info("DebugStoreTx enabled, storing CBOR tx metadata to file: {}", tmpCborFile);
-            Files.write(tmpCborFile, tx.metadataCbor);
+            Files.write(tmpCborFile, tx.metadataCbor());
         }
     }
 
@@ -194,8 +201,8 @@ public class L1TransactionCreator {
     }
 
     private Either<Problem, SerializedCardanoL1Transaction> serialiseTransactionChunk(String organisationId,
-                                                                             Set<TransactionEntity> transactionsBatch,
-                                                                             long creationSlot) {
+                                                                                      Set<TransactionEntity> transactionsBatch,
+                                                                                      long creationSlot) {
         try {
             val metadataMap =
                     api1MetadataSerialiser.serialiseToMetadataMap(organisationId, transactionsBatch, creationSlot);
@@ -251,9 +258,5 @@ public class L1TransactionCreator {
                 .buildAndSign()
                 .serialize();
     }
-
-    public record SerializedCardanoL1Transaction(byte[] txBytes,
-                                         byte[] metadataCbor,
-                                         String metadataJson) { }
 
 }

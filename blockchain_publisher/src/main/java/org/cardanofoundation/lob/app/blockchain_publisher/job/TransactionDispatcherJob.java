@@ -14,7 +14,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.service.dispatch.Block
 @Service("blockchain_publisher.TransactionDispatcherJob")
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "lob.blockchain_publisher.dispatcher.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(value = "lob.blockchain_publisher.dispatcher.txs.enabled", havingValue = "true", matchIfMissing = true)
 public class TransactionDispatcherJob {
 
     private final BlockchainTransactionsDispatcher blockchainTransactionsDispatcher;
@@ -25,8 +25,8 @@ public class TransactionDispatcherJob {
     }
 
     @Scheduled(
-            fixedDelayString = "${lob.blockchain_publisher.dispatcher.fixed_delay:PT10S}",
-            initialDelayString = "${lob.blockchain_publisher.dispatcher.initial_delay:PT1M}")
+            fixedDelayString = "${lob.blockchain_publisher.dispatcher.txs.fixed_delay:PT10S}",
+            initialDelayString = "${lob.blockchain_publisher.dispatcher.txs.initial_delay:PT1M}")
     public void execute() {
         log.info("Pooling for blockchain transactions to be send to the blockchain...");
 

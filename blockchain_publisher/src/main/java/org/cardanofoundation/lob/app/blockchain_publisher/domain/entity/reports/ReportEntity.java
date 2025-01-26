@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import javax.annotation.Nullable;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,6 +37,7 @@ import org.cardanofoundation.lob.app.support.spring_audit.CommonDateOnlyEntity;
 @Table(name = "blockchain_publisher_report")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @EntityListeners({ AuditingEntityListener.class })
 public class ReportEntity extends CommonDateOnlyEntity implements Persistable<String> {
 
@@ -104,6 +106,12 @@ public class ReportEntity extends CommonDateOnlyEntity implements Persistable<St
     @Getter
     @Setter
     private LocalDate date;
+
+    @Column(name = "ver", nullable = false)
+    @NotNull
+    @Getter
+    @Setter
+    private long ver;
 
     @Nullable
     @Embedded

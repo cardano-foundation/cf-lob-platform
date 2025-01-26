@@ -1,16 +1,15 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public interface ReportRepository extends JpaRepository<ReportEntity, String> {
 
@@ -25,9 +24,11 @@ public interface ReportRepository extends JpaRepository<ReportEntity, String> {
 
     @Query("""
             SELECT r FROM accounting_reporting_core.report.ReportEntity r
+            LEFT JOIN accounting_reporting_core.report.ReportEntity r2 on r.idControl = r2.idControl and r.ver < r2.ver
              WHERE r.organisation.id = :organisationId
+             AND r2.idControl IS NULL
              ORDER BY r.createdAt ASC, r.reportId ASC""")
-    Set<ReportEntity> findByOrganisationId(@Param("organisationId") String organisationId);
+    Set<ReportEntity> findAllByOrganisationId(@Param("organisationId") String organisationId);
 
     @Query("""
             SELECT r FROM accounting_reporting_core.report.ReportEntity r
@@ -45,10 +46,21 @@ public interface ReportRepository extends JpaRepository<ReportEntity, String> {
 
     @Query("""
         SELECT r FROM accounting_reporting_core.report.ReportEntity r
+        JOIN (
+            SELECT MAX(r2.ver) AS ver, r2.reportId as id FROM accounting_reporting_core.report.ReportEntity r2
+            WHERE r2.organisation.id = :organisationId
+            AND (CAST(:startDate AS date) IS NULL OR r2.date >= :startDate)
+            AND (CAST(:endDate AS date)  IS NULL OR r2.date <= :endDate)
+            AND r2.ledgerDispatchApproved = true
+            GROUP BY r2.reportId
+            ) AS latest
+        ON r.ver = latest.ver AND r.reportId = latest.id
         WHERE r.organisation.id = :organisationId
-        AND r.date >= :startDate AND r.date <= :endDate
+        AND (CAST(:startDate AS date) IS NULL OR r.date >= :startDate)
+        AND (CAST(:endDate AS date)  IS NULL OR r.date <= :endDate)
+        AND r.ledgerDispatchApproved = true
         """)
-    List<ReportEntity> getReportEntitiesByDateBetween(@Param("organisationId") String organisationId,
-                                                      @Param("startDate") LocalDate startDate,
-                                                      @Param("endDate") LocalDate endDate);
+    List<ReportEntity> getNewestReportsInRange(@Param("organisationId") String organisationId,
+                                               @Param("startDate") LocalDate startDate,
+                                               @Param("endDate") LocalDate endDate);
 }

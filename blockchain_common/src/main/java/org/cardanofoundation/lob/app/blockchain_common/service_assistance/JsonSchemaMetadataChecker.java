@@ -1,35 +1,27 @@
 package org.cardanofoundation.lob.app.blockchain_common.service_assistance;
 
-import static com.networknt.schema.SpecVersion.VersionFlag.V7;
-
-import java.io.IOException;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.JsonSchemaFactory;
 import jakarta.annotation.PostConstruct;
-
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.networknt.schema.JsonSchemaFactory;
+import java.io.IOException;
+
+import static com.networknt.schema.SpecVersion.VersionFlag.V7;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class JsonSchemaMetadataChecker implements MetadataChecker {
 
     private final ObjectMapper objectMapper;
 
-    @Value("classpath:api1_lob_blockchain_transaction_metadata_schema.json")
     @Setter
     protected Resource metadataSchemaResource;
 
-    @Value("${lob.l1.transaction.metadata.validation.enable:true}")
     @Setter
     protected boolean enableChecker;
 

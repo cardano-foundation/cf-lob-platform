@@ -111,6 +111,7 @@ CREATE TABLE blockchain_publisher_transaction_item (
 
 CREATE TABLE blockchain_publisher_report (
     report_id VARCHAR(64) NOT NULL PRIMARY KEY,
+    ver BIGINT NOT NULL,
     organisation_id VARCHAR(64),
     organisation_name VARCHAR(255),
     organisation_country_code VARCHAR(3),
@@ -119,7 +120,7 @@ CREATE TABLE blockchain_publisher_report (
     type VARCHAR(255) NOT NULL,
     interval_type VARCHAR(255) NOT NULL,
     year SMALLINT NOT NULL CHECK (year >= 1900 AND year <= 4000),
-    period SMALLINT CHECK (period >= 1 AND period <= 12),
+    period SMALLINT CHECK (period BETWEEN 1 AND 12),
     mode VARCHAR(255) NOT NULL,
     date DATE NOT NULL,
 

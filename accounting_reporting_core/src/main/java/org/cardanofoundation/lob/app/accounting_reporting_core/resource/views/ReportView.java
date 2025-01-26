@@ -1,16 +1,15 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
-import lombok.Getter;
-import lombok.Setter;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-
+import lombok.Getter;
+import lombok.Setter;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
+import org.zalando.problem.Problem;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -28,9 +27,13 @@ public class ReportView {
 
     private Optional<Short> period;
 
-    private Integer ver;
+    private Long ver;
 
     private Boolean publish;
+
+    private Boolean canBePublish;
+
+    private Optional<Problem> error;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;

@@ -17,9 +17,7 @@ public interface ReportEntityRepository extends JpaRepository<ReportEntity, Stri
                                           @Param("publishStatuses") Set<BlockchainPublishStatus> publishStatuses,
                                           Limit limit);
 
-//    @Query("SELECT t FROM blockchain_publisher.TransactionEntity t WHERE t.organisation.id = :organisationId AND t.l1SubmissionData.publishStatus IN :publishStatuses AND t.l1SubmissionData is NOT NULL ORDER BY t.createdAt ASC, t.id ASC")
-//    Set<TransactionEntity> findDispatchedTransactionsThatAreNotFinalizedYet(@Param("organisationId") String organisationId,
-//                                                                            @Param("publishStatuses") Set<BlockchainPublishStatus> publishStatuses,
-//                                                                            Limit limit);
+    @Query("SELECT r FROM blockchain_publisher.report.ReportEntity r WHERE r.organisation.id = :organisationId AND r.l1SubmissionData.publishStatus IN :publishStatuses AND r.l1SubmissionData IS NOT NULL ORDER BY r.createdAt ASC, r.id ASC")
+    Set<ReportEntity> findDispatchedReportsThatAreNotFinalizedYet(@Param("organisationId") String organisationId, @Param("publishStatuses") Set<BlockchainPublishStatus> notFinalisedButVisibleOnChain, Limit limit);
 
 }
