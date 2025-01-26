@@ -1,17 +1,14 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.name;
+
+import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.GetMetricDataRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.SaveDashboardRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.UpdateDashboardRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.response.metric.MetricDataResponse;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.DashboardView;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.MetricView;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.MetricService;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,10 +18,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Optional;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.name;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.GetMetricDataRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.SaveDashboardRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.metric.UpdateDashboardRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.response.metric.MetricDataResponse;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.DashboardView;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.MetricView;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.metrics.MetricService;
 
 @RestController
 @RequestMapping("/api/metrics")

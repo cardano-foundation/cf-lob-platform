@@ -1,9 +1,10 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.mapper;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.metric.DashboardEntity;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.DashboardView;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.metric.DashboardEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.metric.DashboardView;
 
 @Mapper(componentModel = "spring", uses = ChartViewMapper.class)
 public interface DashboardViewMapper {

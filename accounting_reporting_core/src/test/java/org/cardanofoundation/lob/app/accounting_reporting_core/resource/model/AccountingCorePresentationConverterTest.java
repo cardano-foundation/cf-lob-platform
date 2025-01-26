@@ -305,7 +305,7 @@ class AccountingCorePresentationConverterTest {
 
         Mockito.when(accountingCoreService.scheduleReIngestionForFailed("extractionRequest")).thenReturn(Either.left(Problem.builder()
                 .withTitle("TX_BATCH_NOT_FOUND")
-                .withDetail(STR."Transaction batch with id: extractionRequest not found")
+                .withDetail("Transaction batch with id: extractionRequest not found")
                 .withStatus(Status.NOT_FOUND)
                 .build()));
         accountingCorePresentationConverter.scheduleReIngestionForFailed("extractionRequest");

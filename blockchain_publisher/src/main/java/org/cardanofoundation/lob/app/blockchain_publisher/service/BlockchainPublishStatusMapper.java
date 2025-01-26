@@ -1,14 +1,16 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
-import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
-import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
-import org.springframework.stereotype.Service;
+import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.NOT_DISPATCHED;
 
 import java.util.Optional;
 
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.NOT_DISPATCHED;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Service;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
+import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
 
 @Service
 @Slf4j

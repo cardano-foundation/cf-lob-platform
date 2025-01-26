@@ -1,14 +1,16 @@
 package org.cardanofoundation.lob.app.blockchain_common.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
-import org.cardanofoundation.lob.app.blockchain_common.service_assistance.JsonSchemaMetadataChecker;
-import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
-import org.springframework.beans.factory.annotation.Qualifier;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.cardanofoundation.lob.app.blockchain_common.service_assistance.JsonSchemaMetadataChecker;
+import org.cardanofoundation.lob.app.blockchain_common.service_assistance.MetadataChecker;
 
 @Configuration
 public class BlockchainCommonConfig {

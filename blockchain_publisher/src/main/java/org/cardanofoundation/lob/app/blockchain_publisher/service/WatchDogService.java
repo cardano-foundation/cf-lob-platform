@@ -1,11 +1,21 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
-import io.vavr.control.Either;
+import java.util.Optional;
+
 import jakarta.annotation.PostConstruct;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
+import org.springframework.stereotype.Service;
+
+import io.vavr.control.Either;
+import org.zalando.problem.Problem;
+
 import org.cardanofoundation.lob.app.blockchain_common.domain.ChainTip;
 import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_common.domain.OnChainTxDetails;
@@ -17,12 +27,6 @@ import org.cardanofoundation.lob.app.blockchain_publisher.repository.Transaction
 import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Limit;
-import org.springframework.stereotype.Service;
-import org.zalando.problem.Problem;
-
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
