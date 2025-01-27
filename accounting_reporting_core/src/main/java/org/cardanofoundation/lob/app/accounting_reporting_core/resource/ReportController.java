@@ -41,12 +41,8 @@ public class ReportController {
     public ResponseEntity<?> reportParameters(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
 
         HashMap<String, String> currencyOrg = new HashMap<>();
-        /** Todo: Get the value from organisation */
-        organisationCurrencyService.findByOrganisationIdAndCode(orgId, "CHF")
-                .stream()
-                .map(organisationCurrency -> {
-                    return currencyOrg.put(organisationCurrency.getCurrencyId(), organisationCurrency.getId().getCustomerCode());
-                }).collect(Collectors.toSet());
+        organisationCurrencyService.findByOrganisationIdAndCode(orgId, "CHF").ifPresent(organisationCurrency ->
+                currencyOrg.put(organisationCurrency.getCurrencyId(), organisationCurrency.getId().getCustomerCode()));
         return ResponseEntity.ok().body(
                 new ReportingParametersView(
                         Arrays.stream(ReportType.values()).collect(Collectors.toSet()),

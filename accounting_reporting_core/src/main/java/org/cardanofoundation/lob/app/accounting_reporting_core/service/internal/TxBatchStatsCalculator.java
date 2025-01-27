@@ -6,9 +6,9 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 
 import java.util.Optional;
+import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.stereotype.Service;
 
@@ -22,27 +22,27 @@ public class TxBatchStatsCalculator {
 
     public BatchStatistics reCalcStats(TransactionBatchEntity txBatch,
                                        Optional<Integer> totalTransactionsCount) {
-        val transactions = txBatch.getTransactions();
+        Set<TransactionEntity> transactions = txBatch.getTransactions();
 
         return BatchStatistics.builder()
                 .totalTransactionsCount(totalTransactionsCount.orElseGet(() -> txBatch.getBatchStatistics().flatMap(BatchStatistics::getTotalTransactionsCount).orElse(0)))
                 .processedTransactionsCount(transactions.size())
-                .approvedTransactionsCount(Long.valueOf(transactions.stream().filter(TransactionEntity::getTransactionApproved).count()).intValue())
-                .approvedTransactionsDispatchCount(Long.valueOf(transactions.stream().filter(TransactionEntity::getLedgerDispatchApproved).count()).intValue())
+                .approvedTransactionsCount((int) transactions.stream().filter(TransactionEntity::getTransactionApproved).count())
+                .approvedTransactionsDispatchCount((int) transactions.stream().filter(TransactionEntity::getLedgerDispatchApproved).count())
 
-                .dispatchedTransactionsCount(Long.valueOf(transactions.stream().filter(tx -> tx.getLedgerDispatchStatus() == DISPATCHED).count()).intValue())
-                .completedTransactionsCount(Long.valueOf(transactions.stream().filter(tx -> tx.getLedgerDispatchStatus() == COMPLETED).count()).intValue())
-                .finalizedTransactionsCount(Long.valueOf(transactions.stream().filter(tx -> tx.getLedgerDispatchStatus() == FINALIZED).count()).intValue())
+                .dispatchedTransactionsCount((int) transactions.stream().filter(tx -> tx.getLedgerDispatchStatus() == DISPATCHED).count())
+                .completedTransactionsCount((int) transactions.stream().filter(tx -> tx.getLedgerDispatchStatus() == COMPLETED).count())
+                .finalizedTransactionsCount((int) transactions.stream().filter(tx -> tx.getLedgerDispatchStatus() == FINALIZED).count())
 
-                .failedTransactionsCount(Long.valueOf(transactions.stream().filter(tx -> tx.getAutomatedValidationStatus() == FAILED).count()).intValue())
+                .failedTransactionsCount((int) transactions.stream().filter(tx -> tx.getAutomatedValidationStatus() == FAILED).count())
 
-                .failedSourceLOBTransactionsCount(Long.valueOf(txBatch.getTransactions().stream()
+                .failedSourceLOBTransactionsCount((int) txBatch.getTransactions().stream()
                         .filter(tx -> tx.getAutomatedValidationStatus() == FAILED)
-                        .map(tx -> tx.getViolations().stream().anyMatch(v -> v.getSource() == LOB)).count()).intValue())
+                        .map(tx -> tx.getViolations().stream().anyMatch(v -> v.getSource() == LOB)).count())
 
-                .failedSourceERPTransactionsCount(Long.valueOf(txBatch.getTransactions().stream()
+                .failedSourceERPTransactionsCount((int) txBatch.getTransactions().stream()
                         .filter(tx -> tx.getAutomatedValidationStatus() == FAILED)
-                        .map(tx -> tx.getViolations().stream().anyMatch(v -> v.getSource() == ERP)).count()).intValue())
+                        .map(tx -> tx.getViolations().stream().anyMatch(v -> v.getSource() == ERP)).count())
 
                 .build();
     }

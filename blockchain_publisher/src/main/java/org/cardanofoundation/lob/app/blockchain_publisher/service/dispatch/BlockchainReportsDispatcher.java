@@ -85,7 +85,7 @@ public class BlockchainReportsDispatcher {
     }
 
     @Transactional
-    private Optional<API3BlockchainTransaction> createAndSendBlockchainTransactions(ReportEntity reportEntity) {
+    protected Optional<API3BlockchainTransaction> createAndSendBlockchainTransactions(ReportEntity reportEntity) {
         log.info("Creating and sending blockchain transactions for report:{}", reportEntity.getReportId());
 
         Either<Problem, API3BlockchainTransaction> serialisedTxE = api3L1TransactionCreator.pullBlockchainTransaction(reportEntity);
@@ -103,7 +103,7 @@ public class BlockchainReportsDispatcher {
             sendTransactionOnChainAndUpdateDb(serialisedTx);
 
             return Optional.of(serialisedTx);
-        } catch (InterruptedException | ApiException e) {
+        } catch (ApiException e) {
             log.error("Error sending transaction on chain and / or updating db", e);
         }
 
@@ -111,7 +111,7 @@ public class BlockchainReportsDispatcher {
     }
 
     @Transactional
-    private void sendTransactionOnChainAndUpdateDb(API3BlockchainTransaction api3BlockchainTransaction) throws InterruptedException, ApiException {
+    protected void sendTransactionOnChainAndUpdateDb(API3BlockchainTransaction api3BlockchainTransaction) throws ApiException {
         byte[] reportTxData = api3BlockchainTransaction.serialisedTxData();
 
         L1Submission l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(reportTxData, api3BlockchainTransaction.receiverAddress());
@@ -129,10 +129,10 @@ public class BlockchainReportsDispatcher {
     }
 
     @Transactional
-    private void updateTransactionStatuses(String txHash,
-                                           Optional<Long> absoluteSlot,
-                                           long creationSlot,
-                                           ReportEntity reportEntity) {
+    protected void updateTransactionStatuses(String txHash,
+                                             Optional<Long> absoluteSlot,
+                                             long creationSlot,
+                                             ReportEntity reportEntity) {
 
         reportEntity.setL1SubmissionData(Optional.of(L1SubmissionData.builder()
                     .transactionHash(txHash)
@@ -144,5 +144,4 @@ public class BlockchainReportsDispatcher {
 
         reportEntityRepositoryGateway.storeReport(reportEntity);
     }
-
 }

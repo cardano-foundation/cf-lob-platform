@@ -51,8 +51,8 @@ public class NetSuiteClient {
             try {
                 val bodyJsonTree = objectMapper.readTree(body);
                 if (bodyJsonTree.has("error")) {
-                    val error = bodyJsonTree.get("error").asInt();
-                    val text = bodyJsonTree.get("text").asText();
+                    int error = bodyJsonTree.get("error").asInt();
+                    String text = bodyJsonTree.get("text").asText();
                     log.error("Error api error:{}, message:{}", error, text);
 
                     if (error == 105) {

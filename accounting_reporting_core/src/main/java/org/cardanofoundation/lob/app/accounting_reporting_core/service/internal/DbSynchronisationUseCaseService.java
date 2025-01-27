@@ -66,7 +66,7 @@ public class DbSynchronisationUseCaseService {
     }
 
     @Transactional
-    private void processTransactionsForTheFirstTime(String batchId,
+    protected void processTransactionsForTheFirstTime(String batchId,
                                                     String organisationId,
                                                     Set<TransactionEntity> incomingDetachedTransactions,
                                                     Optional<Integer> totalTransactionsCount,

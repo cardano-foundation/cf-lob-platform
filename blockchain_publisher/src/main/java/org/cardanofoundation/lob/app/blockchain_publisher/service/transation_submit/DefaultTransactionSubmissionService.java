@@ -39,7 +39,7 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
     }
 
     @Override
-    public L1Submission submitTransactionWithPossibleConfirmation(byte[] txData, String receiverAddress) throws InterruptedException, ApiException {
+    public L1Submission submitTransactionWithPossibleConfirmation(byte[] txData, String receiverAddress) throws ApiException {
         log.info("Submitting transaction with confirmation.., txId:{}", TransactionUtil.getTxHash(txData));
         val txHash = submitTransaction(txData);
 
@@ -51,7 +51,11 @@ public class DefaultTransactionSubmissionService implements TransactionSubmissio
 
             if (!transactionDetailsR.isSuccessful()) {
                 log.warn("Transaction not found on chain yet. Sleeping for {} seconds... until deadline:{}", sleepTimeSeconds, future);
-                Thread.sleep(sleepTimeSeconds * 1000L);
+                try {
+                    Thread.sleep(sleepTimeSeconds * 1000L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 continue;
             }
 

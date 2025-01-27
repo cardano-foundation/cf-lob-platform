@@ -65,7 +65,7 @@ public class BlockchainTransactionsDispatcher {
     }
 
     @Transactional
-    private void dispatchTransactionsBatch(String organisationId,
+    protected void dispatchTransactionsBatch(String organisationId,
                                              Set<TransactionEntity> transactionEntitiesBatch) {
         log.info("Dispatching passedTransactions for organisation: {}", organisationId);
 
@@ -114,14 +114,14 @@ public class BlockchainTransactionsDispatcher {
             sendTransactionOnChainAndUpdateDb(serialisedTx);
 
             return Optional.of(serialisedTx);
-        } catch (InterruptedException | ApiException e) {
+        } catch (ApiException e) {
             log.error("Error sending transaction on chain and / or updating db", e);
         }
 
         return Optional.empty();
     }
 
-    private void sendTransactionOnChainAndUpdateDb(API1BlockchainTransactions blockchainTransactions) throws InterruptedException, ApiException {
+    private void sendTransactionOnChainAndUpdateDb(API1BlockchainTransactions blockchainTransactions) throws ApiException {
         val txData = blockchainTransactions.serialisedTxData();
         val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(txData, blockchainTransactions.receiverAddress());
         val organisationId = blockchainTransactions.organisationId();

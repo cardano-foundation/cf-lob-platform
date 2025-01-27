@@ -93,8 +93,8 @@ public class LedgerService {
     }
 
     @Transactional(propagation = SUPPORTS)
-    private void dispatchPendingTransactions(String organisationId,
-                                             Set<TransactionEntity> transactions) {
+    protected void dispatchPendingTransactions(String organisationId,
+                                               Set<TransactionEntity> transactions) {
         log.info("dispatchTransactionToBlockchainPublisher, total tx count: {}", transactions.size());
 
         if (transactions.isEmpty()) {

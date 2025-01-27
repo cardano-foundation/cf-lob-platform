@@ -19,6 +19,6 @@ public interface TransactionSubmissionService {
      * @param txData
      * @return
      */
-    L1Submission submitTransactionWithPossibleConfirmation(byte[] txData, String receiverAddress) throws InterruptedException, ApiException;
+    L1Submission submitTransactionWithPossibleConfirmation(byte[] txData, String receiverAddress) throws ApiException;
 
 }

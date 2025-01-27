@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import java.time.LocalDate;
 import java.util.Set;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -22,20 +23,14 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ERPIncomingDataProcessor {
 
-    @Autowired
-    private TransactionReconcilationService transactionReconcilationService;
-
-    @Autowired
+    private final TransactionReconcilationService transactionReconcilationService;
     @Qualifier("selectorBusinessRulesProcessors")
-    private BusinessRulesPipelineProcessor businessRulesPipelineProcessor;
-
-    @Autowired
-    private TransactionBatchService transactionBatchService;
-
-    @Autowired
-    private DbSynchronisationUseCaseService dbSynchronisationUseCaseService;
+    private final BusinessRulesPipelineProcessor businessRulesPipelineProcessor;
+    private final TransactionBatchService transactionBatchService;
+    private final DbSynchronisationUseCaseService dbSynchronisationUseCaseService;
 
     @Transactional
     public void initiateIngestion(String batchId,
