@@ -21,11 +21,13 @@ public class MetadataDeserialiser {
         val org = (CBORMetadataMap) payload.get("org");
         val orgId = (String) org.get("id");
 
-        val txs = (CBORMetadataList) payload.get("txs");
-
+        Set<LOBOnChainTransaction> txs = new LinkedHashSet<LOBOnChainTransaction>();
+        if(payload.get("type").equals("INDIVIDUAL_TRANSACTIONS")) {
+            txs = readTransactions((CBORMetadataList) payload.get("data"));
+        }
         return LOBOnChainBatch.builder()
                 .organisationId(orgId)
-                .transactions(readTransactions(txs))
+                .transactions(txs)
                 .build();
     }
 
