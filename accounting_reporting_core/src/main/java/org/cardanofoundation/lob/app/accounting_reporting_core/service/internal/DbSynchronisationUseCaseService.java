@@ -37,6 +37,7 @@ public class DbSynchronisationUseCaseService {
     private final TransactionItemRepository transactionItemRepository;
     private final TransactionBatchAssocRepository transactionBatchAssocRepository;
     private final TransactionBatchService transactionBatchService;
+    private final DbSynchronisationUseCaseService useCaseService;
 
     @Transactional
     public void execute(String batchId,
@@ -61,11 +62,11 @@ public class DbSynchronisationUseCaseService {
 
         String organisationId = incomingTransactions.organisationId();
 
-        processTransactionsForTheFirstTime(batchId, organisationId, transactions, Optional.of(totalTransactionsCount), flags);
+        useCaseService.processTransactionsForTheFirstTime(batchId, organisationId, transactions, Optional.of(totalTransactionsCount), flags);
     }
 
     @Transactional
-    protected void processTransactionsForTheFirstTime(String batchId,
+    public void processTransactionsForTheFirstTime(String batchId,
                                                     String organisationId,
                                                     Set<TransactionEntity> incomingDetachedTransactions,
                                                     Optional<Integer> totalTransactionsCount,
@@ -85,7 +86,7 @@ public class DbSynchronisationUseCaseService {
         for (TransactionEntity incomingTx : incomingDetachedTransactions) {
             Optional<TransactionEntity> txM = Optional.ofNullable(databaseTransactionsMap.get(incomingTx.getId()));
 
-            Boolean isDispatchMarked = txM.map(TransactionEntity::allApprovalsPassedForTransactionDispatch).orElse(false);
+            boolean isDispatchMarked = txM.map(TransactionEntity::allApprovalsPassedForTransactionDispatch).orElse(false);
             boolean notStoredYet = txM.isEmpty();
             /** If is a new transaction || the new one is different from our Db copy || the transaction has an ERP source violation || transaction item has an ERP source rejection -> then should be processed*/
             boolean isChanged = notStoredYet || (txM.map(tx -> !isIncomingTransactionERPSame(tx, incomingTx) || tx.hasAnyRejection(Source.ERP) || tx.hasAnyViolation(Source.ERP)).orElse(false));
