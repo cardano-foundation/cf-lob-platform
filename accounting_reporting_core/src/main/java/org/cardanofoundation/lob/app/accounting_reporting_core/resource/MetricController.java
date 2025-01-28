@@ -1,7 +1,5 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.name;
-
 import java.util.List;
 import java.util.Optional;
 

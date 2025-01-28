@@ -5,6 +5,7 @@ import static org.zalando.problem.Status.NOT_FOUND;
 import static org.zalando.problem.Status.OK;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.validation.Valid;
 
@@ -27,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.zalando.problem.Problem;
+import org.zalando.problem.ThrowableProblem;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.RejectionReason;
@@ -55,7 +57,7 @@ public class AccountingCoreResource {
     })
     @PostMapping(value = "/transactions", produces = APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
-    public ResponseEntity<?> listAllAction(@Valid @RequestBody SearchRequest body) {
+    public ResponseEntity<List<TransactionView>> listAllAction(@Valid @RequestBody SearchRequest body) {
         List<TransactionView> transactions = accountingCorePresentationService.allTransactions(body);
         return ResponseEntity.ok().body(transactions);
     }
@@ -90,7 +92,7 @@ public class AccountingCoreResource {
             )
     })
     @GetMapping(value = "/transaction-types", produces = APPLICATION_JSON_VALUE, name = "Transaction types")
-    public ResponseEntity<?> transactionType() throws JsonProcessingException {
+    public ResponseEntity<String> transactionType() throws JsonProcessingException {
         val jsonArray = objectMapper.createArrayNode();
 
         for (val transactionType : TransactionType.values()) {
@@ -111,7 +113,7 @@ public class AccountingCoreResource {
             )
     })
     @GetMapping(value = "/rejection-reasons", produces = APPLICATION_JSON_VALUE, name = "Rejection reasons")
-    public ResponseEntity<?> rejectionReasons() {
+    public ResponseEntity<RejectionReason[]> rejectionReasons() {
         return ResponseEntity.ok().body(RejectionReason.values());
     }
 
@@ -173,7 +175,7 @@ public class AccountingCoreResource {
             }
     )
     @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
-    public ResponseEntity<?> approveTransactions(@Valid @RequestBody TransactionsRequest transactionsRequest) {
+    public ResponseEntity<List<TransactionProcessView>> approveTransactions(@Valid @RequestBody TransactionsRequest transactionsRequest) {
         val transactionProcessViews = accountingCorePresentationService.approveTransactions(transactionsRequest);
 
         return ResponseEntity
@@ -191,7 +193,7 @@ public class AccountingCoreResource {
             }
     )
     @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
-    public ResponseEntity<?> approveTransactionsPublish(@Valid @RequestBody TransactionsRequest transactionsRequest) {
+    public ResponseEntity<List<TransactionProcessView>> approveTransactionsPublish(@Valid @RequestBody TransactionsRequest transactionsRequest) {
         val transactionProcessViewList = accountingCorePresentationService.approveTransactionsPublish(transactionsRequest);
 
         return ResponseEntity
@@ -209,8 +211,8 @@ public class AccountingCoreResource {
             }
     )
     @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
-    public ResponseEntity<?> rejectTransactionItems(@Valid @RequestBody TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
-        val transactionProcessViewsResult = accountingCorePresentationService.rejectTransactionItems(transactionItemsRejectionRequest);
+    public ResponseEntity<TransactionItemsProcessRejectView> rejectTransactionItems(@Valid @RequestBody TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
+        TransactionItemsProcessRejectView transactionProcessViewsResult = accountingCorePresentationService.rejectTransactionItems(transactionItemsRejectionRequest);
 
         return ResponseEntity
                 .status(HttpStatusCode.valueOf(OK.getStatusCode()))
@@ -227,46 +229,15 @@ public class AccountingCoreResource {
             }
     )
     @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
-    public ResponseEntity<?> listAllBatches(@Valid @RequestBody BatchSearchRequest body,
-                                            @RequestParam(name = "page", defaultValue = "0") int page,
-                                            @RequestParam(name = "limit", defaultValue = "10") int limit) {
+    public ResponseEntity<BatchsDetailView> listAllBatches(@Valid @RequestBody BatchSearchRequest body,
+                                                           @RequestParam(name = "page", defaultValue = "0") int page,
+                                                           @RequestParam(name = "limit", defaultValue = "10") int limit) {
         body.setLimit(limit);
         body.setPage(page);
 
-        val batchs = accountingCorePresentationService.listAllBatch(body);
+        BatchsDetailView batchs = accountingCorePresentationService.listAllBatch(body);
 
         return ResponseEntity.ok().body(batchs);
-    }
-
-    @Tag(name = "Batches", description = "Batches API")
-    @GetMapping(value = "/batches/{batchId}", produces = APPLICATION_JSON_VALUE)
-    @Operation(description = "Batch detail",
-            responses = {
-                    @ApiResponse(content = {
-                            @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = BatchView.class))
-                    }),
-                    @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(example = "{\"title\": \"BATCH_NOT_FOUND\",\"status\": 404,\"detail\": \"Batch with id: {batchId} could not be found\"" +
-                            "}"))})
-            }
-    )
-    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
-    public ResponseEntity<?> batchesDetail(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
-        val txBatchM = accountingCorePresentationService.batchDetail(batchId);
-        if (txBatchM.isEmpty()) {
-            val issue = Problem.builder()
-                    .withTitle("BATCH_NOT_FOUND")
-                    .withDetail(STR."Batch with id: {\{batchId}} could not be found")
-                    .withStatus(NOT_FOUND)
-                    .build();
-
-            return ResponseEntity
-                    .status(issue.getStatus().getStatusCode())
-                    .body(issue);
-        }
-
-        return ResponseEntity
-                .ok()
-                .body(txBatchM.orElseThrow());
     }
 
     @Tag(name = "Batches", description = "Batches API")
@@ -281,8 +252,8 @@ public class AccountingCoreResource {
             }
     )
     @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
-    public ResponseEntity<?> batchReprocess(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
-        val transactionProcessViewsResult = accountingCorePresentationService.scheduleReIngestionForFailed(batchId);
+    public ResponseEntity<BatchReprocessView> batchReprocess(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
+        BatchReprocessView transactionProcessViewsResult = accountingCorePresentationService.scheduleReIngestionForFailed(batchId);
 
         return ResponseEntity
                 .status(HttpStatusCode.valueOf(OK.getStatusCode()))
@@ -300,20 +271,19 @@ public class AccountingCoreResource {
             }
     )
     @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
-    public ResponseEntity<?> listAllBatch(@Valid @RequestBody BatchSearchRequest body,
-                                          @RequestParam(name = "page", defaultValue = "0") int page,
-                                          @RequestParam(name = "limit", defaultValue = "10") int limit) {
+    public ResponseEntity<BatchsDetailView> listAllBatch(@Valid @RequestBody BatchSearchRequest body,
+                                                         @RequestParam(name = "page", defaultValue = "0") int page,
+                                                         @RequestParam(name = "limit", defaultValue = "10") int limit) {
         body.setLimit(limit);
         body.setPage(page);
 
-        val batchs = accountingCorePresentationService.listAllBatch(body);
+        BatchsDetailView batchs = accountingCorePresentationService.listAllBatch(body);
 
         return ResponseEntity.ok().body(batchs);
     }
 
-    @Deprecated
     @Tag(name = "Batches", description = "Batches API")
-    @GetMapping(value = "/batchs/{batchId}", produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/batches/{batchId}", produces = APPLICATION_JSON_VALUE)
     @Operation(description = "Batch detail",
             responses = {
                     @ApiResponse(content = {
@@ -324,10 +294,10 @@ public class AccountingCoreResource {
             }
     )
     @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
-    public ResponseEntity<?> batchDetail(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
-        val txBatchM = accountingCorePresentationService.batchDetail(batchId);
+    public ResponseEntity<?> batchesDetail(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
+        Optional<BatchView> txBatchM = accountingCorePresentationService.batchDetail(batchId);
         if (txBatchM.isEmpty()) {
-            val issue = Problem.builder()
+            ThrowableProblem issue = Problem.builder()
                     .withTitle("BATCH_NOT_FOUND")
                     .withDetail(STR."Batch with id: {\{batchId}} could not be found")
                     .withStatus(NOT_FOUND)
@@ -343,6 +313,23 @@ public class AccountingCoreResource {
                 .body(txBatchM.orElseThrow());
     }
 
+    @Deprecated(forRemoval = true)
+    @Tag(name = "Batches", description = "Batches API")
+    @GetMapping(value = "/batchs/{batchId}", produces = APPLICATION_JSON_VALUE)
+    @Operation(description = "Batch detail",
+            responses = {
+                    @ApiResponse(content = {
+                            @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = BatchView.class))
+                    }),
+                    @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(example = "{\"title\": \"BATCH_NOT_FOUND\",\"status\": 404,\"detail\": \"Batch with id: {batchId} could not be found\"" +
+                            "}"))})
+            }
+    )
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
+    public ResponseEntity<?> batchDetail(@Valid @PathVariable("batchId") @Parameter(example = "TESTd12027c0788116d14723a4ab4a67636a7d6463d84f0c6f7adf61aba32c04") String batchId) {
+        return batchesDetail(batchId);
+    }
+
     @Deprecated
     @Tag(name = "Transactions", description = "Transactions API")
     @Operation(description = "Rejection types", responses = {
@@ -351,7 +338,7 @@ public class AccountingCoreResource {
             )
     })
     @GetMapping(value = "/rejection-types", produces = APPLICATION_JSON_VALUE, name = "Rejection types")
-    public ResponseEntity<?> rejectionTypes() {
+    public ResponseEntity<RejectionReason[]> rejectionTypes() {
 
         return ResponseEntity.ok().body(RejectionReason.values());
     }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.LedgerService;
 
-@Service("accounting_core.TransactionDispatcherJob")
+@Service
 @Slf4j
 @RequiredArgsConstructor
 public class DispatcherJob {

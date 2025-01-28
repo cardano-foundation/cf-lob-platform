@@ -25,7 +25,7 @@ public class AccountingCoreResourceNetSuiteMock {
 
     @Tag(name = "Mock", description = "Mock service API")
     @GetMapping(value = "/mockresult", produces = "application/json")
-    public ResponseEntity<?> mockNet() {
+    public ResponseEntity<String> mockNet() {
         String sube = FileUtils.readAsString(Path.of(mockResultPath));
 
         return ResponseEntity.ok().body(sube);

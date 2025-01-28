@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,23 +53,21 @@ public class AccountingCorePresentationViewService {
     private final AccountingCoreTransactionRepository accountingCoreTransactionRepository;
 
     public ReconciliationResponseView allReconciliationTransaction(ReconciliationFilterRequest body) {
-        val transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
+        Object transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
         if (body.getFilter().equals(ReconciliationFilterStatusRequest.UNRECONCILED)) {
             Set<Object> txDuplicated = new HashSet<>();
-            val transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).stream()
+            LinkedHashSet<TransactionReconciliationTransactionsView> transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).stream()
                     .filter(o -> {
-                        if (o[0] instanceof TransactionEntity) {
-                            if (!txDuplicated.contains(((TransactionEntity) o[0]).getId())) {
-                                txDuplicated.add(((TransactionEntity) o[0]).getId());
+                        if (o[0] instanceof TransactionEntity transactionEntity && !txDuplicated.contains((transactionEntity).getId())) {
+                                txDuplicated.add((transactionEntity).getId());
                                 return true;
                             }
-                        }
-                        if (o[1] instanceof ReconcilationViolation) {
-                            if (!txDuplicated.contains(((ReconcilationViolation) o[1]).getTransactionId())) {
-                                txDuplicated.add(((ReconcilationViolation) o[1]).getTransactionId());
+
+                        if (o[1] instanceof ReconcilationViolation reconcilationViolation && !txDuplicated.contains((reconcilationViolation).getTransactionId())) {
+                                txDuplicated.add((reconcilationViolation).getTransactionId());
                                 return true;
                             }
-                        }
+
                         return false;
                     })
                     .map(this::getReconciliationTransactionsSelector)
@@ -83,7 +80,7 @@ public class AccountingCorePresentationViewService {
                     transactions
             );
         }
-        val transactions = transactionRepositoryGateway.findReconciliation(body.getFilter(), body.getLimit(), body.getPage()).stream()
+        Set<TransactionReconciliationTransactionsView> transactions = transactionRepositoryGateway.findReconciliation(body.getFilter(), body.getLimit(), body.getPage()).stream()
                 .map(this::getTransactionReconciliationView)
                 .collect(toSet());
 
@@ -96,7 +93,7 @@ public class AccountingCorePresentationViewService {
     }
 
     public List<TransactionView> allTransactions(SearchRequest body) {
-        val transactions = transactionRepositoryGateway.findAllByStatus(
+        List<TransactionEntity> transactions = transactionRepositoryGateway.findAllByStatus(
                 body.getOrganisationId(),
                 body.getStatus(),
                 body.getTransactionType()
@@ -109,16 +106,16 @@ public class AccountingCorePresentationViewService {
     }
 
     public Optional<TransactionView> transactionDetailSpecific(String transactionId) {
-        val transactionEntity = transactionRepositoryGateway.findById(transactionId);
+        Optional<TransactionEntity> transactionEntity = transactionRepositoryGateway.findById(transactionId);
 
         return transactionEntity.map(this::getTransactionView);
     }
 
     public Optional<BatchView> batchDetail(String batchId) {
         return transactionBatchRepositoryGateway.findById(batchId).map(transactionBatchEntity -> {
-                    val transactions = this.getTransaction(transactionBatchEntity);
-                    val statistic = this.getBatchesStatistics(transactions);
-                    val filteringParameters = this.getFilteringParameters(transactionBatchEntity.getFilteringParameters());
+            Set<TransactionView> transactions = this.getTransaction(transactionBatchEntity);
+            BatchStatisticsView statistic = this.getBatchesStatistics(transactions);
+            FilteringParametersView filteringParameters = this.getFilteringParameters(transactionBatchEntity.getFilteringParameters());
 
                     return new BatchView(
                             transactionBatchEntity.getId(),
@@ -137,14 +134,14 @@ public class AccountingCorePresentationViewService {
     }
 
     public BatchsDetailView listAllBatch(BatchSearchRequest body) {
-        val batchDetailView = new BatchsDetailView();
+        BatchsDetailView batchDetailView = new BatchsDetailView();
 
-        val batches = transactionBatchRepositoryGateway.findByFilter(body)
+        List<BatchView> batches = transactionBatchRepositoryGateway.findByFilter(body)
                 .stream()
                 .map(
                         transactionBatchEntity -> {
-                            val transactions = this.getTransaction(transactionBatchEntity);
-                            val statistic = this.getBatchesStatistics(transactions);
+                            Set<TransactionView> transactions = this.getTransaction(transactionBatchEntity);
+                            BatchStatisticsView statistic = this.getBatchesStatistics(transactions);
                             return new BatchView(
                                     transactionBatchEntity.getId(),
                                     transactionBatchEntity.getCreatedAt().toString(),
@@ -168,10 +165,10 @@ public class AccountingCorePresentationViewService {
 
     @Transactional
     public Either<Problem, Void> extractionTrigger(ExtractionRequest body) {
-        val transactionNumbers = new ArrayList<>(body.getTransactionNumbers());
+        ArrayList<String> transactionNumbers = new ArrayList<>(body.getTransactionNumbers());
         transactionNumbers.removeIf(String::isEmpty);
 
-        val fp = UserExtractionParameters.builder()
+        UserExtractionParameters fp = UserExtractionParameters.builder()
                 .from(LocalDate.parse(body.getDateFrom()))
                 .to(LocalDate.parse(body.getDateTo()))
                 .organisationId(body.getOrganisationId())
@@ -208,13 +205,13 @@ public class AccountingCorePresentationViewService {
 
     @Transactional
     public TransactionItemsProcessRejectView rejectTransactionItems(TransactionItemsRejectionRequest transactionItemsRejectionRequest) {
-        val txM = transactionRepositoryGateway.findById(transactionItemsRejectionRequest.getTransactionId());
+        Optional<TransactionEntity> txM = transactionRepositoryGateway.findById(transactionItemsRejectionRequest.getTransactionId());
         if (txM.isEmpty()) {
             Either<IdentifiableProblem, TransactionEntity> errorE = transactionNotFoundResponse(transactionItemsRejectionRequest.getTransactionId());
             return TransactionItemsProcessRejectView.createFail(transactionItemsRejectionRequest.getTransactionId(), errorE.getLeft().getProblem());
 
         }
-        val tx = txM.orElseThrow();
+        TransactionEntity tx = txM.orElseThrow();
         Set<TransactionItemsProcessView> items = transactionRepositoryGateway.rejectTransactionItems(tx, transactionItemsRejectionRequest.getTransactionItemsRejections())
                 .stream()
                 .map(txItemEntityE -> txItemEntityE.fold(txProblem -> {
@@ -233,7 +230,7 @@ public class AccountingCorePresentationViewService {
 
     @Transactional
     public BatchReprocessView scheduleReIngestionForFailed(String batchId) {
-        val txM = accountingCoreService.scheduleReIngestionForFailed(batchId);
+        Either<Problem, Void> txM = accountingCoreService.scheduleReIngestionForFailed(batchId);
 
         if (txM.isEmpty()) {
             return BatchReprocessView.createFail(batchId, txM.getLeft());
@@ -244,17 +241,17 @@ public class AccountingCorePresentationViewService {
     }
 
     private BatchStatisticsView getBatchesStatistics(Set<TransactionView> transactions) {
-        val invalid = transactions.stream().filter(transactionView -> INVALID == transactionView.getStatistic()).count();
+        long invalid = transactions.stream().filter(transactionView -> INVALID == transactionView.getStatistic()).count();
 
-        val pending = transactions.stream().filter(transactionView -> PENDING == transactionView.getStatistic()).count();
+        long pending = transactions.stream().filter(transactionView -> PENDING == transactionView.getStatistic()).count();
 
-        val approve = transactions.stream().filter(transactionView -> APPROVE == transactionView.getStatistic()).count();
+        long approve = transactions.stream().filter(transactionView -> APPROVE == transactionView.getStatistic()).count();
 
-        val publish = transactions.stream().filter(transactionView -> PUBLISH == transactionView.getStatistic()).count();
+        long publish = transactions.stream().filter(transactionView -> PUBLISH == transactionView.getStatistic()).count();
 
-        val published = transactions.stream().filter(transactionView -> PUBLISHED == transactionView.getStatistic()).count();
+        long published = transactions.stream().filter(transactionView -> PUBLISHED == transactionView.getStatistic()).count();
 
-        val total = (long) transactions.size();
+        long total = transactions.size();
 
         return new BatchStatisticsView(
                 (int) invalid,
@@ -436,11 +433,11 @@ public class AccountingCorePresentationViewService {
 
         switch (transactionEntity.getLedgerDispatchStatus()) {
             case NOT_DISPATCHED, MARK_DISPATCH -> {
-                if (transactionEntity.getLedgerDispatchApproved()) {
+                if (Boolean.TRUE.equals(transactionEntity.getLedgerDispatchApproved())) {
                     return PUBLISHED;
                 }
 
-                if (transactionEntity.getTransactionApproved()) {
+                if (Boolean.TRUE.equals(transactionEntity.getTransactionApproved())) {
                     return PUBLISH;
                 }
             }
@@ -514,11 +511,11 @@ public class AccountingCorePresentationViewService {
 
     private TransactionReconciliationTransactionsView getReconciliationTransactionsSelector(Object[] violations) {
         for (Object o : violations) {
-            if (o instanceof TransactionEntity && ((TransactionEntity) o).getLastReconcilation().isPresent()) {
-                return getTransactionReconciliationView((TransactionEntity) o);
+            if (o instanceof TransactionEntity transactionEntity && transactionEntity.getLastReconcilation().isPresent()) {
+                return getTransactionReconciliationView(transactionEntity);
             }
-            if (o instanceof ReconcilationViolation) {
-                return getTransactionReconciliationViolationView((ReconcilationViolation) o);
+            if (o instanceof ReconcilationViolation reconcilationViolation) {
+                return getTransactionReconciliationViolationView(reconcilationViolation);
             }
 
             try {
