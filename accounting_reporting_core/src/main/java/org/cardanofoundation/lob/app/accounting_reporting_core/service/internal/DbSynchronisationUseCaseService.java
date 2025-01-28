@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,8 +43,8 @@ public class DbSynchronisationUseCaseService {
                         OrganisationTransactions incomingTransactions,
                         int totalTransactionsCount,
                         ProcessorFlags flags) {
-        val trigger = flags.getTrigger();
-        val transactions = incomingTransactions.transactions();
+        ProcessorFlags.Trigger trigger = flags.getTrigger();
+        Set<TransactionEntity> transactions = incomingTransactions.transactions();
 
         if (transactions.isEmpty()) {
             log.info("No transactions to process, batchId: {}", batchId);
@@ -60,37 +59,36 @@ public class DbSynchronisationUseCaseService {
             return;
         }
 
-        val organisationId = incomingTransactions.organisationId();
+        String organisationId = incomingTransactions.organisationId();
 
         processTransactionsForTheFirstTime(batchId, organisationId, transactions, Optional.of(totalTransactionsCount), flags);
     }
 
     @Transactional
-    private void processTransactionsForTheFirstTime(String batchId,
+    public void processTransactionsForTheFirstTime(String batchId,
                                                     String organisationId,
                                                     Set<TransactionEntity> incomingDetachedTransactions,
                                                     Optional<Integer> totalTransactionsCount,
                                                     ProcessorFlags flags) {
-        val trigger = flags.getTrigger();
-        val txsAlreadyStored = new LinkedHashSet<TransactionEntity>();
+        LinkedHashSet<TransactionEntity> txsAlreadyStored = new LinkedHashSet<>();
 
-        val txIds = incomingDetachedTransactions.stream()
+        Set<String> txIds = incomingDetachedTransactions.stream()
                 .map(TransactionEntity::getId)
                 .collect(Collectors.toSet());
 
-        val databaseTransactionsMap = accountingCoreTransactionRepository.findAllById(txIds)
+        Map<String, TransactionEntity> databaseTransactionsMap = accountingCoreTransactionRepository.findAllById(txIds)
                 .stream()
                 .collect(toMap(TransactionEntity::getId, Function.identity()));
 
-        val toProcessTransactions = new LinkedHashSet<TransactionEntity>();
+        LinkedHashSet<TransactionEntity> toProcessTransactions = new LinkedHashSet<>();
 
-        for (val incomingTx : incomingDetachedTransactions) {
-            val txM = Optional.ofNullable(databaseTransactionsMap.get(incomingTx.getId()));
+        for (TransactionEntity incomingTx : incomingDetachedTransactions) {
+            Optional<TransactionEntity> txM = Optional.ofNullable(databaseTransactionsMap.get(incomingTx.getId()));
 
-            val isDispatchMarked = txM.map(TransactionEntity::allApprovalsPassedForTransactionDispatch).orElse(false);
-            val notStoredYet = txM.isEmpty();
+            boolean isDispatchMarked = txM.map(TransactionEntity::allApprovalsPassedForTransactionDispatch).orElse(false);
+            boolean notStoredYet = txM.isEmpty();
             /** If is a new transaction || the new one is different from our Db copy || the transaction has an ERP source violation || transaction item has an ERP source rejection -> then should be processed*/
-            val isChanged = notStoredYet || (txM.map(tx -> !isIncomingTransactionERPSame(tx, incomingTx) || tx.hasAnyRejection(Source.ERP) || tx.hasAnyViolation(Source.ERP)).orElse(false));
+            boolean isChanged = notStoredYet || (txM.map(tx -> !isIncomingTransactionERPSame(tx, incomingTx) || tx.hasAnyRejection(Source.ERP) || tx.hasAnyViolation(Source.ERP)).orElse(false));
 
             if (isDispatchMarked && isChanged) {
                 log.warn("Transaction cannot be altered, it is already marked as dispatched, transactionNumber: {}", incomingTx.getTransactionInternalNumber());
@@ -99,7 +97,7 @@ public class DbSynchronisationUseCaseService {
 
             if (isChanged && !isDispatchMarked) {
                 if (txM.isPresent()) {
-                    val attached = txM.orElseThrow();
+                    TransactionEntity attached = txM.orElseThrow();
 
                     transactionConverter.copyFields(attached, incomingTx);
                     attached.getAllItems().clear();
@@ -122,11 +120,11 @@ public class DbSynchronisationUseCaseService {
                                    OrganisationTransactions transactions,
                                    ProcessorFlags flags) {
         log.info("Updating transaction batch, batchId: {}", batchId);
-        val trigger = flags.getTrigger();
-        val txs = transactions.transactions();
+        ProcessorFlags.Trigger trigger = flags.getTrigger();
+        Set<TransactionEntity> txs = transactions.transactions();
 
-        for (val tx : txs) {
-            val saved = accountingCoreTransactionRepository.save(tx);
+        for (TransactionEntity tx : txs) {
+            TransactionEntity saved = accountingCoreTransactionRepository.save(tx);
             saved.getAllItems().forEach(i -> i.setTransaction(saved));
 
             /** Remove items rejection according to the processor selected */
@@ -140,10 +138,10 @@ public class DbSynchronisationUseCaseService {
             transactionItemRepository.saveAll(tx.getAllItems());
         }
 
-        val transactionBatchAssocEntities = txs
+        Set<TransactionBatchAssocEntity> transactionBatchAssocEntities = txs
                 .stream()
                 .map(tx -> {
-                    val id = new TransactionBatchAssocEntity.Id(batchId, tx.getId());
+                    TransactionBatchAssocEntity.Id id = new TransactionBatchAssocEntity.Id(batchId, tx.getId());
 
                     return transactionBatchAssocRepository.findById(id).orElseGet(() -> new TransactionBatchAssocEntity(id));
                 })
@@ -154,8 +152,8 @@ public class DbSynchronisationUseCaseService {
 
     private boolean isIncomingTransactionERPSame(TransactionEntity existingTx,
                                                  TransactionEntity incomingTx) {
-        val existingTxVersion = ERPSourceTransactionVersionCalculator.compute(existingTx);
-        val incomingTxVersion = ERPSourceTransactionVersionCalculator.compute(incomingTx);
+        String existingTxVersion = ERPSourceTransactionVersionCalculator.compute(existingTx);
+        String incomingTxVersion = ERPSourceTransactionVersionCalculator.compute(incomingTx);
 
         log.info("Existing transaction version:{}, incomingTx:{}", existingTxVersion, incomingTxVersion);
 
@@ -170,10 +168,10 @@ public class DbSynchronisationUseCaseService {
 
         log.info("txs causing conflict count:{}", txsAlreadyDispatched.size());
 
-        for (val tx : txsAlreadyDispatched) {
+        for (TransactionEntity tx : txsAlreadyDispatched) {
             log.info("tx causing conflict: {}", tx);
 
-            val v = TransactionViolation.builder()
+            TransactionViolation v = TransactionViolation.builder()
                     .code(TX_VERSION_CONFLICT_TX_NOT_MODIFIABLE)
                     .severity(WARN)
                     .source(Source.ERP)

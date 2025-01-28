@@ -25,7 +25,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.
 @RequestMapping("/api/core")
 @Slf4j
 @RequiredArgsConstructor
-@Deprecated
+@Deprecated(forRemoval = true)
 public class ExperimentalAccountingCoreResource {
 
     private final AccountingCoreService accountingCoreService;
