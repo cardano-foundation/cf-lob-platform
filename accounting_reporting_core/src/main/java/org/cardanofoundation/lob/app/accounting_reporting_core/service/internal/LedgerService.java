@@ -42,7 +42,6 @@ public class LedgerService {
     private final TransactionConverter transactionConverter;
     private final PIIDataFilteringService piiDataFilteringService;
     private final OrganisationPublicApi organisationPublicApi;
-    private final LedgerService service;
 
     @Value("${ledger.dispatch.batch.size:100}")
     private int dispatchBatchSize;
@@ -91,8 +90,8 @@ public class LedgerService {
 
             log.info("dispatchPending transactions and reports, organisationId: {}, total tx count: {}", organisation.getId(), dispatchTransactions.size());
 
-            service.dispatchPendingTransactions(organisation.getId(), dispatchTransactions);
-            service.dispatchReports(organisation.getId(), dispatchReports);
+            dispatchPendingTransactions(organisation.getId(), dispatchTransactions);
+            dispatchReports(organisation.getId(), dispatchReports);
         }
     }
 

@@ -40,7 +40,6 @@ public class BlockchainTransactionsDispatcher {
     private final TransactionSubmissionService transactionSubmissionService;
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
     private final DispatchingStrategy<TransactionEntity> dispatchingStrategy;
-    private final BlockchainTransactionsDispatcher transactionsDispatcher;
 
     @Value("${lob.blockchain_publisher.dispatcher.pullBatchSize:50}")
     private int pullTransactionsBatchSize = 50;
@@ -63,7 +62,7 @@ public class BlockchainTransactionsDispatcher {
             int dispatchTxCount = transactionToDispatch.size();
             log.info("Dispatching txs for organisationId:{}, tx count:{}", organisationId, dispatchTxCount);
             if (dispatchTxCount > 0) {
-                transactionsDispatcher.dispatchTransactionsBatch(organisationId, transactionToDispatch);
+                dispatchTransactionsBatch(organisationId, transactionToDispatch);
             }
         }
     }
