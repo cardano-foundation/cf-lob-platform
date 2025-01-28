@@ -71,6 +71,7 @@ CREATE TABLE blockchain_publisher_transaction (
 
    created_at TIMESTAMP WITHOUT TIME ZONE,
    updated_at TIMESTAMP WITHOUT TIME ZONE,
+   locked_at TIMESTAMP WITHOUT TIME ZONE,
 
    PRIMARY KEY (transaction_id)
 );

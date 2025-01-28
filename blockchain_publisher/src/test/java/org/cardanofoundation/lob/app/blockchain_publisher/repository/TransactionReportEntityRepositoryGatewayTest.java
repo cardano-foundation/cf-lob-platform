@@ -55,7 +55,7 @@ class TransactionReportEntityRepositoryGatewayTest {
         Set<TransactionEntity> expectedTransactions = Set.of(new TransactionEntity());
         when(transactionEntityRepository.findTransactionsByStatus(anyString(), any(), any())).thenReturn(expectedTransactions);
 
-        Set<TransactionEntity> actualTransactions = transactionEntityRepositoryGateway.findTransactionsByStatus(organisationId, batchSize);
+        Set<TransactionEntity> actualTransactions = transactionEntityRepositoryGateway.findTransactionsReadyToBeDispatched(organisationId, batchSize);
 
         assertEquals(expectedTransactions, actualTransactions);
     }
