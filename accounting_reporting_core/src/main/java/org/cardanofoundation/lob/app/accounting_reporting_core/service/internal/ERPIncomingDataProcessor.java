@@ -5,7 +5,6 @@ import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -56,7 +55,7 @@ public class ERPIncomingDataProcessor {
                                   ProcessorFlags processorFlags) {
         log.info("Processing ERPTransactionChunk event, batchId: {}, transactions: {}", batchId, transactions.size());
 
-        val allOrgTransactions = new OrganisationTransactions(organisationId, transactions);
+        OrganisationTransactions allOrgTransactions = new OrganisationTransactions(organisationId, transactions);
 
         // run or re-run business rules
         businessRulesPipelineProcessor.run(allOrgTransactions,processorFlags);
@@ -92,7 +91,7 @@ public class ERPIncomingDataProcessor {
                                       Set<TransactionEntity> chunkDetachedTxEntities) {
         log.info("Processing ReconcilationChunkEvent, event, reconcilationId: {}", reconcilationId);
 
-        val organisationTransactions = new OrganisationTransactions(organisationId, chunkDetachedTxEntities);
+        OrganisationTransactions organisationTransactions = new OrganisationTransactions(organisationId, chunkDetachedTxEntities);
 
         // run or re-run business rules
         businessRulesPipelineProcessor.run(organisationTransactions,new ProcessorFlags(ProcessorFlags.Trigger.RECONCILATION));
@@ -112,8 +111,8 @@ public class ERPIncomingDataProcessor {
     public void finialiseReconcilation(ReconcilationFinalisationEvent event) {
         log.info("Processing finialiseReconcilation, event: {}", event);
 
-        val reconcilationId = event.getReconciliationId();
-        val organisationId = event.getOrganisationId();
+        String reconcilationId = event.getReconciliationId();
+        String organisationId = event.getOrganisationId();
 
         transactionReconcilationService.wrapUpReconcilation(reconcilationId, organisationId);
 

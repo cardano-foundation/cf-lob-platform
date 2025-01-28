@@ -10,11 +10,11 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import org.scribe.model.OAuthRequest;
@@ -41,15 +41,17 @@ public class NetSuiteClient {
 
     private final String tokenSecret;
 
+    private static final String NETSUITE_API_ERROR = "NETSUITE_API_ERROR";
+
     public Either<Problem, Optional<String>> retrieveLatestNetsuiteTransactionLines(LocalDate extractionFrom, LocalDate extractionTo) {
-        val response = callForTransactionLinesData(extractionFrom, extractionTo);
+        Response response = callForTransactionLinesData(extractionFrom, extractionTo);
 
         if (response.isSuccessful()) {
             log.info("Netsuite response success...customerCode:{}, message:{}", response.getCode(), response.getMessage());
-            val body = response.getBody();
+            final String body = response.getBody();
 
             try {
-                val bodyJsonTree = objectMapper.readTree(body);
+                JsonNode bodyJsonTree = objectMapper.readTree(body);
                 if (bodyJsonTree.has("error")) {
                     int error = bodyJsonTree.get("error").asInt();
                     String text = bodyJsonTree.get("text").asText();
@@ -63,7 +65,7 @@ public class NetSuiteClient {
 
                     return Either.left(Problem.builder()
                             .withStatus(Status.valueOf(response.getCode()))
-                            .withTitle("NETSUITE_API_ERROR")
+                            .withTitle(NETSUITE_API_ERROR)
                             .withDetail(String.format("Error customerCode: %d, message: %s", error, text))
                             .build());
                 }
@@ -74,7 +76,7 @@ public class NetSuiteClient {
 
                 return Either.left(Problem.builder()
                         .withStatus(Status.valueOf(response.getCode()))
-                        .withTitle("NETSUITE_API_ERROR")
+                        .withTitle(NETSUITE_API_ERROR)
                         .withDetail(e.getMessage())
                         .build());
             }
@@ -82,7 +84,7 @@ public class NetSuiteClient {
 
         return Either.left(Problem.builder()
                 .withStatus(Status.valueOf(response.getCode()))
-                .withTitle("NETSUITE_API_ERROR")
+                .withTitle(NETSUITE_API_ERROR)
                 .withDetail(response.getBody())
                 .build());
     }
@@ -91,19 +93,19 @@ public class NetSuiteClient {
         log.info("Retrieving data from NetSuite...");
         log.info("base url: {}", baseUrl);
 
-        val builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
                 .queryParam("trandate:within", isoFormatDates(from, to));
 
-        val url = builder.toUriString();
+        String url = builder.toUriString();
 
         log.info("call url: {}", url);
 
-        val request = new OAuthRequest(GET, url);
+        OAuthRequest request = new OAuthRequest(GET, url);
         request.setConnectTimeout(15, TimeUnit.SECONDS);
         request.setReadTimeout(15, TimeUnit.SECONDS);
         request.setRealm(realm);
 
-        val t = new Token(token, tokenSecret);
+        Token t = new Token(token, tokenSecret);
         oAuthService.signRequest(t, request);
 
         return request.send();

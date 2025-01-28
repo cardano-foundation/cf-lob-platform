@@ -9,15 +9,17 @@ import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bloxbean.cardano.client.api.exception.ApiException;
+import io.vavr.control.Either;
+import org.zalando.problem.Problem;
 
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.API1BlockchainTransactions;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.L1Submission;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1SubmissionData;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
@@ -25,6 +27,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.service.API1L1Transact
 import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
 import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_submit.TransactionSubmissionService;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
+import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 
 @Service
 @Slf4j
@@ -37,6 +40,7 @@ public class BlockchainTransactionsDispatcher {
     private final TransactionSubmissionService transactionSubmissionService;
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
     private final DispatchingStrategy<TransactionEntity> dispatchingStrategy;
+    private final BlockchainTransactionsDispatcher transactionsDispatcher;
 
     @Value("${lob.blockchain_publisher.dispatcher.pullBatchSize:50}")
     private int pullTransactionsBatchSize = 50;
@@ -51,35 +55,35 @@ public class BlockchainTransactionsDispatcher {
     public void dispatchTransactions() {
         log.info("Dispatching txs to the cardano blockchain...");
 
-        for (val organisation : organisationPublicApi.listAll()) {
-            val organisationId = organisation.getId();
-            val transactionsBatch = transactionEntityRepositoryGateway.findTransactionsByStatus(organisationId, pullTransactionsBatchSize);
-            val transactionToDispatch = dispatchingStrategy.apply(organisationId, transactionsBatch);
+        for (Organisation organisation : organisationPublicApi.listAll()) {
+            String organisationId = organisation.getId();
+            Set<TransactionEntity> transactionsBatch = transactionEntityRepositoryGateway.findTransactionsByStatus(organisationId, pullTransactionsBatchSize);
+            Set<TransactionEntity> transactionToDispatch = dispatchingStrategy.apply(organisationId, transactionsBatch);
 
-            val dispatchTxCount = transactionToDispatch.size();
+            int dispatchTxCount = transactionToDispatch.size();
             log.info("Dispatching txs for organisationId:{}, tx count:{}", organisationId, dispatchTxCount);
             if (dispatchTxCount > 0) {
-                dispatchTransactionsBatch(organisationId, transactionToDispatch);
+                transactionsDispatcher.dispatchTransactionsBatch(organisationId, transactionToDispatch);
             }
         }
     }
 
     @Transactional
-    protected void dispatchTransactionsBatch(String organisationId,
-                                             Set<TransactionEntity> transactionEntitiesBatch) {
+    public void dispatchTransactionsBatch(String organisationId,
+                                          Set<TransactionEntity> transactionEntitiesBatch) {
         log.info("Dispatching passedTransactions for organisation: {}", organisationId);
 
-        val blockchainTransactionsM = createAndSendBlockchainTransactions(organisationId, transactionEntitiesBatch);
+        Optional<API1BlockchainTransactions> blockchainTransactionsM = createAndSendBlockchainTransactions(organisationId, transactionEntitiesBatch);
 
         if (blockchainTransactionsM.isEmpty()) {
             log.info("No more passedTransactions to dispatch for organisationId: {}", organisationId);
             return;
         }
 
-        val blockchainTransactions = blockchainTransactionsM.orElseThrow();
+        API1BlockchainTransactions blockchainTransactions = blockchainTransactionsM.orElseThrow();
 
-        val submittedTxCount = blockchainTransactions.submittedTransactions().size();
-        val remainingTxCount = blockchainTransactions.remainingTransactions().size();
+        int submittedTxCount = blockchainTransactions.submittedTransactions().size();
+        int remainingTxCount = blockchainTransactions.remainingTransactions().size();
 
         log.info("Submitted tx count:{}, remainingTxCount:{}", submittedTxCount, remainingTxCount);
     }
@@ -94,14 +98,14 @@ public class BlockchainTransactionsDispatcher {
             return Optional.empty();
         }
 
-        val serialisedTxE = l1TransactionCreator.pullBlockchainTransaction(organisationId, transactions);
+        Either<Problem, Optional<API1BlockchainTransactions>> serialisedTxE = l1TransactionCreator.pullBlockchainTransaction(organisationId, transactions);
         if (serialisedTxE.isEmpty()) {
             log.warn("Error, there is more passedTransactions to dispatch for organisation:{}, actual issue:{}", organisationId, serialisedTxE.getLeft());
 
             return Optional.empty();
         }
 
-        val serialisedTxM = serialisedTxE.get();
+        Optional<API1BlockchainTransactions> serialisedTxM = serialisedTxE.get();
 
         if (serialisedTxM.isEmpty()) {
             log.warn("No passedTransactions to dispatch for organisationId:{}", organisationId);
@@ -109,7 +113,7 @@ public class BlockchainTransactionsDispatcher {
             return Optional.empty();
         }
 
-        val serialisedTx = serialisedTxM.orElseThrow();
+        API1BlockchainTransactions serialisedTx = serialisedTxM.orElseThrow();
         try {
             sendTransactionOnChainAndUpdateDb(serialisedTx);
 
@@ -122,13 +126,13 @@ public class BlockchainTransactionsDispatcher {
     }
 
     private void sendTransactionOnChainAndUpdateDb(API1BlockchainTransactions blockchainTransactions) throws ApiException {
-        val txData = blockchainTransactions.serialisedTxData();
-        val l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(txData, blockchainTransactions.receiverAddress());
-        val organisationId = blockchainTransactions.organisationId();
-        val allTxs = blockchainTransactions.submittedTransactions();
+        byte[] txData = blockchainTransactions.serialisedTxData();
+        L1Submission l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(txData, blockchainTransactions.receiverAddress());
+        String organisationId = blockchainTransactions.organisationId();
+        Set<TransactionEntity> allTxs = blockchainTransactions.submittedTransactions();
 
-        val txHash = l1SubmissionData.txHash();
-        val txAbsoluteSlotM = l1SubmissionData.absoluteSlot();
+        String txHash = l1SubmissionData.txHash();
+        Optional<Long> txAbsoluteSlotM = l1SubmissionData.absoluteSlot();
 
         updateTransactionStatuses(txHash, txAbsoluteSlotM, blockchainTransactions);
 
@@ -140,7 +144,7 @@ public class BlockchainTransactionsDispatcher {
     private void updateTransactionStatuses(String txHash,
                                            Optional<Long> absoluteSlot,
                                            API1BlockchainTransactions blockchainTransactions) {
-        for (val txEntity : blockchainTransactions.submittedTransactions()) {
+        for (TransactionEntity txEntity : blockchainTransactions.submittedTransactions()) {
             txEntity.setL1SubmissionData(Optional.of(L1SubmissionData.builder()
                     .transactionHash(txHash)
                     .absoluteSlot(absoluteSlot.orElse(null)) // if tx is not confirmed yet, slot will not be available

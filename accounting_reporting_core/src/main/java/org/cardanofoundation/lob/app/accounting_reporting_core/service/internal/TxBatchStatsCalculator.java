@@ -1,8 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus.*;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxValidationStatus.FAILED;
 
 import java.util.Optional;
@@ -37,12 +35,10 @@ public class TxBatchStatsCalculator {
                 .failedTransactionsCount((int) transactions.stream().filter(tx -> tx.getAutomatedValidationStatus() == FAILED).count())
 
                 .failedSourceLOBTransactionsCount((int) txBatch.getTransactions().stream()
-                        .filter(tx -> tx.getAutomatedValidationStatus() == FAILED)
-                        .map(tx -> tx.getViolations().stream().anyMatch(v -> v.getSource() == LOB)).count())
+                        .filter(tx -> tx.getAutomatedValidationStatus() == FAILED).count())
 
                 .failedSourceERPTransactionsCount((int) txBatch.getTransactions().stream()
-                        .filter(tx -> tx.getAutomatedValidationStatus() == FAILED)
-                        .map(tx -> tx.getViolations().stream().anyMatch(v -> v.getSource() == ERP)).count())
+                        .filter(tx -> tx.getAutomatedValidationStatus() == FAILED).count())
 
                 .build();
     }

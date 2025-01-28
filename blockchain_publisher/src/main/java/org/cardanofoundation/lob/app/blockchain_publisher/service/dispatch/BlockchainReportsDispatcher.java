@@ -38,6 +38,7 @@ public class BlockchainReportsDispatcher {
     private final API3L1TransactionCreator api3L1TransactionCreator;
     private final TransactionSubmissionService transactionSubmissionService;
     private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
+    private final BlockchainReportsDispatcher reportsDispatcher;
 
     @Value("${lob.blockchain_publisher.dispatcher.pullBatchSize:50}")
     private int pullTransactionsBatchSize = 50;
@@ -57,7 +58,7 @@ public class BlockchainReportsDispatcher {
             if (reportsCount > 0) {
                 Set<ReportEntity> toDispatch = dispatchingStrategy.apply(organisationId, reports);
 
-                dispatchReports(organisationId, toDispatch);
+                reportsDispatcher.dispatchReports(organisationId, toDispatch);
             }
         }
 
@@ -65,12 +66,12 @@ public class BlockchainReportsDispatcher {
     }
 
     @Transactional
-    protected void dispatchReports(String organisationId,
+    public void dispatchReports(String organisationId,
                                    Set<ReportEntity> reportEntities) {
         log.info("Dispatching reports for organisation: {}", organisationId);
 
         for (ReportEntity reportEntity : reportEntities) {
-            dispatchReport(organisationId, reportEntity);
+            reportsDispatcher.dispatchReport(organisationId, reportEntity);
         }
     }
 
@@ -78,14 +79,14 @@ public class BlockchainReportsDispatcher {
     public void dispatchReport(String organisationId, ReportEntity reportEntity) {
         log.info("Dispatching report for organisation: {}", organisationId);
 
-        Optional<API3BlockchainTransaction> api3BlockchainTransactionE = createAndSendBlockchainTransactions(reportEntity);
+        Optional<API3BlockchainTransaction> api3BlockchainTransactionE = reportsDispatcher.createAndSendBlockchainTransactions(reportEntity);
         if (api3BlockchainTransactionE.isEmpty()) {
             log.info("No more reports to dispatch for organisationId, success or error?, organisationId: {}", organisationId);
         }
     }
 
     @Transactional
-    protected Optional<API3BlockchainTransaction> createAndSendBlockchainTransactions(ReportEntity reportEntity) {
+    public Optional<API3BlockchainTransaction> createAndSendBlockchainTransactions(ReportEntity reportEntity) {
         log.info("Creating and sending blockchain transactions for report:{}", reportEntity.getReportId());
 
         Either<Problem, API3BlockchainTransaction> serialisedTxE = api3L1TransactionCreator.pullBlockchainTransaction(reportEntity);
@@ -100,7 +101,7 @@ public class BlockchainReportsDispatcher {
 
         API3BlockchainTransaction serialisedTx = serialisedTxE.get();
         try {
-            sendTransactionOnChainAndUpdateDb(serialisedTx);
+            reportsDispatcher.sendTransactionOnChainAndUpdateDb(serialisedTx);
 
             return Optional.of(serialisedTx);
         } catch (ApiException e) {
@@ -111,7 +112,7 @@ public class BlockchainReportsDispatcher {
     }
 
     @Transactional
-    protected void sendTransactionOnChainAndUpdateDb(API3BlockchainTransaction api3BlockchainTransaction) throws ApiException {
+    public void sendTransactionOnChainAndUpdateDb(API3BlockchainTransaction api3BlockchainTransaction) throws ApiException {
         byte[] reportTxData = api3BlockchainTransaction.serialisedTxData();
 
         L1Submission l1SubmissionData = transactionSubmissionService.submitTransactionWithPossibleConfirmation(reportTxData, api3BlockchainTransaction.receiverAddress());
@@ -122,14 +123,14 @@ public class BlockchainReportsDispatcher {
         ReportEntity report = api3BlockchainTransaction.report();
         long creationSlot = api3BlockchainTransaction.creationSlot();
 
-        updateTransactionStatuses(txHash, txAbsoluteSlotM, creationSlot, report);
+        reportsDispatcher.updateTransactionStatuses(txHash, txAbsoluteSlotM, creationSlot, report);
         ledgerUpdatedEventPublisher.sendReportLedgerUpdatedEvents(report.getOrganisation().getId(), Set.of(report));
 
         log.info("Blockchain transaction submitted (report), l1SubmissionData:{}", l1SubmissionData);
     }
 
     @Transactional
-    protected void updateTransactionStatuses(String txHash,
+    public void updateTransactionStatuses(String txHash,
                                              Optional<Long> absoluteSlot,
                                              long creationSlot,
                                              ReportEntity reportEntity) {
