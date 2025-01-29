@@ -15,8 +15,8 @@ public interface TransactionEntityRepository extends JpaRepository<TransactionEn
 
     @Query("SELECT t FROM blockchain_publisher.txs.TransactionEntity t WHERE t.organisation.id = :organisationId AND t.l1SubmissionData.publishStatus IN :publishStatuses ORDER BY t.createdAt ASC, t.id ASC")
     Set<TransactionEntity> findTransactionsByStatus(@Param("organisationId") String organisationId,
-                                                    @Param("publishStatuses") Set<BlockchainPublishStatus> publishStatuses,
-                                                    Limit limit);
+                                                     @Param("publishStatuses") Set<BlockchainPublishStatus> publishStatuses,
+                                                     Limit limit);
 
     @Query("""
             SELECT t FROM blockchain_publisher.txs.TransactionEntity t

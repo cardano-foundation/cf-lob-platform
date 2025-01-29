@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.blockchain_publisher.service.dispatch;
 
 import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus.SUBMITTED;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -67,8 +68,7 @@ public class BlockchainTransactionsDispatcher {
         }
     }
 
-    @Transactional
-    public void dispatchTransactionsBatch(String organisationId,
+    private void dispatchTransactionsBatch(String organisationId,
                                           Set<TransactionEntity> transactionEntitiesBatch) {
         log.info("Dispatching passedTransactions for organisation: {}", organisationId);
 

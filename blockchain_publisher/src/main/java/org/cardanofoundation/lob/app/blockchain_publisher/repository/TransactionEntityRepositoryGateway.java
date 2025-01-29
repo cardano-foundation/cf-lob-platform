@@ -6,10 +6,12 @@ import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.Blo
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,33 +29,38 @@ import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.Tran
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
+@Getter
 public class TransactionEntityRepositoryGateway {
 
     private final TransactionEntityRepository transactionEntityRepository;
     private final TransactionItemEntityRepository transactionItemEntityRepository;
 
-    @Value("${lob.blockchain_publisher.dispatcher.lock_timeout:PT3H}") // Default to 3 hours
+    @Value("${lob.blockchain_publisher.dispatcher.lock_timeout:PT3H}") // Default grace period to 3 hours
     private Duration lockTimeoutDuration;
 
     public Optional<TransactionEntity> findById(String txId) {
         return transactionEntityRepository.findById(txId);
     }
 
-    public Set<TransactionEntity> findTransactionsReadyToBeDispatched(String organisationId, int pullTransactionsBatchSize) {
-        Set<BlockchainPublishStatus> dispatchStatuses = BlockchainPublishStatus.toDispatchStatuses();
-        Limit limit = Limit.of(pullTransactionsBatchSize);
-
-        return transactionEntityRepository.findTransactionsByStatus(organisationId, dispatchStatuses, limit);
-    }
-
     public Set<TransactionEntity> findAndLockTransactionsReadyToBeDispatched(String organisationId, int pullTransactionsBatchSize) {
         Set<BlockchainPublishStatus> dispatchStatuses = BlockchainPublishStatus.toDispatchStatuses();
         Limit limit = Limit.of(pullTransactionsBatchSize);
 
-        Set<TransactionEntity> transactionsByStatus = transactionEntityRepository.findFreeTransactionsByStatus(organisationId, dispatchStatuses,  LocalDateTime.now().minus(lockTimeoutDuration), limit);
-        transactionsByStatus.forEach(tx -> tx.setLockedAt(LocalDateTime.now()));
-        transactionEntityRepository.saveAll(transactionsByStatus);
-        return transactionsByStatus;
+        Set<TransactionEntity> transactionsByStatus = transactionEntityRepository.findTransactionsByStatus(
+                organisationId,
+                dispatchStatuses,
+                limit);
+        if (transactionsByStatus.isEmpty()) {
+            return transactionsByStatus;
+        }
+        // This logic could be moved to the repository, but for now it is easier to test it here
+        Set<TransactionEntity> filteredTransactions = transactionsByStatus.stream().filter(
+                transactionEntity -> (transactionEntity.getLockedAt() == null) ||
+                        transactionEntity.getLockedAt().isBefore(LocalDateTime.now().minus(lockTimeoutDuration)))
+                .collect(toSet());
+        filteredTransactions.forEach(tx -> tx.setLockedAt(LocalDateTime.now()));
+        transactionEntityRepository.saveAll(filteredTransactions);
+        return filteredTransactions;
     }
 
     public Set<TransactionEntity> findDispatchedTransactionsThatAreNotFinalizedYet(String organisationId, Limit limit) {
