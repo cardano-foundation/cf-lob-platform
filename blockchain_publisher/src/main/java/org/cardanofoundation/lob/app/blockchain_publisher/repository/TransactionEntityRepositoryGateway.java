@@ -6,7 +6,6 @@ import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.Blo
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
