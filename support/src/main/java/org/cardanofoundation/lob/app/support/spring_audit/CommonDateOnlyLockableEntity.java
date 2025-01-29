@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.support.spring_audit;
 import static jakarta.persistence.TemporalType.TIMESTAMP;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -40,6 +41,7 @@ public abstract class CommonDateOnlyLockableEntity {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "locked_at")
+    @DiffIgnore
     protected LocalDateTime lockedAt;
 
     @Transient
@@ -53,6 +55,10 @@ public abstract class CommonDateOnlyLockableEntity {
 
     public boolean isNew() {
         return isNew;
+    }
+
+    public Optional<LocalDateTime> getLockedAt() {
+        return Optional.ofNullable(lockedAt);
     }
 
 
