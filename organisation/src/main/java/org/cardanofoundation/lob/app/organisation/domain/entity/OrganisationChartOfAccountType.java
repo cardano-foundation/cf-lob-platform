@@ -1,7 +1,6 @@
 package org.cardanofoundation.lob.app.organisation.domain.entity;
 
 import static jakarta.persistence.FetchType.LAZY;
-import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -21,17 +20,17 @@ import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 @Getter
 @Setter
 @Entity
-@Table(name = "organisation_chart_of_account_type")
+@Table(name = "organisation_chart_of_account_type", indexes = {@Index(name = "atu_name", columnList = "name", unique = true)})
 @Audited
 @EntityListeners({AuditingEntityListener.class})
 public class OrganisationChartOfAccountType extends CommonEntity {
 
     @Id
-    private String  id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organisation_id", referencedColumnName = "organisation_id")
-    private Organisation organisation;
+    @Column(name = "organisation_id", nullable = false)
+    private String organisationId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -39,9 +38,5 @@ public class OrganisationChartOfAccountType extends CommonEntity {
     @OneToMany(mappedBy = "type", orphanRemoval = true, fetch = LAZY, cascade = CascadeType.ALL)
     private Set<OrganisationChartOfAccountSubType> subType = new LinkedHashSet<>();
 
-    public static String id(Organisation organisationId,
-                            String name) {
-        return digestAsHex(STR."\{organisationId.getId()}::\{name}");
-    }
 
 }
