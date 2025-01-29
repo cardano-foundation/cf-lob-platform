@@ -58,7 +58,10 @@ public abstract class CommonDateOnlyLockableEntity {
     }
 
     public Optional<LocalDateTime> getLockedAt() {
-        return Optional.ofNullable(lockedAt);
+        if(lockedAt == null) {
+            return Optional.empty();
+        }
+        return Optional.of(lockedAt);
     }
 
 

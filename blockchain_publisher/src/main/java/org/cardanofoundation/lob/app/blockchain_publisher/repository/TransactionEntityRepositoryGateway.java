@@ -55,8 +55,9 @@ public class TransactionEntityRepositoryGateway {
         // This logic could be moved to the repository, but for now it is easier to test it here
         Set<TransactionEntity> filteredTransactions = transactionsByStatus.stream().filter(
                 transactionEntity -> (
-                        transactionEntity.getLockedAt().isPresent() &&
-                                transactionEntity.getLockedAt().get().isBefore(LocalDateTime.now().minus(lockTimeoutDuration))
+                        transactionEntity.getLockedAt()
+                                .map(lockedAt -> lockedAt.isBefore(LocalDateTime.now().minus(lockTimeoutDuration)))
+                                .orElse(true) // return true if lockedAt is not present
                         ))
                 .collect(toSet());
         filteredTransactions.forEach(tx -> tx.setLockedAt(LocalDateTime.now()));
