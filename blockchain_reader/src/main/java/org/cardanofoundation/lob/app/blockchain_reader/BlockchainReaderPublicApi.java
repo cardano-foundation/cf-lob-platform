@@ -101,7 +101,11 @@ public class BlockchainReaderPublicApi implements BlockchainReaderPublicApiIF {
             return Either.right(Optional.of(txDetails));
         } catch (RestClientResponseException ex) {
             if (ex.getStatusCode().value() == 404) {
-                return Either.right(Optional.empty());
+                val responseText = ex.getResponseBodyAsString();
+
+                if (responseText.contains("TX_NOT_FOUND")) { // let's really check that lob-follower returned TX_NOT_FOUND in the response to avoid misconfiguration of a firewall / load balancer
+                    return Either.right(Optional.empty());
+                }
             }
 
             val problem = Problem.builder()
@@ -109,6 +113,7 @@ public class BlockchainReaderPublicApi implements BlockchainReaderPublicApiIF {
                     .withStatus(BAD_REQUEST)
                     .withDetail(STR."Error from the client: \{ex.getResponseBodyAsString()}")
                     .build();
+
             return Either.left(problem);  // Return as Either.left
         } catch (RestClientException ex) {
             log.error("Error while fetching tx details", ex);
