@@ -71,7 +71,7 @@ class TransactionEntityRepositoryGatewayTest {
         Set<TransactionEntity> result = transactionEntityRepositoryGateway.findAndLockTransactionsReadyToBeDispatched(ORG_ID, BATCH_SIZE);
 
         assertEquals(2, result.size());
-        Assertions.assertTrue(result.stream().allMatch(tx -> tx.getLockedAt() != null));
+        Assertions.assertTrue(result.stream().allMatch(tx -> tx.getLockedAt().isPresent()));
 
         verify(transactionEntityRepository).findTransactionsByStatus(ORG_ID, dispatchStatuses, Limit.of(BATCH_SIZE));
         verify(transactionEntityRepository).saveAll(result);
