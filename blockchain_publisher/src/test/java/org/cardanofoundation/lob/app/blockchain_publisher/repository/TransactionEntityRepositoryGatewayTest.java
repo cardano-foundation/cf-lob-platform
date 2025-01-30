@@ -14,6 +14,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -52,7 +54,6 @@ class TransactionEntityRepositoryGatewayTest {
 
         when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
         when(clock.instant()).thenReturn(LocalDateTime.now().toInstant(ZoneOffset.UTC));
-
         Field field = TransactionEntityRepositoryGateway.class.getDeclaredField("lockTimeoutDuration");
         field.setAccessible(true);
         field.set(transactionEntityRepositoryGateway, LOCK_TIMEOUT_DURATION); // Set to 3 hours
