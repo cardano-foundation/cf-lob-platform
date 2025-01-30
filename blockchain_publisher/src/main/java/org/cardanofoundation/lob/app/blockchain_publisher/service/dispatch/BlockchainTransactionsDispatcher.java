@@ -56,7 +56,7 @@ public class BlockchainTransactionsDispatcher {
 
         for (Organisation organisation : organisationPublicApi.listAll()) {
             String organisationId = organisation.getId();
-            Set<TransactionEntity> transactionsBatch = transactionEntityRepositoryGateway.findTransactionsByStatus(organisationId, pullTransactionsBatchSize);
+            Set<TransactionEntity> transactionsBatch = transactionEntityRepositoryGateway.findAndLockTransactionsReadyToBeDispatched(organisationId, pullTransactionsBatchSize);
             Set<TransactionEntity> transactionToDispatch = dispatchingStrategy.apply(organisationId, transactionsBatch);
 
             int dispatchTxCount = transactionToDispatch.size();
@@ -67,8 +67,7 @@ public class BlockchainTransactionsDispatcher {
         }
     }
 
-    @Transactional
-    public void dispatchTransactionsBatch(String organisationId,
+    private void dispatchTransactionsBatch(String organisationId,
                                           Set<TransactionEntity> transactionEntitiesBatch) {
         log.info("Dispatching passedTransactions for organisation: {}", organisationId);
 

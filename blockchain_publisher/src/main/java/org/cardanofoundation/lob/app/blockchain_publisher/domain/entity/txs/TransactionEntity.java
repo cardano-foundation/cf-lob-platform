@@ -27,7 +27,7 @@ import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
-import org.cardanofoundation.lob.app.support.spring_audit.CommonDateOnlyEntity;
+import org.cardanofoundation.lob.app.support.spring_audit.CommonDateOnlyLockableEntity;
 
 @Getter
 @Setter
@@ -37,7 +37,7 @@ import org.cardanofoundation.lob.app.support.spring_audit.CommonDateOnlyEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners({ AuditingEntityListener.class })
-public class TransactionEntity extends CommonDateOnlyEntity implements Persistable<String> {
+public class TransactionEntity extends CommonDateOnlyLockableEntity implements Persistable<String> {
 
     @Id
     @Column(name = "transaction_id", nullable = false)

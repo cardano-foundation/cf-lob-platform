@@ -3,9 +3,15 @@ package org.cardanofoundation.lob.app.blockchain_publisher.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -15,9 +21,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1SubmissionData;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 
@@ -26,15 +34,89 @@ class TransactionEntityRepositoryGatewayTest {
     @Mock
     private TransactionEntityRepository transactionEntityRepository;
 
-    @Mock
-    private TransactionItemEntityRepository transactionItemEntityRepository;
-
     @InjectMocks
     private TransactionEntityRepositoryGateway transactionEntityRepositoryGateway;
 
+    private static final Duration LOCK_TIMEOUT_DURATION = Duration.ofHours(3);
+    private static final String ORG_ID = "test-org";
+    private static final int BATCH_SIZE = 5;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws IllegalAccessException, NoSuchFieldException {
         MockitoAnnotations.openMocks(this);
+
+        Field field = TransactionEntityRepositoryGateway.class.getDeclaredField("lockTimeoutDuration");
+        field.setAccessible(true);
+        field.set(transactionEntityRepositoryGateway, LOCK_TIMEOUT_DURATION); // Set to 3 hours
+    }
+
+    @Test
+    void testFindAndLockTransactionsReadyToBeDispatchedLockNotExpired() {
+        Set<BlockchainPublishStatus> dispatchStatuses = BlockchainPublishStatus.toDispatchStatuses();
+        Set<TransactionEntity> transactions = new HashSet<>();
+
+        TransactionEntity unlockedTx = new TransactionEntity();
+        unlockedTx.setId("tx1");
+        unlockedTx.setLockedAt(null);
+        transactions.add(unlockedTx);
+
+        TransactionEntity expiredLockTx = new TransactionEntity();
+        expiredLockTx.setId("tx2");
+        expiredLockTx.setLockedAt(LocalDateTime.now().minus(LOCK_TIMEOUT_DURATION));
+        transactions.add(expiredLockTx);
+
+        when(transactionEntityRepository.findTransactionsByStatus(eq(ORG_ID), eq(dispatchStatuses), any(Limit.class)))
+                .thenReturn(transactions);
+
+        Set<TransactionEntity> result = transactionEntityRepositoryGateway.findAndLockTransactionsReadyToBeDispatched(ORG_ID, BATCH_SIZE);
+
+        assertEquals(2, result.size());
+        Assertions.assertTrue(result.stream().allMatch(tx -> tx.getLockedAt().isPresent()));
+
+        verify(transactionEntityRepository).findTransactionsByStatus(ORG_ID, dispatchStatuses, Limit.of(BATCH_SIZE));
+        verify(transactionEntityRepository).saveAll(result);
+        verifyNoMoreInteractions(transactionEntityRepository);
+    }
+
+    @Test
+    void testFindAndLockTransactionsReadyToBeDispatchedLockExpired() {
+        Set<BlockchainPublishStatus> dispatchStatuses = BlockchainPublishStatus.toDispatchStatuses();
+        Set<TransactionEntity> transactions = new HashSet<>();
+
+        TransactionEntity unlockedTx = new TransactionEntity();
+        unlockedTx.setId("tx1");
+        unlockedTx.setLockedAt(null);
+        transactions.add(unlockedTx);
+
+        TransactionEntity expiredLockTx = new TransactionEntity();
+        expiredLockTx.setId("tx2");
+        expiredLockTx.setLockedAt(LocalDateTime.now().minus(LOCK_TIMEOUT_DURATION.minusSeconds(1)));
+        transactions.add(expiredLockTx);
+
+        when(transactionEntityRepository.findTransactionsByStatus(eq(ORG_ID), eq(dispatchStatuses), any(Limit.class)))
+                .thenReturn(transactions);
+
+        Set<TransactionEntity> result = transactionEntityRepositoryGateway.findAndLockTransactionsReadyToBeDispatched(ORG_ID, BATCH_SIZE);
+
+        assertEquals(1, result.size());
+        Assertions.assertTrue(result.stream().allMatch(tx -> tx.getLockedAt() != null));
+
+        verify(transactionEntityRepository).findTransactionsByStatus(ORG_ID, dispatchStatuses, Limit.of(BATCH_SIZE));
+        verify(transactionEntityRepository).saveAll(result);
+        verifyNoMoreInteractions(transactionEntityRepository);
+    }
+
+    @Test
+    void testFindAndLockTransactionsReadyToBeDispatchedEmptyList() {
+        Set<BlockchainPublishStatus> dispatchStatuses = BlockchainPublishStatus.toDispatchStatuses();
+        when(transactionEntityRepository.findTransactionsByStatus(eq(ORG_ID), eq(dispatchStatuses), any(Limit.class)))
+                .thenReturn(Set.of());
+
+        Set<TransactionEntity> result = transactionEntityRepositoryGateway.findAndLockTransactionsReadyToBeDispatched(ORG_ID, BATCH_SIZE);
+
+        assertEquals(0, result.size());
+        verify(transactionEntityRepository).findTransactionsByStatus(ORG_ID, dispatchStatuses, Limit.of(BATCH_SIZE));
+        verifyNoMoreInteractions(transactionEntityRepository);
     }
 
     @Test
@@ -49,21 +131,8 @@ class TransactionEntityRepositoryGatewayTest {
     }
 
     @Test
-    void findTransactionsByStatus_shouldReturnTransactions() {
-        String organisationId = "org1";
-        int batchSize = 10;
-        Set<TransactionEntity> expectedTransactions = Set.of(new TransactionEntity());
-        when(transactionEntityRepository.findTransactionsByStatus(anyString(), any(), any())).thenReturn(expectedTransactions);
-
-        Set<TransactionEntity> actualTransactions = transactionEntityRepositoryGateway.findTransactionsByStatus(organisationId, batchSize);
-
-        assertEquals(expectedTransactions, actualTransactions);
-    }
-
-    @Test
     void findDispatchedTransactionsThatAreNotFinalizedYet_shouldReturnFilteredTransactions() {
         String organisationId = "org1";
-        long currentTip = 1000L;
         TransactionEntity transaction = new TransactionEntity();
 
         transaction.setL1SubmissionData(Optional.of(L1SubmissionData.builder()
