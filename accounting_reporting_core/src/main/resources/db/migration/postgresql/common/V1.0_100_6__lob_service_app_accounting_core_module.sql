@@ -130,6 +130,25 @@ CREATE TYPE accounting_core_rejection_reason_type AS ENUM (
     'REVIEW_PARENT_PROJECT_CODE'
 );
 
+CREATE TYPE accounting_core_metric_type AS ENUM (
+    'BALANCE_SHEET',
+    'INCOME_STATEMENT'
+);
+
+CREATE TYPE account_core_submetric_type AS ENUM (
+    'ASSET_CATEGORIES',
+    'BALANCE_SHEET_OVERVIEW',
+    'TOTAL_EXPENSES',
+    'INCOME_STREAMS'
+);
+
+CREATE TABLE IF NOT EXISTS accounting_core_dashboard (
+    id BIGSERIAL PRIMARY KEY,
+    organisation_id VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT
+);
+
 -- ISO_4217:CHF or ISO_24165:BSV:2L8HS2MNP, ISO_24165:ADA:HWGL1C2CK, etc
 CREATE DOMAIN accounting_core_currency_id_type AS VARCHAR(25)
     CHECK (VALUE ~ '^(ISO_4217:[A-Z]{3})|(ISO_24165:[A-Z]{3}:[A-Z0-9]+)$');
@@ -794,6 +813,17 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
     -- Foreign Key to revision information table
     FOREIGN KEY (rev) REFERENCES revinfo (rev) MATCH SIMPLE
     ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE IF NOT EXISTS accounting_core_charts (
+  id BIGSERIAL PRIMARY KEY,
+  dashboard_id BIGINT NOT NULL REFERENCES accounting_core_dashboard(id) ON DELETE CASCADE,
+  x_pos DOUBLE PRECISION,
+  y_pos DOUBLE PRECISION,
+  width DOUBLE PRECISION,
+  height DOUBLE PRECISION,
+  metric accounting_core_metric_type NOT NULL,
+  sub_metric account_core_submetric_type NOT NULL
 );
 
 -- indices
