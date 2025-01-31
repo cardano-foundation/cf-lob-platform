@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.annotation.PostConstruct;
@@ -32,8 +33,21 @@ public class IncomeStatementMetricService extends MetricExecutor {
         name = MetricEnum.INCOME_STATEMENT;
         metrics = Map.of(
                 MetricEnum.SubMetric.TOTAL_EXPENSES, this::getTotalExpenses,
-                MetricEnum.SubMetric.INCOME_STREAMS, this::getIncomeStream
+                MetricEnum.SubMetric.INCOME_STREAMS, this::getIncomeStream,
+                MetricEnum.SubMetric.PROFIT_OF_THE_YEAR, this::getProfitOfTheYear
         );
+    }
+
+    private Map<Short, Long> getProfitOfTheYear(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
+        List<ReportEntity> reportEntities = reportRepository.getNewestReportsInRange(organisationID,
+                startDate.orElse(null),
+                endDate.orElse(null));
+
+        return reportEntities.stream()
+                .collect(Collectors.groupingBy(ReportEntity::getYear,
+                        Collectors.summingLong(value ->
+                                value.getIncomeStatementReportData().orElseGet(IncomeStatementData::new)
+                                        .getProfitForTheYear().orElse(BigDecimal.ZERO).longValue())));
     }
 
     private Map<IncomeStatemenCategories, Integer> getTotalExpenses(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
