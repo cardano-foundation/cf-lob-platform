@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.blockchain_publisher.repository;
 import static java.util.stream.Collectors.toSet;
 import static org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus.notFinalisedButVisibleOnChain;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ public class TransactionEntityRepositoryGateway {
 
     private final TransactionEntityRepository transactionEntityRepository;
     private final TransactionItemEntityRepository transactionItemEntityRepository;
+    private final Clock clock;
 
     @Value("${lob.blockchain_publisher.dispatcher.lock_timeout:PT3H}") // Default grace period to 3 hours
     private Duration lockTimeoutDuration;
@@ -56,11 +58,11 @@ public class TransactionEntityRepositoryGateway {
         Set<TransactionEntity> filteredTransactions = transactionsByStatus.stream().filter(
                 transactionEntity -> (
                         transactionEntity.getLockedAt()
-                                .map(lockedAt -> lockedAt.isBefore(LocalDateTime.now().minus(lockTimeoutDuration)))
+                                .map(lockedAt -> lockedAt.isBefore(LocalDateTime.now(clock).minus(lockTimeoutDuration)))
                                 .orElse(true) // return true if lockedAt is not present
                         ))
                 .collect(toSet());
-        filteredTransactions.forEach(tx -> tx.setLockedAt(LocalDateTime.now()));
+        filteredTransactions.forEach(tx -> tx.setLockedAt(LocalDateTime.now(clock)));
         transactionEntityRepository.saveAll(filteredTransactions);
         return filteredTransactions;
     }
