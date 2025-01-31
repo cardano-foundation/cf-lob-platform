@@ -131,17 +131,24 @@ public class BalanceSheetMetricService extends MetricExecutor {
             currentAssets.getOtherReceivables().ifPresent(
                     otherReceivables -> assetMap.merge(BalanceSheetCategories.OTHER, otherReceivables.intValue(), Integer::sum));
             currentAssets.getPrepaymentsAndOtherShortTermAssets().ifPresent(
-                    prepayments -> assetMap.merge(BalanceSheetCategories.OTHER, prepayments.intValue(), Integer::sum));
+                    // Extra Group
+                    prepayments -> assetMap.merge(BalanceSheetCategories.PREPAYMENTS, prepayments.intValue(), Integer::sum));
         });
         assets.getNonCurrentAssets().ifPresent(nonCurrentAssets -> {
             nonCurrentAssets.getFinancialAssets().ifPresent(
                     financialAssets -> assetMap.merge(BalanceSheetCategories.FINANCIAL_ASSETS, financialAssets.intValue(), Integer::sum));
+
             nonCurrentAssets.getIntangibleAssets().ifPresent(
-                    intangibleAssets -> assetMap.merge(BalanceSheetCategories.OTHER, intangibleAssets.intValue(), Integer::sum));
+                    // Extra Group
+                    intangibleAssets -> assetMap.merge(BalanceSheetCategories.INTANGIBLE_ASSETS, intangibleAssets.intValue(), Integer::sum));
+
             nonCurrentAssets.getInvestments().ifPresent(
-                    investments -> assetMap.merge(BalanceSheetCategories.OTHER, investments.intValue(), Integer::sum));
+                    // Extra Group
+                    investments -> assetMap.merge(BalanceSheetCategories.INVESTMENTS, investments.intValue(), Integer::sum));
+
             nonCurrentAssets.getPropertyPlantEquipment().ifPresent(
-                    propertyPlantEquipment -> assetMap.merge(BalanceSheetCategories.OTHER, propertyPlantEquipment.intValue(), Integer::sum));
+                    // Extra Group
+                    propertyPlantEquipment -> assetMap.merge(BalanceSheetCategories.PROPERTY_PLANT_EQUIPMENT, propertyPlantEquipment.intValue(), Integer::sum));
         });
     }
 }
