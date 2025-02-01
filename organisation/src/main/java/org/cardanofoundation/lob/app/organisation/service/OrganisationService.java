@@ -44,4 +44,9 @@ public class OrganisationService {
         return projectMappingRepository.findAllByOrganisationId(organisationId);
     }
 
+    @Transactional
+    public Set<OrganisationChartOfAccountType> getAllChartType(String organisationId) {
+        return organisationChartOfAccountTypeRepository.findAllByOrganisationId(organisationId);
+    }
+
 }
