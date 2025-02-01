@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.metric.MetricEnum.BALANCE_SHEET;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -33,8 +34,49 @@ public class BalanceSheetMetricService extends MetricExecutor {
         name = BALANCE_SHEET;
         metrics = Map.of(
                 MetricEnum.SubMetric.ASSET_CATEGORIES, this::getAssetCategories,
-                MetricEnum.SubMetric.BALANCE_SHEET_OVERVIEW, this::getBalanceSheetOverview
+                MetricEnum.SubMetric.BALANCE_SHEET_OVERVIEW, this::getBalanceSheetOverview,
+                MetricEnum.SubMetric.TOTAL_ASSETS, this::getTotalAssets,
+                MetricEnum.SubMetric.TOTAL_LIABILITIES, this::getTotalLiabilities
         );
+    }
+
+    private Object getTotalLiabilities(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
+        List<ReportEntity> reportEntities = reportRepository.getNewestReportsInRange(organisationID,
+                startDate.orElse(null),
+                endDate.orElse(null));
+        final BigDecimal[] totalLiabilities = {BigDecimal.ZERO};
+        reportEntities.forEach(reportEntity -> reportEntity.getBalanceSheetReportData().flatMap(BalanceSheetData::getLiabilities).ifPresent(liabilities -> {
+            liabilities.getCurrentLiabilities().ifPresent(currentLiabilities -> {
+                currentLiabilities.getTradeAccountsPayables().ifPresent(tradeAccountsPayables -> totalLiabilities[0] = totalLiabilities[0].add(tradeAccountsPayables));
+                currentLiabilities.getOtherCurrentLiabilities().ifPresent(otherCurrentLiabilities -> totalLiabilities[0] = totalLiabilities[0].add(otherCurrentLiabilities));
+                currentLiabilities.getAccrualsAndShortTermProvisions().ifPresent(accruals -> totalLiabilities[0] = totalLiabilities[0].add(accruals));
+            });
+            liabilities.getNonCurrentLiabilities().flatMap(BalanceSheetData.Liabilities.NonCurrentLiabilities::getProvisions).ifPresent(provisions -> totalLiabilities[0] = totalLiabilities[0].add(provisions));
+        }));
+        return totalLiabilities[0];
+    }
+
+    private Object getTotalAssets(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
+        List<ReportEntity> reportEntities = reportRepository.getNewestReportsInRange(organisationID,
+                startDate.orElse(null),
+                endDate.orElse(null));
+
+        final BigDecimal[] totalAssets = {BigDecimal.ZERO};
+        reportEntities.forEach(reportEntity -> reportEntity.getBalanceSheetReportData().flatMap(BalanceSheetData::getAssets).ifPresent(assets -> {
+            assets.getCurrentAssets().ifPresent(currentAssets -> {
+                currentAssets.getCryptoAssets().ifPresent(cryptoAssets -> totalAssets[0] = totalAssets[0].add(cryptoAssets));
+                currentAssets.getCashAndCashEquivalents().ifPresent(cash -> totalAssets[0] = totalAssets[0].add(cash));
+                currentAssets.getOtherReceivables().ifPresent(otherReceivables -> totalAssets[0] = totalAssets[0].add(otherReceivables));
+                currentAssets.getPrepaymentsAndOtherShortTermAssets().ifPresent(prepayments -> totalAssets[0] = totalAssets[0].add(prepayments));
+            });
+            assets.getNonCurrentAssets().ifPresent(nonCurrentAssets -> {
+                nonCurrentAssets.getFinancialAssets().ifPresent(financialAssets -> totalAssets[0] = totalAssets[0].add(financialAssets));
+                nonCurrentAssets.getIntangibleAssets().ifPresent(intangibleAssets -> totalAssets[0] = totalAssets[0].add(intangibleAssets));
+                nonCurrentAssets.getPropertyPlantEquipment().ifPresent(propertyPlantEquipment -> totalAssets[0] = totalAssets[0].add(propertyPlantEquipment));
+                nonCurrentAssets.getInvestments().ifPresent(investments -> totalAssets[0] = totalAssets[0].add(investments));
+            });
+        }));
+        return totalAssets[0];
     }
 
     private Map<BalanceSheetCategories, Integer> getAssetCategories(String organisationID, Optional<LocalDate> startDate, Optional<LocalDate> endDate) {
