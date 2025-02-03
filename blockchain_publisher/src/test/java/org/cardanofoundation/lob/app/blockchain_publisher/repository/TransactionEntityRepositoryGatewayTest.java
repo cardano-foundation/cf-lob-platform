@@ -9,8 +9,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -33,6 +36,8 @@ class TransactionEntityRepositoryGatewayTest {
 
     @Mock
     private TransactionEntityRepository transactionEntityRepository;
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private TransactionEntityRepositoryGateway transactionEntityRepositoryGateway;
@@ -45,6 +50,8 @@ class TransactionEntityRepositoryGatewayTest {
     void setUp() throws IllegalAccessException, NoSuchFieldException {
         MockitoAnnotations.openMocks(this);
 
+        when(clock.getZone()).thenReturn(ZoneId.of("UTC"));
+        when(clock.instant()).thenReturn(LocalDateTime.now().toInstant(ZoneOffset.UTC));
         Field field = TransactionEntityRepositoryGateway.class.getDeclaredField("lockTimeoutDuration");
         field.setAccessible(true);
         field.set(transactionEntityRepositoryGateway, LOCK_TIMEOUT_DURATION); // Set to 3 hours
@@ -62,7 +69,7 @@ class TransactionEntityRepositoryGatewayTest {
 
         TransactionEntity expiredLockTx = new TransactionEntity();
         expiredLockTx.setId("tx2");
-        expiredLockTx.setLockedAt(LocalDateTime.now().minus(LOCK_TIMEOUT_DURATION));
+        expiredLockTx.setLockedAt(LocalDateTime.now().minus(LOCK_TIMEOUT_DURATION.plusSeconds(1)));
         transactions.add(expiredLockTx);
 
         when(transactionEntityRepository.findTransactionsByStatus(eq(ORG_ID), eq(dispatchStatuses), any(Limit.class)))
@@ -90,7 +97,7 @@ class TransactionEntityRepositoryGatewayTest {
 
         TransactionEntity expiredLockTx = new TransactionEntity();
         expiredLockTx.setId("tx2");
-        expiredLockTx.setLockedAt(LocalDateTime.now().minus(LOCK_TIMEOUT_DURATION.minusSeconds(1)));
+        expiredLockTx.setLockedAt(LocalDateTime.now().minus(LOCK_TIMEOUT_DURATION));
         transactions.add(expiredLockTx);
 
         when(transactionEntityRepository.findTransactionsByStatus(eq(ORG_ID), eq(dispatchStatuses), any(Limit.class)))

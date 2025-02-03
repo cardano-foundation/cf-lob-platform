@@ -9,7 +9,10 @@ public enum MetricEnum {
         ASSET_CATEGORIES,
         BALANCE_SHEET_OVERVIEW,
         TOTAL_EXPENSES,
-        INCOME_STREAMS
+        INCOME_STREAMS,
+        TOTAL_ASSETS,
+        TOTAL_LIABILITIES,
+        PROFIT_OF_THE_YEAR,
     }
 
 }

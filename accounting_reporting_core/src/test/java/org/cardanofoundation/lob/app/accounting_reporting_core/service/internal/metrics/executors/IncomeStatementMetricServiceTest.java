@@ -38,6 +38,22 @@ class IncomeStatementMetricServiceTest {
     }
 
     @Test
+    void getProfitOfTheYearTest() {
+        ReportEntity reportEntity = new ReportEntity();
+        reportEntity.setType(ReportType.INCOME_STATEMENT);
+        reportEntity.setYear((short) 2024);
+        reportEntity.setIncomeStatementReportData(Optional.of(getTestIncomeStatementData()));
+
+        when(reportRepository.getNewestReportsInRange(anyString(), any(), any()))
+                .thenReturn(List.of(reportEntity));
+
+        Map<Short, Long> profitOfTheYear = (Map<Short, Long>) incomeStatementMetricService.getData(MetricEnum.SubMetric.PROFIT_OF_THE_YEAR, "organisationId", Optional.empty(), Optional.empty());
+
+        assertThat(profitOfTheYear).isNotNull();
+        assertThat(profitOfTheYear).containsEntry((short) 2024, 150L);
+    }
+
+    @Test
     void getTotalExpensesTest() {
         ReportEntity reportEntity = new ReportEntity();
         reportEntity.setType(ReportType.INCOME_STATEMENT);

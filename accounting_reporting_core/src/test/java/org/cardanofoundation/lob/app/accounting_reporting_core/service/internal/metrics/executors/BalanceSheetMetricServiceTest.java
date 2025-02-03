@@ -39,6 +39,32 @@ class BalanceSheetMetricServiceTest {
     }
 
     @Test
+    void getTotalLiabilitiesTest() {
+        ReportEntity reportEntity = new ReportEntity();
+        reportEntity.setType(ReportType.BALANCE_SHEET);
+        reportEntity.setBalanceSheetReportData(Optional.of(getTestBalanceSheetData()));
+
+        when(reportRepository.getNewestReportsInRange(anyString(), any(), any()))
+                .thenReturn(List.of(reportEntity));
+
+        BigDecimal totalLiabilities = (BigDecimal) balanceSheetMetricService.getData(MetricEnum.SubMetric.TOTAL_LIABILITIES, "organisationId", Optional.empty(), Optional.empty());
+        assertThat(totalLiabilities).isEqualTo(BigDecimal.valueOf(40));
+    }
+
+    @Test
+    void getTotalAssetsTest() {
+        ReportEntity reportEntity = new ReportEntity();
+        reportEntity.setType(ReportType.BALANCE_SHEET);
+        reportEntity.setBalanceSheetReportData(Optional.of(getTestBalanceSheetData()));
+
+        when(reportRepository.getNewestReportsInRange(anyString(), any(), any()))
+                .thenReturn(List.of(reportEntity));
+
+        BigDecimal totelAssets = (BigDecimal) balanceSheetMetricService.getData(MetricEnum.SubMetric.TOTAL_ASSETS, "organisationId", Optional.empty(), Optional.empty());
+        assertThat(totelAssets).isEqualTo(BigDecimal.valueOf(80));
+    }
+
+    @Test
     void getAssetCategoriesTest() {
         ReportEntity reportEntity = new ReportEntity();
         reportEntity.setType(ReportType.BALANCE_SHEET);
