@@ -173,7 +173,6 @@ public class BalanceSheetMetricService extends MetricExecutor {
             currentAssets.getOtherReceivables().ifPresent(
                     otherReceivables -> assetMap.merge(BalanceSheetCategories.OTHER, otherReceivables.intValue(), Integer::sum));
             currentAssets.getPrepaymentsAndOtherShortTermAssets().ifPresent(
-                    // Extra Group
                     prepayments -> assetMap.merge(BalanceSheetCategories.PREPAYMENTS, prepayments.intValue(), Integer::sum));
         });
         assets.getNonCurrentAssets().ifPresent(nonCurrentAssets -> {
@@ -181,15 +180,12 @@ public class BalanceSheetMetricService extends MetricExecutor {
                     financialAssets -> assetMap.merge(BalanceSheetCategories.FINANCIAL_ASSETS, financialAssets.intValue(), Integer::sum));
 
             nonCurrentAssets.getIntangibleAssets().ifPresent(
-                    // Extra Group
                     intangibleAssets -> assetMap.merge(BalanceSheetCategories.INTANGIBLE_ASSETS, intangibleAssets.intValue(), Integer::sum));
 
             nonCurrentAssets.getInvestments().ifPresent(
-                    // Extra Group
                     investments -> assetMap.merge(BalanceSheetCategories.INVESTMENTS, investments.intValue(), Integer::sum));
 
             nonCurrentAssets.getPropertyPlantEquipment().ifPresent(
-                    // Extra Group
                     propertyPlantEquipment -> assetMap.merge(BalanceSheetCategories.PROPERTY_PLANT_EQUIPMENT, propertyPlantEquipment.intValue(), Integer::sum));
         });
     }
