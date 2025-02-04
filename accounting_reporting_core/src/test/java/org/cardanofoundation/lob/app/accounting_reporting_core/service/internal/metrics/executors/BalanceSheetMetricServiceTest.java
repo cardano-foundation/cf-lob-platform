@@ -95,7 +95,11 @@ class BalanceSheetMetricServiceTest {
         assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.FINANCIAL_ASSETS, 10);
         assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.CASH, 10);
         assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.CRYPTO_ASSETS, 10);
-        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.OTHER, 50);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.OTHER, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.PREPAYMENTS, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.INTANGIBLE_ASSETS, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.INVESTMENTS, 10);
+        assertThat(balanceSheetOverview.get(BalanceSheetCategories.ASSETS)).containsEntry(BalanceSheetCategories.PROPERTY_PLANT_EQUIPMENT, 10);
         assertThat(balanceSheetOverview).containsKey(BalanceSheetCategories.LIABILITIES);
         assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.PROFIT_OF_THE_YEAR, 10);
         assertThat(balanceSheetOverview.get(BalanceSheetCategories.LIABILITIES)).containsEntry(BalanceSheetCategories.ACCRUSAL_AND_SHORT_TERM_PROVISIONS, 10);
