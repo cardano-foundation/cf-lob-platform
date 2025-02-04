@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,7 @@ import org.cardanofoundation.lob.app.organisation.service.OrganisationCurrencySe
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true")
 public class ReportController {
     private final ReportViewService reportViewService;
     private final OrganisationCurrencyService organisationCurrencyService;

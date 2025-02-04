@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import org.springframework.modulith.events.ApplicationModuleListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchChunkEvent;
@@ -19,11 +20,11 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reco
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationFinalisationEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.reconcilation.ReconcilationStartedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.business_rules.ProcessorFlags;
-import org.cardanofoundation.lob.app.support.modulith.SyncApplicationModuleListener;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true")
 public class AccountingCoreEventHandler {
 
     private final ERPIncomingDataProcessor erpIncomingDataProcessor;
@@ -32,7 +33,7 @@ public class AccountingCoreEventHandler {
     private final TransactionBatchService transactionBatchService;
     private final TransactionReconcilationService transactionReconcilationService;
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleLedgerUpdatedEvent(TxsLedgerUpdatedEvent event) {
         log.info("Received handleLedgerUpdatedEvent event, event: {}", event.getStatusUpdates());
 
@@ -44,7 +45,7 @@ public class AccountingCoreEventHandler {
         log.info("Finished processing handleLedgerUpdatedEvent event, event: {}", event.getStatusUpdates());
     }
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleReportsLedgerUpdated(ReportsLedgerUpdatedEvent event) {
         log.info("Received handleReportsLedgerUpdated, event: {}", event);
 
@@ -55,7 +56,7 @@ public class AccountingCoreEventHandler {
         log.info("Finished processing handleReportsLedgerUpdated, event: {}", event);
     }
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleTransactionBatchFailedEvent(TransactionBatchFailedEvent event) {
         log.info("Received handleTransactionBatchFailedEvent event, event: {}", event);
 
@@ -71,7 +72,7 @@ public class AccountingCoreEventHandler {
         log.info("Finished processing handleTransactionBatchFailedEvent event, event: {}", event);
     }
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleTransactionBatchStartedEvent(TransactionBatchStartedEvent event) {
         log.info("Received handleTransactionBatchStartedEvent event, event: {}", event);
 
@@ -85,7 +86,7 @@ public class AccountingCoreEventHandler {
         log.info("Finished processing handleTransactionBatchStartedEvent event, event: {}", event);
     }
 
-    @SyncApplicationModuleListener // we need a sync process to avoid out of order events
+    @EventListener // we need a sync process to avoid out of order events
     public void handleTransactionBatchChunkEvent(TransactionBatchChunkEvent transactionBatchChunkEvent) {
         String batchId = transactionBatchChunkEvent.getBatchId();
 
@@ -105,7 +106,7 @@ public class AccountingCoreEventHandler {
         log.info("Finished processing handleTransactionBatchChunkEvent event...., event, batch_id: {}", batchId);
     }
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleReconcilationChunkFailedEvent(ReconcilationFailedEvent event) {
         log.info("Received handleReconcilationChunkFailedEvent event, event: {}", event);
 
@@ -120,7 +121,7 @@ public class AccountingCoreEventHandler {
         log.info("Finished processing handleReconcilationChunkFailedEvent event, event: {}", event);
     }
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleReconcilationStartedEvent(ReconcilationStartedEvent event) {
         log.info("Received handleReconcilationStartedEvent, event: {}", event);
 
@@ -129,7 +130,7 @@ public class AccountingCoreEventHandler {
         log.info("Finished processing handleReconcilationStartedEvent, event: {}", event);
     }
 
-    @SyncApplicationModuleListener // we need a sync process to avoid out of order events
+    @EventListener // we need a sync process to avoid out of order events
     public void handleReconcilationChunkEvent(ReconcilationChunkEvent event) {
         log.info("Received handleReconcilationChunkEvent, event: {}", event);
 
@@ -151,7 +152,7 @@ public class AccountingCoreEventHandler {
         log.info("Finished processing handleReconcilationChunkEvent, event: {}", event);
     }
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleReconcilationFinalisation(ReconcilationFinalisationEvent event) {
         log.info("Received handleReconcilationFinalisation, event: {}", event);
 

@@ -14,7 +14,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.service.dispatch.Block
 @Service("blockchain_publisher.ReportsDispatcherJob")
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "lob.blockchain_publisher.dispatcher.report.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(value = "lob.blockchain_publisher.enabled", havingValue = "true", matchIfMissing = true)
 public class ReportsDispatcherJob {
 
     private final BlockchainReportsDispatcher blockchainReportsDispatcher;

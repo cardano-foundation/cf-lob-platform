@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 @RequestMapping("/api")
 @Tag(name = "Organisation", description = "Organisation API")
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "lob.organisation.enabled", havingValue = "true")
 public class OrganisationResource {
 
     private final OrganisationService organisationService;

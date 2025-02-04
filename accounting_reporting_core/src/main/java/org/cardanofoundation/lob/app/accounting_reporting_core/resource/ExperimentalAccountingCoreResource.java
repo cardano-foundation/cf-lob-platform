@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.
 @Slf4j
 @RequiredArgsConstructor
 @Deprecated(forRemoval = true)
+@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true")
 public class ExperimentalAccountingCoreResource {
 
     private final AccountingCoreService accountingCoreService;
