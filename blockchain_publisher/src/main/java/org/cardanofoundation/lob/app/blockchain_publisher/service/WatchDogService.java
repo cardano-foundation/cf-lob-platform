@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.blockchain_publisher.service;
 
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 
@@ -21,9 +22,12 @@ import org.cardanofoundation.lob.app.blockchain_common.domain.FinalityScore;
 import org.cardanofoundation.lob.app.blockchain_common.domain.OnChainTxDetails;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.OnChainStatus;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.reports.ReportEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1SubmissionData;
+import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.ReportEntityRepositoryGateway;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
 import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
@@ -38,6 +42,7 @@ public class WatchDogService {
     private final BlockchainReaderPublicApiIF blockchainReaderPublicApi;
     private final TransactionEntityRepositoryGateway transactionEntityRepositoryGateway;
     private final ReportEntityRepositoryGateway reportEntityRepositoryGateway;
+    private final LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
 
     @Value("${lob.blockchain_publisher.watchdog.rollback.grace.period.minutes:15}")
     @Getter
@@ -72,7 +77,9 @@ public class WatchDogService {
             return;
         }
 
-        reportEntityRepositoryGateway.findDispatchedReportsThatAreNotFinalizedYet(org.getId(), Limit.of(txStatusInspectionLimitPerOrgPullSize)).forEach(report -> {
+        Set<ReportEntity> reportEntities = reportEntityRepositoryGateway.findDispatchedReportsThatAreNotFinalizedYet(org.getId(), Limit.of(txStatusInspectionLimitPerOrgPullSize));
+
+                reportEntities.forEach(report -> {
             log.info("Checking transaction status for report: {}", report.getId());
             L1SubmissionData l1SubmissionData = report.getL1SubmissionData().orElseThrow(() -> new RuntimeException("Failed to get L1 submission data"));
             report.setL1SubmissionData(Optional.of(updateL1SubmissionData(l1SubmissionData, chainTip)));
@@ -80,6 +87,9 @@ public class WatchDogService {
             reportEntityRepositoryGateway.storeReport(report);
             log.info("Status updated for report: {}", report.getId());
         });
+        // notify accounting core about updated report
+        ledgerUpdatedEventPublisher.sendReportLedgerUpdatedEvents(org.getId(), reportEntities);
+
     }
 
     private void checkTransactionStatusesForOrganisation(Organisation org, int txStatusInspectionLimitPerOrgPullSize) {
@@ -89,7 +99,8 @@ public class WatchDogService {
             return;
         }
 
-        transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(org.getId(), Limit.of(txStatusInspectionLimitPerOrgPullSize)).forEach(tx -> {
+        Set<TransactionEntity> successfullyUpdatedTxEntities = transactionEntityRepositoryGateway.findDispatchedTransactionsThatAreNotFinalizedYet(org.getId(), Limit.of(txStatusInspectionLimitPerOrgPullSize));
+        successfullyUpdatedTxEntities.forEach(tx -> {
             log.info("Checking transaction status for transaction: {}", tx.getId());
             L1SubmissionData l1SubmissionData1 = tx.getL1SubmissionData().orElseThrow(() -> new RuntimeException("Failed to get L1 submission data"));
             tx.setL1SubmissionData(Optional.of(updateL1SubmissionData(l1SubmissionData1, chainTip)));
@@ -97,6 +108,9 @@ public class WatchDogService {
             transactionEntityRepositoryGateway.storeTransaction(tx);
             log.info("Status updated for transaction: {}", tx.getId());
         });
+        // notify accounting core about updated transactions
+        ledgerUpdatedEventPublisher.sendTxLedgerUpdatedEvents(org.getId(), successfullyUpdatedTxEntities);
+
     }
 
     private OnChainStatus getOnChainStatus(Optional<OnChainTxDetails> onChainTxDetails, Long txCreationSlot, ChainTip chainTip) {
