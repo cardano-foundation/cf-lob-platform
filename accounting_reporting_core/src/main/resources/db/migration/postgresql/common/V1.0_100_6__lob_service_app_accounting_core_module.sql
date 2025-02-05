@@ -139,7 +139,11 @@ CREATE TYPE account_core_submetric_type AS ENUM (
     'ASSET_CATEGORIES',
     'BALANCE_SHEET_OVERVIEW',
     'TOTAL_EXPENSES',
-    'INCOME_STREAMS'
+    'INCOME_STREAMS',
+    'TOTAL_ASSETS',
+    'TOTAL_LIABILITIES',
+    'PROFIT_OF_THE_YEAR'
+
 );
 
 CREATE TABLE IF NOT EXISTS accounting_core_dashboard (
