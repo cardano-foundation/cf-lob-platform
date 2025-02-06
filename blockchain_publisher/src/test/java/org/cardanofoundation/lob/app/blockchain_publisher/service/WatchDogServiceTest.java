@@ -36,6 +36,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.L1Su
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.ReportEntityRepositoryGateway;
 import org.cardanofoundation.lob.app.blockchain_publisher.repository.TransactionEntityRepositoryGateway;
+import org.cardanofoundation.lob.app.blockchain_publisher.service.event_publish.LedgerUpdatedEventPublisher;
 import org.cardanofoundation.lob.app.blockchain_reader.BlockchainReaderPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
@@ -56,6 +57,8 @@ class WatchDogServiceTest {
     TransactionEntityRepositoryGateway transactionEntityRepositoryGateway;
     @Mock
     ReportEntityRepositoryGateway reportEntityRepositoryGateway;
+    @Mock
+    LedgerUpdatedEventPublisher ledgerUpdatedEventPublisher;
 
     @BeforeEach
     public void setup() {
@@ -152,6 +155,7 @@ class WatchDogServiceTest {
         when(blockchainPublishStatusMapper.convert(FinalityScore.FINAL)).thenReturn(BlockchainPublishStatus.FINALIZED);
 
         watchDogService.checkTransactionStatusForOrganisations(1);
+        verify(ledgerUpdatedEventPublisher).sendTxLedgerUpdatedEvents(null,Set.of(txEntity));
 
         verify(organisationPublicApiIF).listAll();
         verify(blockchainReaderPublicApi).getChainTip();
@@ -272,6 +276,7 @@ class WatchDogServiceTest {
 
         watchDogService.checkReportStatusForOrganisations(1);
 
+        verify(ledgerUpdatedEventPublisher).sendReportLedgerUpdatedEvents(null,Set.of(reportEntity));
         verify(organisationPublicApiIF).listAll();
         verify(blockchainReaderPublicApi).getChainTip();
         verify(reportEntityRepositoryGateway).findDispatchedReportsThatAreNotFinalizedYet(null, Limit.of(1));
