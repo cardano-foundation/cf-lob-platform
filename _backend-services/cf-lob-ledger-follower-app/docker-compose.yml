@@ -1,0 +1,58 @@
+services:
+
+  postgres-follower:
+    image: postgres:16.3
+    command: -p 5433
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5433"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres -p 5433 -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - lob
+
+  follower-app:
+    build:
+      context: .
+    ports:
+      - "9090:9090"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev--yaci-dev-kit
+      DB_URL: ${DB_USER:-jdbc:postgresql://postgres-follower:5433/postgres?currentSchema=lob_follower_service}
+      LOB_BLOCKFROST_URL: http://yaci-cli:8081/api/v1/
+      STORE_CARDANO_HOST: yaci-cli
+      SOTRE_CARDANO_PORT: 3001
+      STORE_CARDANO_PROTOCOL_MAGIC: 42
+    depends_on:
+      postgres-follower:
+        condition: service_healthy
+    networks:
+      - lob
+
+  yaci-cli:
+    image: bloxbean/yaci-cli:0.10.0-preview5
+    env_file:
+      - ./yaci-config/env
+      - ./yaci-config/node.properties
+    volumes:
+      - ./yaci-config/node.properties:/app/node.properties
+    ports:
+      - "3001:3001"
+      - "8081:8080"
+    entrypoint: [ "/app/yaci-cli", "create-node", "-o", "--start" ]
+    networks:
+      - lob
+volumes:
+  postgres-data:
+networks:
+  lob:
+    name: lob
+
