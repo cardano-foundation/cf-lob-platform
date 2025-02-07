@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,7 +54,7 @@ public class MetricController {
 
     @Tag(name = "Dashboards", description = "Save Dashboards")
     @PostMapping(value = "/saveDashboard", produces = "application/json")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<Boolean> saveDashboard(@RequestBody SaveDashboardRequest saveDashboardRequest) {
         boolean success = metricService.saveDashboard(saveDashboardRequest.getDashboards(), saveDashboardRequest.getOrganisationID());
         if (success) {
@@ -71,7 +72,7 @@ public class MetricController {
 
     @Tag(name = "Dashboards", description = "Delete Dashboards")
     @DeleteMapping(value = "/deleteDashboard/{organisationID}/{dashboardID}", produces = "application/json")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<Void> deleteDashboard(@PathVariable("organisationID") String organisationID, @PathVariable("dashboardID") Long dashboardID) {
         metricService.deleteDashboard(organisationID, dashboardID);
         return ResponseEntity.ok().build();
@@ -79,7 +80,7 @@ public class MetricController {
 
     @Tag(name = "Dashboards", description = "Update Dashboards")
     @PostMapping(value = "/updateDashboard", produces = "application/json")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<Boolean> updateDashboard(@RequestBody UpdateDashboardRequest updateDashboardRequest) {
         metricService.updateDashboard(updateDashboardRequest.getDashboard(), updateDashboardRequest.getOrganisationID());
         return ResponseEntity.ok().build();
