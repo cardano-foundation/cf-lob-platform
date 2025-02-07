@@ -202,6 +202,8 @@ subprojects {
 
             property("sonar.exclusions", "" +
                     "organisation/**, " +
+                    "**/views/**, " +
+                    "**/requests/**, " +
                     "**/entity/**, " +
                     "**/config/**, " +
                     "**/domain/**, " +

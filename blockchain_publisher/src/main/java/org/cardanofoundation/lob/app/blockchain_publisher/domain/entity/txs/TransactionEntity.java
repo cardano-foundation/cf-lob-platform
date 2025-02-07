@@ -82,6 +82,7 @@ public class TransactionEntity extends CommonDateOnlyLockableEntity implements P
     private L1SubmissionData l1SubmissionData;
 
     @OneToMany(mappedBy = "transaction", orphanRemoval = true, fetch = EAGER)
+    @Builder.Default
     private Set<TransactionItemEntity> items = new LinkedHashSet<>();
 
     @Override

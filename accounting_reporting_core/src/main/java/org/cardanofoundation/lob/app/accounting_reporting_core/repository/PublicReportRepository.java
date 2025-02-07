@@ -24,7 +24,7 @@ public class PublicReportRepository {
     private final EntityManager em;
 
 
-    public Set<ReportEntity> findAllByTypeAndPeriod(ReportType reportType, IntervalType intervalType, short year, short period) {
+    public Set<ReportEntity> findAllByTypeAndPeriod(String organisationId, ReportType reportType, IntervalType intervalType, short year, short period) {
         String query = STR."""
                 SELECT r FROM accounting_reporting_core.report.ReportEntity r
                 LEFT JOIN accounting_reporting_core.report.ReportEntity r2 on r.idControl = r2.idControl and r.ver < r2.ver
@@ -33,6 +33,7 @@ public class PublicReportRepository {
         String where = STR."""
                 WHERE r2.idControl IS NULL
                 AND r.ledgerDispatchStatus = '\{FINALIZED}'
+                AND r.organisation.id = '\{organisationId}'
                 """;
 
         if (null != reportType) {

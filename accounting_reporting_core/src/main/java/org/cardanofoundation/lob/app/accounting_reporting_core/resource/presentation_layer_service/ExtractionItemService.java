@@ -2,8 +2,11 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.present
 
 import static java.math.BigDecimal.ZERO;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -29,14 +32,18 @@ public class ExtractionItemService {
     @Transactional(readOnly = true)
     public ExtractionTransactionView findTransactionItems(LocalDate dateFrom, LocalDate dateTo, List<String> accountCode, List<String> costCenter, List<String> project) {
 
-        List<ExtractionTransactionItemView> transactionItem = transactionItemRepositoryImpl.findByItemAccount(dateFrom, dateTo, accountCode, costCenter, project).stream().map(item -> {
-            return extractionTransactionItemViewBuilder(item);
-        }).collect(Collectors.toList());
+        List<ExtractionTransactionItemView> transactionItem = transactionItemRepositoryImpl.findByItemAccount(dateFrom, dateTo, accountCode, costCenter, project).stream().map(this::extractionTransactionItemViewBuilder).collect(Collectors.toList());
 
-        return new ExtractionTransactionView(
-                transactionItem.stream().count(),
-                transactionItem
-        );
+        return ExtractionTransactionView.createSuccess(transactionItem);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ExtractionTransactionItemView> findTransactionItemsPublic(String orgId, LocalDate dateFrom, LocalDate dateTo, Set<String> event, Set<String> currency, Optional<BigDecimal> minAmount, Optional<BigDecimal> maxAmount, Set<String> transactionHash) {
+
+        return transactionItemRepositoryImpl.findByItemAccountDate(orgId, dateFrom, dateTo, event, currency, minAmount, maxAmount, transactionHash).stream().map(item -> {
+            return extractionTransactionItemViewBuilder(item);
+        }).toList();
+
     }
 
     private ExtractionTransactionItemView extractionTransactionItemViewBuilder(TransactionItemEntity item) {
@@ -46,6 +53,7 @@ public class ExtractionItemService {
                 item.getTransaction().getId(),
                 item.getTransaction().getEntryDate(),
                 item.getTransaction().getTransactionType(),
+                item.getTransaction().getLedgerDispatchReceipt().map(LedgerDispatchReceipt::getPrimaryBlockchainHash).orElse(null),
                 item.getTransaction().getReconcilation().flatMap(Reconcilation::getFinalStatus).orElse(ReconcilationCode.NOK),
                 item.getAccountDebit().map(Account::getCode).orElse(null),
                 item.getAccountDebit().flatMap(Account::getName).orElse(null),

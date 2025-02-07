@@ -28,6 +28,7 @@ class PublicReportRepositoryTest {
                 LEFT JOIN accounting_reporting_core.report.ReportEntity r2 on r.idControl = r2.idControl and r.ver < r2.ver
                 WHERE r2.idControl IS NULL
                 AND r.ledgerDispatchStatus = 'FINALIZED'
+                AND r.organisation.id = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
                 AND r.type = 'INCOME_STATEMENT'
                 AND r.intervalType = 'MONTH'
                 AND r.year = 2025
@@ -37,7 +38,7 @@ class PublicReportRepositoryTest {
         jakarta.persistence.Query queryResult = Mockito.mock(Query.class);
         PublicReportRepository publicReportRepository = new PublicReportRepository(em);
         Mockito.when(em.createQuery(Mockito.anyString())).thenReturn(queryResult);
-        publicReportRepository.findAllByTypeAndPeriod(ReportType.INCOME_STATEMENT, IntervalType.MONTH, (short) 2025, (short) 1);
+        publicReportRepository.findAllByTypeAndPeriod("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94",ReportType.INCOME_STATEMENT, IntervalType.MONTH, (short) 2025, (short) 1);
         Mockito.verify(em, Mockito.times(1)).createQuery(query);
     }
 
@@ -48,6 +49,7 @@ class PublicReportRepositoryTest {
                 LEFT JOIN accounting_reporting_core.report.ReportEntity r2 on r.idControl = r2.idControl and r.ver < r2.ver
                 WHERE r2.idControl IS NULL
                 AND r.ledgerDispatchStatus = 'FINALIZED'
+                AND r.organisation.id = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
                 AND r.intervalType = 'MONTH'
                 AND r.year = 2025
                 AND r.period = 1
@@ -56,7 +58,7 @@ class PublicReportRepositoryTest {
         jakarta.persistence.Query queryResult = Mockito.mock(Query.class);
         PublicReportRepository publicReportRepository = new PublicReportRepository(em);
         Mockito.when(em.createQuery(Mockito.anyString())).thenReturn(queryResult);
-        publicReportRepository.findAllByTypeAndPeriod(null, IntervalType.MONTH, (short) 2025, (short) 1);
+        publicReportRepository.findAllByTypeAndPeriod("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94",null, IntervalType.MONTH, (short) 2025, (short) 1);
         Mockito.verify(em, Mockito.times(1)).createQuery(query);
     }
 
@@ -67,13 +69,14 @@ class PublicReportRepositoryTest {
                 LEFT JOIN accounting_reporting_core.report.ReportEntity r2 on r.idControl = r2.idControl and r.ver < r2.ver
                 WHERE r2.idControl IS NULL
                 AND r.ledgerDispatchStatus = 'FINALIZED'
+                AND r.organisation.id = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
                 AND r.type = 'BALANCE_SHEET'
                 ORDER BY r.createdAt ASC, r.reportId ASC
                 """;
         jakarta.persistence.Query queryResult = Mockito.mock(Query.class);
         PublicReportRepository publicReportRepository = new PublicReportRepository(em);
         Mockito.when(em.createQuery(Mockito.anyString())).thenReturn(queryResult);
-        publicReportRepository.findAllByTypeAndPeriod(ReportType.BALANCE_SHEET,null, (short) 2025, (short) 1);
+        publicReportRepository.findAllByTypeAndPeriod("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94",ReportType.BALANCE_SHEET,null, (short) 2025, (short) 1);
         Mockito.verify(em, Mockito.times(1)).createQuery(query);
     }
 
@@ -84,12 +87,13 @@ class PublicReportRepositoryTest {
                 LEFT JOIN accounting_reporting_core.report.ReportEntity r2 on r.idControl = r2.idControl and r.ver < r2.ver
                 WHERE r2.idControl IS NULL
                 AND r.ledgerDispatchStatus = 'FINALIZED'
+                AND r.organisation.id = '75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94'
                 ORDER BY r.createdAt ASC, r.reportId ASC
                 """;
         jakarta.persistence.Query queryResult = Mockito.mock(Query.class);
         PublicReportRepository publicReportRepository = new PublicReportRepository(em);
         Mockito.when(em.createQuery(Mockito.anyString())).thenReturn(queryResult);
-        publicReportRepository.findAllByTypeAndPeriod(null,null, (short) 2025, (short) 1);
+        publicReportRepository.findAllByTypeAndPeriod("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94",null,null, (short) 2025, (short) 1);
         Mockito.verify(em, Mockito.times(1)).createQuery(query);
     }
 }

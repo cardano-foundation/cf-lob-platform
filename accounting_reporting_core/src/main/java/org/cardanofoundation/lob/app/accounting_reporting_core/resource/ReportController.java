@@ -121,16 +121,5 @@ public class ReportController {
         );
     }
 
-    @Tag(name = "Reporting", description = "Public search for reporting")
-    @PostMapping(value = "/public/report-list", produces = "application/json")
-    public ResponseEntity<ReportResponseView> reportSearchPublicInterface(@Valid @RequestBody PublicReportSearchRequest reportSearchRequest) {
 
-        return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findAllByTypeAndPeriod(
-                        reportSearchRequest.getReportType(),
-                        reportSearchRequest.getIntervalType(),
-                        reportSearchRequest.getYear(),
-                        reportSearchRequest.getPeriod()
-                ).stream().map(reportViewService::responseView).collect(Collectors.toList()))
-        );
-    }
 }

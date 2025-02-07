@@ -318,8 +318,8 @@ public class ReportService {
         return reportRepository.findAllByOrganisationId(organisationId);
     }
 
-    public Set<ReportEntity> findAllByTypeAndPeriod(ReportType reportType, IntervalType intervalType, short year, short period) {
-        return publicReportRepository.findAllByTypeAndPeriod(reportType, intervalType, year, period);
+    public Set<ReportEntity> findAllByTypeAndPeriod(String organistionId,ReportType reportType, IntervalType intervalType, short year, short period) {
+        return publicReportRepository.findAllByTypeAndPeriod(organistionId,reportType, intervalType, year, period);
     }
 
     public Either<Problem, ReportEntity> exist(String organisationId, ReportType reportType, IntervalType intervalType, short year, short period) {
