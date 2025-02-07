@@ -27,7 +27,6 @@ import org.cardanofoundation.lob.app.organisation.service.OrganisationCurrencySe
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @Slf4j
 public class ReportController {
@@ -38,6 +37,7 @@ public class ReportController {
 
     @Tag(name = "Reporting", description = "Report Parameters")
     @GetMapping(value = "/report-parameters/{orgId}", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<ReportingParametersView> reportParameters(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
 
         HashMap<String, String> currencyOrg = new HashMap<>();
@@ -71,6 +71,7 @@ public class ReportController {
 
     @Tag(name = "Reporting", description = "Create Income Statement")
     @PostMapping(value = "/report-search", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<ReportResponseView> reportSearch(@Valid @RequestBody ReportSearchRequest reportSearchRequest) {
 
         return reportService.exist(
@@ -91,6 +92,7 @@ public class ReportController {
 
     @Tag(name = "Reporting", description = "Report list")
     @GetMapping(value = "/report-list/{orgId}", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<ReportResponseView> reportList(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findAllByOrgId(
                         orgId
@@ -116,4 +118,16 @@ public class ReportController {
         );
     }
 
+    @Tag(name = "Reporting", description = "Public search for reporting")
+    @PostMapping(value = "/public/report-list", produces = "application/json")
+    public ResponseEntity<ReportResponseView> reportSearchPublicInterface(@Valid @RequestBody PublicReportSearchRequest reportSearchRequest) {
+
+        return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findAllByTypeAndPeriod(
+                        reportSearchRequest.getReportType(),
+                        reportSearchRequest.getIntervalType(),
+                        reportSearchRequest.getYear(),
+                        reportSearchRequest.getPeriod()
+                ).stream().map(reportViewService::responseView).collect(Collectors.toSet()))
+        );
+    }
 }

@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.organisation.resource;
 
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,8 +25,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
+import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationChartOfAccountSubTypeView;
+import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationChartOfAccountTypeView;
 import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationCostCenterView;
 import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationView;
+import org.cardanofoundation.lob.app.organisation.repository.OrganisationChartOfAccountSubTypeRepository;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationCurrencyService;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 
@@ -37,6 +41,7 @@ public class OrganisationResource {
 
     private final OrganisationService organisationService;
     private final OrganisationCurrencyService organisationCurrencyService;
+    private final OrganisationChartOfAccountSubTypeRepository chartOfAccountSubTypeRepository;
 
     @Operation(description = "Transaction types", responses = {
             @ApiResponse(content =
@@ -159,6 +164,33 @@ public class OrganisationResource {
                             organisationProject.getId() != null ? organisationProject.getId().getCustomerCode() : null,
                             organisationProject.getExternalCustomerCode(),
                             organisationProject.getName()
+                    );
+                }).toList());
+
+    }
+
+    @Operation(description = "Organisation Chart of aacount type", responses = {
+            @ApiResponse(content =
+                    {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OrganisationChartOfAccountTypeView.class)))}
+            ),
+    })
+    @GetMapping(value = "/organisation/{orgId}/chart-type", produces = "application/json")
+    public ResponseEntity<List<OrganisationChartOfAccountTypeView>> organisationChartOfAccountType(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+        return ResponseEntity.ok().body(
+                organisationService.getAllChartType(orgId).stream().map(chartOfAccountType -> {
+
+                    return new OrganisationChartOfAccountTypeView(
+                            chartOfAccountType.getId(),
+                            chartOfAccountType.getOrganisationId(),
+                            chartOfAccountType.getName(),
+                            chartOfAccountType.getSubType().stream().map(chartOfAccountSubType -> {
+                                return new OrganisationChartOfAccountSubTypeView(
+                                        chartOfAccountSubType.getId(),
+                                        chartOfAccountSubType.getOrganisationId(),
+                                        chartOfAccountSubType.getName()
+                                );
+
+                            }).collect(Collectors.toSet())
                     );
                 }).toList());
 

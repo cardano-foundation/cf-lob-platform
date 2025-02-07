@@ -18,18 +18,20 @@ public class ReportResponseView {
 
     private boolean success;
 
+    private Long total;
     private Set<ReportView> report;
     private Optional<Problem> error;
 
     public static ReportResponseView createSuccess(Set<ReportView> reportView) {
         return new ReportResponseView(
                 true,
+                reportView.stream().count(),
                 reportView,
                 Optional.empty()
         );
     }
 
     public static ReportResponseView createFail(Problem error) {
-        return new ReportResponseView(false, new HashSet<>(), Optional.of(error));
+        return new ReportResponseView(false, 0L, new HashSet<>(), Optional.of(error));
     }
 }
