@@ -27,7 +27,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: dev--yaci-dev-kit
       DB_URL: ${DB_USER:-jdbc:postgresql://postgres-follower:5433/postgres?currentSchema=lob_follower_service}
-      LOB_BLOCKFROST_URL: http://yaci-cli:8081/api/v1/
+      LOB_BLOCKFROST_URL: http://yaci-cli:8080/api/v1/
       STORE_CARDANO_HOST: yaci-cli
       SOTRE_CARDANO_PORT: 3001
       STORE_CARDANO_PROTOCOL_MAGIC: 42
@@ -46,8 +46,16 @@ services:
       - ./yaci-config/node.properties:/app/node.properties
     ports:
       - "3001:3001"
-      - "8081:8080"
+      - "8082:8080"
     entrypoint: [ "/app/yaci-cli", "create-node", "-o", "--start" ]
+    networks:
+      - lob
+  yaci-viewer:
+    image: bloxbean/yaci-viewer:0.10.0-preview5
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./yaci-config/env
     networks:
       - lob
 volumes:
