@@ -49,8 +49,7 @@ public class LedgerUpdatedEventPublisher {
                         val publishStatusM = txEntity.getL1SubmissionData().flatMap(L1SubmissionData::getPublishStatus);
                         val cardanoFinalityScoreM = txEntity.getL1SubmissionData().flatMap(L1SubmissionData::getFinalityScore);
                         val ledgerDispatchStatus = blockchainPublishStatusMapper.convert(publishStatusM, cardanoFinalityScoreM);
-
-                        return new TxStatusUpdate(txEntity.getId(), ledgerDispatchStatus);
+                        return new TxStatusUpdate(txEntity.getId(), ledgerDispatchStatus,txEntity.getL1SubmissionData().flatMap(L1SubmissionData::getTransactionHash));
                     })
                     .collect(Collectors.toSet());
 
@@ -79,7 +78,7 @@ public class LedgerUpdatedEventPublisher {
                         val cardanoFinalityScoreM = reportEntity.getL1SubmissionData().flatMap(L1SubmissionData::getFinalityScore);
                         val ledgerDispatchStatus = blockchainPublishStatusMapper.convert(publishStatusM, cardanoFinalityScoreM);
 
-                        return new ReportStatusUpdate(reportEntity.getReportId(), ledgerDispatchStatus);
+                        return new ReportStatusUpdate(reportEntity.getReportId(), ledgerDispatchStatus, reportEntity.getL1SubmissionData().flatMap(L1SubmissionData::getTransactionHash));
                     })
                     .collect(Collectors.toSet());
 

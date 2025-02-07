@@ -31,6 +31,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Valid
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.LedgerDispatchReceipt;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 
@@ -117,6 +118,15 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @Getter
     @Setter
     private LocalDate date;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "primaryBlockchainType", column = @Column(name = "primary_blockchain_type")),
+            @AttributeOverride(name = "primaryBlockchainHash", column = @Column(name = "primary_blockchain_hash"))
+    })
+    @Getter
+    @Setter
+    private LedgerDispatchReceipt ledgerDispatchReceipt;
 
     @Embedded
     @AttributeOverrides({

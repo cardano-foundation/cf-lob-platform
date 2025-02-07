@@ -40,6 +40,7 @@ class ExtractionItemServiceTest {
         tx.setTransactionInternalNumber("1");
         tx.setOrganisation(Organisation.builder().id("orgId1").build());
         tx.setTransactionType(TransactionType.FxRevaluation);
+        tx.setLedgerDispatchReceipt(new LedgerDispatchReceipt());
 
 
         val item1 = new TransactionItemEntity();

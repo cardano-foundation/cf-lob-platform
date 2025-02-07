@@ -26,10 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
-import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationChartOfAccountSubTypeView;
-import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationChartOfAccountTypeView;
-import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationCostCenterView;
-import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationView;
+import org.cardanofoundation.lob.app.organisation.domain.view.*;
 import org.cardanofoundation.lob.app.organisation.repository.OrganisationChartOfAccountSubTypeRepository;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationCurrencyService;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
@@ -195,6 +192,25 @@ public class OrganisationResource {
                             }).collect(Collectors.toSet())
                     );
                 }).toList());
+
+    }
+
+    @Operation(description = "Organisation Chart of aacount type", responses = {
+            @ApiResponse(content =
+                    {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OrganisationEventView.class)))}
+            ),
+    })
+    @GetMapping(value = "/organisation/{orgId}/events", produces = "application/json")
+    public ResponseEntity<List<OrganisationEventView>> organisationEvent(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
+        return ResponseEntity.ok().body(
+                organisationService.getOrganisationEventCode(orgId).stream().map(accountEvent -> {
+                    return new OrganisationEventView(
+                            accountEvent.getId().getCustomerCode(),
+                            accountEvent.getId().getOrganisationId(),
+                            accountEvent.getName()
+                    );
+                }).toList()
+        );
 
     }
 

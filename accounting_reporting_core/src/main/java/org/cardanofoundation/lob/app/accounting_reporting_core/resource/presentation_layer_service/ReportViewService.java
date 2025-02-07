@@ -53,6 +53,9 @@ public class ReportViewService {
         reportResponseView.setDate(reportEntity.getDate());
         reportResponseView.setPublish(reportEntity.getLedgerDispatchApproved());
         reportResponseView.setCanBePublish(true);
+        if (null != reportEntity.getLedgerDispatchReceipt()) {
+            reportResponseView.setBlockChainHash(reportEntity.getLedgerDispatchReceipt().getPrimaryBlockchainHash());
+        }
         Either<Problem, Boolean> left = reportService.canPublish(reportEntity);
         reportResponseView.setError(Optional.empty());
         if (left.isLeft()) {

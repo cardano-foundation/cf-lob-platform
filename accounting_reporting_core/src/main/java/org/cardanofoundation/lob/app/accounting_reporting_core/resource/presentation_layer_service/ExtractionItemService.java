@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.present
 
 import static java.math.BigDecimal.ZERO;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,6 +40,19 @@ public class ExtractionItemService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public ExtractionTransactionView findTransactionItemsPublic(String orgId , LocalDate dateFrom, LocalDate dateTo, List<String> event, String currency, BigDecimal minAmount, BigDecimal maxAmount, List<String> transactionHash) {
+
+        List<ExtractionTransactionItemView> transactionItem = transactionItemRepositoryImpl.findByItemAccountDate(orgId ,dateFrom, dateTo,event, currency, minAmount, maxAmount, transactionHash).stream().map(item -> {
+            return extractionTransactionItemViewBuilder(item);
+        }).collect(Collectors.toList());
+
+        return new ExtractionTransactionView(
+                transactionItem.stream().count(),
+                transactionItem
+        );
+    }
+
     private ExtractionTransactionItemView extractionTransactionItemViewBuilder(TransactionItemEntity item) {
         return new ExtractionTransactionItemView(
                 item.getId(),
@@ -46,6 +60,7 @@ public class ExtractionItemService {
                 item.getTransaction().getId(),
                 item.getTransaction().getEntryDate(),
                 item.getTransaction().getTransactionType(),
+                item.getTransaction().getLedgerDispatchReceipt().getPrimaryBlockchainHash(),
                 item.getTransaction().getReconcilation().flatMap(Reconcilation::getFinalStatus).orElse(ReconcilationCode.NOK),
                 item.getAccountDebit().map(Account::getCode).orElse(null),
                 item.getAccountDebit().flatMap(Account::getName).orElse(null),
