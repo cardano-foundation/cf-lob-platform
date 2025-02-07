@@ -1,6 +1,5 @@
 package org.cardanofoundation.lob.app.organisation.domain.entity;
 
-import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
 
 import jakarta.persistence.*;
 
@@ -17,13 +16,14 @@ import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 @Getter
 @Setter
 @Entity
-@Table(name = "organisation_chart_of_account_sub_type")
+@Table(name = "organisation_chart_of_account_sub_type", indexes = {@Index(name = "astu_name", columnList = "name", unique = true)})
 @Audited
 @EntityListeners({AuditingEntityListener.class})
 public class OrganisationChartOfAccountSubType extends CommonEntity {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "organisation_id", nullable = false)
     private String organisationId;
@@ -35,9 +35,5 @@ public class OrganisationChartOfAccountSubType extends CommonEntity {
     @JoinColumn(name = "type", referencedColumnName = "id")
     private OrganisationChartOfAccountType type;
 
-    public static String id(OrganisationChartOfAccountType chartOfAccountType,
-                            String name) {
-        return digestAsHex(STR."\{chartOfAccountType}::\{name}");
-    }
 
 }

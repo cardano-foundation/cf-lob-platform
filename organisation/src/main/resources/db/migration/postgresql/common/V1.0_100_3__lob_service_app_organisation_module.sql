@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS organisation_chart_of_account (
    ref_code VARCHAR(255) NOT NULL,
    event_ref_code VARCHAR(255) NOT NULL,
    name VARCHAR(255) NOT NULL,
-   sub_type CHAR(64),
+   sub_type VARCHAR(255),
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS organisation_chart_of_account_aud (
    ref_code VARCHAR(255) NOT NULL,
    event_ref_code VARCHAR(255) NOT NULL,
    name VARCHAR(255) NOT NULL,
-   sub_type CHAR(64),
+   sub_type VARCHAR(255) NOT NULL,
 
 
    created_by VARCHAR(255),
@@ -270,8 +270,9 @@ CREATE TABLE IF NOT EXISTS organisation_account_event_aud (
    ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
+
  CREATE TABLE IF NOT EXISTS organisation_chart_of_account_type (
-    id CHAR(64) PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     organisation_id CHAR(64) NOT NULL,
     name VARCHAR(255),
 
@@ -284,7 +285,7 @@ CREATE TABLE IF NOT EXISTS organisation_account_event_aud (
  );
 
 CREATE TABLE IF NOT EXISTS organisation_chart_of_account_type_aud (
-        id CHAR(64),
+        id CHAR(255),
        organisation_id CHAR(64) NOT NULL,
        name VARCHAR(255),
 
@@ -306,10 +307,10 @@ CREATE TABLE IF NOT EXISTS organisation_chart_of_account_type_aud (
 );
 
  CREATE TABLE IF NOT EXISTS organisation_chart_of_account_sub_type (
-    id CHAR(64) PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     organisation_id CHAR(64) NOT NULL,
     name VARCHAR(255),
-    type CHAR(64),
+    type BIGINT NOT NULL,
 
     created_by VARCHAR(255),
     updated_by VARCHAR(255),
@@ -319,10 +320,10 @@ CREATE TABLE IF NOT EXISTS organisation_chart_of_account_type_aud (
  );
 
 CREATE TABLE IF NOT EXISTS organisation_chart_of_account_sub_type_aud (
-   id CHAR(64),
+   id CHAR(255),
    organisation_id CHAR(64) NOT NULL,
    name VARCHAR(255),
-   type CHAR(64),
+   type BIGINT NOT NULL,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
