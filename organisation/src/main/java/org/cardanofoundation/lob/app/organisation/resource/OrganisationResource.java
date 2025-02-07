@@ -34,7 +34,7 @@ import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 @RequestMapping("/api")
 @Tag(name = "Organisation", description = "Organisation API")
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "lob.organisation.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.organisation.enabled", havingValue = "true", matchIfMissing = true)
 public class OrganisationResource {
 
     private final OrganisationService organisationService;

@@ -14,7 +14,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.service.WatchDogServic
 
 @Service
 @Slf4j
-@ConditionalOnProperty(value = "lob.blockchain_publisher.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.blockchain_publisher.enabled", havingValue = "true", matchIfMissing = true)
 @RequiredArgsConstructor
 public class WatchDogJob {
 

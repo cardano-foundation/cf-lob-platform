@@ -19,7 +19,7 @@ import org.flywaydb.core.internal.util.FileUtils;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
-@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true", matchIfMissing = true)
 public class AccountingCoreResourceNetSuiteMock {
 
     @Value("${lob.mock-result-path:src/main/resources/json/NetSuiteIngestionMock.json}")

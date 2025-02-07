@@ -32,7 +32,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
-@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true", matchIfMissing = true)
 public class AccountingCoreResourceReconciliation {
 
     private final AccountingCorePresentationViewService accountingCorePresentationService;

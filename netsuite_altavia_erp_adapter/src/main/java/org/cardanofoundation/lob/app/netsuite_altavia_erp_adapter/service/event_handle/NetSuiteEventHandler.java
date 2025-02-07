@@ -15,7 +15,7 @@ import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.intern
 
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "lob.netsuite.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.netsuite.enabled", havingValue = "true", matchIfMissing = true)
 public class NetSuiteEventHandler {
 
     private final NetSuiteExtractionService netSuiteExtractionService;

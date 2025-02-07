@@ -27,7 +27,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.
 @Slf4j
 @RequiredArgsConstructor
 @Deprecated(forRemoval = true)
-@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true", matchIfMissing = true)
 public class ExperimentalAccountingCoreResource {
 
     private final AccountingCoreService accountingCoreService;

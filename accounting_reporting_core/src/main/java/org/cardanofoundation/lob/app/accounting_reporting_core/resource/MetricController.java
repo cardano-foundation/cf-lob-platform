@@ -32,7 +32,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @Slf4j
-@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true", matchIfMissing = true)
 public class MetricController {
 
     private final MetricService metricService;
