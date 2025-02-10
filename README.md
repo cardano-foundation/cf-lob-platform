@@ -59,10 +59,10 @@ cd cf-lob-platform
 
 ## Documentation
 
-| Link                                                                               | Audience                                                     |
-|------------------------------------------------------------------------------------|--------------------------------------------------------------|
-| [Code Of Conduct](https://github.com/cardano-foundation/cf-lob-platform/CODE-OF-CONDUCT.md) | Developers                                                   |
-| [Contributing](https://github.com/cardano-foundation/cf-lob-platform/CONTRIBUTING.md)       | Developers                                                   |
-| [Security](https://github.com/cardano-foundation/cf-lob-platform/SECURITY.md)               | Developers                                                   |
+| Link                                                                                        | Audience   |
+|---------------------------------------------------------------------------------------------|------------|
+| [Code Of Conduct](https://github.com/cardano-foundation/cf-lob-platform/CODE-OF-CONDUCT.md) | Developers |
+| [Contributing](https://github.com/cardano-foundation/cf-lob-platform/CONTRIBUTING.md)       | Developers |
+| [Security](https://github.com/cardano-foundation/cf-lob-platform/SECURITY.md)               | Developers |
 
 <hr/>
