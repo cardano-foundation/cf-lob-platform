@@ -64,4 +64,6 @@ public interface ReportRepository extends JpaRepository<ReportEntity, String> {
     List<ReportEntity> getNewestReportsInRange(@Param("organisationId") String organisationId,
                                                @Param("startDate") LocalDate startDate,
                                                @Param("endDate") LocalDate endDate);
+
+
 }

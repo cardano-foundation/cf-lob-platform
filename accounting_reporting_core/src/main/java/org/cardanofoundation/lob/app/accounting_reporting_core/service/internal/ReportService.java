@@ -1,5 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
+
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType.MONTH;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType.YEAR;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode.USER;
@@ -30,6 +31,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Org
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.BalanceSheetData;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.IncomeStatementData;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.PublicReportRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.ReportRepository;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 
@@ -40,6 +42,7 @@ import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 public class ReportService {
 
     private final ReportRepository reportRepository;
+    private final PublicReportRepository publicReportRepository;
     private final OrganisationPublicApi organisationPublicApi;
     private final Clock clock;
 
@@ -474,6 +477,10 @@ public class ReportService {
 
     public Set<ReportEntity> findAllByOrgId(String organisationId) {
         return reportRepository.findAllByOrganisationId(organisationId);
+    }
+
+    public Set<ReportEntity> findAllByTypeAndPeriod(ReportType reportType, IntervalType intervalType, short year, short period) {
+        return publicReportRepository.findAllByTypeAndPeriod(reportType,intervalType,year,period);
     }
 
     public Either<Problem, ReportEntity> exist(String organisationId, ReportType reportType, IntervalType intervalType, short year, short period) {

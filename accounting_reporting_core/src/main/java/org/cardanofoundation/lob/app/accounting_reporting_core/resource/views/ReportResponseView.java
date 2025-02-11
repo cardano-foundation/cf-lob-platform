@@ -1,8 +1,8 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 
-import java.util.HashSet;
+
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,18 +18,20 @@ public class ReportResponseView {
 
     private boolean success;
 
-    private Set<ReportView> report;
+    private Long total;
+    private List<ReportView> report;
     private Optional<Problem> error;
 
-    public static ReportResponseView createSuccess(Set<ReportView> reportView) {
+    public static ReportResponseView createSuccess(List<ReportView> reportView) {
         return new ReportResponseView(
                 true,
+                reportView.stream().count(),
                 reportView,
                 Optional.empty()
         );
     }
 
     public static ReportResponseView createFail(Problem error) {
-        return new ReportResponseView(false, new HashSet<>(), Optional.of(error));
+        return new ReportResponseView(false, 0L, List.of(), Optional.of(error));
     }
 }

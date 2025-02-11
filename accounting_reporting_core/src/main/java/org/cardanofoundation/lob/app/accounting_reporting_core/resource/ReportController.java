@@ -1,8 +1,9 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 
+
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
@@ -65,7 +66,7 @@ public class ReportController {
                     return ResponseEntity.status(problem.getStatus().getStatusCode()).body(ReportResponseView.createFail(problem));
                 }, success -> {
                     return ResponseEntity.ok().body(
-                            ReportResponseView.createSuccess(Set.of(reportViewService.responseView(success)))
+                            ReportResponseView.createSuccess(List.of(reportViewService.responseView(success)))
                     );
                 });
     }
@@ -86,7 +87,7 @@ public class ReportController {
             return ResponseEntity.status(problem.getStatus().getStatusCode()).body(ReportResponseView.createFail(problem));
         }, success -> {
             return ResponseEntity.ok().body(
-                    ReportResponseView.createSuccess(Set.of(reportViewService.responseView(success)))
+                    ReportResponseView.createSuccess(List.of(reportViewService.responseView(success)))
             );
         });
     }
@@ -98,7 +99,7 @@ public class ReportController {
     public ResponseEntity<ReportResponseView> reportList(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findAllByOrgId(
                         orgId
-                ).stream().map(reportViewService::responseView).collect(Collectors.toSet()))
+                ).stream().map(reportViewService::responseView).collect(Collectors.toList()))
         );
 
     }
@@ -114,10 +115,22 @@ public class ReportController {
                     return ResponseEntity.status(problem.getStatus().getStatusCode()).body(ReportResponseView.createFail(problem));
                 }, success -> {
                     return ResponseEntity.ok().body(
-                            ReportResponseView.createSuccess(Set.of(reportViewService.responseView(success)))
+                            ReportResponseView.createSuccess(List.of(reportViewService.responseView(success)))
                     );
                 }
         );
     }
 
+    @Tag(name = "Reporting", description = "Public search for reporting")
+    @PostMapping(value = "/public/report-list", produces = "application/json")
+    public ResponseEntity<ReportResponseView> reportSearchPublicInterface(@Valid @RequestBody PublicReportSearchRequest reportSearchRequest) {
+
+        return ResponseEntity.ok().body(ReportResponseView.createSuccess(reportService.findAllByTypeAndPeriod(
+                        reportSearchRequest.getReportType(),
+                        reportSearchRequest.getIntervalType(),
+                        reportSearchRequest.getYear(),
+                        reportSearchRequest.getPeriod()
+                ).stream().map(reportViewService::responseView).collect(Collectors.toList()))
+        );
+    }
 }
