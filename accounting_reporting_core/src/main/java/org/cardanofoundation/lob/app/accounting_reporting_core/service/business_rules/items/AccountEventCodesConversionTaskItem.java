@@ -54,7 +54,7 @@ public class AccountEventCodesConversionTaskItem implements PipelineTaskItem {
 
             accountChartMappingM.ifPresentOrElse(
                     chartOfAccount -> setAccountCodeRef(acc, type, item, chartOfAccount),
-                    () -> addMissingChartOfAccountViolation(accountCode, type, item, tx, determineSource(type))
+                    () -> addMissingChartOfAccountViolation(accountCode, type, item, tx, LOB)
             );
         });
     }
@@ -114,13 +114,6 @@ public class AccountEventCodesConversionTaskItem implements PipelineTaskItem {
                 .build();
 
         tx.addViolation(violation);
-    }
-
-    private Source determineSource(OperationType type) {
-        return switch (type) {
-            case DEBIT -> LOB;
-            case CREDIT -> ERP;
-        };
     }
 
     private void setAccountEventCode(String organisationId,
