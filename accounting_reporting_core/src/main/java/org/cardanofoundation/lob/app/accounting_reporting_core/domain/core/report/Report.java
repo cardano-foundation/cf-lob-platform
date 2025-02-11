@@ -81,7 +81,7 @@ public class Report {
     }
 
     public void setBalanceSheetData(Optional<BalanceSheetData> balanceSheetData) {
-        if (type != ReportType.BALANCE_SHEET) {
+        if (balanceSheetData != null && balanceSheetData.isPresent() && type != ReportType.BALANCE_SHEET) {
             throw new IllegalArgumentException("Balance sheet data can only be set for balance sheet report type!");
         }
 
@@ -89,7 +89,7 @@ public class Report {
     }
 
     public void setIncomeStatementData(Optional<IncomeStatementData> incomeStatementData) {
-        if (type != ReportType.INCOME_STATEMENT) {
+        if (incomeStatementData != null && incomeStatementData.isPresent() && type != ReportType.INCOME_STATEMENT) {
             throw new IllegalArgumentException("Income statement data can only be set for income statement report type!");
         }
 

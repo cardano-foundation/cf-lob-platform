@@ -3,7 +3,8 @@ package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.event
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.modulith.events.ApplicationModuleListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.event.EventListener;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.ScheduledIngestionEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchCreatedEvent;
@@ -14,12 +15,13 @@ import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.intern
 
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "lob.netsuite.enabled", havingValue = "true", matchIfMissing = true)
 public class NetSuiteEventHandler {
 
     private final NetSuiteExtractionService netSuiteExtractionService;
     private final NetSuiteReconcilationService netSuiteReconcilationService;
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleScheduledIngestionEvent(ScheduledIngestionEvent event) {
         log.info("Handling handleScheduledIngestionEvent...");
 
@@ -32,7 +34,7 @@ public class NetSuiteEventHandler {
         log.info("Handled handleScheduledIngestionEvent.");
     }
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleTransactionBatchCreatedEvent(TransactionBatchCreatedEvent transactionBatchCreatedEvent) {
         log.info("Handling handleTransactionBatchCreatedEvent...");
 
@@ -46,7 +48,7 @@ public class NetSuiteEventHandler {
         log.info("Handled handleTransactionBatchCreatedEvent.");
     }
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleScheduledReconciliationEvent(ScheduledReconcilationEvent scheduledReconcilationEvent) {
         log.info("Handling handleScheduledReconciliationEvent...");
 
@@ -60,7 +62,7 @@ public class NetSuiteEventHandler {
         log.info("Handled handleScheduledReconciliationEvent.");
     }
 
-    @ApplicationModuleListener
+    @EventListener
     public void handleCreatedReconciliationEvent(ReconcilationCreatedEvent reconcilationCreatedEvent) {
         log.info("Handling handleCreatedReconciliationEvent...");
 

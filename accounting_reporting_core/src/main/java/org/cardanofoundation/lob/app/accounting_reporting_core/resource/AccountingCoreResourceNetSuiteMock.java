@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import org.flywaydb.core.internal.util.FileUtils;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(value = "lob.accounting_reporting_core.enabled", havingValue = "true", matchIfMissing = true)
 public class AccountingCoreResourceNetSuiteMock {
 
     @Value("${lob.mock-result-path:src/main/resources/json/NetSuiteIngestionMock.json}")
