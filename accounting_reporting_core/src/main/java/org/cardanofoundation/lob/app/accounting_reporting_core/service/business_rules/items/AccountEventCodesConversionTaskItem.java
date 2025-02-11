@@ -3,7 +3,6 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.business
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.CREDIT;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.DEBIT;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.CHART_OF_ACCOUNT_NOT_FOUND;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.EVENT_DATA_NOT_FOUND;

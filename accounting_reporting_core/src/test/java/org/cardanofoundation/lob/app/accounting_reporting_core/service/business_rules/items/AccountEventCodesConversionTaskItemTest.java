@@ -28,7 +28,7 @@ import org.cardanofoundation.lob.app.organisation.domain.entity.AccountEvent;
 import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationChartOfAccount;
 import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationChartOfAccountSubType;
 
-class AccountAccountEventCodesConversionTaskItemTest {
+class AccountEventCodesConversionTaskItemTest {
 
     private PipelineTaskItem taskItem;
 
