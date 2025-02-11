@@ -46,7 +46,7 @@ The repository is organized into several modules, each responsible for specific 
 ## Architecture
 This repository uses [Spring Modulith](https://github.com/spring-projects/spring-modulith) architecture to organize the codebase into modules. The architecture is designed to promote modularity, scalability, and maintainability, allowing for the independent development and deployment of different components.
 Through the use of modules it is possible to split the architecture into different layers, each responsible for specific functionalities within the platform. This separation of concerns enables better code organization, easier testing, and improved code reuse across different components.
-![Architecutre](LOB-Architecture.png)
+![Architecutre](docs/images/architecture.png)
 
 ## How to build
 This project uses Gradle as the build tool. To build the project, follow these steps:
