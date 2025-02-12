@@ -3,7 +3,6 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.BALANCE_SHEET;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.INCOME_STATEMENT;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -27,6 +26,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.rep
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.IncomeStatementData;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.ReportRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.CreateReportView;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 
@@ -1108,66 +1108,7 @@ class ReportServiceTest {
     }
 
     @Test
-    void storeBalanceSheetTestOrganisationNotFound_ShouldReturnProblem() {
-        IntervalType intervalType = IntervalType.MONTH;
-        short year = 2025;
-        short period = 3;
-        String organisationId = "org-123";
-        when(organisationPublicApi.findByOrganisationId(organisationId)).thenReturn(Optional.empty());
-
-        Either<Problem, ReportEntity> result = reportService.storeBalanceSheet(
-                organisationId, "100", "50", "200", "20", "30", "40", "10", "60", "70", "80",
-                "90", "100", "110", "120", "130", BALANCE_SHEET, intervalType, year, period
-        );
-
-        assertTrue(result.isLeft());
-        assertThat(result.getLeft().getTitle()).isEqualTo("ORGANISATION_NOT_FOUND");
-        verify(organisationPublicApi).findByOrganisationId(organisationId);
-        verifyNoMoreInteractions(organisationPublicApi);
-
-        verifyNoInteractions(reportRepository);
-    }
-
-    @Test
-    void storeBalanceSheetThrowsException_ShouldNotSave() {
-        IntervalType intervalType = IntervalType.MONTH;
-        short year = 2025;
-        short period = 3;
-        String organisationId = "org-123";
-        when(organisationPublicApi.findByOrganisationId(organisationId)).thenThrow(new RuntimeException("Test exception"));
-
-        assertThrows(RuntimeException.class, () -> reportService.storeBalanceSheet(
-                organisationId, "100", "50", "200", "20", "30", "40", "10", "60", "70", "80",
-                "90", "100", "110", "120", "130", BALANCE_SHEET, intervalType, year, period
-        ));
-
-        verify(organisationPublicApi).findByOrganisationId(organisationId);
-        verifyNoMoreInteractions(organisationPublicApi);
-
-        verifyNoInteractions(reportRepository);
-    }
-
-    @Test
-    void storeBalanceSheetTestWrongType_ShouldReturnProblem() {
-        IntervalType intervalType = IntervalType.MONTH;
-        short year = 2025;
-        short period = 3;
-        String organisationId = "org-123";
-        when(organisationPublicApi.findByOrganisationId(organisationId)).thenReturn(Optional.empty());
-
-        Either<Problem, ReportEntity> result = reportService.storeBalanceSheet(
-                organisationId, "100", "50", "200", "20", "30", "40", "10", "60", "70", "80",
-                "90", "100", "110", "120", "130", INCOME_STATEMENT, intervalType, year, period
-        );
-
-        assertTrue(result.isLeft());
-        assertThat(result.getLeft().getTitle()).isEqualTo("INVALID_REPORT_TYPE");
-        verifyNoInteractions(organisationPublicApi);
-        verifyNoInteractions(reportRepository);
-    }
-
-    @Test
-    void storeBalanceSheet_successfull() {
+    void storeReport_successfull() {
         IntervalType intervalType = IntervalType.MONTH;
         short year = 2025;
         short period = 3;
@@ -1185,10 +1126,10 @@ class ReportServiceTest {
 
         when(reportRepository.findLatestByIdControl(anyString(), anyString())).thenReturn(Optional.of(reportEntity));
         when(reportRepository.save(any(ReportEntity.class))).thenReturn(reportEntity);
-        Either<Problem, ReportEntity> result = reportService.storeBalanceSheet(
-                organisationId, "10", "10", "10", "10", "10", "10", "10", "10", "10", "10",
-                "10", "10", "10", "10", "20", BALANCE_SHEET, intervalType, year, period
-        );
+
+        Either<Problem, ReportEntity> result = reportService.storeReport(BALANCE_SHEET, CreateReportView.builder()
+                .organisationId(organisationId)
+                .balanceSheetData(Optional.of(BalanceSheetData.builder().build())).build(), intervalType, year, period);
 
         assertTrue(result.isRight());
 
@@ -1197,6 +1138,62 @@ class ReportServiceTest {
         verify(reportRepository, times(1)).save(any(ReportEntity.class));
         verifyNoMoreInteractions(organisationPublicApi);
         verifyNoMoreInteractions(reportRepository);
+    }
+
+    @Test
+    void storeBalanceSheetTestWrongType_ShouldReturnProblem() {
+        IntervalType intervalType = IntervalType.MONTH;
+        short year = 2025;
+        short period = 3;
+        String organisationId = "org-123";
+
+        Either<Problem, ReportEntity> result = reportService.storeReport(BALANCE_SHEET, CreateReportView.builder()
+                .organisationId(organisationId)
+                .balanceSheetData(Optional.empty())
+                .incomeStatementData(Optional.of(IncomeStatementData.builder().build())).build(), intervalType, year, period);
+
+        assertTrue(result.isLeft());
+        assertThat(result.getLeft().getTitle()).isEqualTo("INVALID_REPORT_TYPE");
+        verifyNoInteractions(organisationPublicApi);
+        verifyNoInteractions(reportRepository);
+    }
+
+    @Test
+    void storeIncomeStatementTestWrongType_ShouldReturnProblem() {
+        IntervalType intervalType = IntervalType.MONTH;
+        short year = 2025;
+        short period = 3;
+        String organisationId = "org-123";
+
+        Either<Problem, ReportEntity> result = reportService.storeReport(INCOME_STATEMENT, CreateReportView.builder()
+                .organisationId(organisationId)
+                .incomeStatementData(Optional.empty())
+                .balanceSheetData(Optional.of(BalanceSheetData.builder().build())).build(), intervalType, year, period);
+
+        assertTrue(result.isLeft());
+        assertThat(result.getLeft().getTitle()).isEqualTo("INVALID_REPORT_TYPE");
+        verifyNoInteractions(organisationPublicApi);
+        verifyNoInteractions(reportRepository);
+    }
+
+    @Test
+    void storeReportOrganisationNotFound_ShouldReturnProblem() {
+        IntervalType intervalType = IntervalType.MONTH;
+        short year = 2025;
+        short period = 3;
+        String organisationId = "org-123";
+        when(organisationPublicApi.findByOrganisationId(organisationId)).thenReturn(Optional.empty());
+
+        Either<Problem, ReportEntity> result = reportService.storeReport(BALANCE_SHEET, CreateReportView.builder()
+                .organisationId(organisationId)
+                .incomeStatementData(Optional.empty())
+                .balanceSheetData(Optional.of(BalanceSheetData.builder().build())).build(), intervalType, year, period);
+
+        assertTrue(result.isLeft());
+        assertThat(result.getLeft().getTitle()).isEqualTo("ORGANISATION_NOT_FOUND");
+        verify(organisationPublicApi).findByOrganisationId(organisationId);
+        verifyNoMoreInteractions(organisationPublicApi);
+        verifyNoInteractions(reportRepository);
     }
 
 }
