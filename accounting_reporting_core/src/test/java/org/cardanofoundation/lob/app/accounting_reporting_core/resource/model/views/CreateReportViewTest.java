@@ -56,7 +56,7 @@ class CreateReportViewTest {
     }
 
     @Test
-    public void fromReportRequest_WithIncomeStatement_ShouldPopulateIncomeStatementData() {
+    void fromReportRequest_WithIncomeStatement_ShouldPopulateIncomeStatementData() {
         when(reportRequest.getReportType()).thenReturn(ReportType.INCOME_STATEMENT);
         when(reportRequest.getOtherIncome()).thenReturn("1000");
         when(reportRequest.getBuildOfLongTermProvision()).thenReturn("500");
