@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 import io.vavr.control.Either;
 import org.zalando.problem.Problem;
 
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReportPublishRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReportRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.CreateReportView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReportView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.ReportService;
 
@@ -35,53 +35,11 @@ public class ReportViewService {
 
     @Transactional
     public Either<Problem, ReportEntity> reportCreate(ReportRequest reportSaveRequest) {
-        if (reportSaveRequest.getReportType().equals(ReportType.INCOME_STATEMENT)) {
-            return reportService.storeIncomeStatement(
-                    reportSaveRequest.getOrganisationID(),
-                    reportSaveRequest.getOtherIncome(),
-                    reportSaveRequest.getBuildOfLongTermProvision(),
-                    reportSaveRequest.getCostOfProvidingServices(),
-                    reportSaveRequest.getFinancialRevenues(),
-                    reportSaveRequest.getNetIncomeOptionsSale(),
-                    reportSaveRequest.getRealisedGainsOnSaleOfCryptocurrencies(),
-                    reportSaveRequest.getStakingRewardsIncome(),
-                    reportSaveRequest.getFinancialExpenses(),
-                    reportSaveRequest.getExtraordinaryExpenses(),
-                    reportSaveRequest.getIncomeTaxExpense(),
-                    reportSaveRequest.getPersonnelExpenses(),
-                    reportSaveRequest.getGeneralAndAdministrativeExpenses(),
-                    reportSaveRequest.getDepreciationAndImpairmentLossesOnTangibleAssets(),
-                    reportSaveRequest.getAmortizationOnIntangibleAssets(),
-                    reportSaveRequest.getRentExpenses(),
-                    reportSaveRequest.getReportType(),
-                    reportSaveRequest.getIntervalType(),
-                    reportSaveRequest.getYear(),
-                    reportSaveRequest.getPeriod()
-            );
-        }
-        return reportService.storeBalanceSheet(
-                reportSaveRequest.getOrganisationID(),
-                reportSaveRequest.getPropertyPlantEquipment(),
-                reportSaveRequest.getIntangibleAssets(),
-                reportSaveRequest.getInvestments(),
-                reportSaveRequest.getFinancialAssets(),
-                reportSaveRequest.getPrepaymentsAndOtherShortTermAssets(),
-                reportSaveRequest.getOtherReceivables(),
-                reportSaveRequest.getCryptoAssets(),
-                reportSaveRequest.getCashAndCashEquivalents(),
-                reportSaveRequest.getProvisions(),
-                reportSaveRequest.getTradeAccountsPayables(),
-                reportSaveRequest.getOtherCurrentLiabilities(),
-                reportSaveRequest.getAccrualsAndShortTermProvisions(),
-                reportSaveRequest.getCapital(),
-                reportSaveRequest.getProfitForTheYear(),
-                reportSaveRequest.getResultsCarriedForward(),
-                reportSaveRequest.getReportType(),
+        return reportService.storeReport(reportSaveRequest.getReportType(),
+                CreateReportView.fromReportRequest(reportSaveRequest),
                 reportSaveRequest.getIntervalType(),
                 reportSaveRequest.getYear(),
-                reportSaveRequest.getPeriod()
-        );
-
+                reportSaveRequest.getPeriod());
     }
 
     public ReportView responseView(ReportEntity reportEntity) {

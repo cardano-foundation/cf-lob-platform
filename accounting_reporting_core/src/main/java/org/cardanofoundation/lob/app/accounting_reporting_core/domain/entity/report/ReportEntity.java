@@ -229,7 +229,7 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     public Optional<Validable> getReportData() {
         return switch (type) {
             case BALANCE_SHEET -> getBalanceSheetReportData().map(Validable.class::cast);
-            case INCOME_STATEMENT -> getIncomeStatementReportData().map(Validable.class::cast);
+            case INCOME_STATEMENT -> getIncomeStatementReportData().map(Validable.class::cast); // TODO: Income statement is always true
         };
     }
 

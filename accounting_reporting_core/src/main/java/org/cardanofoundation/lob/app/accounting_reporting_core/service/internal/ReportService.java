@@ -33,6 +33,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.rep
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.PublicReportRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.ReportRepository;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.CreateReportView;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 
 @Service
@@ -146,9 +147,9 @@ public class ReportService {
 
         reportExample.setIncomeStatementReportData(Optional.of(incomeStatementReportData));
 
-        reportRepository.save(reportExample);
+        ReportEntity savedEntity = reportRepository.save(reportExample);
 
-        log.info("Income Statement::Report saved successfully: {}", reportExample);
+        log.info("Income Statement::Report saved successfully: {}", savedEntity.getReportId());
 
         return Either.right(null);
     }
@@ -234,38 +235,30 @@ public class ReportService {
                     .build());
         }
 
-        reportRepository.save(reportExample);
+        ReportEntity savedEntity = reportRepository.save(reportExample);
 
-        log.info("Balance Sheet::Report saved successfully: {}", reportExample.getReportId());
+        log.info("Balance Sheet::Report saved successfully: {}", savedEntity.getReportId());
 
         return Either.right(null);
     }
 
-    @Transactional
-    public Either<Problem, ReportEntity> storeBalanceSheet(
-            String organisationId,
-            String propertyPlantEquipment,
-            String intangibleAssets,
-            String investments,
-            String financialAssets,
-            String prepaymentsAndOtherShortTermAssets,
-            String otherReceivables,
-            String cryptoAssets,
-            String cashAndCashEquivalents,
-            String provisions,
-            String tradeAccountsPayables,
-            String otherCurrentLiabilities,
-            String accrualsAndShortTermProvisions,
-            String capital,
-            String profitForTheYear,
-            String resultsCarriedForward,
-            ReportType reportType,
-            IntervalType intervalType,
-            short year,
-            short period
-    ) {
-        log.info("Balance Sheet:: Saving report...");
 
+    public Either<Problem, ReportEntity> storeReport(ReportType reportType,
+                                                     CreateReportView createReportView,
+                                                     IntervalType intervalType,
+                                                     short year,
+                                                     short period) {
+        log.info(reportType.name() + ":: Saving report...");
+        if(reportType == BALANCE_SHEET && createReportView.getBalanceSheetData().isEmpty() ||
+        reportType == INCOME_STATEMENT && createReportView.getIncomeStatementData().isEmpty()) {
+            return Either.left(Problem.builder()
+                    .withTitle("INVALID_REPORT_TYPE")
+                    .withDetail(STR."Report type is not valid. Expected BALANCE_SHEET but got \{reportType}.")
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("reportType", reportType)
+                    .build());
+        }
+        String organisationId = createReportView.getOrganisationId();
         val orgM = organisationPublicApi.findByOrganisationId(organisationId);
         if (orgM.isEmpty()) {
             return Either.left(Problem.builder()
@@ -278,7 +271,6 @@ public class ReportService {
         val org = orgM.orElseThrow();
 
         val reportEntityE = exist(organisationId, reportType, intervalType, year, period);
-
         ReportEntity reportEntity = reportEntityE.fold(problem -> {
             // question: is it safe to assume that problem will always be because it already exists?
 
@@ -309,170 +301,17 @@ public class ReportService {
         reportEntity.setMode(USER); // Assuming USER is a constant in ReportMode enum
         reportEntity.setDate(LocalDate.now(clock));
 
-        BalanceSheetData balanceSheetReportData = BalanceSheetData.builder()
-                .assets(BalanceSheetData.Assets.builder()
-                        .nonCurrentAssets(BalanceSheetData.Assets.NonCurrentAssets.builder()
-                                .propertyPlantEquipment(new BigDecimal(propertyPlantEquipment))
-                                .intangibleAssets(new BigDecimal(intangibleAssets))
-                                .investments(new BigDecimal(investments))
-                                .financialAssets(new BigDecimal(financialAssets))
-                                .build())
-                        .currentAssets(BalanceSheetData.Assets.CurrentAssets.builder()
-                                .prepaymentsAndOtherShortTermAssets(new BigDecimal(prepaymentsAndOtherShortTermAssets))
-                                .otherReceivables(new BigDecimal(otherReceivables))
-                                .cryptoAssets(new BigDecimal(cryptoAssets))
-                                .cashAndCashEquivalents(new BigDecimal(cashAndCashEquivalents))
-                                .build())
-                        .build())
-                .liabilities(BalanceSheetData.Liabilities.builder()
-                        .nonCurrentLiabilities(BalanceSheetData.Liabilities.NonCurrentLiabilities.builder()
-                                .provisions(new BigDecimal(provisions))
-                                .build())
-                        .currentLiabilities(BalanceSheetData.Liabilities.CurrentLiabilities.builder()
-                                .tradeAccountsPayables(new BigDecimal(tradeAccountsPayables))
-                                .otherCurrentLiabilities(new BigDecimal(otherCurrentLiabilities))
-                                .accrualsAndShortTermProvisions(new BigDecimal(accrualsAndShortTermProvisions))
-                                .build())
-                        .build())
-                .capital(BalanceSheetData.Capital.builder()
-                        .capital(new BigDecimal(capital))
-                        .profitForTheYear(new BigDecimal(profitForTheYear))
-                        .resultsCarriedForward(new BigDecimal(resultsCarriedForward))
-                        .build())
-                .build();
-
-        reportEntity.setBalanceSheetReportData(Optional.of(balanceSheetReportData));
-        /**
-         * Todo: Bug: Always save even when error is triggered.
-
-         if (!reportEntity.isValid()) {
-         return Either.left(Problem.builder()
-         .withTitle("INVALID_REPORT")
-         .withDetail(STR."Report is not valid since it didn't pass through business checks.")
-         .withStatus(Status.BAD_REQUEST)
-         .with("reportId", reportEntity.getReportId())
-         .with("reportType", reportEntity.getType())
-         .build());
-         }
-         */
-        val result = store(reportEntity);
-        if (result.isLeft()) {
-            return Either.left(result.getLeft());
+        if(reportType == BALANCE_SHEET) {
+            reportEntity.setBalanceSheetReportData(createReportView.getBalanceSheetData());
+        } else if(reportType == INCOME_STATEMENT) {
+            reportEntity.setIncomeStatementReportData(createReportView.getIncomeStatementData());
         }
 
-        log.info("Balance Sheet::Report saved successfully: {}", reportEntity.getReportId());
+        val result = reportRepository.save(reportEntity);
 
-        return Either.right(reportEntity);
-    }
+        log.info(reportType.name() + "::Report saved successfully: {}", result.getReportId());
 
-    @Transactional
-    public Either<Problem, ReportEntity> storeIncomeStatement(
-            String organisationId,
-            String otherIncome,
-            String buildOfLongTermProvision,
-            String costOfProvidingServices,
-            String financialRevenues,
-            String netIncomeOptionsSale,
-            String realisedGainsOnSaleOfCryptocurrencies,
-            String stakingRewardsIncome,
-            String financialExpenses,
-            String extraordinaryExpenses,
-            String incomeTaxExpense,
-            String personnelExpenses,
-            String generalAndAdministrativeExpenses,
-            String depreciationAndImpairmentLossesOnTangibleAssets,
-            String amortizationOnIntangibleAssets,
-            String rentExpenses,
-            ReportType reportType,
-            IntervalType intervalType,
-            short year,
-            short period
-    ) {
-        log.info("Income Statement::Saving report example...");
-
-        Optional<org.cardanofoundation.lob.app.organisation.domain.entity.Organisation> orgM = organisationPublicApi.findByOrganisationId(organisationId);
-        if (orgM.isEmpty()) {
-            return Either.left(Problem.builder()
-                    .withTitle("ORGANISATION_NOT_FOUND")
-                    .withDetail(STR."Organisation with ID \{organisationId} does not exist.")
-                    .withStatus(Status.BAD_REQUEST)
-                    .with("organisationId", organisationId)
-                    .build());
-        }
-        org.cardanofoundation.lob.app.organisation.domain.entity.Organisation org = orgM.orElseThrow();
-
-        val reportEntityE = exist(organisationId, reportType, intervalType, year, period);
-
-        ReportEntity reportEntity = reportEntityE.fold(problem -> {
-            return newReport();
-        }, success -> {
-            if (success.getLedgerDispatchApproved()) {
-                return newReport();
-            }
-            return success;
-        });
-
-        reportEntity.setReportId(Report.id(organisationId, reportType, intervalType, year, reportEntity.getVer(), Optional.of(period)));
-        reportEntity.setIdControl(Report.idControl(organisationId, reportType, intervalType, year, Optional.of(period)));
-
-        reportEntity.setOrganisation(Organisation.builder()
-                .id(organisationId)
-                .countryCode(org.getCountryCode())
-                .name(org.getName())
-                .taxIdNumber(org.getTaxIdNumber())
-                .currencyId(org.getCurrencyId())
-                .build()
-        );
-
-        reportEntity.setType(reportType);
-        reportEntity.setIntervalType(intervalType); // Assuming MONTHLY is a constant in ReportRollupPeriodType
-        reportEntity.setYear(year);
-        reportEntity.setPeriod(Optional.of(period)); // Representing March
-        reportEntity.setMode(USER); // Assuming USER is a constant in ReportMode enum
-        reportEntity.setDate(LocalDate.now(clock));
-
-        var incomeStatementReportData = IncomeStatementData.builder()
-                .revenues(IncomeStatementData.Revenues.builder()
-                        .otherIncome(new BigDecimal(otherIncome))
-                        .buildOfLongTermProvision(new BigDecimal(buildOfLongTermProvision))
-                        .build())
-                .costOfGoodsAndServices(IncomeStatementData.CostOfGoodsAndServices.builder()
-                        .costOfProvidingServices(new BigDecimal(costOfProvidingServices))
-                        .build())
-                .financialIncome(IncomeStatementData.FinancialIncome.builder()
-                        .financialRevenues(new BigDecimal(financialRevenues))
-                        .netIncomeOptionsSale(new BigDecimal(netIncomeOptionsSale))
-                        .realisedGainsOnSaleOfCryptocurrencies(new BigDecimal(realisedGainsOnSaleOfCryptocurrencies))
-                        .stakingRewardsIncome(new BigDecimal(stakingRewardsIncome))
-                        .financialExpenses(new BigDecimal(financialExpenses))
-                        .build())
-                .extraordinaryIncome(IncomeStatementData.ExtraordinaryIncome.builder()
-                        .extraordinaryExpenses(new BigDecimal(extraordinaryExpenses))
-                        .build())
-                .taxExpenses(IncomeStatementData.TaxExpenses.builder()
-                        .incomeTaxExpense(new BigDecimal(incomeTaxExpense))
-                        .build())
-                .operatingExpenses(IncomeStatementData.OperatingExpenses.builder()
-                        .personnelExpenses(new BigDecimal(personnelExpenses))
-                        .generalAndAdministrativeExpenses(new BigDecimal(generalAndAdministrativeExpenses))
-                        .depreciationAndImpairmentLossesOnTangibleAssets(new BigDecimal(depreciationAndImpairmentLossesOnTangibleAssets))
-                        .amortizationOnIntangibleAssets(new BigDecimal(amortizationOnIntangibleAssets))
-                        .rentExpenses(new BigDecimal(rentExpenses))
-
-                        .build())
-                .build();
-
-        incomeStatementReportData = incomeStatementReportData.toBuilder().profitForTheYear(incomeStatementReportData.sumOf()).build();
-
-        reportEntity.setIncomeStatementReportData(Optional.of(incomeStatementReportData));
-        val result = store(reportEntity);
-        if (result.isLeft()) {
-            return Either.left(result.getLeft());
-        }
-
-        log.info("Income Statement::Report saved successfully: {}", reportEntity);
-
-        return Either.right(reportEntity);
+        return Either.right(result);
     }
 
     public Set<ReportEntity> findAllByOrgId(String organisationId) {
@@ -480,7 +319,7 @@ public class ReportService {
     }
 
     public Set<ReportEntity> findAllByTypeAndPeriod(ReportType reportType, IntervalType intervalType, short year, short period) {
-        return publicReportRepository.findAllByTypeAndPeriod(reportType,intervalType,year,period);
+        return publicReportRepository.findAllByTypeAndPeriod(reportType, intervalType, year, period);
     }
 
     public Either<Problem, ReportEntity> exist(String organisationId, ReportType reportType, IntervalType intervalType, short year, short period) {
@@ -516,22 +355,6 @@ public class ReportService {
         val report = reportM.orElseThrow();
 
         return Either.right(report.isValid());
-    }
-
-    public Either<Problem, ReportEntity> store(ReportEntity reportEntity) {
-
-        val reportId = reportEntity.getId();
-        if (reportEntity.getLedgerDispatchApproved()) {
-            return Either.left(Problem.builder()
-                    .withTitle("REPORT_ALREADY_APPROVED")
-                    .withDetail(STR."Report with ID \{reportId} has already been approved for ledger dispatch.")
-                    .withStatus(Status.BAD_REQUEST)
-                    .with("reportId", reportId)
-                    .build());
-        }
-
-        reportRepository.save(reportEntity);
-        return Either.right(reportEntity);
     }
 
     public Either<Problem, Void> store(String organisationId,
@@ -718,7 +541,7 @@ public class ReportService {
         return Either.right(true);
     }
 
-    private ReportEntity newReport(){
+    private ReportEntity newReport() {
         ReportEntity report = new ReportEntity();
         report.setVer(clock.millis());
         return report;
