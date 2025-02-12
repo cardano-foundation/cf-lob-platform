@@ -3,6 +3,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.BALANCE_SHEET;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType.INCOME_STATEMENT;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -1121,6 +1122,25 @@ class ReportServiceTest {
 
         assertTrue(result.isLeft());
         assertThat(result.getLeft().getTitle()).isEqualTo("ORGANISATION_NOT_FOUND");
+        verify(organisationPublicApi).findByOrganisationId(organisationId);
+        verifyNoMoreInteractions(organisationPublicApi);
+
+        verifyNoInteractions(reportRepository);
+    }
+
+    @Test
+    void storeBalanceSheetThrowsException_ShouldNotSave() {
+        IntervalType intervalType = IntervalType.MONTH;
+        short year = 2025;
+        short period = 3;
+        String organisationId = "org-123";
+        when(organisationPublicApi.findByOrganisationId(organisationId)).thenThrow(new RuntimeException("Test exception"));
+
+        assertThrows(RuntimeException.class, () -> reportService.storeBalanceSheet(
+                organisationId, "100", "50", "200", "20", "30", "40", "10", "60", "70", "80",
+                "90", "100", "110", "120", "130", BALANCE_SHEET, intervalType, year, period
+        ));
+
         verify(organisationPublicApi).findByOrganisationId(organisationId);
         verifyNoMoreInteractions(organisationPublicApi);
 
