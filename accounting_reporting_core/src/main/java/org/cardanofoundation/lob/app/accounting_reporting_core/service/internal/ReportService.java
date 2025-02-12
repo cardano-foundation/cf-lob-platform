@@ -146,9 +146,9 @@ public class ReportService {
 
         reportExample.setIncomeStatementReportData(Optional.of(incomeStatementReportData));
 
-        reportRepository.save(reportExample);
+        ReportEntity savedEntity = reportRepository.save(reportExample);
 
-        log.info("Income Statement::Report saved successfully: {}", reportExample);
+        log.info("Income Statement::Report saved successfully: {}", savedEntity.getReportId());
 
         return Either.right(null);
     }
@@ -234,9 +234,9 @@ public class ReportService {
                     .build());
         }
 
-        reportRepository.save(reportExample);
+        ReportEntity savedEntity = reportRepository.save(reportExample);
 
-        log.info("Balance Sheet::Report saved successfully: {}", reportExample.getReportId());
+        log.info("Balance Sheet::Report saved successfully: {}", savedEntity.getReportId());
 
         return Either.right(null);
     }
@@ -265,6 +265,15 @@ public class ReportService {
             short period
     ) {
         log.info("Balance Sheet:: Saving report...");
+
+        if (reportType != BALANCE_SHEET) {
+            return Either.left(Problem.builder()
+                    .withTitle("INVALID_REPORT_TYPE")
+                    .withDetail(STR."Report type is not valid. Expected BALANCE_SHEET but got \{reportType}.")
+                    .withStatus(Status.BAD_REQUEST)
+                    .with("reportType", reportType)
+                    .build());
+        }
 
         val orgM = organisationPublicApi.findByOrganisationId(organisationId);
         if (orgM.isEmpty()) {
@@ -342,27 +351,21 @@ public class ReportService {
                 .build();
 
         reportEntity.setBalanceSheetReportData(Optional.of(balanceSheetReportData));
-        /**
-         * Todo: Bug: Always save even when error is triggered.
 
-         if (!reportEntity.isValid()) {
-         return Either.left(Problem.builder()
-         .withTitle("INVALID_REPORT")
-         .withDetail(STR."Report is not valid since it didn't pass through business checks.")
-         .withStatus(Status.BAD_REQUEST)
-         .with("reportId", reportEntity.getReportId())
-         .with("reportType", reportEntity.getType())
-         .build());
-         }
-         */
-        val result = store(reportEntity);
-        if (result.isLeft()) {
-            return Either.left(result.getLeft());
-        }
+//        if (!reportEntity.isValid()) {
+//            return Either.left(Problem.builder()
+//                    .withTitle("INVALID_REPORT")
+//                    .withDetail(STR."Report is not valid since it didn't pass through business checks.")
+//                    .withStatus(Status.BAD_REQUEST)
+//                    .with("reportId", reportEntity.getReportId())
+//                    .with("reportType", reportEntity.getType())
+//                    .build());
+//        }
+        val result = reportRepository.save(reportEntity);
 
-        log.info("Balance Sheet::Report saved successfully: {}", reportEntity.getReportId());
+        log.info("Balance Sheet::Report saved successfully: {}", result.getReportId());
 
-        return Either.right(reportEntity);
+        return Either.right(result);
     }
 
     @Transactional
@@ -465,14 +468,11 @@ public class ReportService {
         incomeStatementReportData = incomeStatementReportData.toBuilder().profitForTheYear(incomeStatementReportData.sumOf()).build();
 
         reportEntity.setIncomeStatementReportData(Optional.of(incomeStatementReportData));
-        val result = store(reportEntity);
-        if (result.isLeft()) {
-            return Either.left(result.getLeft());
-        }
+        ReportEntity savedEntity = reportRepository.save(reportEntity);
 
-        log.info("Income Statement::Report saved successfully: {}", reportEntity);
+        log.info("Income Statement::Report saved successfully: {}", savedEntity.getReportId());
 
-        return Either.right(reportEntity);
+        return Either.right(savedEntity);
     }
 
     public Set<ReportEntity> findAllByOrgId(String organisationId) {
@@ -480,7 +480,7 @@ public class ReportService {
     }
 
     public Set<ReportEntity> findAllByTypeAndPeriod(ReportType reportType, IntervalType intervalType, short year, short period) {
-        return publicReportRepository.findAllByTypeAndPeriod(reportType,intervalType,year,period);
+        return publicReportRepository.findAllByTypeAndPeriod(reportType, intervalType, year, period);
     }
 
     public Either<Problem, ReportEntity> exist(String organisationId, ReportType reportType, IntervalType intervalType, short year, short period) {
@@ -518,21 +518,23 @@ public class ReportService {
         return Either.right(report.isValid());
     }
 
-    public Either<Problem, ReportEntity> store(ReportEntity reportEntity) {
-
-        val reportId = reportEntity.getId();
-        if (reportEntity.getLedgerDispatchApproved()) {
-            return Either.left(Problem.builder()
-                    .withTitle("REPORT_ALREADY_APPROVED")
-                    .withDetail(STR."Report with ID \{reportId} has already been approved for ledger dispatch.")
-                    .withStatus(Status.BAD_REQUEST)
-                    .with("reportId", reportId)
-                    .build());
-        }
-
-        reportRepository.save(reportEntity);
-        return Either.right(reportEntity);
-    }
+//    TODO Code not reachable - Will remove later before merging the PR
+//    public Either<Problem, ReportEntity> store(ReportEntity reportEntity) {
+//
+//        val reportId = reportEntity.getId();
+//
+//        if (reportEntity.getLedgerDispatchApproved()) {
+//            return Either.left(Problem.builder()
+//                    .withTitle("REPORT_ALREADY_APPROVED")
+//                    .withDetail(STR."Report with ID \{reportId} has already been approved for ledger dispatch.")
+//                    .withStatus(Status.BAD_REQUEST)
+//                    .with("reportId", reportId)
+//                    .build());
+//        }
+//
+//        reportRepository.save(reportEntity);
+//        return Either.right(reportEntity);
+//    }
 
     public Either<Problem, Void> store(String organisationId,
                                        IntervalType intervalType,
@@ -718,7 +720,7 @@ public class ReportService {
         return Either.right(true);
     }
 
-    private ReportEntity newReport(){
+    private ReportEntity newReport() {
         ReportEntity report = new ReportEntity();
         report.setVer(clock.millis());
         return report;
