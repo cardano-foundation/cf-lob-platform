@@ -3,7 +3,6 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.service.business
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.CREDIT;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType.DEBIT;
-import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.ERP;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Source.LOB;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.CHART_OF_ACCOUNT_NOT_FOUND;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode.EVENT_DATA_NOT_FOUND;
@@ -54,7 +53,7 @@ public class AccountEventCodesConversionTaskItem implements PipelineTaskItem {
 
             accountChartMappingM.ifPresentOrElse(
                     chartOfAccount -> setAccountCodeRef(acc, type, item, chartOfAccount),
-                    () -> addMissingChartOfAccountViolation(accountCode, type, item, tx, determineSource(type))
+                    () -> addMissingChartOfAccountViolation(accountCode, type, item, tx, LOB)
             );
         });
     }
@@ -114,13 +113,6 @@ public class AccountEventCodesConversionTaskItem implements PipelineTaskItem {
                 .build();
 
         tx.addViolation(violation);
-    }
-
-    private Source determineSource(OperationType type) {
-        return switch (type) {
-            case DEBIT -> LOB;
-            case CREDIT -> ERP;
-        };
     }
 
     private void setAccountEventCode(String organisationId,
