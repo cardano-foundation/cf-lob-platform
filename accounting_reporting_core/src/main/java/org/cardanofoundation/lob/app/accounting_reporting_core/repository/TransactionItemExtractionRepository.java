@@ -1,5 +1,6 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,4 +48,57 @@ public class TransactionItemExtractionRepository {
 
         return resultQuery.getResultList();
     }
+
+
+    public List<TransactionItemEntity> findByItemAccountDate(String orgId, LocalDate dateFrom, LocalDate dateTo, List<String> event, String currency, BigDecimal minAmount, BigDecimal maxAmount, List<String> transactionHash) {
+        String jpql = STR."""
+                SELECT ti FROM accounting_reporting_core.TransactionItemEntity ti INNER JOIN ti.transaction te
+                """;
+        String where = STR."""
+                WHERE te.entryDate >= :dateFrom AND te.entryDate <= :dateTo
+                AND te.organisation.id = '\{orgId}'
+                """;
+
+        if (null != event && 0 < event.stream().count()) {
+            where += STR."""
+            AND (ti.accountEvent.code in (\{event.stream().map(code -> "'" + code + "'").collect(Collectors.joining(","))}) ) AND ti.amountFcy <> 0
+            """;
+        }
+
+        if (null != currency) {
+            where += STR."""
+            AND ti.document.currency.customerCode = '\{currency}'
+            """;
+        }
+
+        if (null != minAmount) {
+            where += STR."""
+            AND ABS(ti.amountFcy) >= \{minAmount}
+            """;
+        }
+
+        if (null != maxAmount) {
+            where += STR."""
+            AND ABS(ti.amountFcy) <= \{maxAmount}
+            """;
+        }
+
+        if (null != transactionHash && 0 < transactionHash.stream().count()) {
+            where += STR."""
+            AND (te.ledgerDispatchReceipt.primaryBlockchainHash in (\{transactionHash.stream().map(code -> "'" + code + "'").collect(Collectors.joining(","))}))
+            """;
+        }
+
+
+        where += STR."AND te.ledgerDispatchStatus = '\{LedgerDispatchStatus.FINALIZED}' ";
+
+        Query resultQuery = em.createQuery(jpql + where);
+
+        resultQuery.setParameter("dateFrom", dateFrom);
+        resultQuery.setParameter("dateTo", dateTo);
+
+        return resultQuery.getResultList();
+    }
+
+
 }

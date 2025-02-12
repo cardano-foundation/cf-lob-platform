@@ -19,6 +19,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Repor
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.Report;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.LedgerDispatchReceipt;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.ReportLedgerUpdateCommand;
@@ -29,6 +30,7 @@ import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.support.collections.Partitions;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
+
 
 @Service
 @Slf4j
@@ -42,6 +44,8 @@ public class LedgerService {
     private final TransactionConverter transactionConverter;
     private final PIIDataFilteringService piiDataFilteringService;
     private final OrganisationPublicApi organisationPublicApi;
+
+    private final String blockchainType = "CARDANO_L1";
 
     @Value("${ledger.dispatch.batch.size:100}")
     private int dispatchBatchSize;
@@ -57,6 +61,7 @@ public class LedgerService {
         for (TransactionEntity tx : transactionEntities) {
             TxStatusUpdate txStatusUpdate = statuses.get(tx.getId());
             tx.setLedgerDispatchStatus(txStatusUpdate.getStatus());
+            tx.setLedgerDispatchReceipt(new LedgerDispatchReceipt(blockchainType, txStatusUpdate.getLedgerhash().orElse(null)));
         }
 
         accountingCoreTransactionRepository.saveAll(transactionEntities);
@@ -75,6 +80,7 @@ public class LedgerService {
         for (ReportEntity report : reports) {
             ReportStatusUpdate reportsLedgerUpdatedEvent = reportStatusUpdateMap.get(report.getId());
             report.setLedgerDispatchStatus(reportsLedgerUpdatedEvent.getStatus());
+            report.setLedgerDispatchReceipt(new LedgerDispatchReceipt(blockchainType, reportsLedgerUpdatedEvent.getLedgerhash().orElse(null)));
         }
 
         reportRepository.saveAll(reports);
@@ -97,7 +103,7 @@ public class LedgerService {
 
     @Transactional(propagation = SUPPORTS)
     public void dispatchPendingTransactions(String organisationId,
-                                               Set<TransactionEntity> transactions) {
+                                            Set<TransactionEntity> transactions) {
         log.info("dispatchTransactionToBlockchainPublisher, total tx count: {}", transactions.size());
 
         if (transactions.isEmpty()) {

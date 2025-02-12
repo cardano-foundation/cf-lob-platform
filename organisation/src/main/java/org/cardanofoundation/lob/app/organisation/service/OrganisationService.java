@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.cardanofoundation.lob.app.organisation.domain.entity.*;
-import org.cardanofoundation.lob.app.organisation.repository.OrganisationChartOfAccountSubTypeRepository;
-import org.cardanofoundation.lob.app.organisation.repository.OrganisationChartOfAccountTypeRepository;
-import org.cardanofoundation.lob.app.organisation.repository.OrganisationRepository;
-import org.cardanofoundation.lob.app.organisation.repository.ProjectMappingRepository;
+import org.cardanofoundation.lob.app.organisation.repository.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +24,7 @@ public class OrganisationService {
     private final ProjectMappingRepository projectMappingRepository;
     private final OrganisationChartOfAccountTypeRepository organisationChartOfAccountTypeRepository;
     private final OrganisationChartOfAccountSubTypeRepository organisationChartOfAccountSubTypeRepository;
+    private final AccountEventRepository accountEventRepository;
 
     public Optional<Organisation> findById(String organisationId) {
         return organisationRepository.findById(organisationId);
@@ -47,6 +45,10 @@ public class OrganisationService {
     @Transactional
     public Set<OrganisationChartOfAccountType> getAllChartType(String organisationId) {
         return organisationChartOfAccountTypeRepository.findAllByOrganisationId(organisationId);
+    }
+
+    public Set<AccountEvent> getOrganisationEventCode(String orgId){
+        return accountEventRepository.findAllByOrganisationId(orgId);
     }
 
 }

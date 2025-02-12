@@ -29,6 +29,8 @@ public class ExtractionTransactionItemView {
 
     private TransactionType transactionType;
 
+    private String blockChainHash;
+
     private ReconcilationCode reconciliation;
 
     private String accountDebitCode;

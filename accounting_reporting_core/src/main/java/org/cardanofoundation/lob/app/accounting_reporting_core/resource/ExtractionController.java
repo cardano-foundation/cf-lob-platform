@@ -21,11 +21,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.ExtractionItemService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ExtractionTransactionsRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.PublicInterfaceTransactionsRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ExtractionTransactionItemView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ExtractionTransactionView;
 
 @RestController
-@RequestMapping("/api/extraction")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
 public class ExtractionController {
@@ -33,7 +34,7 @@ public class ExtractionController {
 
 
     @Tag(name = "Extraction", description = "Extraction search")
-    @PostMapping(value = "/search", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/extraction/search", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Search transactions items published",
             responses = {
                     @ApiResponse(content = {
@@ -45,7 +46,31 @@ public class ExtractionController {
     public ResponseEntity<ExtractionTransactionView> transactionSearch(@Valid @RequestBody ExtractionTransactionsRequest transactionsRequest) {
         return ResponseEntity
                 .ok()
-                .body(extractionItemService.findTransactionItems( transactionsRequest.getDateFrom(), transactionsRequest.getDateTo(),transactionsRequest.getAccountCode(),transactionsRequest.getCostCenter(),transactionsRequest.getProject()));
+                .body(extractionItemService.findTransactionItems(transactionsRequest.getDateFrom(), transactionsRequest.getDateTo(), transactionsRequest.getAccountCode(), transactionsRequest.getCostCenter(), transactionsRequest.getProject()));
+    }
+
+    @Tag(name = "Transactions", description = "Extraction search")
+    @PostMapping(value = "/transactions/search-public", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @Operation(description = "Search transactions items published - Public interface",
+            responses = {
+                    @ApiResponse(content = {
+                            @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = PublicInterfaceTransactionsRequest.class)))
+                    })
+            }
+    )
+    public ResponseEntity<ExtractionTransactionView> transactionSearchPublicInterface(@Valid @RequestBody PublicInterfaceTransactionsRequest transactionsRequest) {
+        return ResponseEntity
+                .ok()
+                .body(extractionItemService.findTransactionItemsPublic(
+                                transactionsRequest.getOrganisationId(),
+                                transactionsRequest.getDateFrom(),
+                                transactionsRequest.getDateTo(),
+                                transactionsRequest.getEvent(), transactionsRequest.getCurrency(),
+                                transactionsRequest.getMinAmount(),
+                                transactionsRequest.getMaxAmount(),
+                                transactionsRequest.getTransactionHash()
+                        )
+                );
     }
 
 }
