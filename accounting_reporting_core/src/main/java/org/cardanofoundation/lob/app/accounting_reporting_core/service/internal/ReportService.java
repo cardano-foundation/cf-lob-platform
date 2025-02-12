@@ -357,24 +357,6 @@ public class ReportService {
         return Either.right(report.isValid());
     }
 
-//    TODO Code not reachable - Will remove later before merging the PR
-//    public Either<Problem, ReportEntity> store(ReportEntity reportEntity) {
-//
-//        val reportId = reportEntity.getId();
-//
-//        if (reportEntity.getLedgerDispatchApproved()) {
-//            return Either.left(Problem.builder()
-//                    .withTitle("REPORT_ALREADY_APPROVED")
-//                    .withDetail(STR."Report with ID \{reportId} has already been approved for ledger dispatch.")
-//                    .withStatus(Status.BAD_REQUEST)
-//                    .with("reportId", reportId)
-//                    .build());
-//        }
-//
-//        reportRepository.save(reportEntity);
-//        return Either.right(reportEntity);
-//    }
-
     public Either<Problem, Void> store(String organisationId,
                                        IntervalType intervalType,
                                        short year,
