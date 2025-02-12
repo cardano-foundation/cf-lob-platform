@@ -13,8 +13,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.processing.Generated;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -83,7 +81,6 @@ public class ReportService {
 
     @Transactional
     @Deprecated
-    @Generated("No tests needed")
     public Either<Problem, Void> storeIncomeStatementAsExample(String organisationId) {
         log.info("Income Statement::Saving report example...");
 
@@ -159,7 +156,6 @@ public class ReportService {
 
     @Transactional
     @Deprecated
-    @Generated("No tests needed")
     public Either<Problem, Void> storeBalanceSheetAsExample(String organisationId) {
         log.info("Balance Sheet:: Saving report...");
 
