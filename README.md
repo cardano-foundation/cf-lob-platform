@@ -56,11 +56,12 @@ cd cf-lob-platform
 ./gradlew clean build
 ```
 
-
 ## Documentation
 
 | Link                                                                                        | Audience   |
 |---------------------------------------------------------------------------------------------|------------|
+| [On-chain Format](docs/onChainFormat.md)                                                    | Developers |
+| [Dataflow within the System](docs/dataflow.md)                                              | Developers |
 | [Code Of Conduct](https://github.com/cardano-foundation/cf-lob-platform/CODE-OF-CONDUCT.md) | Developers |
 | [Contributing](https://github.com/cardano-foundation/cf-lob-platform/CONTRIBUTING.md)       | Developers |
 | [Security](https://github.com/cardano-foundation/cf-lob-platform/SECURITY.md)               | Developers |

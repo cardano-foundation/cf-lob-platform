@@ -143,5 +143,24 @@ Currently supported are the following subtypes:
 ```
 #### Income Statement
 ```json
-
+{
+  <General Report structure>,
+  "data": {
+    "revenues": {
+      "other_income": "string", // Optional, only if present
+      "build_of_long_term_provision": "string" // Optional, only if present
+    },
+    "cost_of_goods_and_services" : {
+      "cost_of_providing_services": "string" // Optional, only if present
+    },
+    "operating_expenses": {
+      "personnel_expenses": "string", // Optional, only if present
+      "general_and_adminsitrative_expenses": "string", // Optional, only if present
+      "depreciation_and_impairment_losses_on_tangible_assets": "string", // Optional, only if present
+      "amortization_on_intangible_assets": "string", // Optional, only if present
+      "rent_expenses": "string" // Optional, only if present
+    },
+    "profit_for_the_year": "string" // Optional, only if present
+  }
+}
 ```
