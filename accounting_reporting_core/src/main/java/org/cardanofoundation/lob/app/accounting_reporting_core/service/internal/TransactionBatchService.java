@@ -65,6 +65,11 @@ public class TransactionBatchService {
 
         val filteringParameters = transactionConverter.convertToDbDetached(systemExtractionParameters, userExtractionParameters);
 
+        if (transactionBatchRepository.findById(batchId).isPresent()) {
+            log.info("Transaction batch already exists skipping processing, batchId: {}", batchId);
+            return;
+        }
+
         val transactionBatchEntity = new TransactionBatchEntity();
         transactionBatchEntity.setId(batchId);
         transactionBatchEntity.setTransactions(Set.of());

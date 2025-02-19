@@ -86,7 +86,7 @@ public class LedgerService {
     public void dispatchPending(int limit) {
         for (Organisation organisation : organisationPublicApi.listAll()) {
             Set<TransactionEntity> dispatchTransactions = accountingCoreTransactionRepository.findDispatchableTransactions(organisation.getId(), Limit.of(limit));
-            Set<ReportEntity> dispatchReports = reportRepository.findDispatchableTransactions(organisation.getId(), Limit.of(limit));
+            Set<ReportEntity> dispatchReports = reportRepository.findDispatchableReports(organisation.getId(), Limit.of(limit));
 
             log.info("dispatchPending transactions and reports, organisationId: {}, total tx count: {}", organisation.getId(), dispatchTransactions.size());
 
