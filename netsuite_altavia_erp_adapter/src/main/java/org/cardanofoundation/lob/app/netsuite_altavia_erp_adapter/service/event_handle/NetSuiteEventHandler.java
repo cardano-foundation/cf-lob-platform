@@ -18,7 +18,7 @@ import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.intern
 
 @Slf4j
 @RequiredArgsConstructor
-@Service
+//@Service  // Service not needed since it will be defined in the config of the implementing application
 @ConditionalOnProperty(value = "lob.netsuite.enabled", havingValue = "true", matchIfMissing = true)
 public class NetSuiteEventHandler {
 
