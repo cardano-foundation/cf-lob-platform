@@ -3,8 +3,10 @@ package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.event
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.ScheduledIngestionEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchCreatedEvent;
@@ -15,14 +17,20 @@ import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.intern
 
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "lob.netsuite.enabled", havingValue = "true", matchIfMissing = true)
+@Service
+@ConditionalOnProperty(value = "lob.netsuite.enabled", havingValue = "true")
 public class NetSuiteEventHandler {
 
     private final NetSuiteExtractionService netSuiteExtractionService;
     private final NetSuiteReconcilationService netSuiteReconcilationService;
-
+    @Value("${lob.netsuite.enabled}")
+    private boolean netSuiteEnabled;
     @EventListener
     public void handleScheduledIngestionEvent(ScheduledIngestionEvent event) {
+        if(!netSuiteEnabled) {
+            log.info("NetSuite is disabled. Ignoring handleScheduledIngestionEvent.");
+            return;
+        }
         log.info("Handling handleScheduledIngestionEvent...");
 
         netSuiteExtractionService.startNewERPExtraction(
