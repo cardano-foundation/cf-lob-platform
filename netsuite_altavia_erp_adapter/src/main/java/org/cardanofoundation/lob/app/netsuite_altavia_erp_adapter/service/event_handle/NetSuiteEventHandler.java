@@ -4,7 +4,6 @@ package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.event
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 
@@ -23,8 +22,7 @@ public class NetSuiteEventHandler {
 
     private final NetSuiteExtractionService netSuiteExtractionService;
     private final NetSuiteReconcilationService netSuiteReconcilationService;
-    @Value("${lob.netsuite.enabled}")
-    private boolean netSuiteEnabled;
+
     @EventListener
     public void handleScheduledIngestionEvent(ScheduledIngestionEvent event) {
         log.info("Handling handleScheduledIngestionEvent...");
