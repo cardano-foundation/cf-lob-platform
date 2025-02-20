@@ -25,7 +25,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.Ex
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ExtractionTransactionView;
 
 @RestController
-@RequestMapping("/api/extraction")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
 public class ExtractionController {
@@ -33,7 +33,7 @@ public class ExtractionController {
 
 
     @Tag(name = "Extraction", description = "Extraction search")
-    @PostMapping(value = "/search", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/extraction/search", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Search transactions items published",
             responses = {
                     @ApiResponse(content = {
@@ -45,7 +45,9 @@ public class ExtractionController {
     public ResponseEntity<ExtractionTransactionView> transactionSearch(@Valid @RequestBody ExtractionTransactionsRequest transactionsRequest) {
         return ResponseEntity
                 .ok()
-                .body(extractionItemService.findTransactionItems( transactionsRequest.getDateFrom(), transactionsRequest.getDateTo(),transactionsRequest.getAccountCode(),transactionsRequest.getCostCenter(),transactionsRequest.getProject()));
+                .body(extractionItemService.findTransactionItems(transactionsRequest.getDateFrom(), transactionsRequest.getDateTo(), transactionsRequest.getAccountCode(), transactionsRequest.getCostCenter(), transactionsRequest.getProject()));
     }
+
+
 
 }

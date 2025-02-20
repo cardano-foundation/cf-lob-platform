@@ -276,7 +276,8 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction (
    transaction_approved BOOLEAN NOT NULL DEFAULT FALSE,
    ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
    ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
-
+   primary_blockchain_type VARCHAR(255),
+   primary_blockchain_hash CHAR(64),
    overall_status accounting_core_transaction_status_type NOT NULL,
 
    created_by VARCHAR(255),
@@ -317,7 +318,8 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_aud (
    transaction_approved BOOLEAN NOT NULL DEFAULT FALSE,
    ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
    ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
-
+   primary_blockchain_type VARCHAR(255),
+   primary_blockchain_hash CHAR(64),
    overall_status accounting_core_transaction_status_type NOT NULL,
 
    created_by VARCHAR(255),
@@ -717,6 +719,8 @@ CREATE table accounting_core_report (
 
     ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
     ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
+    primary_blockchain_type VARCHAR(255),
+    primary_blockchain_hash CHAR(64),
 
     created_by VARCHAR(255),
     updated_by VARCHAR(255),
@@ -800,6 +804,8 @@ CREATE TABLE IF NOT EXISTS accounting_core_report_aud (
 
     ledger_dispatch_approved BOOLEAN NOT NULL DEFAULT FALSE,
     ledger_dispatch_status accounting_core_ledger_dispatch_status_type NOT NULL,
+    primary_blockchain_type VARCHAR(255),
+    primary_blockchain_hash CHAR(64),
 
     created_by VARCHAR(255),
     updated_by VARCHAR(255),

@@ -88,6 +88,16 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
 
     @Embedded
     @AttributeOverrides({
+            @AttributeOverride(name = "primaryBlockchainType", column = @Column(name = "primary_blockchain_type")),
+            @AttributeOverride(name = "primaryBlockchainHash", column = @Column(name = "primary_blockchain_hash"))
+    })
+    @Getter
+    @Setter
+    @Nullable
+    private LedgerDispatchReceipt ledgerDispatchReceipt;
+
+    @Embedded
+    @AttributeOverrides({
             @AttributeOverride(name = "id", column = @Column(name = "organisation_id")),
             @AttributeOverride(name = "name", column = @Column(name = "organisation_name")),
             @AttributeOverride(name = "countryCode", column = @Column(name = "organisation_country_code")),
@@ -286,6 +296,10 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
         this.userComment = userComment.orElse(null);
     }
 
+    public Optional<LedgerDispatchReceipt> getLedgerDispatchReceipt() {
+        return Optional.ofNullable(ledgerDispatchReceipt);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -309,5 +323,6 @@ public class TransactionEntity extends CommonEntity implements Persistable<Strin
     public String toString() {
         return STR."TransactionEntity{id='\{id}\{'\''}, transactionInternalNumber='\{transactionInternalNumber}\{'\''}, batchId='\{batchId}'}";
     }
+
 
 }

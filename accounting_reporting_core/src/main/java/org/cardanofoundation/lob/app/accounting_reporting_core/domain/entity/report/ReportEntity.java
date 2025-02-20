@@ -14,14 +14,12 @@ import jakarta.validation.constraints.NotNull;
 
 import javax.annotation.Nullable;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.google.common.base.Objects;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.hibernate.envers.Audited;
@@ -31,6 +29,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Valid
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.IntervalType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportMode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.ReportType;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.LedgerDispatchReceipt;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.support.spring_audit.CommonEntity;
 
@@ -117,6 +116,16 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     @Getter
     @Setter
     private LocalDate date;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "primaryBlockchainType", column = @Column(name = "primary_blockchain_type")),
+            @AttributeOverride(name = "primaryBlockchainHash", column = @Column(name = "primary_blockchain_hash"))
+    })
+    @Getter
+    @Setter
+    @Nullable
+    private LedgerDispatchReceipt ledgerDispatchReceipt;
 
     @Embedded
     @AttributeOverrides({
@@ -251,6 +260,24 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
             return;
         }
         this.period = period.orElse(null);
+    }
+
+    public Optional<LedgerDispatchReceipt> getLedgerDispatchReceipt() {
+        return Optional.ofNullable(ledgerDispatchReceipt);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        val that = (ReportEntity) o;
+
+        return Objects.equal(reportId, that.reportId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(reportId);
     }
 
 }

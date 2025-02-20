@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.BlockchainReceipt;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReportStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.ReportsLedgerUpdatedEvent;
@@ -33,6 +34,8 @@ public class LedgerUpdatedEventPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final BlockchainPublishStatusMapper blockchainPublishStatusMapper;
 
+    private static String BLOCKCHAIN_TYPE = "CARDANO_L1";
+
     @Value("${lob.blockchain_publisher.send.batch.size:100}")
     protected int dispatchBatchSize = 100;
 
@@ -49,8 +52,23 @@ public class LedgerUpdatedEventPublisher {
                         val publishStatusM = txEntity.getL1SubmissionData().flatMap(L1SubmissionData::getPublishStatus);
                         val cardanoFinalityScoreM = txEntity.getL1SubmissionData().flatMap(L1SubmissionData::getFinalityScore);
                         val ledgerDispatchStatus = blockchainPublishStatusMapper.convert(publishStatusM, cardanoFinalityScoreM);
+                        val txId = txEntity.getId();
 
-                        return new TxStatusUpdate(txEntity.getId(), ledgerDispatchStatus);
+                        val blockchainHashM = txEntity.getL1SubmissionData().flatMap(L1SubmissionData::getTransactionHash);
+                        if (blockchainHashM.isEmpty()) {
+                            return new TxStatusUpdate(txId, ledgerDispatchStatus, Set.of());
+                        }
+
+                        String blockchainHash = blockchainHashM.get();
+
+                        val blockchainReceipts = Set.of(
+                                new BlockchainReceipt(
+                                        BLOCKCHAIN_TYPE,
+                                        blockchainHash
+                                )
+                        );
+
+                        return new TxStatusUpdate(txId, ledgerDispatchStatus, blockchainReceipts);
                     })
                     .collect(Collectors.toSet());
 
@@ -78,8 +96,23 @@ public class LedgerUpdatedEventPublisher {
                         val publishStatusM = reportEntity.getL1SubmissionData().flatMap(L1SubmissionData::getPublishStatus);
                         val cardanoFinalityScoreM = reportEntity.getL1SubmissionData().flatMap(L1SubmissionData::getFinalityScore);
                         val ledgerDispatchStatus = blockchainPublishStatusMapper.convert(publishStatusM, cardanoFinalityScoreM);
+                        val reportId = reportEntity.getReportId();
 
-                        return new ReportStatusUpdate(reportEntity.getReportId(), ledgerDispatchStatus);
+                        val blockchainHashM = reportEntity.getL1SubmissionData().flatMap(L1SubmissionData::getTransactionHash);
+                        if (blockchainHashM.isEmpty()) {
+                            return new ReportStatusUpdate(reportId, ledgerDispatchStatus, Set.of());
+                        }
+
+                        String blockchainHash = blockchainHashM.get();
+
+                        val blockchainReceipts = Set.of(
+                                new BlockchainReceipt(
+                                        BLOCKCHAIN_TYPE,
+                                        blockchainHash
+                                )
+                        );
+
+                        return new ReportStatusUpdate(reportId, ledgerDispatchStatus, blockchainReceipts);
                     })
                     .collect(Collectors.toSet());
 

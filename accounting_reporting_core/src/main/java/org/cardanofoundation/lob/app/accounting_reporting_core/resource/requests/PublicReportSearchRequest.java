@@ -2,6 +2,8 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.request
 
 
 
+import jakarta.validation.constraints.NotBlank;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +20,10 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.repor
 //@Builder todo: For testing
 @NoArgsConstructor
 public class PublicReportSearchRequest {
+
+    @Schema(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
+    @NotBlank
+    private String organisationId;
 
     @Schema(example = "INCOME_STATEMENT")
     private ReportType reportType;

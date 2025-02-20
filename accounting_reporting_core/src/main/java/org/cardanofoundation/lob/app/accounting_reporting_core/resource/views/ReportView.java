@@ -3,6 +3,8 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,6 +36,9 @@ public class ReportView {
     private Boolean publish;
 
     private Boolean canBePublish;
+
+    @Nullable
+    private String blockChainHash;
 
     private Optional<Problem> error;
 

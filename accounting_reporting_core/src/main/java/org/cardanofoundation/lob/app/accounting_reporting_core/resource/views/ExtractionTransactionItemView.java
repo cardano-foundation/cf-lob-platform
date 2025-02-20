@@ -3,6 +3,8 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource.views;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import javax.annotation.Nullable;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +30,9 @@ public class ExtractionTransactionItemView {
     private LocalDate entryDate;
 
     private TransactionType transactionType;
+
+    @Nullable
+    private String blockChainHash;
 
     private ReconcilationCode reconciliation;
 

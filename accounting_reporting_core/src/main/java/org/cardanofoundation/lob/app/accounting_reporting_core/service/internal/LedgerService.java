@@ -15,10 +15,12 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.BlockchainReceipt;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReportStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.report.Report;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.LedgerDispatchReceipt;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.report.ReportEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.ReportLedgerUpdateCommand;
@@ -29,6 +31,7 @@ import org.cardanofoundation.lob.app.organisation.OrganisationPublicApi;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.support.collections.Partitions;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
+
 
 @Service
 @Slf4j
@@ -42,6 +45,7 @@ public class LedgerService {
     private final TransactionConverter transactionConverter;
     private final PIIDataFilteringService piiDataFilteringService;
     private final OrganisationPublicApi organisationPublicApi;
+
 
     @Value("${ledger.dispatch.batch.size:100}")
     private int dispatchBatchSize;
@@ -57,6 +61,16 @@ public class LedgerService {
         for (TransactionEntity tx : transactionEntities) {
             TxStatusUpdate txStatusUpdate = statuses.get(tx.getId());
             tx.setLedgerDispatchStatus(txStatusUpdate.getStatus());
+
+            // TODO for now we only support one blockchain but this is open for adding more blockchains
+            if (!txStatusUpdate.getBlockchainReceipts().isEmpty()) {
+                BlockchainReceipt firstBlockchainReceipt = txStatusUpdate.getBlockchainReceipts().stream().iterator().next();
+
+                String type = firstBlockchainReceipt.getType();
+                String hash = firstBlockchainReceipt.getHash();
+
+                tx.setLedgerDispatchReceipt(new LedgerDispatchReceipt(type, hash));
+            }
         }
 
         accountingCoreTransactionRepository.saveAll(transactionEntities);
@@ -75,6 +89,16 @@ public class LedgerService {
         for (ReportEntity report : reports) {
             ReportStatusUpdate reportsLedgerUpdatedEvent = reportStatusUpdateMap.get(report.getId());
             report.setLedgerDispatchStatus(reportsLedgerUpdatedEvent.getStatus());
+
+            // TODO for now we only support one blockchain but this is open for adding more blockchains
+            if (!reportsLedgerUpdatedEvent.getBlockchainReceipts().isEmpty()) {
+                BlockchainReceipt firstBlockchainReceipt = reportsLedgerUpdatedEvent.getBlockchainReceipts().stream().iterator().next();
+
+                String type = firstBlockchainReceipt.getType();
+                String hash = firstBlockchainReceipt.getHash();
+
+                report.setLedgerDispatchReceipt(new LedgerDispatchReceipt(type, hash));
+            }
         }
 
         reportRepository.saveAll(reports);
@@ -97,7 +121,7 @@ public class LedgerService {
 
     @Transactional(propagation = SUPPORTS)
     public void dispatchPendingTransactions(String organisationId,
-                                               Set<TransactionEntity> transactions) {
+                                            Set<TransactionEntity> transactions) {
         log.info("dispatchTransactionToBlockchainPublisher, total tx count: {}", transactions.size());
 
         if (transactions.isEmpty()) {

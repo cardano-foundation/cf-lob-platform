@@ -40,6 +40,7 @@ class ExtractionItemServiceTest {
         tx.setTransactionInternalNumber("1");
         tx.setOrganisation(Organisation.builder().id("orgId1").build());
         tx.setTransactionType(TransactionType.FxRevaluation);
+        tx.setLedgerDispatchReceipt(new LedgerDispatchReceipt());
 
 
         val item1 = new TransactionItemEntity();
@@ -57,6 +58,42 @@ class ExtractionItemServiceTest {
         ExtractionTransactionView result = extractionItemService.findTransactionItems(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         assertInstanceOf(ExtractionTransactionView.class, result);
         assertEquals(1L, result.getTotal());
+        verifyNoMoreInteractions(transactionItemExtractionRepository);
+
+    }
+
+    @Test
+    void findByItemAccountDateTest() {
+        val document = Document.builder()
+                .currency(Currency.builder()
+                        .customerCode("EUR")
+                        .build())
+                .build();
+        val tx = new TransactionEntity();
+        tx.setId("TxId1");
+        tx.setTransactionInternalNumber("1");
+        tx.setOrganisation(Organisation.builder().id("orgId1").build());
+        tx.setTransactionType(TransactionType.FxRevaluation);
+        tx.setLedgerDispatchReceipt(new LedgerDispatchReceipt());
+
+
+        val item1 = new TransactionItemEntity();
+        item1.setId("item1");
+        item1.setDocument(Optional.of(document));
+        item1.setAmountFcy(BigDecimal.valueOf(1));
+        item1.setAmountLcy(BigDecimal.valueOf(1));
+        tx.setItems(Set.of(item1));
+
+        item1.setTransaction(tx);
+
+        Mockito.when(transactionItemExtractionRepository.findByItemAccountDate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(List.of(item1));
+        ExtractionItemService extractionItemService = new ExtractionItemService(transactionItemExtractionRepository);
+
+        ExtractionTransactionView result = ExtractionTransactionView.createSuccess(extractionItemService.findTransactionItemsPublic(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()));
+        assertInstanceOf(ExtractionTransactionView.class, result);
+        assertEquals(1L, result.getTotal());
+        assertEquals("item1",result.getTransactions().getFirst().getId());
+        assertEquals("TxId1",result.getTransactions().getFirst().getTransactionID());
         verifyNoMoreInteractions(transactionItemExtractionRepository);
 
     }
