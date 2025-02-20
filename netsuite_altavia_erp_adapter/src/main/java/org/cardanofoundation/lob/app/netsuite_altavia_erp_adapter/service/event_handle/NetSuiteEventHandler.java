@@ -1,5 +1,6 @@
 package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.event_handle;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +19,7 @@ import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.intern
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@ConditionalOnProperty(value = "lob.netsuite.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "lob.netsuite.enabled", havingValue = "true", matchIfMissing = true)
 public class NetSuiteEventHandler {
 
     private final NetSuiteExtractionService netSuiteExtractionService;
@@ -27,10 +28,6 @@ public class NetSuiteEventHandler {
     private boolean netSuiteEnabled;
     @EventListener
     public void handleScheduledIngestionEvent(ScheduledIngestionEvent event) {
-        if(!netSuiteEnabled) {
-            log.info("NetSuite is disabled. Ignoring handleScheduledIngestionEvent.");
-            return;
-        }
         log.info("Handling handleScheduledIngestionEvent...");
 
         netSuiteExtractionService.startNewERPExtraction(
