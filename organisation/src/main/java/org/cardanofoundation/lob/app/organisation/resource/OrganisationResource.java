@@ -168,7 +168,7 @@ public class OrganisationResource {
 
     }
 
-    @Operation(description = "Organisation Chart of aacount type", responses = {
+    @Operation(description = "Organisation Chart of account type", responses = {
             @ApiResponse(content =
                     {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OrganisationChartOfAccountTypeView.class)))}
             ),
@@ -186,7 +186,15 @@ public class OrganisationResource {
                                 return new OrganisationChartOfAccountSubTypeView(
                                         chartOfAccountSubType.getId(),
                                         chartOfAccountSubType.getOrganisationId(),
-                                        chartOfAccountSubType.getName()
+                                        chartOfAccountSubType.getName(),
+                                        organisationService.getBySubTypeId(chartOfAccountSubType.getId()).stream().map(chartOfAccount ->{
+                                            return new OrganisationChartOfAccountView(
+                                                    chartOfAccount.getId().getCustomerCode(),
+                                                    chartOfAccount.getRefCode(),
+                                                    chartOfAccount.getEventRefCode(),
+                                                    chartOfAccount.getName()
+                                            );
+                                        }).collect(Collectors.toSet())
                                 );
 
                             }).collect(Collectors.toSet())
@@ -195,7 +203,7 @@ public class OrganisationResource {
 
     }
 
-    @Operation(description = "Organisation Chart of aacount type", responses = {
+    @Operation(description = "Organisation Chart of acount type", responses = {
             @ApiResponse(content =
                     {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OrganisationEventView.class)))}
             ),
