@@ -45,6 +45,7 @@ public class ReportViewService {
     public ReportView responseView(ReportEntity reportEntity) {
         val reportResponseView = new ReportView();
         reportResponseView.setReportId(reportEntity.getReportId());
+        reportResponseView.setDocumentCurrencyCustomerCode(reportEntity.getOrganisation().getCurrencyId());
         reportResponseView.setOrganisationId(reportEntity.getOrganisation().getId());
         reportResponseView.setType(reportEntity.getType());
         reportResponseView.setIntervalType(reportEntity.getIntervalType());
