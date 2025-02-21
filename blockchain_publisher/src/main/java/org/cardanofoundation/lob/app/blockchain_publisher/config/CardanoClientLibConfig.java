@@ -19,7 +19,7 @@ public class CardanoClientLibConfig {
     @Bean
     @Qualifier("lob_owner_account")
     public Account ownerAccount(CardanoNetwork cardanoNetwork,
-                                @Value("${lob_owner_account_mnemonic}" ) String lobOwnerMnemonics) {
+                                @Value("${lob_owner_account_mnemonic:test test test test test test test test test test test test test test test test test test test test test test test sauce}" ) String lobOwnerMnemonics) {
         var organiserAccount = switch(cardanoNetwork) {
             case MAIN -> new Account(Networks.mainnet(), lobOwnerMnemonics);
             case PREPROD -> new Account(Networks.preprod(), lobOwnerMnemonics);
