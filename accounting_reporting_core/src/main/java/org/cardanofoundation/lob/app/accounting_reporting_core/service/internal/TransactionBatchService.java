@@ -63,6 +63,11 @@ public class TransactionBatchService {
                                        SystemExtractionParameters systemExtractionParameters) {
         log.info("Creating transaction batch, batchId: {}, filteringParameters: {}", batchId, userExtractionParameters);
 
+        if (transactionBatchRepository.findById(batchId).isPresent()) {
+            log.info("Transaction batch already exists skipping processing, batchId: {}", batchId);
+            return;
+        }
+
         val filteringParameters = transactionConverter.convertToDbDetached(systemExtractionParameters, userExtractionParameters);
 
         val transactionBatchEntity = new TransactionBatchEntity();
@@ -70,8 +75,6 @@ public class TransactionBatchService {
         transactionBatchEntity.setTransactions(Set.of());
         transactionBatchEntity.setFilteringParameters(filteringParameters);
         transactionBatchEntity.setStatus(CREATED);
-//        transactionBatchEntity.setCreatedBy("system");
-//        transactionBatchEntity.setUpdatedBy("system");
 
         transactionBatchRepository.save(transactionBatchEntity);
 
@@ -91,9 +94,7 @@ public class TransactionBatchService {
     public void updateTransactionBatchStatusAndStats(String batchId,
                                                      Optional<Integer> totalTransactionsCount) {
         try {
-            val debouncer = debouncerManager.getDebouncer(batchId, () -> {
-                invokeUpdateTransactionBatchStatusAndStats(batchId, totalTransactionsCount);
-            }, batchStatsDebounceDuration);
+            val debouncer = debouncerManager.getDebouncer(batchId, () -> invokeUpdateTransactionBatchStatusAndStats(batchId, totalTransactionsCount), batchStatsDebounceDuration);
 
             debouncer.call();
         } catch (ExecutionException e) {

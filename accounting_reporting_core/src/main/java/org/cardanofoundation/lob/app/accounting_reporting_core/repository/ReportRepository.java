@@ -20,8 +20,8 @@ public interface ReportRepository extends JpaRepository<ReportEntity, String> {
              AND r.ledgerDispatchStatus = 'NOT_DISPATCHED'
              AND r.ledgerDispatchApproved = true
              ORDER BY r.createdAt ASC, r.reportId ASC""")
-    Set<ReportEntity> findDispatchableTransactions(@Param("organisationId") String organisationId,
-                                                   Limit limit);
+    Set<ReportEntity> findDispatchableReports(@Param("organisationId") String organisationId,
+                                              Limit limit);
 
     @Query("""
             SELECT r FROM accounting_reporting_core.report.ReportEntity r
