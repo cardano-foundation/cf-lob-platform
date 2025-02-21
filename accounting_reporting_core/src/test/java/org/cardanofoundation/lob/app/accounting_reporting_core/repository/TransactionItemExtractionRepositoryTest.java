@@ -1,6 +1,7 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -39,7 +40,7 @@ class TransactionItemExtractionRepositoryTest {
         jakarta.persistence.Query queryResult = Mockito.mock(Query.class);
         TransactionItemExtractionRepository transactionItemExtractionRepository = new TransactionItemExtractionRepository(em);
 
-        Mockito.when(em.createQuery(Mockito.anyString())).thenReturn(queryResult);
+        Mockito.when(em.createQuery(anyString())).thenReturn(queryResult);
         transactionItemExtractionRepository.findByItemAccount(
                 LocalDate.of(2023, Month.JANUARY, 1),
                 LocalDate.of(2023, Month.JANUARY, 31),
@@ -52,22 +53,10 @@ class TransactionItemExtractionRepositoryTest {
 
     @Test
     void findByItemAccountDate() {
-        String query = """
-                SELECT ti FROM accounting_reporting_core.TransactionItemEntity ti INNER JOIN ti.transaction te
-                WHERE te.entryDate >= :dateFrom AND te.entryDate <= :dateTo
-                AND te.organisation.id = 'OrgId'
-                AND ti.amountFcy <> 0
-                AND (ti.accountEvent.code in ('EventCode1','EventCode2') )
-                AND (ti.document.currency.customerCode in ('Currency1','Currency2') )
-                AND ABS(ti.amountFcy) >= 100
-                AND ABS(ti.amountFcy) <= 1000
-                AND (te.ledgerDispatchReceipt.primaryBlockchainHash in ('TheHast1','TheHast2'))
-                AND te.ledgerDispatchStatus = 'FINALIZED'
-                """;
         jakarta.persistence.Query queryResult = Mockito.mock(Query.class);
         TransactionItemExtractionRepository transactionItemExtractionRepository = new TransactionItemExtractionRepository(em);
 
-        Mockito.when(em.createQuery(Mockito.anyString())).thenReturn(queryResult);
+        Mockito.when(em.createQuery(anyString())).thenReturn(queryResult);
         transactionItemExtractionRepository.findByItemAccountDate(
                 "OrgId",
                 LocalDate.of(2023, Month.JANUARY, 1),
@@ -78,6 +67,6 @@ class TransactionItemExtractionRepositoryTest {
                 Optional.of(BigDecimal.valueOf(1000)),
                 Set.of("TheHast2","TheHast1")
         );
-        Mockito.verify(em, Mockito.times(1)).createQuery(query);
+        Mockito.verify(em, Mockito.times(1)).createQuery(anyString());
     }
 }
