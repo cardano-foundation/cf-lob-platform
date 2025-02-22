@@ -15,7 +15,7 @@ import com.bloxbean.cardano.client.backend.blockfrost.service.BFBackendService;
 @Configuration
 public class YaciStoreConfig {
 
-    @Value("${lob.blockfrost.url:http://localhost:8080/api/v1/}")
+    @Value("http://localhost:8081/api/v1/")
     private String baseUrl;
 
     @Value("${lob.blockfrost.project_id:}")
