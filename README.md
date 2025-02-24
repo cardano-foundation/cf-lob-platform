@@ -56,6 +56,15 @@ cd cf-lob-platform
 ./gradlew clean build
 ```
 
+## How to run
+This project offers the needed components to customize an own application. To run the application, follow these steps:
+- Create your own Spring Boot application and include the needed dependencies from this project
+- Implement for your ERP system the needed adapter to integrate the LOB platform with your system (or if it's NetSuite Altavia ERP, use the provided adapter)
+- Start your Spring Boot Application
+
+**We will provide a sample application in the near future to demonstrate how to use the LOB platform.**
+
+
 ## Documentation
 
 | Link                                                                                        | Audience   |
