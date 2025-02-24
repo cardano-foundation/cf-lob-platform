@@ -40,7 +40,7 @@ public class OrganisationChartOfAccount extends CommonEntity implements Persista
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subType", referencedColumnName = "name")
+    @JoinColumn(name = "subType", referencedColumnName = "id")
     private OrganisationChartOfAccountSubType subType;
 
     @Embeddable

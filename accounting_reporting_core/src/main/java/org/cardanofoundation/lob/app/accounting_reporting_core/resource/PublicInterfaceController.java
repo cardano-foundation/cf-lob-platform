@@ -29,7 +29,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presenta
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.ReportViewService;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.PublicInterfaceTransactionsRequest;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.PublicReportSearchRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ExtractionTransactionItemView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ExtractionTransactionView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReportResponseView;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.ReportService;
@@ -49,7 +48,7 @@ public class PublicInterfaceController {
     @Operation(description = "Search transactions items published",
             responses = {
                     @ApiResponse(content = {
-                            @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = ExtractionTransactionItemView.class)))
+                            @Content(mediaType = APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = ReportResponseView.class)))
                     })
             }
     )

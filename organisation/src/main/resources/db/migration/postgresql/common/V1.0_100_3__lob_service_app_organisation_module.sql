@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS organisation_chart_of_account (
    ref_code VARCHAR(255) NOT NULL,
    event_ref_code VARCHAR(255) NOT NULL,
    name VARCHAR(255) NOT NULL,
-   sub_type VARCHAR(255),
+   sub_type BIGINT,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),

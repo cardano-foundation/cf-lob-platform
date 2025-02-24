@@ -23,6 +23,7 @@ public class OrganisationService {
     private final CostCenterService costCenterService;
     private final ProjectMappingRepository projectMappingRepository;
     private final OrganisationChartOfAccountTypeRepository organisationChartOfAccountTypeRepository;
+    private final ChartOfAccountRepository organisationChartOfAccountRepository;
     private final OrganisationChartOfAccountSubTypeRepository organisationChartOfAccountSubTypeRepository;
     private final AccountEventRepository accountEventRepository;
 
@@ -47,6 +48,9 @@ public class OrganisationService {
         return organisationChartOfAccountTypeRepository.findAllByOrganisationId(organisationId);
     }
 
+    public Set<OrganisationChartOfAccount> getBySubTypeId( Long subType){
+        return organisationChartOfAccountRepository.findAllByOrganisationIdSubTypeId(subType);
+    }
     public Set<AccountEvent> getOrganisationEventCode(String orgId){
         return accountEventRepository.findAllByOrganisationId(orgId);
     }
