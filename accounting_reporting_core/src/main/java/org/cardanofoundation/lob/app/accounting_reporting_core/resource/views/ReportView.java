@@ -37,6 +37,8 @@ public class ReportView {
 
     private Boolean canBePublish;
 
+    private String documentCurrencyCustomerCode;
+
     @Nullable
     private String blockChainHash;
 
