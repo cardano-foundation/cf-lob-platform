@@ -61,6 +61,7 @@ public class AccountingCoreResourceReconciliation {
     })
     @Tag(name = "Reconciliation", description = "Reconciliation API")
     @PostMapping(value = "/transactions-reconcile", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
     public ResponseEntity<?> reconcileStart(@Valid @RequestBody ReconciliationFilterRequest body,
                                             @RequestParam(name = "page", defaultValue = "0") int page,
                                             @RequestParam(name = "limit", defaultValue = "10") int limit) {
@@ -79,6 +80,7 @@ public class AccountingCoreResourceReconciliation {
     })
     @Tag(name = "Reconciliation", description = "Reconciliation API")
     @GetMapping(value = "/transactions-rejection-codes", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
     public ResponseEntity<?> reconciliationRejectionCode() {
         return ResponseEntity.ok().body(ReconciliationRejectionCodeRequest.values());
     }
