@@ -1,26 +1,5 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 
-import io.vavr.control.Either;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationRequest;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReconcileResponseView;
-import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReconciliationResponseView;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
-
-import java.time.LocalDate;
-import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -28,6 +7,29 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
+
+import io.vavr.control.Either;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.presentation_layer_service.AccountingCorePresentationViewService;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationFilterRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.ReconciliationRequest;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReconcileResponseView;
+import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.ReconciliationResponseView;
+import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
 
 @ExtendWith(MockitoExtension.class)
 class AccountingCoreResourceReconcilationTest {
