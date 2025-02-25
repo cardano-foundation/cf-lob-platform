@@ -59,6 +59,7 @@ public class OrganisationResource {
                             organisation.getId(),
                             organisation.getName(),
                             organisation.getTaxIdNumber(),
+                            organisation.getTaxIdNumber(),
                             organisation.getCurrencyId(),
                             monthsAgo,
                             yesterday,
@@ -92,6 +93,7 @@ public class OrganisationResource {
             return new OrganisationView(
                     organisation1.getId(),
                     organisation1.getName(),
+                    organisation1.getTaxIdNumber(),
                     organisation1.getTaxIdNumber(),
                     organisation1.getCurrencyId(),
                     monthsAgo,
