@@ -58,9 +58,10 @@ public class AccountingCorePresentationViewService {
     public ReconciliationResponseView allReconciliationTransaction(ReconciliationFilterRequest body) {
         Object transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
         Optional<ReconcilationEntity> latestReconcilation = transactionReconcilationRepository.findTopByOrderByCreatedAtDesc();
+        Set<TransactionReconciliationTransactionsView> transactions;
         if (body.getFilter().equals(ReconciliationFilterStatusRequest.UNRECONCILED)) {
             Set<Object> txDuplicated = new HashSet<>();
-            LinkedHashSet<TransactionReconciliationTransactionsView> transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).stream()
+            transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).stream()
                     .filter(o -> {
                         if (o[0] instanceof TransactionEntity transactionEntity && !txDuplicated.contains((transactionEntity).getId())) {
                                 txDuplicated.add((transactionEntity).getId());
@@ -77,22 +78,13 @@ public class AccountingCorePresentationViewService {
                     .map(this::getReconciliationTransactionsSelector)
                     .sorted(Comparator.comparing(TransactionReconciliationTransactionsView::getId))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
-
-            return new ReconciliationResponseView(
-                    (long) accountingCoreTransactionRepository.findAllReconciliationSpecialCount(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).size(),
-                    latestReconcilation.flatMap(ReconcilationEntity::getFrom),
-                    latestReconcilation.flatMap(ReconcilationEntity::getTo),
-                    latestReconcilation.map(reconcilationEntity -> reconcilationEntity.getUpdatedAt().toLocalDate()),
-                    getTransactionReconciliationStatistic(transactionsStatistic),
-                    transactions
-            );
+        } else {
+            transactions = transactionRepositoryGateway.findReconciliation(body.getFilter(), body.getLimit(), body.getPage()).stream()
+                    .map(this::getTransactionReconciliationView)
+                    .collect(toSet());
         }
-        Set<TransactionReconciliationTransactionsView> transactions = transactionRepositoryGateway.findReconciliation(body.getFilter(), body.getLimit(), body.getPage()).stream()
-                .map(this::getTransactionReconciliationView)
-                .collect(toSet());
-
         return new ReconciliationResponseView(
-                (long) transactionRepositoryGateway.findReconciliationCount(body.getFilter(), body.getLimit(), body.getPage()).size(),
+                (long) transactions.size(),
                 latestReconcilation.flatMap(ReconcilationEntity::getFrom),
                 latestReconcilation.flatMap(ReconcilationEntity::getTo),
                 latestReconcilation.map(reconcilationEntity -> reconcilationEntity.getUpdatedAt().toLocalDate()),
