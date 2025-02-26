@@ -25,9 +25,11 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Opera
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.*;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.reconcilation.ReconcilationEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.reconcilation.ReconcilationViolation;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.AccountingCoreTransactionRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepositoryGateway;
+import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
@@ -46,6 +48,7 @@ public class AccountingCorePresentationViewService {
     private final TransactionRepositoryGateway transactionRepositoryGateway;
     private final AccountingCoreService accountingCoreService;
     private final TransactionBatchRepositoryGateway transactionBatchRepositoryGateway;
+    private final TransactionReconcilationRepository transactionReconcilationRepository;
 
     /**
      * TODO: waiting for refactoring the layer to remove this
@@ -54,9 +57,11 @@ public class AccountingCorePresentationViewService {
 
     public ReconciliationResponseView allReconciliationTransaction(ReconciliationFilterRequest body) {
         Object transactionsStatistic = accountingCoreTransactionRepository.findCalcReconciliationStatistic();
+        Optional<ReconcilationEntity> latestReconcilation = transactionReconcilationRepository.findTopByOrderByCreatedAtDesc();
+        Set<TransactionReconciliationTransactionsView> transactions;
         if (body.getFilter().equals(ReconciliationFilterStatusRequest.UNRECONCILED)) {
             Set<Object> txDuplicated = new HashSet<>();
-            LinkedHashSet<TransactionReconciliationTransactionsView> transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).stream()
+            transactions = accountingCoreTransactionRepository.findAllReconciliationSpecial(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).stream()
                     .filter(o -> {
                         if (o[0] instanceof TransactionEntity transactionEntity && !txDuplicated.contains((transactionEntity).getId())) {
                                 txDuplicated.add((transactionEntity).getId());
@@ -73,21 +78,17 @@ public class AccountingCorePresentationViewService {
                     .map(this::getReconciliationTransactionsSelector)
                     .sorted(Comparator.comparing(TransactionReconciliationTransactionsView::getId))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
-
-            return new ReconciliationResponseView(
-                    (long) accountingCoreTransactionRepository.findAllReconciliationSpecialCount(body.getReconciliationRejectionCode(), body.getDateFrom(), body.getLimit(), body.getPage()).size(),
-                    getTransactionReconciliationStatistic(transactionsStatistic),
-                    transactions
-            );
+        } else {
+            transactions = transactionRepositoryGateway.findReconciliation(body.getFilter(), body.getLimit(), body.getPage()).stream()
+                    .map(this::getTransactionReconciliationView)
+                    .collect(toSet());
         }
-        Set<TransactionReconciliationTransactionsView> transactions = transactionRepositoryGateway.findReconciliation(body.getFilter(), body.getLimit(), body.getPage()).stream()
-                .map(this::getTransactionReconciliationView)
-                .collect(toSet());
-
         return new ReconciliationResponseView(
-                (long) transactionRepositoryGateway.findReconciliationCount(body.getFilter(), body.getLimit(), body.getPage()).size(),
+                (long) transactions.size(),
+                latestReconcilation.flatMap(ReconcilationEntity::getFrom),
+                latestReconcilation.flatMap(ReconcilationEntity::getTo),
+                latestReconcilation.map(reconcilationEntity -> reconcilationEntity.getUpdatedAt().toLocalDate()),
                 getTransactionReconciliationStatistic(transactionsStatistic),
-
                 transactions
         );
     }
@@ -183,11 +184,10 @@ public class AccountingCorePresentationViewService {
     public List<TransactionProcessView> approveTransactions(TransactionsRequest transactionsRequest) {
         return transactionRepositoryGateway.approveTransactions(transactionsRequest)
                 .stream()
-                .map(txEntityE -> txEntityE.fold(txProblem -> {
-                    return TransactionProcessView.createFail(txProblem.getId(), txProblem.getProblem());
-                }, success -> {
-                    return TransactionProcessView.createSuccess(success.getId());
-                }))
+                .map(txEntityE -> txEntityE.fold(
+                        txProblem -> TransactionProcessView.createFail(txProblem.getId(), txProblem.getProblem()),
+                        success -> TransactionProcessView.createSuccess(success.getId())
+                ))
                 .toList();
     }
 
@@ -195,11 +195,10 @@ public class AccountingCorePresentationViewService {
     public List<TransactionProcessView> approveTransactionsPublish(TransactionsRequest transactionsRequest) {
         return transactionRepositoryGateway.approveTransactionsDispatch(transactionsRequest)
                 .stream()
-                .map(txEntityE -> txEntityE.fold(txProblem -> {
-                    return TransactionProcessView.createFail(txProblem.getId(), txProblem.getProblem());
-                }, success -> {
-                    return TransactionProcessView.createSuccess(success.getId());
-                }))
+                .map(txEntityE -> txEntityE.fold(
+                        txProblem -> TransactionProcessView.createFail(txProblem.getId(), txProblem.getProblem()),
+                        success -> TransactionProcessView.createSuccess(success.getId())
+                ))
                 .toList();
     }
 
@@ -214,11 +213,9 @@ public class AccountingCorePresentationViewService {
         TransactionEntity tx = txM.orElseThrow();
         Set<TransactionItemsProcessView> items = transactionRepositoryGateway.rejectTransactionItems(tx, transactionItemsRejectionRequest.getTransactionItemsRejections())
                 .stream()
-                .map(txItemEntityE -> txItemEntityE.fold(txProblem -> {
-                    return TransactionItemsProcessView.createFail(txProblem.getId(), txProblem.getProblem());
-                }, success -> {
-                    return TransactionItemsProcessView.createSuccess(success.getId());
-                }))
+                .map(txItemEntityE -> txItemEntityE.fold(txProblem -> TransactionItemsProcessView.createFail(txProblem.getId(), txProblem.getProblem())
+                , success -> TransactionItemsProcessView.createSuccess(success.getId())
+                ))
                 .collect(toSet());
 
         return TransactionItemsProcessRejectView.createSuccess(
@@ -295,24 +292,18 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getLedgerDispatchApproved(),
                 getAmountLcyTotalForAllItems(transactionEntity),
                 false,
-                transactionEntity.getReconcilation().flatMap(reconcilation -> {
-                    return reconcilation.getSource().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of);
-                }).orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
-                transactionEntity.getReconcilation().flatMap(reconcilation -> {
-                    return reconcilation.getSink().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of);
-                }).orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
-                transactionEntity.getReconcilation().flatMap(reconcilation -> {
-                    return reconcilation.getFinalStatus().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of);
-                }).orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> reconcilation.getSource().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of))
+                        .orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> reconcilation.getSink().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of))
+                        .orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> reconcilation.getFinalStatus().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of))
+                        .orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
 
-                transactionEntity.getLastReconcilation().map(reconcilationEntity -> {
-                    return reconcilationEntity.getViolations().stream()
+                transactionEntity.getLastReconcilation().map(reconcilationEntity -> reconcilationEntity.getViolations().stream()
                             .filter(reconcilationViolation -> reconcilationViolation.getTransactionId().equals(transactionEntity.getId()))
-                            .map(reconcilationViolation -> {
-                                return ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode(), transactionEntity.getLedgerDispatchApproved());
-                            })
-                            .collect(toSet());
-                }).orElse(new LinkedHashSet<>()),
+                            .map(reconcilationViolation -> ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode(), transactionEntity.getLedgerDispatchApproved()))
+                            .collect(toSet()))
+                        .orElse(new LinkedHashSet<>()),
                 transactionEntity.getLastReconcilation().map(CommonEntity::getCreatedAt).orElse(null),
                 getTransactionItemView(transactionEntity),
                 getViolations(transactionEntity)
@@ -384,24 +375,18 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getLedgerDispatchApproved(),
                 getAmountLcyTotalForAllItems(transactionEntity),
                 transactionEntity.hasAnyRejection(),
-                transactionEntity.getReconcilation().flatMap(reconcilation -> {
-                    return reconcilation.getSource().map(TransactionView.ReconciliationCodeView::of);
-                }).orElse(TransactionView.ReconciliationCodeView.NEVER),
-                transactionEntity.getReconcilation().flatMap(reconcilation -> {
-                    return reconcilation.getSink().map(TransactionView.ReconciliationCodeView::of);
-                }).orElse(TransactionView.ReconciliationCodeView.NEVER),
-                transactionEntity.getReconcilation().flatMap(reconcilation -> {
-                    return reconcilation.getFinalStatus().map(TransactionView.ReconciliationCodeView::of);
-                }).orElse(TransactionView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> reconcilation.getSource().map(TransactionView.ReconciliationCodeView::of))
+                        .orElse(TransactionView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> reconcilation.getSink().map(TransactionView.ReconciliationCodeView::of))
+                        .orElse(TransactionView.ReconciliationCodeView.NEVER),
+                transactionEntity.getReconcilation().flatMap(reconcilation -> reconcilation.getFinalStatus().map(TransactionView.ReconciliationCodeView::of))
+                        .orElse(TransactionView.ReconciliationCodeView.NEVER),
 
-                transactionEntity.getLastReconcilation().map(reconcilationEntity -> {
-                    return reconcilationEntity.getViolations().stream()
+                transactionEntity.getLastReconcilation().map(reconcilationEntity -> reconcilationEntity.getViolations().stream()
                             .filter(reconcilationViolation -> reconcilationViolation.getTransactionId().equals(transactionEntity.getId()))
-                            .map(reconcilationViolation -> {
-                                return ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode(), transactionEntity.getLedgerDispatchApproved());
-                            })
-                            .collect(toSet());
-                }).orElse(new LinkedHashSet<>()),
+                            .map(reconcilationViolation -> ReconciliationRejectionCodeRequest.of(reconcilationViolation.getRejectionCode(), transactionEntity.getLedgerDispatchApproved()))
+                            .collect(toSet()))
+                        .orElse(new LinkedHashSet<>()),
                 transactionEntity.getLastReconcilation().map(CommonEntity::getCreatedAt).orElse(null),
                 getTransactionItemView(transactionEntity),
                 getViolations(transactionEntity)
@@ -467,8 +452,7 @@ public class AccountingCorePresentationViewService {
     }
 
     private Set<TransactionItemView> getTransactionItemView(TransactionEntity transaction) {
-        return transaction.getItems().stream().map(item -> {
-            return new TransactionItemView(
+        return transaction.getItems().stream().map(item -> new TransactionItemView(
                     item.getId(),
                     item.getAccountDebit().map(Account::getCode).orElse(""),
                     item.getAccountDebit().flatMap(Account::getName).orElse(""),
@@ -495,8 +479,7 @@ public class AccountingCorePresentationViewService {
                     item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).isPresent() ? item.getDocument().flatMap(d -> d.getCounterparty().map(Counterparty::getType)).get().toString() : "",
                     item.getDocument().flatMap(document -> document.getCounterparty().flatMap(Counterparty::getName)).orElse(""),
                     item.getRejection().map(Rejection::getRejectionReason).orElse(null)
-            );
-        }).collect(toSet());
+            )).collect(toSet());
     }
 
     private Set<ViolationView> getViolations(TransactionEntity transaction) {
@@ -519,7 +502,7 @@ public class AccountingCorePresentationViewService {
             }
 
             try {
-                log.warn("Object type: {}", o.getClass().toString());
+                log.warn("Object type: {}", o.getClass());
             } catch (Exception e) {
                 log.warn("\nempty object: {}\n", o);
             }
@@ -533,9 +516,7 @@ public class AccountingCorePresentationViewService {
         Set<TransactionItemEntity> items = tx.getItems();
 
         if (tx.getTransactionType().equals(TransactionType.Journal)) {
-            items = tx.getItems().stream().filter(txItems -> {
-                return txItems.getOperationType().equals(Optional.of(OperationType.DEBIT));
-            }).collect(toSet());
+            items = tx.getItems().stream().filter(txItems -> txItems.getOperationType().equals(Optional.of(OperationType.DEBIT))).collect(toSet());
         }
 
         return items.stream()

@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
@@ -46,12 +45,11 @@ public class AccountingCoreResourceReconciliation {
     })
     @PostMapping(value = "/reconcile/trigger", produces = APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
-    public ResponseEntity<?> reconcileTriggerAction(@Valid @RequestBody ReconciliationRequest body) {
-        return accountingCoreService.scheduleReconcilation(body.getOrganisationId(), body.getDateFrom(), body.getDateTo()).fold(problem -> {
-            return ResponseEntity.status(problem.getStatus().getStatusCode()).body(ReconcileResponseView.createFail(problem.getTitle(), body.getDateFrom(), body.getDateTo(), problem));
-        }, success -> {
-            return ResponseEntity.ok(ReconcileResponseView.createSuccess("We have received your reconcile request now.", body.getDateFrom(), body.getDateTo()));
-        });
+    public ResponseEntity<ReconcileResponseView> reconcileTriggerAction(@Valid @RequestBody ReconciliationRequest body) {
+        return accountingCoreService.scheduleReconcilation(body.getOrganisationId(), body.getDateFrom(), body.getDateTo()).fold(
+                problem -> ResponseEntity.status(problem.getStatus().getStatusCode()).body(ReconcileResponseView.createFail(problem.getTitle(), body.getDateFrom(), body.getDateTo(), problem)),
+                success -> ResponseEntity.ok(ReconcileResponseView.createSuccess("We have received your reconcile request now.", body.getDateFrom(), body.getDateTo()))
+        );
     }
 
     @Operation(description = "Get the Reconciliations", responses = {
@@ -62,13 +60,13 @@ public class AccountingCoreResourceReconciliation {
     @Tag(name = "Reconciliation", description = "Reconciliation API")
     @PostMapping(value = "/transactions-reconcile", produces = "application/json")
     @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
-    public ResponseEntity<?> reconcileStart(@Valid @RequestBody ReconciliationFilterRequest body,
+    public ResponseEntity<ReconciliationResponseView> reconcileStart(@Valid @RequestBody ReconciliationFilterRequest body,
                                             @RequestParam(name = "page", defaultValue = "0") int page,
                                             @RequestParam(name = "limit", defaultValue = "10") int limit) {
         body.setLimit(limit);
         body.setPage(page);
 
-        val reconciliationResponseView = accountingCorePresentationService.allReconciliationTransaction(body);
+        ReconciliationResponseView reconciliationResponseView = accountingCorePresentationService.allReconciliationTransaction(body);
 
         return ResponseEntity.ok().body(reconciliationResponseView);
     }
@@ -81,7 +79,7 @@ public class AccountingCoreResourceReconciliation {
     @Tag(name = "Reconciliation", description = "Reconciliation API")
     @GetMapping(value = "/transactions-rejection-codes", produces = "application/json")
     @PreAuthorize("hasRole(@securityConfig.getManagerRole()) or hasRole(@securityConfig.getAuditorRole())")
-    public ResponseEntity<?> reconciliationRejectionCode() {
+    public ResponseEntity<ReconciliationRejectionCodeRequest[]> reconciliationRejectionCode() {
         return ResponseEntity.ok().body(ReconciliationRejectionCodeRequest.values());
     }
 

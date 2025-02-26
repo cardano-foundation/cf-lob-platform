@@ -81,8 +81,8 @@ public class TransactionSubmissionConfig {
                                                              BlockchainReaderPublicApiIF blockchainReaderPublicApi,
                                                              @Qualifier("api3JsonSchemaMetadataChecker") MetadataChecker metadataChecker,
                                                              Account organiserAccount,
-                                                             @Value("${l1.transaction.metadata_label:1447}") int metadataLabel,
-                                                             @Value("${l1.transaction.debug_store_output_tx:false}") boolean debugStoreOutputTx
+                                                             @Value("${lob.l1.transaction.metadata_label:1447}") int metadataLabel,
+                                                             @Value("${lob.l1.transaction.debug_store_output_tx:false}") boolean debugStoreOutputTx
     ) {
         return new API3L1TransactionCreator(backendService,
                 metadataSerialiser,
