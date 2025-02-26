@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,10 +26,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Slf4j
 public class ReconciliationFilterRequest {
 
+    @NotBlank(message = "Organisation Id is mandatory and must not be blank or null.")
     @Schema(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
     private String organisationId;
 
     @Schema(example = "UNRECONCILED")
+    @NotNull(message = "Filter is mandatory and must not be blank or null. Options are: RECONCILED, UNRECONCILED, UNPROCESSED")
     private ReconciliationFilterStatusRequest filter;
 
     @Schema(example = "2014-01-01")
