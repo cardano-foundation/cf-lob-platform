@@ -33,7 +33,7 @@ public class ReportRequest {
 
     @Schema(example = "3")
     @Nullable
-    private short period;
+    private Short period;
 
     /**
      * INCOME_STATEMENT

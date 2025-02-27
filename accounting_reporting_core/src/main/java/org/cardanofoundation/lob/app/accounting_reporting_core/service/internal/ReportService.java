@@ -247,8 +247,9 @@ public class ReportService {
                                                      CreateReportView createReportView,
                                                      IntervalType intervalType,
                                                      short year,
-                                                     short period) {
+                                                     Optional<Short> period) {
         log.info(reportType.name() + ":: Saving report...");
+        period = calculatePeriod(intervalType, period);
         if(reportType == BALANCE_SHEET && createReportView.getBalanceSheetData().isEmpty() ||
         reportType == INCOME_STATEMENT && createReportView.getIncomeStatementData().isEmpty()) {
             return Either.left(Problem.builder()
@@ -282,8 +283,8 @@ public class ReportService {
             return success;
         });
 
-        reportEntity.setReportId(Report.id(organisationId, reportType, intervalType, year, reportEntity.getVer(), Optional.of(period)));
-        reportEntity.setIdControl(Report.idControl(organisationId, reportType, intervalType, year, Optional.of(period)));
+        reportEntity.setReportId(Report.id(organisationId, reportType, intervalType, year, reportEntity.getVer(), period));
+        reportEntity.setIdControl(Report.idControl(organisationId, reportType, intervalType, year, period));
 
         reportEntity.setOrganisation(Organisation.builder()
                 .id(organisationId)
@@ -297,7 +298,7 @@ public class ReportService {
         reportEntity.setType(reportType);
         reportEntity.setIntervalType(intervalType); // Assuming MONTHLY is a constant in ReportRollupPeriodType
         reportEntity.setYear(year);
-        reportEntity.setPeriod(Optional.of(period)); // Representing March
+        reportEntity.setPeriod(period); // Representing March
         reportEntity.setMode(USER); // Assuming USER is a constant in ReportMode enum
         reportEntity.setDate(LocalDate.now(clock));
 
@@ -322,8 +323,9 @@ public class ReportService {
         return publicReportRepository.findAllByTypeAndPeriod(organistionId,reportType, intervalType, year, period);
     }
 
-    public Either<Problem, ReportEntity> exist(String organisationId, ReportType reportType, IntervalType intervalType, short year, short period) {
-        String reportId = Report.idControl(organisationId, reportType, intervalType, year, Optional.of(period));
+    public Either<Problem, ReportEntity> exist(String organisationId, ReportType reportType, IntervalType intervalType, short year, Optional<Short> period) {
+        period = calculatePeriod(intervalType, period);
+        String reportId = Report.idControl(organisationId, reportType, intervalType, year, period);
         val reportM = reportRepository.findLatestByIdControl(organisationId, reportId);
 
         if (reportM.isEmpty()) {
@@ -545,5 +547,12 @@ public class ReportService {
         ReportEntity report = new ReportEntity();
         report.setVer(clock.millis());
         return report;
+    }
+
+    private Optional<Short> calculatePeriod(IntervalType intervalType, Optional<Short> period){
+        if (intervalType.equals(IntervalType.YEAR)) {
+            return Optional.ofNullable(null);
+        }
+        return period;
     }
 }

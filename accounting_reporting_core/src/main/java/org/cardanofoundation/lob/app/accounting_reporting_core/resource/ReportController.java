@@ -4,6 +4,7 @@ package org.cardanofoundation.lob.app.accounting_reporting_core.resource;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
@@ -82,7 +83,7 @@ public class ReportController {
                 reportSearchRequest.getReportType(),
                 reportSearchRequest.getIntervalType(),
                 reportSearchRequest.getYear(),
-                reportSearchRequest.getPeriod()
+                Optional.of(reportSearchRequest.getPeriod())
         ).fold(problem -> {
             return ResponseEntity.status(problem.getStatus().getStatusCode()).body(ReportResponseView.createFail(problem));
         }, success -> {

@@ -39,7 +39,7 @@ public class ReportViewService {
                 CreateReportView.fromReportRequest(reportSaveRequest),
                 reportSaveRequest.getIntervalType(),
                 reportSaveRequest.getYear(),
-                reportSaveRequest.getPeriod());
+                Optional.ofNullable(reportSaveRequest.getPeriod()));
     }
 
     public ReportView responseView(ReportEntity reportEntity) {
@@ -53,10 +53,10 @@ public class ReportViewService {
         reportResponseView.setPeriod(reportEntity.getPeriod());
         reportResponseView.setDate(reportEntity.getDate());
         reportResponseView.setPublish(reportEntity.getLedgerDispatchApproved());
-        reportResponseView.setCanBePublish(true);
         if (reportEntity.getLedgerDispatchReceipt().isPresent()) {
             reportResponseView.setBlockChainHash(reportEntity.getLedgerDispatchReceipt().get().getPrimaryBlockchainHash());
         }
+        reportResponseView.setCanBePublish(true);
         Either<Problem, Boolean> left = reportService.canPublish(reportEntity);
         reportResponseView.setError(Optional.empty());
         if (left.isLeft()) {

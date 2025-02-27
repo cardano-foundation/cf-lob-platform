@@ -1129,7 +1129,7 @@ class ReportServiceTest {
 
         Either<Problem, ReportEntity> result = reportService.storeReport(BALANCE_SHEET, CreateReportView.builder()
                 .organisationId(organisationId)
-                .balanceSheetData(Optional.of(BalanceSheetData.builder().build())).build(), intervalType, year, period);
+                .balanceSheetData(Optional.of(BalanceSheetData.builder().build())).build(), intervalType, year, Optional.of(period));
 
         assertTrue(result.isRight());
 
@@ -1150,7 +1150,7 @@ class ReportServiceTest {
         Either<Problem, ReportEntity> result = reportService.storeReport(BALANCE_SHEET, CreateReportView.builder()
                 .organisationId(organisationId)
                 .balanceSheetData(Optional.empty())
-                .incomeStatementData(Optional.of(IncomeStatementData.builder().build())).build(), intervalType, year, period);
+                .incomeStatementData(Optional.of(IncomeStatementData.builder().build())).build(), intervalType, year, Optional.of(period));
 
         assertTrue(result.isLeft());
         assertThat(result.getLeft().getTitle()).isEqualTo("INVALID_REPORT_TYPE");
@@ -1168,7 +1168,7 @@ class ReportServiceTest {
         Either<Problem, ReportEntity> result = reportService.storeReport(INCOME_STATEMENT, CreateReportView.builder()
                 .organisationId(organisationId)
                 .incomeStatementData(Optional.empty())
-                .balanceSheetData(Optional.of(BalanceSheetData.builder().build())).build(), intervalType, year, period);
+                .balanceSheetData(Optional.of(BalanceSheetData.builder().build())).build(), intervalType, year, Optional.of(period));
 
         assertTrue(result.isLeft());
         assertThat(result.getLeft().getTitle()).isEqualTo("INVALID_REPORT_TYPE");
@@ -1187,7 +1187,7 @@ class ReportServiceTest {
         Either<Problem, ReportEntity> result = reportService.storeReport(BALANCE_SHEET, CreateReportView.builder()
                 .organisationId(organisationId)
                 .incomeStatementData(Optional.empty())
-                .balanceSheetData(Optional.of(BalanceSheetData.builder().build())).build(), intervalType, year, period);
+                .balanceSheetData(Optional.of(BalanceSheetData.builder().build())).build(), intervalType, year, Optional.of(period));
 
         assertTrue(result.isLeft());
         assertThat(result.getLeft().getTitle()).isEqualTo("ORGANISATION_NOT_FOUND");
