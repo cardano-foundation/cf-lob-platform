@@ -1,13 +1,16 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.test_configs;
+package org.cardanofoundation.lob.app.accounting_reporting_core.config;
+
+import java.math.BigDecimal;
 
 import lombok.extern.slf4j.Slf4j;
-import org.cardanofoundation.lob.app.support.javers.LOBBigDecimalComparator;
-import org.javers.core.Javers;
-import org.javers.core.JaversBuilder;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.math.BigDecimal;
+import org.javers.core.Javers;
+import org.javers.core.JaversBuilder;
+
+import org.cardanofoundation.lob.app.support.javers.LOBBigDecimalComparator;
 
 @Configuration
 @Slf4j

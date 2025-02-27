@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.test_configs;
+package org.cardanofoundation.lob.app.accounting_reporting_core.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

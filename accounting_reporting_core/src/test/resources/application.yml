@@ -25,7 +25,6 @@ spring:
     validateMigrationNaming: true
     cleanDisabled: false
     locations:
-      - classpath:db/store/{vendor}
       - classpath:db/migration/{vendor}/common
       - classpath:db/migration/{vendor}/dev
     driver-class-name: ${DB_DRIVER:org.postgresql.Driver}

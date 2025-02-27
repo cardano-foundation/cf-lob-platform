@@ -59,8 +59,7 @@ public class LedgerService {
         List<TransactionEntity> transactionEntities = accountingCoreTransactionRepository.findAllById(txIds);
 
         for (TransactionEntity tx : transactionEntities) {
-            // TODO I have a weird error in this test, that the id has a lot of trailing spaces, will figure it out later
-            TxStatusUpdate txStatusUpdate = statuses.get(tx.getId().trim());
+            TxStatusUpdate txStatusUpdate = statuses.get(tx.getId());
             tx.setLedgerDispatchStatus(txStatusUpdate.getStatus());
 
             // TODO for now we only support one blockchain but this is open for adding more blockchains

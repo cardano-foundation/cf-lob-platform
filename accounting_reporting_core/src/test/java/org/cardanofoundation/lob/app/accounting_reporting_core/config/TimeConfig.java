@@ -1,12 +1,13 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.test_configs;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+package org.cardanofoundation.lob.app.accounting_reporting_core.config;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
