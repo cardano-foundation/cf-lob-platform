@@ -62,8 +62,12 @@ public class TransactionReconcilationService {
                         " to: {}",
                 reconcilationId, from, to
         );
-
-        val reconcilationEntity = new ReconcilationEntity();
+        Optional<ReconcilationEntity> entity = transactionReconcilationRepository.findById(reconcilationId);
+        if(entity.isPresent()) {
+            log.warn("Reconcilation already exists, reconcilationId: {}", reconcilationId);
+            return;
+        }
+        ReconcilationEntity reconcilationEntity = new ReconcilationEntity();
         reconcilationEntity.setId(reconcilationId);
         reconcilationEntity.setOrganisationId(organisationId);
         reconcilationEntity.setStatus(ReconcilationStatus.CREATED);

@@ -87,7 +87,8 @@ public class ReconcilationEntity extends CommonEntity implements Persistable<Str
             @AttributeOverride(name = "transactionInternalNumber", column = @Column(name = "transaction_internal_number", nullable = false)),
             @AttributeOverride(name = "transactionEntryDate", column = @Column(name = "transaction_entry_date", nullable = false)),
             @AttributeOverride(name = "transactionType", column = @Column(name = "transaction_type", nullable = false)),
-            @AttributeOverride(name = "amountLcySum", column = @Column(name = "amount_lcy_sum", nullable = false))
+            @AttributeOverride(name = "amountLcySum", column = @Column(name = "amount_lcy_sum", nullable = false)),
+            @AttributeOverride(name = "sourceDiff", column = @Column(name = "source_diff", nullable = false))
     })
     @Setter
     @Getter
