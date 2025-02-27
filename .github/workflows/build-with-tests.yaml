@@ -32,10 +32,19 @@ jobs:
 
       - name: Test
         run: |
-         ./gradlew clean test
+         ./gradlew clean test jacocoTestReport
       - name: Spotless
         run : |
           ./gradlew spotlessCheck
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        run: |
+          ./gradlew sonar \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.organization=cardano-foundation \
+          -Dsonar.projectKey=cardano-foundation_cf-lob-platform \
+          -Dsonar.branch.name=${{ github.head_ref }}
 
 #  mutation-test:
 #    needs: test
