@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.accounting_reporting_core.service.event_processing;
+package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -51,8 +51,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.repository.Accoun
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.ReportRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionBatchRepository;
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;
-import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreEventHandler;
-import org.cardanofoundation.lob.app.organisation.repository.OrganisationRepository;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 
 @SpringBootTest(classes = {JaversConfig.class, TimeConfig.class, JpaConfig.class, ModulithEventConfig.class})
@@ -71,8 +69,6 @@ class AccountingCoreEventHandlerDuplicateEventsTest {
     private ReportRepository reportRepository;
     @Autowired
     private TransactionReconcilationRepository transactionReconcilationRepository;
-    @Autowired
-    private OrganisationRepository organisationRepository;
 
     @BeforeEach
     public void clearDatabase(@Autowired Flyway flyway){

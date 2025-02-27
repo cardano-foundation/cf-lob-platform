@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Sets;
 
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.core.BlockchainPublishStatus;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.reports.ReportEntity;
@@ -33,10 +32,13 @@ public class ReportEntityRepositoryGateway {
                 .map(ReportEntity::getId)
                 .collect(toSet());
 
-        Set<ReportEntity> existingReports = new HashSet<>(reportEntityRepository
-                .findAllById(reportIds));
+        Set<String> existingReportIds = new HashSet<>(reportEntityRepository
+                .findAllById(reportIds))
+                .stream().map(ReportEntity::getId).collect(toSet());
 
-        Sets.SetView<ReportEntity> newReports = Sets.difference(reportEntities, existingReports);
+        Set<ReportEntity> newReports = reportEntities.stream()
+                .filter(report -> !existingReportIds.contains(report.getId()))
+                .collect(Collectors.toSet());
 
         return new HashSet<>(reportEntityRepository.saveAll(newReports));
     }
