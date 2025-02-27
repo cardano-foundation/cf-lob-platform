@@ -37,6 +37,24 @@ public class Organisation extends CommonEntity implements Persistable<String> {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "city", nullable = false)
+    private String city;
+
+    @Column(name = "post_code", nullable = false)
+    private String postCode;
+
+    @Column(name = "province", nullable = false)
+    private String province;
+
+    @Column(name = "country", nullable = false)
+    private String country;
+
+    @Column(name = "address", nullable = false)
+    private String address;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Column(name = "tax_id_number", nullable = false)
     private String taxIdNumber;
 
@@ -57,6 +75,12 @@ public class Organisation extends CommonEntity implements Persistable<String> {
 
     @Column(name = "currency_id", nullable = false)
     private String currencyId;
+
+    @Column(name = "report_currency_id", nullable = false)
+    private String reportCurrencyId;
+
+    @Column(name = "website")
+    private String webSite;
 
     @Column(name = "admin_email", nullable = false)
     private String adminEmail;

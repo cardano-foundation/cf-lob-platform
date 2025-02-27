@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,9 +26,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
+import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationUpsert;
 import org.cardanofoundation.lob.app.organisation.domain.view.*;
-import org.cardanofoundation.lob.app.organisation.repository.OrganisationChartOfAccountSubTypeRepository;
-import org.cardanofoundation.lob.app.organisation.service.OrganisationCurrencyService;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 
 @RestController
@@ -39,8 +38,6 @@ import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 public class OrganisationResource {
 
     private final OrganisationService organisationService;
-    private final OrganisationCurrencyService organisationCurrencyService;
-    private final OrganisationChartOfAccountSubTypeRepository chartOfAccountSubTypeRepository;
 
     @Operation(description = "Transaction types", responses = {
             @ApiResponse(content =
@@ -48,6 +45,7 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationList() {
         return ResponseEntity.ok().body(
                 organisationService.findAll().stream().map(organisation -> {
@@ -64,6 +62,12 @@ public class OrganisationResource {
                             monthsAgo,
                             yesterday,
                             organisation.getAdminEmail(),
+                            organisation.getPhoneNumber(),
+                            organisation.getAddress(),
+                            organisation.getCity(),
+                            organisation.getPostCode(),
+                            organisation.getProvince(),
+                            organisation.getCountry(),
                             new LinkedHashSet<>(),
                             new LinkedHashSet<>(),
                             new LinkedHashSet<>(),
@@ -84,42 +88,11 @@ public class OrganisationResource {
                     "}"))})
     })
     @GetMapping(value = "/organisation/{orgId}", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationDetailSpecific(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         Optional<OrganisationView> organisation = organisationService.findById(orgId).map(organisation1 -> {
-            LocalDate today = LocalDate.now();
-            LocalDate monthsAgo = today.minusMonths(organisation1.getAccountPeriodDays());
-            LocalDate yesterday = today.minusDays(1);
 
-            return new OrganisationView(
-                    organisation1.getId(),
-                    organisation1.getName(),
-                    organisation1.getTaxIdNumber(),
-                    organisation1.getTaxIdNumber(),
-                    organisation1.getCurrencyId(),
-                    monthsAgo,
-                    yesterday,
-                    organisation1.getAdminEmail(),
-                    organisationService.getAllCostCenter(organisation1.getId()).stream().map(organisationCostCenter -> {
-                        return new OrganisationCostCenterView(
-                                organisationCostCenter.getId() != null ? organisationCostCenter.getId().getCustomerCode() : null,
-                                organisationCostCenter.getExternalCustomerCode(),
-                                organisationCostCenter.getName()
-                        );
-                    }).collect(Collectors.toSet()),
-                    organisationService.getAllProjects(organisation1.getId()).stream().map(organisationProject -> {
-                        return new OrganisationCostCenterView(
-                                organisationProject.getId() != null ? organisationProject.getId().getCustomerCode() : null,
-                                organisationProject.getExternalCustomerCode(),
-                                organisationProject.getName()
-                        );
-                    }).collect(Collectors.toSet()),
-                    organisationCurrencyService.findAllByOrganisationId("75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94")
-                            .stream()
-                            .map(organisationCurrency -> {
-                                return organisationCurrency.getId() != null ? organisationCurrency.getId().getCustomerCode() : null;
-                            }).collect(Collectors.toSet()),
-                    organisation1.getLogo()
-            );
+            return organisationService.getOrganisationView(organisation1);
         });
         if (organisation.isEmpty()) {
             val issue = Problem.builder()
@@ -140,6 +113,7 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation/{orgId}/cost-center", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationCostCenter(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(
                 organisationService.getAllCostCenter(orgId).stream().map(organisationCostCenter -> {
@@ -158,6 +132,7 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation/{orgId}/project", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationProject(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(
                 organisationService.getAllProjects(orgId).stream().map(organisationProject -> {
@@ -176,6 +151,7 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation/{orgId}/chart-type", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<List<OrganisationChartOfAccountTypeView>> organisationChartOfAccountType(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(
                 organisationService.getAllChartType(orgId).stream().map(chartOfAccountType -> {
@@ -189,7 +165,7 @@ public class OrganisationResource {
                                         chartOfAccountSubType.getId(),
                                         chartOfAccountSubType.getOrganisationId(),
                                         chartOfAccountSubType.getName(),
-                                        organisationService.getBySubTypeId(chartOfAccountSubType.getId()).stream().map(chartOfAccount ->{
+                                        organisationService.getBySubTypeId(chartOfAccountSubType.getId()).stream().map(chartOfAccount -> {
                                             return new OrganisationChartOfAccountView(
                                                     chartOfAccount.getId().getCustomerCode(),
                                                     chartOfAccount.getRefCode(),
@@ -211,6 +187,7 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation/{orgId}/events", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<List<OrganisationEventView>> organisationEvent(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(
                 organisationService.getOrganisationEventCode(orgId).stream().map(accountEvent -> {
@@ -222,6 +199,23 @@ public class OrganisationResource {
                 }).toList()
         );
 
+    }
+
+    @Operation(description = "Organistion update", responses = {
+            @ApiResponse(content =
+                    {@Content(mediaType = "application/json", schema = @Schema(implementation = OrganisationView.class))}
+            ),
+            @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = "application/json", schema = @Schema(example = "{\n" +
+                    "    \"title\": \"Organisation not found\",\n" +
+                    "    \"status\": 404,\n" +
+                    "    \"detail\": \"Unable to get the organisation\"\n" +
+                    "}"))})
+    })
+    @PutMapping(value = "/organisation", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
+    public ResponseEntity<OrganisationView> organisationUpsertOrganisation(@Valid @RequestBody OrganisationUpsert organisationUpsert) {
+
+        return ResponseEntity.ok().body(organisationService.upsertOrganisation(organisationUpsert));
     }
 
 }
