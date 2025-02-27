@@ -71,7 +71,7 @@
       "enum": ["YEAR", "MONTH", "QUARTER"]
     },
     "period": {
-      "type": ["integer", "null"],
+      "type": ["integer"],
       "minimum": 1,
       "maximum": 12
     },
@@ -98,8 +98,28 @@
         }
       },
       "then": {
-        "not": {
-          "required": ["period"]
+        "required": ["period"],
+        "properties": {
+          "period": {"const": 1}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "interval": {
+            "const": "QUARTER"
+          }
+        }
+      },
+      "then": {
+        "required": ["period"],
+        "properties": {
+          "period": {
+            "type": ["integer"],
+            "minimum": 1,
+            "maximum": 4
+          }
         }
       }
     },
@@ -110,9 +130,6 @@
             "enum": ["MONTH", "QUARTER"]
           }
         }
-      },
-      "then": {
-        "required": ["period"]
       }
     },
     {

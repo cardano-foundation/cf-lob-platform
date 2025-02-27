@@ -42,6 +42,7 @@
       "results_carried_forward": "300000.00"
     }
   },
+  "period": 1,
   "type": "REPORT",
   "subType": "BALANCE_SHEET",
   "interval": "YEAR",

@@ -255,10 +255,6 @@ public class ReportEntity extends CommonEntity implements Persistable<String>, V
     }
 
     public void setPeriod(Optional<@Min(1) @Max(12) Short> period) {
-        if (this.intervalType.equals(IntervalType.YEAR)) {
-            this.period = null;
-            return;
-        }
         this.period = period.orElse(null);
     }
 
