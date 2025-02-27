@@ -26,7 +26,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.requests
 import org.cardanofoundation.lob.app.accounting_reporting_core.service.internal.AccountingCoreService;
 
 @ExtendWith(MockitoExtension.class)
-public class AccountingCoreResourceReconciliationTest {
+class AccountingCoreResourceReconciliationTest {
 
     @Mock
     private AccountingCorePresentationViewService accountingCorePresentationViewService;
