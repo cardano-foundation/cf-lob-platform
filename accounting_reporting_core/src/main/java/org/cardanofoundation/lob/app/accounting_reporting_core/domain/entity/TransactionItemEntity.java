@@ -129,7 +129,7 @@ public class TransactionItemEntity extends CommonEntity implements Persistable<S
             @AttributeOverride(name = "counterparty.type", column = @Column(name = "document_counterparty_type")),
             @AttributeOverride(name = "counterparty.name", column = @Column(name = "document_counterparty_name")),
     })
-    @Nullable
+
     private Document document;
 
     @Column(name = "status", nullable = false)
@@ -138,6 +138,13 @@ public class TransactionItemEntity extends CommonEntity implements Persistable<S
     @Enumerated(EnumType.STRING)
     @JdbcType(PostgreSQLEnumJdbcType.class)
     private TxItemValidationStatus status = TxItemValidationStatus.OK;
+
+    @Getter
+    @Setter
+    @Enumerated(EnumType.STRING)
+    @Column(name = "operation_type", nullable = false)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    private OperationType operationType;
 
     public void clearAccountCodeCredit() {
         this.accountCredit = null;
@@ -202,14 +209,6 @@ public class TransactionItemEntity extends CommonEntity implements Persistable<S
 
     public void setRejection(Optional<Rejection> rejection) {
         this.rejection = rejection.orElse(null);
-    }
-
-    public Optional<OperationType> getOperationType() {
-        val amountLcy = this.amountLcy;
-
-        if (amountLcy.compareTo(BigDecimal.ZERO) == 0) return Optional.empty();
-
-        return amountLcy.compareTo(BigDecimal.ZERO) < 0 ? Optional.of(OperationType.CREDIT) : Optional.of(OperationType.DEBIT);
     }
 
     @Override

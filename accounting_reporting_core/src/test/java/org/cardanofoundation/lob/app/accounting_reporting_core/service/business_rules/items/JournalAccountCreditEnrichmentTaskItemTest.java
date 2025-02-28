@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import lombok.val;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,9 +43,9 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
 
     @Test
     void should_Not_Run_Because_It_Is_Not_A_Journal_Transaction() {
-        val organisationId = "org1";
+        String organisationId = "org1";
 
-        val items = new LinkedHashSet<TransactionItemEntity>();
+        LinkedHashSet<TransactionItemEntity> items = new LinkedHashSet<TransactionItemEntity>();
         transaction = new TransactionEntity();
         transaction.setOrganisation(org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation.builder()
                 .id(organisationId)
@@ -52,7 +53,7 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
         );
         transaction.setTransactionType(FxRevaluation);
 
-        val txItem1 = new TransactionItemEntity();
+        TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId("1");
         txItem1.clearAccountCodeCredit();
         items.add(txItem1);
@@ -67,9 +68,9 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
 
     @Test
     void should_Not_Run_Because_Dummy_Account_Is_Missing() {
-        val organisationId = "org1";
+        String organisationId = "org1";
 
-        val items = new LinkedHashSet<TransactionItemEntity>();
+        LinkedHashSet<TransactionItemEntity> items = new LinkedHashSet<TransactionItemEntity>();
         transaction = new TransactionEntity();
         transaction.setOrganisation(org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation.builder()
                 .id(organisationId)
@@ -77,7 +78,7 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
         );
         transaction.setTransactionType(Journal);
 
-        val txItem1 = new TransactionItemEntity();
+        TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId("1");
         txItem1.clearAccountCodeCredit();
         items.add(txItem1);
@@ -95,9 +96,9 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
 
     @Test
     void should_Not_Run_Because_Not_All_Credit_Accounts_Are_Missing() {
-        val organisationId = "org1";
+        String organisationId = "org1";
 
-        val items = new LinkedHashSet<TransactionItemEntity>();
+        LinkedHashSet<TransactionItemEntity> items = new LinkedHashSet<TransactionItemEntity>();
         transaction = new TransactionEntity();
         transaction.setOrganisation(org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation.builder()
                 .id(organisationId)
@@ -105,12 +106,12 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
         );
         transaction.setTransactionType(Journal);
 
-        val txItem1 = new TransactionItemEntity();
+        TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId("1");
         txItem1.clearAccountCodeCredit();
         items.add(txItem1);
 
-        val txItem2 = new TransactionItemEntity();
+        TransactionItemEntity txItem2 = new TransactionItemEntity();
         txItem2.setId("2");
         txItem2.setAccountCredit(Optional.of(Account.builder()
                 .code("1234567890")
@@ -132,7 +133,7 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
 
     @Test
     void should_Set_Credit_From_Debit_If_Conditions_Met() {
-        val items = new LinkedHashSet<TransactionItemEntity>();
+        LinkedHashSet<TransactionItemEntity> items = new LinkedHashSet<>();
         transaction = new TransactionEntity();
         transaction.setOrganisation(org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Organisation.builder()
                 .id("org1")
@@ -140,7 +141,7 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
         );
         transaction.setTransactionType(Journal);
 
-        val item1 = new TransactionItemEntity();
+        TransactionItemEntity item1 = new TransactionItemEntity();
         item1.setId("1");
 
         item1.setAccountDebit(Optional.of(Account.builder()
@@ -148,10 +149,11 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
                 .build())
         );
 
-        item1.setAmountLcy(BigDecimal.valueOf(988.86)); // positive implies debit
+        item1.setAmountLcy(BigDecimal.valueOf(988.86));
+        item1.setOperationType(OperationType.DEBIT);
         items.add(item1);
 
-        val item2 = new TransactionItemEntity();
+        TransactionItemEntity item2 = new TransactionItemEntity();
         item2.setId("2");
         item2.setAccountDebit(Optional.of(Account.builder()
                         .code("4102120100")
@@ -159,10 +161,12 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
                 )
         );
 
-        item2.setAmountLcy(BigDecimal.valueOf(-188.50)); // negative implies credit
+
+        item2.setAmountLcy(BigDecimal.valueOf(188.50));
+        item2.setOperationType(OperationType.CREDIT);
         items.add(item2);
 
-        val item3 = new TransactionItemEntity();
+        TransactionItemEntity item3 = new TransactionItemEntity();
         item3.setId("3");
         item3.setAccountDebit(Optional.of(Account.builder()
                 .code("4102140100")
@@ -170,9 +174,10 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
         );
 
         item3.setAmountLcy(BigDecimal.valueOf(148.64));
+        item3.setOperationType(OperationType.DEBIT);
         items.add(item3);
 
-        val item4 = new TransactionItemEntity();
+        TransactionItemEntity item4 = new TransactionItemEntity();
         item4.setId("4");
 
         item4.setAccountDebit(Optional.of(Account.builder()
@@ -180,10 +185,11 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
                 .build())
         );
 
-        item4.setAmountLcy(BigDecimal.valueOf(-949.00));
+        item4.setAmountLcy(BigDecimal.valueOf(949.00));
+        item4.setOperationType(OperationType.CREDIT);
         items.add(item4);
 
-        val item5 = new TransactionItemEntity();
+        TransactionItemEntity item5 = new TransactionItemEntity();
         item5.setId("5");
 
         item5.setAccountDebit(Optional.of(Account.builder()
@@ -191,10 +197,11 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
                 .build())
         );
 
-        item5.setAmountLcy(BigDecimal.valueOf(-528.5));
+        item5.setAmountLcy(BigDecimal.valueOf(528.5));
+        item5.setOperationType(OperationType.CREDIT);
         items.add(item5);
 
-        val item6 = new TransactionItemEntity();
+        TransactionItemEntity item6 = new TransactionItemEntity();
         item6.setId("6");
 
         item6.setAccountDebit(Optional.of(Account.builder()
@@ -202,10 +209,11 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
                 .build())
 
         );
-        item6.setAmountLcy(BigDecimal.valueOf(-147.30));
+        item6.setAmountLcy(BigDecimal.valueOf(147.30));
+        item6.setOperationType(OperationType.CREDIT);
         items.add(item6);
 
-        val item7 = new TransactionItemEntity();
+        TransactionItemEntity item7 = new TransactionItemEntity();
         item7.setId("7");
 
         item7.setAccountDebit(Optional.of(Account.builder()
@@ -214,9 +222,10 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
         );
 
         item7.setAmountLcy(BigDecimal.valueOf(675.80));
+        item7.setOperationType(OperationType.DEBIT);
         items.add(item7);
 
-        val item8 = new TransactionItemEntity();
+        TransactionItemEntity item8 = new TransactionItemEntity();
         item8.setId("8");
 
         item8.setAccountDebit(Optional.of(Account.builder()
@@ -224,10 +233,11 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
                 .build()
         ));
 
-        item8.setAmountLcy(BigDecimal.valueOf(-925.40));
+        item8.setAmountLcy(BigDecimal.valueOf(925.40));
+        item8.setOperationType(OperationType.CREDIT);
         items.add(item8);
 
-        val item9 = new TransactionItemEntity();
+        TransactionItemEntity item9 = new TransactionItemEntity();
         item9.setId("9");
 
         item9.setAccountDebit(Optional.of(Account.builder()
@@ -236,9 +246,10 @@ public class JournalAccountCreditEnrichmentTaskItemTest {
         ));
 
         item9.setAmountLcy(BigDecimal.valueOf(925.40));
+        item9.setOperationType(OperationType.DEBIT);
         items.add(item9);
 
-        val item10 = new TransactionItemEntity();
+        TransactionItemEntity item10 = new TransactionItemEntity();
         item10.setId("10");
 
         item10.setAccountDebit(Optional.of(Account.builder()

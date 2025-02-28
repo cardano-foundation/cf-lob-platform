@@ -7,25 +7,33 @@ import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.Mo
 import static org.cardanofoundation.lob.app.support.crypto.MD5Hashing.md5;
 import static org.cardanofoundation.lob.app.support.crypto.SHA3.digestAsHex;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.vavr.control.Either;
+import org.zalando.problem.Problem;
+
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.SystemExtractionParameters;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.UserExtractionParameters;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchChunkEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchFailedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchStartedEvent;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.NetSuiteClient;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.Transactions;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.TxLine;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity.NetSuiteIngestionEntity;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.repository.IngestionRepository;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreCompress;
@@ -54,29 +62,29 @@ public class NetSuiteExtractionService {
     public void startNewERPExtraction(String organisationId,
                                       String user,
                                       UserExtractionParameters userExtractionParameters) {
-        val batchId = digestAsHex(UUID.randomUUID().toString());
+        String batchId = digestAsHex(UUID.randomUUID().toString());
 
         try {
             log.info("Running ingestion...");
 
-            val fromExtractionDate = userExtractionParameters.getFrom();
-            val toExtractionDate = userExtractionParameters.getTo();
+            LocalDate fromExtractionDate = userExtractionParameters.getFrom();
+            LocalDate toExtractionDate = userExtractionParameters.getTo();
 
-            val netSuiteJsonE = netSuiteClient.retrieveLatestNetsuiteTransactionLines(fromExtractionDate, toExtractionDate);
+            Either<Problem, Optional<String>> netSuiteJsonE = netSuiteClient.retrieveLatestNetsuiteTransactionLines(fromExtractionDate, toExtractionDate);
 
             if (netSuiteJsonE.isLeft()) {
                 log.error("Error retrieving data from NetSuite API: {}", netSuiteJsonE.getLeft().getDetail());
 
-                val problem = netSuiteJsonE.getLeft();
+                Problem problem = netSuiteJsonE.getLeft();
 
-                val bag = Map.<String, Object>of(
+                Map<String, Object> bag = Map.<String, Object>of(
                         "adapterInstanceId", netsuiteInstanceId,
                         "netsuiteUrl", netSuiteClient.getBaseUrl(),
                         "technicalErrorTitle", problem.getTitle(),
                         "technicalErrorDetail", problem.getDetail()
                 );
 
-                val batchFailedEvent = TransactionBatchFailedEvent.builder()
+                TransactionBatchFailedEvent batchFailedEvent = TransactionBatchFailedEvent.builder()
                         .metadata(EventMetadata.create(TransactionBatchFailedEvent.VERSION, user))
                         .batchId(batchId)
                         .organisationId(organisationId)
@@ -88,20 +96,20 @@ public class NetSuiteExtractionService {
                 return;
             }
 
-            val bodyM = netSuiteJsonE.get();
+            Optional<String> bodyM = netSuiteJsonE.get();
             if (bodyM.isEmpty()) {
                 log.warn("No data to read from NetSuite API..., bailing out!");
 
-                val problem = netSuiteJsonE.getLeft();
+                Problem problem = netSuiteJsonE.getLeft();
 
-                val bag = Map.<String, Object>of(
+                Map<String, Object> bag = Map.<String, Object>of(
                         "adapterInstanceId", netsuiteInstanceId,
                         "netsuiteUrl", netSuiteClient.getBaseUrl(),
                         "technicalErrorTitle", problem.getTitle(),
                         "technicalErrorDetail", problem.getDetail()
                 );
 
-                val batchFailedEvent = TransactionBatchFailedEvent.builder()
+                TransactionBatchFailedEvent batchFailedEvent = TransactionBatchFailedEvent.builder()
                         .metadata(EventMetadata.create(TransactionBatchFailedEvent.VERSION, user))
                         .batchId(batchId)
                         .organisationId(organisationId)
@@ -113,12 +121,12 @@ public class NetSuiteExtractionService {
                 return;
             }
 
-            val netsuiteTransactionLinesJson = bodyM.get();
-            val ingestionBodyChecksum = md5(netsuiteTransactionLinesJson);
-            val netSuiteIngestion = new NetSuiteIngestionEntity();
+            String netsuiteTransactionLinesJson = bodyM.get();
+            String ingestionBodyChecksum = md5(netsuiteTransactionLinesJson);
+            NetSuiteIngestionEntity netSuiteIngestion = new NetSuiteIngestionEntity();
             netSuiteIngestion.setId(batchId);
 
-            val compressedBody = MoreCompress.compress(netsuiteTransactionLinesJson);
+            String compressedBody = MoreCompress.compress(netsuiteTransactionLinesJson);
             log.info("Before compression: {}, compressed: {}", netsuiteTransactionLinesJson.length(), compressedBody.length());
 
             netSuiteIngestion.setIngestionBody(compressedBody);
@@ -128,19 +136,19 @@ public class NetSuiteExtractionService {
             netSuiteIngestion.setAdapterInstanceId(netsuiteInstanceId);
             netSuiteIngestion.setIngestionBodyChecksum(ingestionBodyChecksum);
 
-            val storedNetsuiteIngestion = ingestionRepository.saveAndFlush(netSuiteIngestion);
+            NetSuiteIngestionEntity storedNetsuiteIngestion = ingestionRepository.saveAndFlush(netSuiteIngestion);
 
-            val systemExtractionParametersE = systemExtractionParametersFactory.createSystemExtractionParameters(organisationId);
+            Either<Problem, SystemExtractionParameters> systemExtractionParametersE = systemExtractionParametersFactory.createSystemExtractionParameters(organisationId);
             if (systemExtractionParametersE.isLeft()) {
-                val problem = systemExtractionParametersE.getLeft();
+                Problem problem = systemExtractionParametersE.getLeft();
 
-                val bag = Map.<String, Object>of(
+                Map<String, Object> bag = Map.<String, Object>of(
                         "adapterInstanceId", netsuiteInstanceId,
                         "technicalErrorTitle", problem.getTitle(),
                         "technicalErrorDetail", problem.getDetail()
                 );
 
-                val batchFailedEvent = TransactionBatchFailedEvent.builder()
+                TransactionBatchFailedEvent batchFailedEvent = TransactionBatchFailedEvent.builder()
                         .metadata(EventMetadata.create(TransactionBatchFailedEvent.VERSION, user))
                         .batchId(batchId)
                         .organisationId(organisationId)
@@ -152,7 +160,7 @@ public class NetSuiteExtractionService {
                 return;
             }
 
-            val systemExtractionParameters = systemExtractionParametersE.get();
+            SystemExtractionParameters systemExtractionParameters = systemExtractionParametersE.get();
 
             applicationEventPublisher.publishEvent(TransactionBatchStartedEvent.builder()
                     .metadata(EventMetadata.create(TransactionBatchStartedEvent.VERSION, user))
@@ -165,12 +173,12 @@ public class NetSuiteExtractionService {
 
             log.info("NetSuite ingestion started.");
         } catch (Exception e) {
-            val bag = Map.<String, Object>of(
+            Map<String, Object> bag = Map.<String, Object>of(
                     "adapterInstanceId", netsuiteInstanceId,
                     "technicalErrorMessage", e.getMessage()
             );
 
-            val batchFailedEvent = TransactionBatchFailedEvent.builder()
+            TransactionBatchFailedEvent batchFailedEvent = TransactionBatchFailedEvent.builder()
                     .metadata(EventMetadata.create(TransactionBatchFailedEvent.VERSION, user))
                     .batchId(batchId)
                     .organisationId(organisationId)
@@ -191,15 +199,15 @@ public class NetSuiteExtractionService {
         try {
             log.info("Continuing ERP extraction..., batchId: {}, organisationId: {}", batchId, organisationId);
 
-            val netsuiteIngestionM = ingestionRepository.findById(batchId);
+            Optional<NetSuiteIngestionEntity> netsuiteIngestionM = ingestionRepository.findById(batchId);
             if (netsuiteIngestionM.isEmpty()) {
                 log.error("NetSuite ingestion not found, batchId: {}", batchId);
 
-                val bag = Map.<String, Object>of(
+                Map<String, Object> bag = Map.of(
                         "batchId", batchId,
                         "organisationId", organisationId);
 
-                val batchFailedEvent = TransactionBatchFailedEvent.builder()
+                TransactionBatchFailedEvent batchFailedEvent = TransactionBatchFailedEvent.builder()
                         .metadata(EventMetadata.create(TransactionBatchFailedEvent.VERSION))
                         .batchId(batchId)
                         .organisationId(organisationId)
@@ -213,12 +221,12 @@ public class NetSuiteExtractionService {
             }
 
             if (!userExtractionParameters.getOrganisationId().equals(systemExtractionParameters.getOrganisationId())) {
-                val bag = Map.<String, Object>of(
+                Map<String, Object> bag = Map.<String, Object>of(
                         "batchId", batchId,
                         "organisationId", organisationId
                 );
 
-                val batchFailedEvent = TransactionBatchFailedEvent.builder()
+                TransactionBatchFailedEvent batchFailedEvent = TransactionBatchFailedEvent.builder()
                         .metadata(EventMetadata.create(TransactionBatchFailedEvent.VERSION))
                         .batchId(batchId)
                         .organisationId(organisationId)
@@ -230,20 +238,20 @@ public class NetSuiteExtractionService {
                 applicationEventPublisher.publishEvent(batchFailedEvent);
                 return;
             }
-            val netsuiteIngestion = netsuiteIngestionM.orElseThrow();
+            NetSuiteIngestionEntity netsuiteIngestion = netsuiteIngestionM.orElseThrow();
 
-            val transactionDataSearchResultE = netSuiteParser.parseSearchResults(requireNonNull(decompress(netsuiteIngestion.getIngestionBody())));
+            Either<Problem, List<TxLine>> transactionDataSearchResultE = netSuiteParser.parseSearchResults(requireNonNull(decompress(netsuiteIngestion.getIngestionBody())));
 
             if (transactionDataSearchResultE.isEmpty()) {
-                val problem = transactionDataSearchResultE.getLeft();
+                Problem problem = transactionDataSearchResultE.getLeft();
 
-                val bag = Map.<String, Object>of(
+                Map<String, Object> bag = Map.<String, Object>of(
                         "batchId", batchId,
                         "organisationId", organisationId,
                         "technicalErrorTitle", problem.getTitle(),
                         "technicalErrorDetail", problem.getDetail()
                 );
-                val batchFailedEvent = TransactionBatchFailedEvent.builder()
+                TransactionBatchFailedEvent batchFailedEvent = TransactionBatchFailedEvent.builder()
                         .metadata(EventMetadata.create(TransactionBatchFailedEvent.VERSION))
                         .batchId(batchId)
                         .organisationId(organisationId)
@@ -256,11 +264,11 @@ public class NetSuiteExtractionService {
                 return;
             }
 
-            val transactionDataSearchResult = transactionDataSearchResultE.get();
-            val transactionsE = transactionConverter.convert(organisationId, batchId, transactionDataSearchResult);
+            List<TxLine> transactionDataSearchResult = transactionDataSearchResultE.get();
+            Either<FatalError, Transactions> transactionsE = transactionConverter.convert(organisationId, batchId, transactionDataSearchResult);
 
             if (transactionsE.isLeft()) {
-                val batchFailedEvent = TransactionBatchFailedEvent.builder()
+                TransactionBatchFailedEvent batchFailedEvent = TransactionBatchFailedEvent.builder()
                         .metadata(EventMetadata.create(TransactionBatchFailedEvent.VERSION))
                         .batchId(batchId)
                         .organisationId(organisationId)
@@ -273,13 +281,13 @@ public class NetSuiteExtractionService {
                 return;
             }
 
-            val transactions = transactionsE.get();
+            Transactions transactions = transactionsE.get();
 
-            val transactionsWithExtractionParametersApplied = extractionParametersFilteringService
+            Set<Transaction> transactionsWithExtractionParametersApplied = extractionParametersFilteringService
                     .applyExtractionParameters(transactions.transactions(), userExtractionParameters, systemExtractionParameters);
 
             Partitions.partition(transactionsWithExtractionParametersApplied, sendBatchSize).forEach(txPartition -> {
-                val batchChunkEventBuilder = TransactionBatchChunkEvent.builder()
+                TransactionBatchChunkEvent.TransactionBatchChunkEventBuilder batchChunkEventBuilder = TransactionBatchChunkEvent.builder()
                         .metadata(EventMetadata.create(TransactionBatchChunkEvent.VERSION))
                         .batchId(netsuiteIngestion.getId())
                         .organisationId(organisationId)
@@ -301,12 +309,12 @@ public class NetSuiteExtractionService {
         } catch (Exception e) {
             log.error("Fatal error while processing NetSuite ingestion", e);
 
-            val bag = Map.<String, Object>of(
+            Map<String, Object> bag = Map.<String, Object>of(
                     "adapterInstanceId", netsuiteInstanceId,
                     "technicalErrorMessage", e.getMessage()
             );
 
-            val batchFailedEvent = TransactionBatchFailedEvent.builder()
+            TransactionBatchFailedEvent batchFailedEvent = TransactionBatchFailedEvent.builder()
                     .metadata(EventMetadata.create(TransactionBatchFailedEvent.VERSION))
                     .batchId(batchId)
                     .organisationId(organisationId)

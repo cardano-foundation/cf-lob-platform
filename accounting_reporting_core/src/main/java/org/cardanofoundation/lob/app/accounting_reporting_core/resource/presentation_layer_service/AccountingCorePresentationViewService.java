@@ -290,7 +290,7 @@ public class AccountingCorePresentationViewService {
                 Optional.of(transactionEntity.getAutomatedValidationStatus()),
                 transactionEntity.getTransactionApproved(),
                 transactionEntity.getLedgerDispatchApproved(),
-                getAmountLcyTotalForAllItems(transactionEntity),
+                getAmountLcyTotalForAllDebitItems(transactionEntity),
                 false,
                 transactionEntity.getReconcilation().flatMap(reconcilation -> reconcilation.getSource().map(TransactionReconciliationTransactionsView.ReconciliationCodeView::of))
                         .orElse(TransactionReconciliationTransactionsView.ReconciliationCodeView.NEVER),
@@ -373,7 +373,7 @@ public class AccountingCorePresentationViewService {
                 transactionEntity.getAutomatedValidationStatus(),
                 transactionEntity.getTransactionApproved(),
                 transactionEntity.getLedgerDispatchApproved(),
-                getAmountLcyTotalForAllItems(transactionEntity),
+                getAmountLcyTotalForAllDebitItems(transactionEntity),
                 transactionEntity.hasAnyRejection(),
                 transactionEntity.getReconcilation().flatMap(reconcilation -> reconcilation.getSource().map(TransactionView.ReconciliationCodeView::of))
                         .orElse(TransactionView.ReconciliationCodeView.NEVER),
@@ -512,11 +512,11 @@ public class AccountingCorePresentationViewService {
         return getTransactionReconciliationViolationView();
     }
 
-    public BigDecimal getAmountLcyTotalForAllItems(TransactionEntity tx) {
+    public BigDecimal getAmountLcyTotalForAllDebitItems(TransactionEntity tx) {
         Set<TransactionItemEntity> items = tx.getItems();
 
         if (tx.getTransactionType().equals(TransactionType.Journal)) {
-            items = tx.getItems().stream().filter(txItems -> txItems.getOperationType().equals(Optional.of(OperationType.DEBIT))).collect(toSet());
+            items = tx.getItems().stream().filter(txItems -> txItems.getOperationType().equals(OperationType.DEBIT)).collect(toSet());
         }
 
         return items.stream()

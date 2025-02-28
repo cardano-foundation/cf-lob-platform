@@ -180,6 +180,7 @@ class AccountingCorePresentationConverterTest {
         transactionItem.setId("txItemId");
         transactionItem.setAmountLcy(BigDecimal.valueOf(100));
         transactionItem.setAmountFcy(BigDecimal.valueOf(100));
+        transactionItem.setOperationType(OperationType.DEBIT);
         TransactionViolation transactionViolation = new TransactionViolation();
         transactionViolation.setTxItemId(Optional.of("txItemId"));
         LocalDate from = LocalDate.now();

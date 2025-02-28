@@ -11,9 +11,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionViolationCode;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.Account;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
 import org.cardanofoundation.lob.app.organisation.OrganisationPublicApiIF;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
@@ -32,12 +34,12 @@ public class JournalAccountCreditEnrichmentTaskItem implements PipelineTaskItem 
             return;
         }
 
-        val dummyAccountM = organisationPublicApiIF.findByOrganisationId(tx.getOrganisation().getId())
+        Optional<String> dummyAccountM = organisationPublicApiIF.findByOrganisationId(tx.getOrganisation().getId())
                 .flatMap(Organisation::getDummyAccount);
 
         if (!shouldTriggerNormalisation(tx, dummyAccountM)) {
             if (dummyAccountM.isEmpty()) {
-                val v = TransactionViolation.builder()
+                TransactionViolation v = TransactionViolation.builder()
                         .code(TransactionViolationCode.JOURNAL_DUMMY_ACCOUNT_MISSING)
                         .processorModule(this.getClass().getSimpleName())
                         .source(LOB)
@@ -52,22 +54,12 @@ public class JournalAccountCreditEnrichmentTaskItem implements PipelineTaskItem 
         log.info("Normalising journal transaction with id: {}", tx.getId());
 
         // at this point we can assume we have it, it is mandatory
-        val dummyAccount = dummyAccountM.orElseThrow();
-        for (val txItem : tx.getItems()) {
-            val operationTypeM = txItem.getOperationType();
-
-            if (operationTypeM.isEmpty()) {
-                txItem.setAccountCredit(Optional.of(Account.builder()
-                        .code(dummyAccount)
-                        .name(DUMMY_ACCOUNT)
-                        .build()));
-                continue;
-            }
-
-            val operationType = operationTypeM.orElseThrow();
+        String dummyAccount = dummyAccountM.orElseThrow();
+        for (TransactionItemEntity txItem : tx.getItems()) {
+            OperationType operationType = txItem.getOperationType();
 
             if (txItem.getAccountCredit().isEmpty() && operationType == CREDIT) {
-                val accountDebit = txItem.getAccountDebit().orElseThrow();
+                Account accountDebit = txItem.getAccountDebit().orElseThrow();
                 txItem.setAccountCredit(Optional.of(accountDebit));
 
                 txItem.clearAccountCodeDebit();
