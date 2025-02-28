@@ -20,8 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCostCenter;
 import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationProject;
-import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationUpsert;
-import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationView;
+import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationCreate;
+import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationUpdate;
 import org.cardanofoundation.lob.app.organisation.repository.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,21 +59,23 @@ class OrganisationServiceTest {
     @BeforeEach
     void setUp() {
         organisation = new Organisation();
-        organisation.setId("org-123");
+        organisation.setId("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0");
+        organisation.setCountryCode("IE");
+        organisation.setTaxIdNumber("1");
     }
 
     @Test
     void testFindById_WhenOrganisationExists() {
-        when(organisationRepository.findById("org-123")).thenReturn(Optional.of(organisation));
-        Optional<Organisation> result = organisationService.findById("org-123");
+        when(organisationRepository.findById("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0")).thenReturn(Optional.of(organisation));
+        Optional<Organisation> result = organisationService.findById("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0");
         assertTrue(result.isPresent());
-        assertEquals("org-123", result.get().getId());
+        assertEquals("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0", result.get().getId());
     }
 
     @Test
     void testFindById_WhenOrganisationDoesNotExist() {
-        when(organisationRepository.findById("org-123")).thenReturn(Optional.empty());
-        Optional<Organisation> result = organisationService.findById("org-123");
+        when(organisationRepository.findById("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0")).thenReturn(Optional.empty());
+        Optional<Organisation> result = organisationService.findById("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0");
         assertFalse(result.isPresent());
     }
 
@@ -88,44 +90,65 @@ class OrganisationServiceTest {
     @Test
     void testGetAllCostCenter() {
         Set<OrganisationCostCenter> costCenters = new HashSet<>();
-        when(costCenterService.getAllCostCenter("org-123")).thenReturn(costCenters);
-        Set<OrganisationCostCenter> result = organisationService.getAllCostCenter("org-123");
+        when(costCenterService.getAllCostCenter("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0")).thenReturn(costCenters);
+        Set<OrganisationCostCenter> result = organisationService.getAllCostCenter("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0");
         assertEquals(costCenters, result);
     }
 
     @Test
     void testGetAllProjects() {
         Set<OrganisationProject> projects = new HashSet<>();
-        when(projectMappingRepository.findAllByOrganisationId("org-123")).thenReturn(projects);
-        Set<OrganisationProject> result = organisationService.getAllProjects("org-123");
+        when(projectMappingRepository.findAllByOrganisationId("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0")).thenReturn(projects);
+        Set<OrganisationProject> result = organisationService.getAllProjects("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0");
         assertEquals(projects, result);
     }
 
     @Test
     void testUpsertOrganisation_NewOrganisation() {
-        OrganisationUpsert organisationUpsert = new OrganisationUpsert();
-        organisationUpsert.setCountryCode("US");
-        organisationUpsert.setTaxIdNumber("12345");
-        organisationUpsert.setAddress("Street");
-        organisationUpsert.setName("Company name");
-        organisationUpsert.setAdminEmail("the@email.com");
-        organisationUpsert.setCity("City name");
-        organisationUpsert.setCountry("Country name");
-        organisationUpsert.setCurrencyId("ISO_4217:CHF");
-        organisationUpsert.setPostCode("A127");
-        organisationUpsert.setProvince("County co.");
-        organisationUpsert.setReportCurrencyId("ISO_4217:CHF");
-        organisationUpsert.setPhoneNumber("0101010101");
 
-        when(organisationRepository.findById(any())).thenReturn(Optional.empty());
+        OrganisationUpdate organisationUpdate = new OrganisationUpdate();
+        organisationUpdate.setAddress("Street");
+        organisationUpdate.setName("Company name");
+        organisationUpdate.setAdminEmail("the@email.com");
+        organisationUpdate.setCity("City name");
+        organisationUpdate.setCurrencyId("ISO_4217:CHF");
+        organisationUpdate.setPostCode("A127");
+        organisationUpdate.setProvince("County co.");
+        organisationUpdate.setReportCurrencyId("ISO_4217:CHF");
+        organisationUpdate.setPhoneNumber("0101010101");
+
         when(organisationRepository.saveAndFlush(any())).thenReturn(organisation);
 
-        OrganisationView result = organisationService.upsertOrganisation(organisationUpsert);
+        Organisation result = organisationService.upsertOrganisation(organisation, organisationUpdate).get();
         assertNotNull(result);
-        assertEquals("6d50ed2208aba5047f54a0b4e603d77463db27f108de9a268bb1670fa9afef11",result.getId());
+        assertEquals("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0",result.getId());
         assertEquals("Street",result.getAddress());
         assertEquals("City name",result.getCity());
-        assertEquals("Country name",result.getCountry());
+        assertEquals("County co.",result.getProvince());
+    }
+
+    @Test
+    void testCreateOrganisation_NewOrganisation() {
+        OrganisationCreate organisationCreate = new OrganisationCreate();
+        organisationCreate.setAddress("Street");
+        organisationCreate.setCountryCode("IE");
+        organisationCreate.setTaxIdNumber("1");
+        organisationCreate.setName("Company name");
+        organisationCreate.setAdminEmail("the@email.com");
+        organisationCreate.setCity("City name");
+        organisationCreate.setCurrencyId("ISO_4217:CHF");
+        organisationCreate.setPostCode("A127");
+        organisationCreate.setProvince("County co.");
+        organisationCreate.setReportCurrencyId("ISO_4217:CHF");
+        organisationCreate.setPhoneNumber("0101010101");
+
+        when(organisationRepository.saveAndFlush(any())).thenReturn(organisation);
+
+        Organisation result = organisationService.createOrganisation(organisationCreate).get();
+        assertNotNull(result);
+        assertEquals("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0",result.getId());
+        assertEquals("Street",result.getAddress());
+        assertEquals("City name",result.getCity());
         assertEquals("County co.",result.getProvince());
     }
 }
