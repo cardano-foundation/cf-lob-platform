@@ -9,6 +9,7 @@ import java.util.Set;
 
 import lombok.val;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,24 +25,26 @@ class AmountFcyBalanceZerosOutCheckTaskItemTest {
     private PipelineTaskItem taskItem;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         this.taskItem = new AmountFcyBalanceZerosOutCheckTaskItem();
     }
 
     @Test
-    public void whenFcyBalanceZerosOut_thenNoViolations() {
-        val txId = Transaction.id("1", "1");
-        val organisationId = "1";
+    void whenFcyBalanceZerosOut_thenNoViolations() {
+        String txId = Transaction.id("1", "1");
+        String organisationId = "1";
 
-        val txItem1 = new TransactionItemEntity();
+        TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "0"));
         txItem1.setAmountFcy(new BigDecimal("100"));
+        txItem1.setOperationType(OperationType.DEBIT);
 
-        val txItem2 = new TransactionItemEntity();
+        TransactionItemEntity txItem2 = new TransactionItemEntity();
         txItem2.setId(TransactionItem.id(txId, "1"));
-        txItem2.setAmountFcy(new BigDecimal("-100"));
+        txItem2.setAmountFcy(new BigDecimal("100"));
+        txItem2.setOperationType(OperationType.CREDIT);
 
-        val tx = new TransactionEntity();
+        TransactionEntity tx = new TransactionEntity();
         tx.setId(txId);
         tx.setTransactionInternalNumber("1");
         tx.setOrganisation(Organisation.builder().id(organisationId).build());
@@ -54,19 +57,21 @@ class AmountFcyBalanceZerosOutCheckTaskItemTest {
     }
 
     @Test
-    public void whenFcyBalanceDoesNotZeroOut_thenViolationGenerated() {
-        val txId = Transaction.id("2", "1");
-        val organisationId = "1";
+    void whenFcyBalanceDoesNotZeroOut_thenViolationGenerated() {
+        String txId = Transaction.id("2", "1");
+        String organisationId = "1";
 
-        val txItem1 = new TransactionItemEntity();
+        TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "0"));
         txItem1.setAmountFcy(new BigDecimal("100"));
+        txItem1.setOperationType(OperationType.DEBIT);
 
-        val txItem2 = new TransactionItemEntity();
+        TransactionItemEntity txItem2 = new TransactionItemEntity();
         txItem2.setId(TransactionItem.id(txId, "1"));
-        txItem2.setAmountFcy(new BigDecimal("-90"));
+        txItem2.setAmountFcy(new BigDecimal("90"));
+        txItem2.setOperationType(OperationType.CREDIT);
 
-        val tx = new TransactionEntity();
+        TransactionEntity tx = new TransactionEntity();
         tx.setId(txId);
         tx.setTransactionInternalNumber("2");
         tx.setOrganisation(Organisation.builder().id(organisationId).build());
@@ -81,11 +86,11 @@ class AmountFcyBalanceZerosOutCheckTaskItemTest {
     }
 
     @Test
-    public void whenNoTransactionItems_thenNoViolations() {
-        val txId = Transaction.id("3", "1");
-        val organisationId = "1";
+    void whenNoTransactionItems_thenNoViolations() {
+        String txId = Transaction.id("3", "1");
+        String organisationId = "1";
 
-        val tx = new TransactionEntity();
+        TransactionEntity tx = new TransactionEntity();
         tx.setId(txId);
         tx.setTransactionInternalNumber("3");
         tx.setOrganisation(Organisation.builder().id(organisationId).build());
