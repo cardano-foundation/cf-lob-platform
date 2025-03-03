@@ -8,10 +8,11 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
@@ -21,14 +22,14 @@ public class AmountLcyBalanceZerosOutCheckTaskItem implements PipelineTaskItem {
 
     @Override
     public void run(TransactionEntity tx) {
-        val txItems = tx.getItems();
+        Set<TransactionItemEntity> txItems = tx.getItems();
 
-        val lcySum = txItems.stream()
-                .map(TransactionItemEntity::getAmountLcy)
-                .reduce(ZERO, BigDecimal::add);
+        BigDecimal lcySumDebit = getSumOfOperationType(txItems, OperationType.DEBIT);
+        BigDecimal lcySumCredit = getSumOfOperationType(txItems, OperationType.CREDIT);
+        BigDecimal lcySum = lcySumDebit.subtract(lcySumCredit);
 
         if (lcySum.signum() != 0) {
-            val v = TransactionViolation.builder()
+            TransactionViolation v = TransactionViolation.builder()
                     .code(LCY_BALANCE_MUST_BE_ZERO)
                     .severity(ERROR)
                     .source(ERP)
@@ -44,4 +45,10 @@ public class AmountLcyBalanceZerosOutCheckTaskItem implements PipelineTaskItem {
         }
     }
 
+    private static BigDecimal getSumOfOperationType(Set<TransactionItemEntity> txItems, OperationType credit) {
+        return txItems.stream()
+                .filter(transactionItemEntity -> transactionItemEntity.getOperationType().equals(credit))
+                .map(TransactionItemEntity::getAmountLcy)
+                .reduce(ZERO, BigDecimal::add);
+    }
 }
