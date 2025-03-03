@@ -97,8 +97,8 @@ public class OrganisationService {
         organisationO.setCurrencyId(organisationUpdate.getCurrencyId());
         organisationO.setReportCurrencyId(organisationUpdate.getReportCurrencyId());
 
-        organisationRepository.saveAndFlush(organisationO);
-        return Optional.of(organisationO);
+        Organisation organisation = organisationRepository.saveAndFlush(organisationO);
+        return Optional.of(organisation);
     }
 
 

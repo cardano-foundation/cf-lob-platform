@@ -2,6 +2,8 @@ package org.cardanofoundation.lob.app.organisation.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -101,6 +103,8 @@ class OrganisationServiceTest {
         when(projectMappingRepository.findAllByOrganisationId("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0")).thenReturn(projects);
         Set<OrganisationProject> result = organisationService.getAllProjects("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0");
         assertEquals(projects, result);
+        verify(projectMappingRepository).findAllByOrganisationId("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0");
+        verifyNoMoreInteractions(projectMappingRepository);
     }
 
     @Test
@@ -125,6 +129,8 @@ class OrganisationServiceTest {
         assertEquals("Street",result.getAddress());
         assertEquals("City name",result.getCity());
         assertEquals("County co.",result.getProvince());
+        verify(organisationRepository).saveAndFlush(any());
+        verifyNoMoreInteractions(organisationRepository);
     }
 
     @Test
@@ -144,11 +150,14 @@ class OrganisationServiceTest {
 
         when(organisationRepository.saveAndFlush(any())).thenReturn(organisation);
 
-        Organisation result = organisationService.createOrganisation(organisationCreate).get();
-        assertNotNull(result);
+        Optional<Organisation> optionalOrg = organisationService.createOrganisation(organisationCreate);
+        assertTrue(optionalOrg.isPresent());
+        Organisation result = optionalOrg.get();
         assertEquals("f3b7485e96cc45b98e825a48a80d856be260b53de5fe45f23287da5b4970b9b0",result.getId());
         assertEquals("Street",result.getAddress());
         assertEquals("City name",result.getCity());
         assertEquals("County co.",result.getProvince());
+        verify(organisationRepository).saveAndFlush(any());
+        verifyNoMoreInteractions(organisationRepository);
     }
 }
