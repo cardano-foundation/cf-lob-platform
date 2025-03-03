@@ -124,20 +124,20 @@ public class TransactionConverter {
             OperationType operationType;
             BigDecimal amountLcy;
             BigDecimal amountFcy;
-            BigDecimal debitAmount = MoreBigDecimal.zeroForNull(txLine.amountDebit());
-            BigDecimal creditAmount = MoreBigDecimal.zeroForNull(txLine.amountCredit());
-            if(debitAmount.signum() > 0 && creditAmount.signum() > 0) {
+            if(txLine.amountDebit() != null && txLine.amountCredit() != null) {
                 // Error when both amounts are non-zero
+                log.error("Both debit and credit amounts are non-zero for transaction: {}", txId);
                 return Either.left(new FatalError(ADAPTER_ERROR, "TRANSACTIONS_VALIDATION_ERROR", Map.of()));
-            } else if(debitAmount.signum() > 0) {
+            } else if(txLine.amountDebit() != null) {
                 operationType = OperationType.DEBIT;
                 amountLcy = txLine.amountDebit();
                 amountFcy = txLine.amountDebitForeignCurrency();
-            } else if(creditAmount.signum() > 0) {
+            } else if(txLine.amountCredit() != null) {
                 operationType = OperationType.CREDIT;
                 amountLcy = txLine.amountCredit();
                 amountFcy = txLine.amountCreditForeignCurrency();
             } else {
+                log.info("Skipping transaction line with zero amounts for transaction: {}", txId);
                 // skipping when both amounts are zero
                 continue;
             }
