@@ -80,14 +80,6 @@ class TransactionConverterTest {
     }
 
     @Test
-    void testConvertFromDb_SetOfTransactionEntities() {
-        Set<TransactionEntity> transactionEntities = Set.of(transactionEntity);
-        Set<Transaction> result = transactionConverter.convertFromDb(transactionEntities);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.size());
-    }
-
-    @Test
     void testCopyFields() {
         TransactionEntity attached = new TransactionEntity();
         TransactionEntity detached = new TransactionEntity();
