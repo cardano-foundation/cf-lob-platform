@@ -1,7 +1,3 @@
-plugins {
-    id("org.sonarqube")
-}
-
 dependencies {
 
     implementation("org.springframework.modulith:spring-modulith-api")
