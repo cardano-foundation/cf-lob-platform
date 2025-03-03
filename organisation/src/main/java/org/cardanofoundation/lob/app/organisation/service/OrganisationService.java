@@ -120,25 +120,23 @@ public class OrganisationService {
                 organisation.getPostCode(),
                 organisation.getProvince(),
                 organisation.getCountryCode(),
-                getAllCostCenter(organisation.getId()).stream().map(organisationCostCenter -> {
-                    return new OrganisationCostCenterView(
+                getAllCostCenter(organisation.getId()).stream().map(organisationCostCenter ->
+                        new OrganisationCostCenterView(
                             organisationCostCenter.getId() != null ? organisationCostCenter.getId().getCustomerCode() : null,
                             organisationCostCenter.getExternalCustomerCode(),
                             organisationCostCenter.getName()
-                    );
-                }).collect(Collectors.toSet()),
-                getAllProjects(organisation.getId()).stream().map(organisationProject -> {
-                    return new OrganisationCostCenterView(
+                    )).collect(Collectors.toSet()),
+                getAllProjects(organisation.getId()).stream().map(organisationProject ->
+                        new OrganisationCostCenterView(
                             organisationProject.getId() != null ? organisationProject.getId().getCustomerCode() : null,
                             organisationProject.getExternalCustomerCode(),
                             organisationProject.getName()
-                    );
-                }).collect(Collectors.toSet()),
+                    )).collect(Collectors.toSet()),
                 organisationCurrencyService.findAllByOrganisationId(organisation.getId())
                         .stream()
-                        .map(organisationCurrency -> {
-                            return organisationCurrency.getId() != null ? organisationCurrency.getId().getCustomerCode() : null;
-                        }).collect(Collectors.toSet()),
+                        .map(organisationCurrency ->
+                                organisationCurrency.getId() != null ? organisationCurrency.getId().getCustomerCode() : null
+                        ).collect(Collectors.toSet()),
                 organisation.getWebSite(),
                 organisation.getLogo()
         );
