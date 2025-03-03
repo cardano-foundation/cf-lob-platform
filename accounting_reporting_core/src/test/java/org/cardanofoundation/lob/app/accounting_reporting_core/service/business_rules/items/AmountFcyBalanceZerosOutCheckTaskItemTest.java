@@ -7,12 +7,10 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import java.math.BigDecimal;
 import java.util.Set;
 
-import lombok.val;
-
-import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionItem;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
