@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.cardanofoundation.lob.app.organisation.domain.entity.*;
-import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationUpsert;
+import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationCreate;
+import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationUpdate;
 import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationCostCenterView;
 import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationView;
 import org.cardanofoundation.lob.app.organisation.repository.*;
@@ -29,11 +30,8 @@ public class OrganisationService {
     private final ProjectMappingRepository projectMappingRepository;
     private final OrganisationChartOfAccountTypeRepository organisationChartOfAccountTypeRepository;
     private final ChartOfAccountRepository organisationChartOfAccountRepository;
-    private final OrganisationChartOfAccountSubTypeRepository organisationChartOfAccountSubTypeRepository;
     private final AccountEventRepository accountEventRepository;
     private final OrganisationCurrencyService organisationCurrencyService;
-    private final OrganisationChartOfAccountSubTypeRepository chartOfAccountSubTypeRepository;
-
 
     public Optional<Organisation> findById(String organisationId) {
         return organisationRepository.findById(organisationId);
@@ -65,25 +63,39 @@ public class OrganisationService {
     }
 
     @Transactional
-    public OrganisationView upsertOrganisation(OrganisationUpsert organisationUpsert) {
-        Optional<Organisation> organisationO = findById(Organisation.id(organisationUpsert.getCountryCode(), organisationUpsert.getTaxIdNumber()));
-        if (organisationO.isEmpty()) {
-            organisationO = Optional.of(new Organisation());
-            organisationO.get().setId(Organisation.id(organisationUpsert.getCountryCode(), organisationUpsert.getTaxIdNumber()));
-            organisationO.get().setCountryCode(organisationUpsert.getCountryCode());
-            organisationO.get().setTaxIdNumber(organisationUpsert.getTaxIdNumber());
-            /**
-             * Those fields are needed but at the moment we don't want to set it from UI CRUD
-             */
-            organisationO.get().setDummyAccount("0000000000");
-            organisationO.get().setAccountPeriodDays(7305);
-        }
+    public Optional<Organisation> createOrganisation(OrganisationCreate organisationCreate){
 
-
-        Organisation organisation = getOrganisation(organisationUpsert, organisationO);
+        Organisation organisationO = new Organisation();
+        organisationO.setId(Organisation.id(organisationCreate.getCountryCode(), organisationCreate.getTaxIdNumber()));
+        organisationO.setCountryCode(organisationCreate.getCountryCode());
+        organisationO.setTaxIdNumber(organisationCreate.getTaxIdNumber());
+        /**
+         * Those fields are needed but at the moment we don't want to set it from UI CRUD
+         */
+        organisationO.setDummyAccount("0000000000");
+        organisationO.setAccountPeriodDays(7305);
+        Organisation organisation = getOrganisation(organisationCreate, organisationO);
 
         organisationRepository.saveAndFlush(organisation);
-        return getOrganisationView(organisation);
+        return Optional.of(organisation);
+    }
+
+    @Transactional
+    public Optional<Organisation> upsertOrganisation(Organisation organisationO, OrganisationUpdate organisationUpdate) {
+
+        organisationO.setName(organisationUpdate.getName());
+        organisationO.setCity(organisationUpdate.getCity());
+        organisationO.setPostCode(organisationUpdate.getPostCode());
+        organisationO.setProvince(organisationUpdate.getProvince());
+        organisationO.setAddress(organisationUpdate.getAddress());
+        organisationO.setPhoneNumber(organisationUpdate.getPhoneNumber());
+        organisationO.setAdminEmail(organisationUpdate.getAdminEmail());
+        organisationO.setWebSite(organisationUpdate.getWebsiteUrl());
+        organisationO.setCurrencyId(organisationUpdate.getCurrencyId());
+        organisationO.setReportCurrencyId(organisationUpdate.getReportCurrencyId());
+
+        Organisation organisation = organisationRepository.saveAndFlush(organisationO);
+        return Optional.of(organisation);
     }
 
 
@@ -95,9 +107,10 @@ public class OrganisationService {
         return new OrganisationView(
                 organisation.getId(),
                 organisation.getName(),
-                organisation.getTaxIdNumber(),
+                "", // Description is deprecated and should be removed
                 organisation.getTaxIdNumber(),
                 organisation.getCurrencyId(),
+                organisation.getReportCurrencyId(),
                 monthsAgo,
                 yesterday,
                 organisation.getAdminEmail(),
@@ -106,43 +119,44 @@ public class OrganisationService {
                 organisation.getCity(),
                 organisation.getPostCode(),
                 organisation.getProvince(),
-                organisation.getCountry(),
-                getAllCostCenter(organisation.getId()).stream().map(organisationCostCenter -> {
-                    return new OrganisationCostCenterView(
+                organisation.getCountryCode(),
+                getAllCostCenter(organisation.getId()).stream().map(organisationCostCenter ->
+                        new OrganisationCostCenterView(
                             organisationCostCenter.getId() != null ? organisationCostCenter.getId().getCustomerCode() : null,
                             organisationCostCenter.getExternalCustomerCode(),
                             organisationCostCenter.getName()
-                    );
-                }).collect(Collectors.toSet()),
-                getAllProjects(organisation.getId()).stream().map(organisationProject -> {
-                    return new OrganisationCostCenterView(
+                    )).collect(Collectors.toSet()),
+                getAllProjects(organisation.getId()).stream().map(organisationProject ->
+                        new OrganisationCostCenterView(
                             organisationProject.getId() != null ? organisationProject.getId().getCustomerCode() : null,
                             organisationProject.getExternalCustomerCode(),
                             organisationProject.getName()
-                    );
-                }).collect(Collectors.toSet()),
+                    )).collect(Collectors.toSet()),
                 organisationCurrencyService.findAllByOrganisationId(organisation.getId())
                         .stream()
-                        .map(organisationCurrency -> {
-                            return organisationCurrency.getId() != null ? organisationCurrency.getId().getCustomerCode() : null;
-                        }).collect(Collectors.toSet()),
+                        .map(organisationCurrency ->
+                                organisationCurrency.getId() != null ? organisationCurrency.getId().getCustomerCode() : null
+                        ).collect(Collectors.toSet()),
+                organisation.getWebSite(),
                 organisation.getLogo()
         );
     }
 
-    private static Organisation getOrganisation(OrganisationUpsert organisationUpsert, Optional<Organisation> organisationO) {
-        Organisation organisation = organisationO.get();
-        organisation.setName(organisationUpsert.getName());
-        organisation.setCity(organisationUpsert.getCity());
-        organisation.setPostCode(organisationUpsert.getPostCode());
-        organisation.setProvince(organisationUpsert.getProvince());
-        organisation.setCountry(organisationUpsert.getCountry());
-        organisation.setAddress(organisationUpsert.getAddress());
-        organisation.setCurrencyId(organisationUpsert.getCurrencyId());
-        organisation.setReportCurrencyId(organisationUpsert.getReportCurrencyId());
-        organisation.setPhoneNumber(organisationUpsert.getPhoneNumber());
-        organisation.setAdminEmail(organisationUpsert.getAdminEmail());
-        organisation.setWebSite(organisationUpsert.getWebsiteUrl());
+    private static Organisation getOrganisation(OrganisationCreate organisationCreate, Organisation organisation) {
+        organisation.setName(organisationCreate.getName());
+        organisation.setCity(organisationCreate.getCity());
+        organisation.setPostCode(organisationCreate.getPostCode());
+        organisation.setProvince(organisationCreate.getProvince());
+        organisation.setAddress(organisationCreate.getAddress());
+        organisation.setPhoneNumber(organisationCreate.getPhoneNumber());
+        organisation.setAdminEmail(organisationCreate.getAdminEmail());
+        organisation.setWebSite(organisationCreate.getWebsiteUrl());
+        organisation.setCurrencyId(organisationCreate.getCurrencyId());
+        organisation.setReportCurrencyId(organisationCreate.getReportCurrencyId());
+
+
+
+
         return organisation;
     }
 

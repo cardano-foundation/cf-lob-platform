@@ -71,7 +71,7 @@ class AccountingCoreEventHandlerDuplicateEventsTest {
     private TransactionReconcilationRepository transactionReconcilationRepository;
 
     @BeforeEach
-    public void clearDatabase(@Autowired Flyway flyway){
+    void clearDatabase(@Autowired Flyway flyway){
         flyway.clean();
         flyway.migrate();
     }

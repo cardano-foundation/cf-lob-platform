@@ -46,9 +46,6 @@ public class Organisation extends CommonEntity implements Persistable<String> {
     @Column(name = "province", nullable = false)
     private String province;
 
-    @Column(name = "country")
-    private String country;
-
     @Column(name = "address", nullable = false)
     private String address;
 

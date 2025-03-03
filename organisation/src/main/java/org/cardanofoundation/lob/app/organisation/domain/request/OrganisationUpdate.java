@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganisationUpsert {
+public class OrganisationUpdate {
 
     @Schema(example = "My company name")
     private String name;
@@ -24,12 +24,6 @@ public class OrganisationUpsert {
 
     @Schema(example = "Co. Wexford")
     private String province;
-
-    @Schema(example = "Ireland")
-    private String country;
-
-    @Schema(example = "IE")
-    private String countryCode;
 
     @Schema(example = "Ballyhealy Cottage")
     private String address;
@@ -48,8 +42,5 @@ public class OrganisationUpsert {
 
     @Schema(example = "ISO_4217:CHF")
     private String reportCurrencyId;
-
-    @Schema(example = "CHE-184477354")
-    private String taxIdNumber;
 
 }

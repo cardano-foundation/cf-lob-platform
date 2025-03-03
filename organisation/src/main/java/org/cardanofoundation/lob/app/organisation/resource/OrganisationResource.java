@@ -26,7 +26,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
-import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationUpsert;
+import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
+import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationCreate;
+import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationUpdate;
 import org.cardanofoundation.lob.app.organisation.domain.view.*;
 import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 
@@ -59,6 +61,7 @@ public class OrganisationResource {
                             organisation.getTaxIdNumber(),
                             organisation.getTaxIdNumber(),
                             organisation.getCurrencyId(),
+                            organisation.getReportCurrencyId(),
                             monthsAgo,
                             yesterday,
                             organisation.getAdminEmail(),
@@ -67,10 +70,11 @@ public class OrganisationResource {
                             organisation.getCity(),
                             organisation.getPostCode(),
                             organisation.getProvince(),
-                            organisation.getCountry(),
+                            organisation.getCountryCode(),
                             new LinkedHashSet<>(),
                             new LinkedHashSet<>(),
                             new LinkedHashSet<>(),
+                            organisation.getWebSite(),
                             organisation.getLogo()
                     );
                 }).toList()
@@ -201,6 +205,47 @@ public class OrganisationResource {
 
     }
 
+    @Operation(description = "Organistion create", responses = {
+            @ApiResponse(content =
+                    {@Content(mediaType = "application/json", schema = @Schema(implementation = OrganisationView.class))}
+            ),
+            @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = "application/json", schema = @Schema(example = "{\n" +
+                    "    \"title\": \"ORGANISATION_ALREADY_EXIST\",\n" +
+                    "    \"status\": 404,\n" +
+                    "    \"detail\": \"Unable to crate Organisation with IdNumber\"\n" +
+                    "}"))})
+    })
+    @PostMapping(value = "/organisation", produces = "application/json")
+    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
+    public ResponseEntity<?> organisationCreate(@Valid @RequestBody OrganisationCreate organisationCreate) {
+
+        Optional<Organisation> organisationChe = organisationService.findById(Organisation.id(organisationCreate.getCountryCode(), organisationCreate.getTaxIdNumber()));
+        if (organisationChe.isPresent()) {
+            val issue = Problem.builder()
+                    .withTitle("ORGANISATION_ALREADY_EXIST")
+                    .withDetail(STR."Unable to crate Organisation with IdNumber: \{organisationCreate.getTaxIdNumber()} and CountryCode: \{organisationCreate.getCountryCode()}")
+                    .withStatus(Status.NOT_FOUND)
+                    .build();
+
+            return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
+        }
+
+        Optional<OrganisationView> organisation = organisationService.createOrganisation(organisationCreate).map(organisationService::getOrganisationView);
+        if (organisation.isEmpty()) {
+            val issue = Problem.builder()
+                    .withTitle("ORGANISATION_CREATE_ERROR")
+                    .withDetail(STR."Unable to create Organisation by Id: \{organisationCreate.getName()}")
+                    .withStatus(Status.NOT_FOUND)
+                    .build();
+
+            return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
+        }
+
+        return ResponseEntity.ok().body(organisation.get());
+
+
+    }
+
     @Operation(description = "Organistion update", responses = {
             @ApiResponse(content =
                     {@Content(mediaType = "application/json", schema = @Schema(implementation = OrganisationView.class))}
@@ -209,13 +254,41 @@ public class OrganisationResource {
                     "    \"title\": \"Organisation not found\",\n" +
                     "    \"status\": 404,\n" +
                     "    \"detail\": \"Unable to get the organisation\"\n" +
+                    "}"))}),
+            @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = "application/json", schema = @Schema(example = "{\n" +
+                    "    \"title\": \"ORGANISATION_UPDATE_ERROR\",\n" +
+                    "    \"status\": 404,\n" +
+                    "    \"detail\": \"Unable to create Organisation\"\n" +
                     "}"))})
     })
-    @PutMapping(value = "/organisation", produces = "application/json")
+    @PutMapping(value = "/organisation/{orgId}", produces = "application/json")
     @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
-    public ResponseEntity<OrganisationView> organisationUpsertOrganisation(@Valid @RequestBody OrganisationUpsert organisationUpsert) {
+    public ResponseEntity<?> organisationUpdate(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId, @Valid @RequestBody OrganisationUpdate organisationUpdate) {
+        Optional<Organisation> organisationChe = organisationService.findById(orgId);
+        if (organisationChe.isEmpty()) {
+            val issue = Problem.builder()
+                    .withTitle("ORGANISATION_NOT_FOUND")
+                    .withDetail(STR."Unable to find Organisation by Id: \{orgId}")
+                    .withStatus(Status.NOT_FOUND)
+                    .build();
 
-        return ResponseEntity.ok().body(organisationService.upsertOrganisation(organisationUpsert));
+            return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
+        }
+
+        Optional<OrganisationView> organisation = organisationService.upsertOrganisation(organisationChe.get(), organisationUpdate).map(organisationService::getOrganisationView);
+        if (organisation.isEmpty()) {
+            val issue = Problem.builder()
+                    .withTitle("ORGANISATION_UPDATE_ERROR")
+                    .withDetail(STR."Unable to create Organisation by Id: \{organisationUpdate.getName()}")
+                    .withStatus(Status.NOT_FOUND)
+                    .build();
+
+            return ResponseEntity.status(issue.getStatus().getStatusCode()).body(issue);
+        }
+
+        return ResponseEntity.ok().body(organisation.get());
+
+
     }
 
 }
