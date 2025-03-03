@@ -12,11 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.cardanofoundation.lob.app.organisation.domain.entity.AccountEvent;
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationChartOfAccount;
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationChartOfAccountType;
-import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCurrency;
-import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationView;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,9 +22,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.cardanofoundation.lob.app.organisation.domain.entity.Organisation;
 import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCostCenter;
+import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCurrency;
 import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationProject;
 import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationCreate;
 import org.cardanofoundation.lob.app.organisation.domain.request.OrganisationUpdate;
+import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationView;
 import org.cardanofoundation.lob.app.organisation.repository.*;
 
 @ExtendWith(MockitoExtension.class)
