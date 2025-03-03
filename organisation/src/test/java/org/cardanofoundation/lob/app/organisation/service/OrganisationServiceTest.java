@@ -2,6 +2,7 @@ package org.cardanofoundation.lob.app.organisation.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.cardanofoundation.lob.app.organisation.domain.entity.AccountEvent;
+import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationChartOfAccount;
+import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationChartOfAccountType;
+import org.cardanofoundation.lob.app.organisation.domain.entity.OrganisationCurrency;
+import org.cardanofoundation.lob.app.organisation.domain.view.OrganisationView;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -43,9 +49,6 @@ class OrganisationServiceTest {
 
     @Mock
     private ChartOfAccountRepository organisationChartOfAccountRepository;
-
-    @Mock
-    private OrganisationChartOfAccountSubTypeRepository organisationChartOfAccountSubTypeRepository;
 
     @Mock
     private AccountEventRepository accountEventRepository;
@@ -159,5 +162,52 @@ class OrganisationServiceTest {
         assertEquals("County co.",result.getProvince());
         verify(organisationRepository).saveAndFlush(any());
         verifyNoMoreInteractions(organisationRepository);
+    }
+
+    @Test
+    void testGetOrganisationView() {
+        Organisation org = new Organisation();
+        org.setId("orgId");
+        org.setName("orgName");
+        org.setTaxIdNumber("taxId");
+        org.setCurrencyId("currencyId");
+        org.setAdminEmail("adminEmail");
+        org.setPhoneNumber("phoneNumber");
+        org.setAddress("address");
+        org.setCity("city");
+        org.setPostCode("postCode");
+        org.setProvince("province");
+        org.setCountryCode("countryCode");
+        org.setWebSite("webSite");
+        org.setLogo("logo");
+
+        when(costCenterService.getAllCostCenter(anyString())).thenReturn(Set.of(new OrganisationCostCenter()));
+        when(projectMappingRepository.findAllByOrganisationId(anyString())).thenReturn(Set.of(new OrganisationProject()));
+        when(organisationCurrencyService.findAllByOrganisationId(anyString())).thenReturn(Set.of(new OrganisationCurrency()));
+
+        OrganisationView organisationView = organisationService.getOrganisationView(org);
+
+        assertNotNull(organisationView);
+        assertEquals(org.getId(), organisationView.getId());
+        assertEquals(org.getName(), organisationView.getName());
+        assertEquals(org.getTaxIdNumber(), organisationView.getTaxIdNumber());
+        assertEquals(org.getCurrencyId(), organisationView.getCurrencyId());
+        assertEquals(org.getAdminEmail(), organisationView.getAdminEmail());
+        assertEquals(org.getPhoneNumber(), organisationView.getPhoneNumber());
+        assertEquals(org.getAddress(), organisationView.getAddress());
+        assertEquals(org.getCity(), organisationView.getCity());
+        assertEquals(org.getPostCode(), organisationView.getPostCode());
+        assertEquals(org.getProvince(), organisationView.getProvince());
+        assertEquals(org.getCountryCode(), organisationView.getCountryCode());
+        assertEquals(org.getWebSite(), organisationView.getWebSite());
+        assertEquals(org.getLogo(), organisationView.getLogo());
+        assertEquals(1, organisationView.getCostCenters().size());
+        assertEquals(1, organisationView.getProjects().size());
+        assertEquals(1, organisationView.getOrganisationCurrencies().size());
+
+        verify(costCenterService).getAllCostCenter(anyString());
+        verify(projectMappingRepository).findAllByOrganisationId(anyString());
+        verify(organisationCurrencyService).findAllByOrganisationId(anyString());
+        verifyNoMoreInteractions(costCenterService, projectMappingRepository, organisationCurrencyService);
     }
 }

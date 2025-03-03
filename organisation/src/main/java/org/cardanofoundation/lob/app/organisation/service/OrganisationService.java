@@ -30,11 +30,8 @@ public class OrganisationService {
     private final ProjectMappingRepository projectMappingRepository;
     private final OrganisationChartOfAccountTypeRepository organisationChartOfAccountTypeRepository;
     private final ChartOfAccountRepository organisationChartOfAccountRepository;
-    private final OrganisationChartOfAccountSubTypeRepository organisationChartOfAccountSubTypeRepository;
     private final AccountEventRepository accountEventRepository;
     private final OrganisationCurrencyService organisationCurrencyService;
-    private final OrganisationChartOfAccountSubTypeRepository chartOfAccountSubTypeRepository;
-
 
     public Optional<Organisation> findById(String organisationId) {
         return organisationRepository.findById(organisationId);
@@ -110,7 +107,7 @@ public class OrganisationService {
         return new OrganisationView(
                 organisation.getId(),
                 organisation.getName(),
-                organisation.getTaxIdNumber(),
+                "", // Description is deprecated and should be removed
                 organisation.getTaxIdNumber(),
                 organisation.getCurrencyId(),
                 organisation.getReportCurrencyId(),

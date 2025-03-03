@@ -63,7 +63,7 @@ public class OrganisationView {
     @Schema(example = "IE")
     private String countryCode;
 
-    private Set<OrganisationCostCenterView> costCenter;
+    private Set<OrganisationCostCenterView> costCenters;
 
     private Set<OrganisationCostCenterView> projects;
 
