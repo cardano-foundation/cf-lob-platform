@@ -35,6 +35,7 @@ import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Organisation", description = "Organisation API")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "lob.organisation.enabled", havingValue = "true", matchIfMissing = true)
 public class OrganisationResource {
@@ -246,23 +247,7 @@ public class OrganisationResource {
 
     }
 
-    @Operation(description = "Organistion update", responses = {
-            @ApiResponse(content =
-                    {@Content(mediaType = "application/json", schema = @Schema(implementation = OrganisationView.class))}
-            ),
-            @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = "application/json", schema = @Schema(example = "{\n" +
-                    "    \"title\": \"Organisation not found\",\n" +
-                    "    \"status\": 404,\n" +
-                    "    \"detail\": \"Unable to get the organisation\"\n" +
-                    "}"))}),
-            @ApiResponse(responseCode = "404", description = "Error: response status is 404", content = {@Content(mediaType = "application/json", schema = @Schema(example = "{\n" +
-                    "    \"title\": \"ORGANISATION_UPDATE_ERROR\",\n" +
-                    "    \"status\": 404,\n" +
-                    "    \"detail\": \"Unable to create Organisation\"\n" +
-                    "}"))})
-    })
-    @PutMapping(value = "/organisation/{orgId}", produces = "application/json")
-    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
+    @PostMapping(value = "/organisation/{orgId}", produces = "application/json")
     public ResponseEntity<?> organisationUpdate(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId, @Valid @RequestBody OrganisationUpdate organisationUpdate) {
         Optional<Organisation> organisationChe = organisationService.findById(orgId);
         if (organisationChe.isEmpty()) {
