@@ -261,7 +261,7 @@ public class OrganisationResource {
                     "    \"detail\": \"Unable to create Organisation\"\n" +
                     "}"))})
     })
-    @PutMapping(value = "/organisation/{orgId}", produces = "application/json")
+    @PostMapping(value = "/organisation/{orgId}", produces = "application/json")
     @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationUpdate(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId, @Valid @RequestBody OrganisationUpdate organisationUpdate) {
         Optional<Organisation> organisationChe = organisationService.findById(orgId);
