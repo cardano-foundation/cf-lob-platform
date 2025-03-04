@@ -25,7 +25,7 @@ The type is an identifier for the specific transaction type. From this type more
 }
 ```
 
-Currently we are using the following types:
+Currently we are supporting the following types:
 - `INDIVIDUAL_TRANSACTIONS`
 - `REPORT`
 

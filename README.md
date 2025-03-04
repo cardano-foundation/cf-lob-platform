@@ -22,6 +22,7 @@ Reeve, also known as Ledger on the Blockchain (LOB), empowers organizations to s
 ## Project Overview
 The LOB platform is designed to integrate traditional accounting systems with blockchain technology, ensuring transparency, immutability, and enhanced security for financial records. By leveraging the Cardano blockchain, the platform offers a decentralized approach to financial data management, facilitating trust and efficiency in accounting processes.
 
+Learn more about Reeve: [Reeve - Ledger on the Blockchain](https://www.cardanofoundation.org/blog/boosting-transparency-on-chain-financial-report)
 ### Key Features
 - **Streamlined Audits:** Simplifies the audit process by providing a single source of truth for financial information
 - **Strengthened Accountability:** Creates an immutable and transparent record of all financial activities, holding accountable for their actions and decisions
