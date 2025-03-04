@@ -36,6 +36,14 @@ public class ExtractionTransactionsRequest {
     @Nullable
     private List<String> accountCode;
 
+    @ArraySchema(arraySchema = @Schema(example = "[\"2\",\"3\"]"))
+    @Nullable
+    private List<String> accountType;
+
+    @ArraySchema(arraySchema = @Schema(example = "[\"1\",\"4\"]"))
+    @Nullable
+    private List<String> accountSubType;
+
     @ArraySchema(arraySchema = @Schema(example = "[\"4300\",\"5400\"]"))
     @Nullable
     private List<String> costCenter;

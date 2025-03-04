@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxItemValidationStatus;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 
 @Slf4j
@@ -25,18 +26,35 @@ public class TransactionItemExtractionRepository {
 
     private final EntityManager em;
 
-    public List<TransactionItemEntity> findByItemAccount(LocalDate dateFrom, LocalDate dateTo, List<String> accountCode, List<String> costCenter, List<String> project) {
+    public List<TransactionItemEntity> findByItemAccount(LocalDate dateFrom, LocalDate dateTo, List<String> accountCode, List<String> costCenter, List<String> project, List<String> accountType, List<String> accountSubType) {
         String jpql = STR."""
                 SELECT ti FROM accounting_reporting_core.TransactionItemEntity ti INNER JOIN ti.transaction te
                 """;
         String where = STR."""
                 WHERE te.entryDate >= :dateFrom AND te.entryDate <= :dateTo
-                AND ti.amountFcy <> 0
+                AND ti.status = '\{TxItemValidationStatus.OK}'
                 """;
 
         if (null != accountCode && 0 < accountCode.stream().count()) {
             where += STR."""
             AND (ti.accountDebit.code in (\{accountCode.stream().map(code -> "'" + code + "'").collect(Collectors.joining(","))}) or ti.accountCredit.code in (\{accountCode.stream().map(code -> "'" + code + "'").collect(Collectors.joining(","))}))
+            """;
+        }
+        if (null != accountSubType && 0 < accountSubType.stream().count()) {
+            where += STR."""
+            AND (
+            ti.accountDebit.code in (select Id.customerCode from OrganisationChartOfAccount where subType.id  in (\{accountSubType.stream().map(code -> "" + code + "").collect(Collectors.joining(","))})) or
+            ti.accountCredit.code in (select Id.customerCode from OrganisationChartOfAccount where subType.id in (\{accountSubType.stream().map(code -> "" + code + "").collect(Collectors.joining(","))}))
+            )
+            """;
+        }
+
+        if (null != accountType && 0 < accountType.stream().count()) {
+            where += STR."""
+            AND (
+            ti.accountDebit.code in (select Id.customerCode from OrganisationChartOfAccount where subType.id  in (select id from OrganisationChartOfAccountSubType where type.id in (\{accountType.stream().map(code -> "" + code + "").collect(Collectors.joining(","))}))) or
+            ti.accountCredit.code in (select Id.customerCode from OrganisationChartOfAccount where subType.id in (select id from OrganisationChartOfAccountSubType where type.id in (\{accountType.stream().map(code -> "" + code + "").collect(Collectors.joining(","))})))
+            )
             """;
         }
 
@@ -76,7 +94,7 @@ public class TransactionItemExtractionRepository {
         String where = STR."""
                 WHERE te.entryDate >= :dateFrom AND te.entryDate <= :dateTo
                 AND te.organisation.id = '\{orgId}'
-                AND ti.amountFcy <> 0
+                AND ti.status = '\{TxItemValidationStatus.OK}'
                 """;
 
         if (!event.isEmpty()) {

@@ -45,7 +45,7 @@ public class ExtractionController {
     public ResponseEntity<ExtractionTransactionView> transactionSearch(@Valid @RequestBody ExtractionTransactionsRequest transactionsRequest) {
         return ResponseEntity
                 .ok()
-                .body(extractionItemService.findTransactionItems(transactionsRequest.getDateFrom(), transactionsRequest.getDateTo(), transactionsRequest.getAccountCode(), transactionsRequest.getCostCenter(), transactionsRequest.getProject()));
+                .body(extractionItemService.findTransactionItems(transactionsRequest.getDateFrom(), transactionsRequest.getDateTo(), transactionsRequest.getAccountCode(), transactionsRequest.getCostCenter(), transactionsRequest.getProject(),transactionsRequest.getAccountType(),transactionsRequest.getAccountSubType()));
     }
 
 
