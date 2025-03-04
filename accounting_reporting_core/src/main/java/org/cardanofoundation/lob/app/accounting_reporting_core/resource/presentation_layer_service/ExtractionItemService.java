@@ -30,9 +30,9 @@ public class ExtractionItemService {
     private final TransactionItemExtractionRepository transactionItemRepositoryImpl;
 
     @Transactional(readOnly = true)
-    public ExtractionTransactionView findTransactionItems(LocalDate dateFrom, LocalDate dateTo, List<String> accountCode, List<String> costCenter, List<String> project) {
+    public ExtractionTransactionView findTransactionItems(LocalDate dateFrom, LocalDate dateTo, List<String> accountCode, List<String> costCenter, List<String> project, List<String> accountType, List<String> accountSubType) {
 
-        List<ExtractionTransactionItemView> transactionItem = transactionItemRepositoryImpl.findByItemAccount(dateFrom, dateTo, accountCode, costCenter, project).stream().map(this::extractionTransactionItemViewBuilder).collect(Collectors.toList());
+        List<ExtractionTransactionItemView> transactionItem = transactionItemRepositoryImpl.findByItemAccount(dateFrom, dateTo, accountCode, costCenter, project,accountType,accountSubType).stream().map(this::extractionTransactionItemViewBuilder).collect(Collectors.toList());
 
         return ExtractionTransactionView.createSuccess(transactionItem);
     }

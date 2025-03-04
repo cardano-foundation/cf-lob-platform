@@ -52,10 +52,10 @@ class ExtractionItemServiceTest {
 
         item1.setTransaction(tx);
 
-        Mockito.when(transactionItemExtractionRepository.findByItemAccount(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(List.of(item1));
+        Mockito.when(transactionItemExtractionRepository.findByItemAccount(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(List.of(item1));
         ExtractionItemService extractionItemService = new ExtractionItemService(transactionItemExtractionRepository);
 
-        ExtractionTransactionView result = extractionItemService.findTransactionItems(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        ExtractionTransactionView result = extractionItemService.findTransactionItems(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         assertInstanceOf(ExtractionTransactionView.class, result);
         assertEquals(1L, result.getTotal());
         verifyNoMoreInteractions(transactionItemExtractionRepository);

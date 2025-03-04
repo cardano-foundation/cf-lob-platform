@@ -31,8 +31,16 @@ class TransactionItemExtractionRepositoryTest {
         String query = """
                 SELECT ti FROM accounting_reporting_core.TransactionItemEntity ti INNER JOIN ti.transaction te
                 WHERE te.entryDate >= :dateFrom AND te.entryDate <= :dateTo
-                AND ti.amountFcy <> 0
+                AND ti.status = 'OK'
                 AND (ti.accountDebit.code in ('AccountCode') or ti.accountCredit.code in ('AccountCode'))
+                AND (
+                ti.accountDebit.code in (select Id.customerCode from OrganisationChartOfAccount where subType.id  in (accountSubType)) or
+                ti.accountCredit.code in (select Id.customerCode from OrganisationChartOfAccount where subType.id in (accountSubType))
+                )
+                AND (
+                ti.accountDebit.code in (select Id.customerCode from OrganisationChartOfAccount where subType.id  in (select id from OrganisationChartOfAccountSubType where type.id in (accountType))) or
+                ti.accountCredit.code in (select Id.customerCode from OrganisationChartOfAccount where subType.id in (select id from OrganisationChartOfAccountSubType where type.id in (accountType)))
+                )
                 AND ti.costCenter.externalCustomerCode in ('CostCenterCode')
                 AND ti.project.customerCode in ('ProjectCode')
                 AND te.ledgerDispatchStatus = 'FINALIZED'
@@ -46,7 +54,9 @@ class TransactionItemExtractionRepositoryTest {
                 LocalDate.of(2023, Month.JANUARY, 31),
                 List.of("AccountCode"),
                 List.of("CostCenterCode"),
-                List.of("ProjectCode")
+                List.of("ProjectCode"),
+                List.of("accountType"),
+                List.of("accountSubType")
         );
         Mockito.verify(em, Mockito.times(1)).createQuery(query);
     }
@@ -61,11 +71,11 @@ class TransactionItemExtractionRepositoryTest {
                 "OrgId",
                 LocalDate.of(2023, Month.JANUARY, 1),
                 LocalDate.of(2023, Month.JANUARY, 31),
-                Set.of("EventCode2","EventCode1"),
-                Set.of("Currency2","Currency1"),
+                Set.of("EventCode2", "EventCode1"),
+                Set.of("Currency2", "Currency1"),
                 Optional.of(BigDecimal.valueOf(100)),
                 Optional.of(BigDecimal.valueOf(1000)),
-                Set.of("TheHast2","TheHast1")
+                Set.of("TheHast2", "TheHast1")
         );
         Mockito.verify(em, Mockito.times(1)).createQuery(anyString());
     }
