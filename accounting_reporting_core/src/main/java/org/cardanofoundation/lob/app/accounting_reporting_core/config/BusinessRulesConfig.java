@@ -70,7 +70,6 @@ public class BusinessRulesConfig {
         return new DefaultPipelineTask(List.of(
                 new DiscardZeroBalanceTxItemsTaskItem(),
                 new JournalAccountCreditEnrichmentTaskItem(organisationPublicApi)
-                //new JournalAccountAmountsEnrichmentTaskItem() // this must be after JournalAccountCreditEnrichmentTaskItem
         ));
     }
 

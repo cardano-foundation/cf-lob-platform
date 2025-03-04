@@ -104,6 +104,11 @@ CREATE TYPE accounting_core_tx_item_validation_status_type AS ENUM (
     'ERASED_ZERO_BALANCE'
 );
 
+CREATE TYPE accounting_core_tx_item_operation_type AS ENUM (
+    'DEBIT',
+    'CREDIT'
+);
+
 CREATE TYPE accounting_core_report_type AS ENUM (
     'BALANCE_SHEET',
     'INCOME_STATEMENT'
@@ -474,6 +479,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item (
    cost_center_name VARCHAR(255),
 
    status accounting_core_tx_item_validation_status_type NOT NULL,
+   operation_type accounting_core_tx_item_operation_type NOT NULL,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),
@@ -527,6 +533,7 @@ CREATE TABLE IF NOT EXISTS accounting_core_transaction_item_aud (
    cost_center_external_customer_code VARCHAR(255),
    cost_center_name VARCHAR(255),
    status accounting_core_tx_item_validation_status_type,
+   operation_type accounting_core_tx_item_operation_type NOT NULL,
 
    created_by VARCHAR(255),
    updated_by VARCHAR(255),

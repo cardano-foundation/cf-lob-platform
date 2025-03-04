@@ -7,6 +7,8 @@ import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.
 import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.entity.CodeMappingType.ORGANISATION;
 import static org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreString.normaliseString;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 
@@ -15,16 +17,15 @@ import jakarta.validation.Validator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import io.vavr.control.Either;
+import org.zalando.problem.Problem;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Currency;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.FinancialPeriodSource;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.Transactions;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.TxLine;
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreBigDecimal;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreString;
 import org.cardanofoundation.lob.app.support.collections.Optionals;
 
@@ -42,30 +43,30 @@ public class TransactionConverter {
     public Either<FatalError, Transactions> convert(String organisationId,
                                                     String batchId,
                                                     List<TxLine> txLines) {
-        val searchResultsByOrganisation = new ArrayList<TxLine>();
-        val transactions = new LinkedHashSet<Transaction>();
+        ArrayList<TxLine> searchResultsByOrganisation = new ArrayList<>();
+        LinkedHashSet<Transaction> transactions = new LinkedHashSet<>();
 
-        for (val txLine : txLines) {
-            val localOrgIdE = organisationId(txLine);
+        for (TxLine txLine : txLines) {
+            Either<FatalError, String> localOrgIdE = organisationId(txLine);
 
             if (localOrgIdE.isEmpty()) {
                 return Either.left(localOrgIdE.getLeft());
             }
 
-            val localOrgId = localOrgIdE.get();
+            String localOrgId = localOrgIdE.get();
 
             if (localOrgId.equals(organisationId)) {
                 searchResultsByOrganisation.add(txLine);
             }
         }
 
-        val searchResultItemsPerTransactionNumber = searchResultsByOrganisation
+        Map<String, List<TxLine>> searchResultItemsPerTransactionNumber = searchResultsByOrganisation
                 .stream()
                 .collect(groupingBy(TxLine::transactionNumber));
 
-        for (val entry : searchResultItemsPerTransactionNumber.entrySet()) {
-            val transactionLevelTxLines = entry.getValue();
-            val transactionE = createTransactionFromSearchResultItems(organisationId, batchId, transactionLevelTxLines);
+        for (Map.Entry<String, List<TxLine>> entry : searchResultItemsPerTransactionNumber.entrySet()) {
+            List<TxLine> transactionLevelTxLines = entry.getValue();
+            Either<FatalError, Optional<Transaction>> transactionE = createTransactionFromSearchResultItems(organisationId, batchId, transactionLevelTxLines);
 
             if (transactionE.isEmpty()) {
                 return Either.left(transactionE.getLeft());
@@ -85,28 +86,27 @@ public class TransactionConverter {
             return Either.right(Optional.empty());
         }
 
-        val firstTxLine = txLines.getFirst();
-        val txId = Transaction.id(organisationId, firstTxLine.transactionNumber());
+        TxLine firstTxLine = txLines.getFirst();
+        String txId = Transaction.id(organisationId, firstTxLine.transactionNumber());
 
-        val transTypeE = transactionType(organisationId, txId, firstTxLine);
+        Either<FatalError, TransactionType> transTypeE = transactionType(organisationId, txId, firstTxLine);
         if (transTypeE.isEmpty()) {
             return Either.left(transTypeE.getLeft());
         }
-        val transactionType = transTypeE.get();
+        TransactionType transactionType = transTypeE.get();
 
-        val txDate = firstTxLine.date();
-        val internalTransactionNumber = firstTxLine.transactionNumber();
-        val fxRate = firstTxLine.exchangeRate();
-        val accountingPeriod = financialPeriod(firstTxLine);
+        LocalDate txDate = firstTxLine.date();
+        String internalTransactionNumber = firstTxLine.transactionNumber();
+        BigDecimal fxRate = firstTxLine.exchangeRate();
+        YearMonth accountingPeriod = financialPeriod(firstTxLine);
 
-        val txItems = new LinkedHashSet<TransactionItem>();
+        LinkedHashSet<TransactionItem> txItems = new LinkedHashSet<>();
 
-        for (val txLine : txLines) {
-            val validationIssues = validator.validate(txLine);
-            val isValid = validationIssues.isEmpty();
-
+        for (TxLine txLine : txLines) {
+            Set<ConstraintViolation<TxLine>> validationIssues = validator.validate(txLine);
+            boolean isValid = validationIssues.isEmpty();
             if (!isValid) {
-                val bag = Map.<String, Object>of(
+                Map<String, Object> bag = Map.of(
                         "organisationId", organisationId,
                         "txId", txId,
                         "internalTransactionNumber", txLine.transactionNumber(),
@@ -118,17 +118,35 @@ public class TransactionConverter {
                 return Either.left(new FatalError(ADAPTER_ERROR, "TRANSACTIONS_VALIDATION_ERROR", bag));
             }
 
-            val accountCreditCodeM = accountCreditCode(organisationId, txLine.accountMain());
+            Optional<String> accountCreditCodeM = accountCreditCode(organisationId, txLine.accountMain());
 
-            val amountLcy = MoreBigDecimal.substractNullFriendly(txLine.amountDebit(), txLine.amountCredit());
-            val amountFcy = MoreBigDecimal.substractNullFriendly(txLine.amountDebitForeignCurrency(), txLine.amountCreditForeignCurrency());
+            OperationType operationType;
+            BigDecimal amountLcy;
+            BigDecimal amountFcy;
+            if(txLine.amountDebit() != null && txLine.amountCredit() != null) {
+                // Error when both amounts are non-zero
+                log.error("Both debit and credit amounts are non-zero for transaction: {}", txId);
+                return Either.left(new FatalError(ADAPTER_ERROR, "TRANSACTIONS_VALIDATION_ERROR", Map.of()));
+            } else if(txLine.amountDebit() != null) {
+                operationType = OperationType.DEBIT;
+                amountLcy = txLine.amountDebit();
+                amountFcy = txLine.amountDebitForeignCurrency();
+            } else if(txLine.amountCredit() != null) {
+                operationType = OperationType.CREDIT;
+                amountLcy = txLine.amountCredit();
+                amountFcy = txLine.amountCreditForeignCurrency();
+            } else {
+                log.info("Skipping transaction line with zero amounts for transaction: {}", txId);
+                // skipping when both amounts are zero
+                continue;
+            }
 
-            val costCenterM = costCenterCode(organisationId, txLine);
-            val projectCodeM = projectCode(organisationId, txLine);
+            Optional<String> costCenterM = costCenterCode(organisationId, txLine);
+            Optional<String> projectCodeM = projectCode(organisationId, txLine);
 
-            val documentM = convertDocument(organisationId, txLine);
+            Optional<Document> documentM = convertDocument(organisationId, txLine);
 
-            val txItem = TransactionItem.builder()
+            TransactionItem txItem = TransactionItem.builder()
                     .id(TransactionItem.id(txId, txLine.lineID().toString()))
                     .accountDebit(Optionals.zip(normaliseString(txLine.name()), normaliseString(txLine.number()), (accountDebitName, accountDebitCode) -> {
                         return Account.builder()
@@ -154,7 +172,7 @@ public class TransactionConverter {
                     .fxRate(fxRate)
                     .amountLcy(amountLcy)
                     .amountFcy(amountFcy)
-
+                    .operationType(operationType)
                     .build();
 
             txItems.add(txItem);
@@ -191,7 +209,7 @@ public class TransactionConverter {
         return switch (financialPeriodSource) {
             case IMPLICIT -> YearMonth.from(txLine.date());
             case EXPLICIT -> {
-                val endDate = txLine.endDate();
+                LocalDate endDate = txLine.endDate();
 
                 yield YearMonth.from(endDate);
             }
@@ -201,10 +219,10 @@ public class TransactionConverter {
     private Either<FatalError, TransactionType> transactionType(String organisationId,
                                                                 String txId,
                                                                 TxLine txLine) {
-        val transactionTypeM = transactionTypeMapper.apply(txLine.type());
+        Optional<TransactionType> transactionTypeM = transactionTypeMapper.apply(txLine.type());
 
         if (transactionTypeM.isEmpty()) {
-            val bag = Map.<String, Object>of(
+            Map<String, Object> bag = Map.<String, Object>of(
                     "organisationId", organisationId,
                     "internalTransactionNumber", txLine.transactionNumber(),
                     "txId", txId,
@@ -218,17 +236,17 @@ public class TransactionConverter {
     }
 
     private Optional<Document> convertDocument(String organisationId, TxLine txLine) {
-        val documentNumberM = normaliseString(txLine.documentNumber());
+        Optional<String> documentNumberM = normaliseString(txLine.documentNumber());
 
         if (documentNumberM.isPresent()) {
-            val documentNumber = documentNumberM.orElseThrow();
+            String documentNumber = documentNumberM.orElseThrow();
 
-            val taxItemM = normaliseString(txLine.taxItem())
+            Optional<String> taxItemM = normaliseString(txLine.taxItem())
                     .map(String::trim);
 
-            var vatCodeM = Optional.<String>empty();
+            Optional<String> vatCodeM = Optional.<String>empty();
             if (taxItemM.isPresent()) {
-                val vatCodeE = preprocessorService.preProcess(taxItemM.orElseThrow(), VAT);
+                Either<Problem, String> vatCodeE = preprocessorService.preProcess(taxItemM.orElseThrow(), VAT);
 
                 if (vatCodeE.isEmpty()) {
                     log.warn("Conversion failed for vatCode: {} in organisation: {}", taxItemM.orElseThrow(), organisationId);
@@ -265,12 +283,12 @@ public class TransactionConverter {
 
     private Optional<String> accountCreditCode(String organisationId,
                                                String accountMain) {
-        val accountCodeCreditM = normaliseString(accountMain);
+        Optional<String> accountCodeCreditM = normaliseString(accountMain);
 
         if (accountCodeCreditM.isPresent()) {
-            val accountCodeCreditText = accountCodeCreditM.orElseThrow();
+            String accountCodeCreditText = accountCodeCreditM.orElseThrow();
 
-            val accountCreditCodeE = preprocessorService.preProcess(accountCodeCreditM.orElseThrow(), CHART_OF_ACCOUNT);
+            Either<Problem, String> accountCreditCodeE = preprocessorService.preProcess(accountCodeCreditM.orElseThrow(), CHART_OF_ACCOUNT);
 
             if (accountCreditCodeE.isEmpty()) {
                 log.warn("Conversion failed for accountCodeCredit: {} in organisation: {}", accountCodeCreditText, organisationId);
@@ -278,7 +296,7 @@ public class TransactionConverter {
                 return Optional.of(accountCodeCreditText);
             }
 
-            val accountCreditCode = accountCreditCodeE.get();
+            String accountCreditCode = accountCreditCodeE.get();
 
             return Optional.of(accountCreditCode);
         }
@@ -288,19 +306,19 @@ public class TransactionConverter {
 
     private Optional<String> costCenterCode(String organisationId,
                                             TxLine txLine) {
-        val costCenterM = MoreString.normaliseString(txLine.costCenter());
+        Optional<String> costCenterM = MoreString.normaliseString(txLine.costCenter());
 
         if (costCenterM.isPresent()) {
-            val costCenterText = costCenterM.orElseThrow();
+            String costCenterText = costCenterM.orElseThrow();
 
-            val costCenterE = preprocessorService.preProcess(costCenterText, COST_CENTER);
+            Either<Problem, String> costCenterE = preprocessorService.preProcess(costCenterText, COST_CENTER);
 
             if (costCenterE.isEmpty()) {
                 log.warn("Conversion failed for costCenter: {} in organisation: {}", costCenterText, organisationId);
 
                 return Optional.of(costCenterText);
             }
-            val costCenter = costCenterE.get();
+            String costCenter = costCenterE.get();
 
             return Optional.of(costCenter);
         }
@@ -309,10 +327,10 @@ public class TransactionConverter {
     }
 
     private Either<FatalError, String> organisationId(TxLine txLine) {
-        val organisationIdM = codesMappingService.getCodeMapping(netsuiteInstanceId, txLine.subsidiary(), ORGANISATION);
+        Optional<String> organisationIdM = codesMappingService.getCodeMapping(netsuiteInstanceId, txLine.subsidiary(), ORGANISATION);
 
         if (organisationIdM.isEmpty()) {
-            val bag = Map.<String, Object>of(
+            Map<String, Object> bag = Map.<String, Object>of(
                     "netsuiteInstanceId", netsuiteInstanceId,
                     "subsidiary", txLine.subsidiary()
             );
@@ -325,12 +343,12 @@ public class TransactionConverter {
 
     private Optional<String> projectCode(String organisationId,
                                          TxLine txLine) {
-        val projectM = normaliseString(txLine.project());
+        Optional<String> projectM = normaliseString(txLine.project());
 
         if (projectM.isPresent()) {
-            val projectText = projectM.orElseThrow();
+            String projectText = projectM.orElseThrow();
 
-            val projectCodeE = preprocessorService.preProcess(projectM.orElseThrow(), PROJECT);
+            Either<Problem, String> projectCodeE = preprocessorService.preProcess(projectM.orElseThrow(), PROJECT);
 
             if (projectCodeE.isEmpty()) {
                 log.warn("Conversion failed for projectCode: {} in organisation: {}", projectText, organisationId);
@@ -338,7 +356,7 @@ public class TransactionConverter {
                 return Optional.of(projectText);
             }
 
-            val projectCode = projectCodeE.get();
+            String projectCode = projectCodeE.get();
 
             return Optional.of(projectCode);
         }

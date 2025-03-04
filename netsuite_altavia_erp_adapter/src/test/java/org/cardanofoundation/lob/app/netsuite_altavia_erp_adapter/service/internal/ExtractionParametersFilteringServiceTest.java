@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service;
+package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType.CardCharge;
@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.*;
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.service.internal.ExtractionParametersFilteringService;
 
 class ExtractionParametersFilteringServiceTest {
 

@@ -7,10 +7,11 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionItemEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionViolation;
@@ -20,14 +21,14 @@ public class AmountFcyBalanceZerosOutCheckTaskItem implements PipelineTaskItem {
 
     @Override
     public void run(TransactionEntity tx) {
-        val txItems = tx.getItems();
+        Set<TransactionItemEntity> txItems = tx.getItems();
 
-        val fcySum = txItems.stream()
-                .map(TransactionItemEntity::getAmountFcy)
-                .reduce(ZERO, BigDecimal::add);
+        BigDecimal fcySumDebit = getSumOfFcy(txItems, OperationType.DEBIT);
+        BigDecimal fcySumCredit = getSumOfFcy(txItems, OperationType.CREDIT);
+        BigDecimal fcySum = fcySumDebit.subtract(fcySumCredit);
 
         if (fcySum.signum() != 0) {
-            val v = TransactionViolation.builder()
+            TransactionViolation v = TransactionViolation.builder()
                     .code(FCY_BALANCE_MUST_BE_ZERO)
                     .severity(ERROR)
                     .source(ERP)
@@ -42,5 +43,13 @@ public class AmountFcyBalanceZerosOutCheckTaskItem implements PipelineTaskItem {
             tx.addViolation(v);
         }
     }
+
+    private static BigDecimal getSumOfFcy(Set<TransactionItemEntity> txItems, OperationType credit) {
+        return txItems.stream()
+                .filter(transactionItemEntity -> transactionItemEntity.getOperationType().equals(credit))
+                .map(TransactionItemEntity::getAmountFcy)
+                .reduce(ZERO, BigDecimal::add);
+    }
+
 
 }
