@@ -35,6 +35,7 @@ import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Organisation", description = "Organisation API")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "lob.organisation.enabled", havingValue = "true", matchIfMissing = true)
 public class OrganisationResource {
