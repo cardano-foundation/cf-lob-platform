@@ -29,7 +29,6 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledg
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.ledger.TransactionLedgerUpdateCommand;
 import org.cardanofoundation.lob.app.blockchain_publisher.config.JaversConfig;
 import org.cardanofoundation.lob.app.blockchain_publisher.config.JpaConfig;
-import org.cardanofoundation.lob.app.blockchain_publisher.config.ModulithEventConfig;
 import org.cardanofoundation.lob.app.blockchain_publisher.config.TimeConfig;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.reports.ReportEntity;
 import org.cardanofoundation.lob.app.blockchain_publisher.domain.entity.txs.TransactionEntity;
@@ -44,7 +43,7 @@ import org.cardanofoundation.lob.app.blockchain_publisher.service.transation_sub
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 
 
-@SpringBootTest(classes = {JaversConfig.class, TimeConfig.class, JpaConfig.class, ModulithEventConfig.class})
+@SpringBootTest(classes = {JaversConfig.class, TimeConfig.class, JpaConfig.class})
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"org.cardanofoundation.lob.app.blockchain_publisher","org.cardanofoundation.lob.app.organisation","org.cardanofoundation.lob.app.blockchain_reader"})

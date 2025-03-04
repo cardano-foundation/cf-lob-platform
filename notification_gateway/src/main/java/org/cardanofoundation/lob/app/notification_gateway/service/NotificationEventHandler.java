@@ -2,7 +2,6 @@
 //
 //import lombok.extern.slf4j.Slf4j;
 //import org.cardanofoundation.lob.app.notification_gateway.domain.event.NotificationEvent;
-//import org.springframework.modulith.events.ApplicationModuleListener;
 //import org.springframework.stereotype.Service;
 //
 //import static org.cardanofoundation.lob.app.notification_gateway.domain.core.NotificationSeverity.ERROR;

@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 
-import org.springframework.modulith.events.Externalized;
-
 import org.jmolecules.event.annotation.DomainEvent;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError;
@@ -22,7 +20,6 @@ import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 @Getter
 @ToString
 @NoArgsConstructor
-@Externalized
 @Setter
 public class TransactionBatchFailedEvent {
 
