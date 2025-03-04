@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import org.cardanofoundation.lob.app.accounting_reporting_core.config.JaversConfig;
 import org.cardanofoundation.lob.app.accounting_reporting_core.config.JpaConfig;
-import org.cardanofoundation.lob.app.accounting_reporting_core.config.ModulithEventConfig;
 import org.cardanofoundation.lob.app.accounting_reporting_core.config.TimeConfig;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.LedgerDispatchStatus;
@@ -53,7 +52,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.repository.Transa
 import org.cardanofoundation.lob.app.accounting_reporting_core.repository.TransactionReconcilationRepository;
 import org.cardanofoundation.lob.app.support.modulith.EventMetadata;
 
-@SpringBootTest(classes = {JaversConfig.class, TimeConfig.class, JpaConfig.class, ModulithEventConfig.class})
+@SpringBootTest(classes = {JaversConfig.class, TimeConfig.class, JpaConfig.class})
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"org.cardanofoundation.lob.app.accounting_reporting_core","org.cardanofoundation.lob.app.organisation","org.cardanofoundation.lob.app.blockchain_reader"})
