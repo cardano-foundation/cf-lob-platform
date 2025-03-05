@@ -47,7 +47,6 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation", produces = "application/json")
-    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationList() {
         return ResponseEntity.ok().body(
                 organisationService.findAll().stream().map(organisation -> {
@@ -92,7 +91,6 @@ public class OrganisationResource {
                     "}"))})
     })
     @GetMapping(value = "/organisation/{orgId}", produces = "application/json")
-    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationDetailSpecific(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         Optional<OrganisationView> organisation = organisationService.findById(orgId).map(organisation1 -> {
 
@@ -117,7 +115,6 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation/{orgId}/cost-center", produces = "application/json")
-    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationCostCenter(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(
                 organisationService.getAllCostCenter(orgId).stream().map(organisationCostCenter -> {
@@ -136,7 +133,6 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation/{orgId}/project", produces = "application/json")
-    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationProject(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(
                 organisationService.getAllProjects(orgId).stream().map(organisationProject -> {
@@ -155,7 +151,6 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation/{orgId}/chart-type", produces = "application/json")
-    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<List<OrganisationChartOfAccountTypeView>> organisationChartOfAccountType(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(
                 organisationService.getAllChartType(orgId).stream().map(chartOfAccountType -> {
@@ -191,7 +186,6 @@ public class OrganisationResource {
             ),
     })
     @GetMapping(value = "/organisation/{orgId}/events", produces = "application/json")
-    @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<List<OrganisationEventView>> organisationEvent(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId) {
         return ResponseEntity.ok().body(
                 organisationService.getOrganisationEventCode(orgId).stream().map(accountEvent -> {
