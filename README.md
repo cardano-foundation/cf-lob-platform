@@ -24,10 +24,10 @@ The LOB platform is designed to integrate traditional accounting systems with bl
 
 Learn more about Reeve: [Reeve - Ledger on the Blockchain](https://www.cardanofoundation.org/blog/boosting-transparency-on-chain-financial-report)
 ### Key Features
-- **Streamlined Audits:** Simplifies the audit process by providing a single source of truth for financial information
-- **Strengthened Accountability:** Creates an immutable and transparent record of all financial activities, holding accountable for their actions and decisions
-- **Increased Trust:** Instills confidence in stakeholders regarding the accuracy and reliability of financial information, strengthening relationships and promotin collaboration
-- **Improved Efficiency:** Reduces the cost and complexity of managing financial data, freeing ressources for innovation and growth initiatives.
+- **Enhanced auditability:** The recording of transactions on-chain, immutable and tamper-proof, creates a verifiable trail of the financial activities and makes audits faster, less expensive and more reliable.
+- **Strengthened Accountability:** Creates an immutable and transparent record of all financial activities, holding management teams accountable for their actions and decisions
+- **Increased Trust:** Transparent sharing of data instills confidence in stakeholders and generates new opportunities for showcase commitment to responsible management
+- **Improved Efficiency:** Reduces the cost and complexity of managing financial data, by creating a single source of truth, that can be used for automated reporting and streamlined working processes, freeing resources for innovation and growth initiatives.
 - **Modular Software Architecture:** Facilitates scalability and extensibility, allowing for the integration of additional features and functionalities as needed
 
 ## Repository Structure
