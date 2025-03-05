@@ -23,9 +23,6 @@
 - `organisation_project` - Organisation Project (AUDIT)
 - `organisation_vat` - Organisation VAT (AUDIT)
 
-### Spring Modulith
-- `event_publication` - Event Publication
-
 ### Spring Data Envers
 - `revinfo` - Rev Info
 

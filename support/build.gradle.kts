@@ -4,9 +4,6 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
 
-    implementation("org.springframework.modulith:spring-modulith-api")
-    implementation("org.springframework.modulith:spring-modulith-events-core")
-    implementation("org.springframework.modulith:spring-modulith-events-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.2.4")
     implementation("org.springframework.boot:spring-boot-starter-security:3.2.4")
 }
