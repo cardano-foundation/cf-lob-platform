@@ -76,8 +76,8 @@ public class Organisation extends CommonEntity implements Persistable<String> {
     @Column(name = "report_currency_id", nullable = false)
     private String reportCurrencyId;
 
-    @Column(name = "website")
-    private String webSite;
+    @Column(name = "website_url")
+    private String websiteUrl;
 
     @Column(name = "admin_email", nullable = false)
     private String adminEmail;

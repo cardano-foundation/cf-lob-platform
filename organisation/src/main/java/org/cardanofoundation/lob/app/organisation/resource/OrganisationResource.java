@@ -76,7 +76,7 @@ public class OrganisationResource {
                             new LinkedHashSet<>(),
                             new LinkedHashSet<>(),
                             new LinkedHashSet<>(),
-                            organisation.getWebSite(),
+                            organisation.getWebsiteUrl(),
                             organisation.getLogo()
                     );
                 }).toList()

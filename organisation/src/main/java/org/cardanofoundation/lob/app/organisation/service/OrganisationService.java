@@ -105,7 +105,7 @@ public class OrganisationService {
             organisationO.setAdminEmail(organisationUpdate.getAdminEmail());
         }
         if (organisationUpdate.getWebsiteUrl() != null) {
-            organisationO.setWebSite(organisationUpdate.getWebsiteUrl());
+            organisationO.setWebsiteUrl(organisationUpdate.getWebsiteUrl());
         }
         if (organisationUpdate.getCurrencyId() != null) {
             organisationO.setCurrencyId(organisationUpdate.getCurrencyId());
@@ -157,7 +157,7 @@ public class OrganisationService {
                         .map(organisationCurrency ->
                                 organisationCurrency.getId() != null ? organisationCurrency.getId().getCustomerCode() : null
                         ).collect(Collectors.toSet()),
-                organisation.getWebSite(),
+                organisation.getWebsiteUrl(),
                 organisation.getLogo()
         );
     }
@@ -170,7 +170,7 @@ public class OrganisationService {
         organisation.setAddress(organisationCreate.getAddress());
         organisation.setPhoneNumber(organisationCreate.getPhoneNumber());
         organisation.setAdminEmail(organisationCreate.getAdminEmail());
-        organisation.setWebSite(organisationCreate.getWebsiteUrl());
+        organisation.setWebsiteUrl(organisationCreate.getWebsiteUrl());
         organisation.setCurrencyId(organisationCreate.getCurrencyId());
         organisation.setReportCurrencyId(organisationCreate.getReportCurrencyId());
 

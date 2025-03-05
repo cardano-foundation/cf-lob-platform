@@ -175,7 +175,7 @@ class OrganisationServiceTest {
         org.setPostCode("postCode");
         org.setProvince("province");
         org.setCountryCode("countryCode");
-        org.setWebSite("webSite");
+        org.setWebsiteUrl("webSite");
         org.setLogo("logo");
 
         when(costCenterService.getAllCostCenter(anyString())).thenReturn(Set.of(new OrganisationCostCenter()));
@@ -196,7 +196,7 @@ class OrganisationServiceTest {
         assertEquals(org.getPostCode(), organisationView.getPostCode());
         assertEquals(org.getProvince(), organisationView.getProvince());
         assertEquals(org.getCountryCode(), organisationView.getCountryCode());
-        assertEquals(org.getWebSite(), organisationView.getWebSite());
+        assertEquals(org.getWebsiteUrl(), organisationView.getWebsiteUrl());
         assertEquals(org.getLogo(), organisationView.getLogo());
         assertEquals(1, organisationView.getCostCenters().size());
         assertEquals(1, organisationView.getProjects().size());
