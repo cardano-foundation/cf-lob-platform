@@ -1,5 +1,7 @@
 package org.cardanofoundation.lob.app.organisation.resource;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,6 +37,7 @@ import org.cardanofoundation.lob.app.organisation.service.OrganisationService;
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Organisation", description = "Organisation API")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @ConditionalOnProperty(value = "lob.organisation.enabled", havingValue = "true", matchIfMissing = true)
 public class OrganisationResource {
@@ -209,7 +212,7 @@ public class OrganisationResource {
                     "    \"detail\": \"Unable to crate Organisation with IdNumber\"\n" +
                     "}"))})
     })
-    @PostMapping(value = "/organisation", produces = "application/json")
+    @PostMapping(value = "/organisation", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
     public ResponseEntity<?> organisationCreate(@Valid @RequestBody OrganisationCreate organisationCreate) {
 
@@ -255,8 +258,8 @@ public class OrganisationResource {
                     "    \"detail\": \"Unable to create Organisation\"\n" +
                     "}"))})
     })
-    @PutMapping(value = "/organisation/{orgId}", produces = "application/json")
     @PreAuthorize("hasRole(@securityConfig.getManagerRole())")
+    @PostMapping(value = "/organisation/{orgId}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     public ResponseEntity<?> organisationUpdate(@PathVariable("orgId") @Parameter(example = "75f95560c1d883ee7628993da5adf725a5d97a13929fd4f477be0faf5020ca94") String orgId, @Valid @RequestBody OrganisationUpdate organisationUpdate) {
         Optional<Organisation> organisationChe = organisationService.findById(orgId);
         if (organisationChe.isEmpty()) {

@@ -26,6 +26,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.resource.views.Ex
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @Slf4j
 public class ExtractionController {

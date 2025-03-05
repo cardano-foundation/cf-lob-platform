@@ -83,16 +83,36 @@ public class OrganisationService {
     @Transactional
     public Optional<Organisation> upsertOrganisation(Organisation organisationO, OrganisationUpdate organisationUpdate) {
 
-        organisationO.setName(organisationUpdate.getName());
-        organisationO.setCity(organisationUpdate.getCity());
-        organisationO.setPostCode(organisationUpdate.getPostCode());
-        organisationO.setProvince(organisationUpdate.getProvince());
-        organisationO.setAddress(organisationUpdate.getAddress());
-        organisationO.setPhoneNumber(organisationUpdate.getPhoneNumber());
-        organisationO.setAdminEmail(organisationUpdate.getAdminEmail());
-        organisationO.setWebSite(organisationUpdate.getWebsiteUrl());
-        organisationO.setCurrencyId(organisationUpdate.getCurrencyId());
-        organisationO.setReportCurrencyId(organisationUpdate.getReportCurrencyId());
+        if (organisationUpdate.getName() != null) {
+            organisationO.setName(organisationUpdate.getName());
+        }
+        if (organisationUpdate.getCity() != null) {
+            organisationO.setCity(organisationUpdate.getCity());
+        }
+        if (organisationUpdate.getPostCode() != null) {
+            organisationO.setPostCode(organisationUpdate.getPostCode());
+        }
+        if (organisationUpdate.getProvince() != null) {
+            organisationO.setProvince(organisationUpdate.getProvince());
+        }
+        if (organisationUpdate.getAddress() != null) {
+            organisationO.setAddress(organisationUpdate.getAddress());
+        }
+        if (organisationUpdate.getPhoneNumber() != null) {
+            organisationO.setPhoneNumber(organisationUpdate.getPhoneNumber());
+        }
+        if (organisationUpdate.getAdminEmail() != null) {
+            organisationO.setAdminEmail(organisationUpdate.getAdminEmail());
+        }
+        if (organisationUpdate.getWebsiteUrl() != null) {
+            organisationO.setWebSite(organisationUpdate.getWebsiteUrl());
+        }
+        if (organisationUpdate.getCurrencyId() != null) {
+            organisationO.setCurrencyId(organisationUpdate.getCurrencyId());
+        }
+        if (organisationUpdate.getReportCurrencyId() != null) {
+            organisationO.setReportCurrencyId(organisationUpdate.getReportCurrencyId());
+        }
 
         Organisation organisation = organisationRepository.saveAndFlush(organisationO);
         return Optional.of(organisation);
