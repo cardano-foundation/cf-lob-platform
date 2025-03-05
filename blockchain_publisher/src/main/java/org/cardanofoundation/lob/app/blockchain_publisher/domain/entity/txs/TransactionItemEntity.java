@@ -76,6 +76,7 @@ public class TransactionItemEntity extends CommonDateOnlyEntity implements Persi
             @AttributeOverride(name = "counterparty.customerCode", column = @Column(name = "document_counterparty_customer_code")),
             @AttributeOverride(name = "counterparty.type", column = @Column(name = "document_counterparty_type")),
     })
+    @Nullable
     private Document document;
 
     public Optional<AccountEvent> getAccountEvent() {
