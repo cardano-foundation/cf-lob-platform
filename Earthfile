@@ -2,7 +2,7 @@ VERSION 0.8
 
 ARG --global ALL_BUILD_TARGETS="platform-library-m2-cache follower-app"
 
-ARG --global DOCKER_IMAGE_PREFIX="cf-lob"
+ARG --global DOCKER_IMAGE_PREFIX="cf-reeve"
 ARG --global DOCKER_IMAGES_EXTRA_TAGS=""
 ARG --global DOCKER_REGISTRIES="hub.docker.com"
 ARG --global HUB_DOCKER_COM_ORG=cardanofoundation
