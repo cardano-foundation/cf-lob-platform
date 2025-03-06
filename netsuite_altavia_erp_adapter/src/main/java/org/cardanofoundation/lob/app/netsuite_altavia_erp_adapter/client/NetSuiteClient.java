@@ -20,6 +20,7 @@ import java.time.chrono.ChronoLocalDate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import jakarta.annotation.PostConstruct;
@@ -52,6 +53,8 @@ public class NetSuiteClient {
     private final String baseUrl;
     private final String tokenUrl;
     private final String privateKeyFilePath;
+    private final String certificateId;
+    private final String clientId;
 
     private String accessToken;
     private LocalDateTime accessTokenExpiration;
@@ -86,11 +89,11 @@ public class NetSuiteClient {
         PrivateKey privateKey = loadPrivateKeyFromFile(privateKeyFilePath);
         return Jwts.builder()
                 .setIssuedAt(new Date())
-                .setAudience("https://6766746-sb1.suitetalk.api.netsuite.com/services/rest/auth/oauth2/v1/token")
-                .setHeader(Map.of("kid", "BhY-OPdKYFAwd2qwWqY1PmuVrJtGk1HZE85pFoFaa_U", "typ", "jwt"))
+                .setAudience(tokenUrl)
+                .setHeader(Map.of("kid", certificateId, "typ", "jwt"))
                 .setExpiration(Date.from(Instant.now().plusSeconds(3600))) // 1-hour expiration
                 .claim("scope", "restlets")  // Adding the scope claim
-                .claim("iss", "a0d5804eea0a5f2c21a9d7d2070437d4bbd1081c60fa596aae00e1671a031c8e")  // Adding the issuer (you can adjust it to your needs)
+                .claim("iss", clientId)  // Adding the issuer (you can adjust it to your needs)
                 .signWith(privateKey, SignatureAlgorithm.PS256)  // Sign with RS256
                 .compact();
     }
@@ -185,7 +188,7 @@ public class NetSuiteClient {
         String uriString = UriComponentsBuilder.fromHttpUrl(baseUrl)
                 .queryParam("trandate:within", isoFormatDates(from, to)).toUriString();
         log.info("Call to url: {}", uriString);
-        return webClient
+        return Objects.requireNonNull(webClient
                 .get()
                 .uri(uriString)
                 .header("Authorization", "Bearer " + accessToken)
@@ -193,7 +196,7 @@ public class NetSuiteClient {
                     int value = clientResponse.statusCode().value();
                     return clientResponse.bodyToMono(String.class).map(body -> new ApiResponse(value, body));
                 })
-                .block();
+                .block());
     }
 
     private String isoFormatDates(LocalDate from, LocalDate to) {
