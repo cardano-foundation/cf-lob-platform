@@ -1,15 +1,22 @@
 package org.cardanofoundation.lob.app.accounting_reporting_core.service.internal;
 
+import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.FatalError;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.ReportStatusUpdate;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TxStatusUpdate;
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.entity.TransactionEntity;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchChunkEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchFailedEvent;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.event.extraction.TransactionBatchStartedEvent;
@@ -37,7 +44,7 @@ public class AccountingCoreEventHandler {
     public void handleLedgerUpdatedEvent(TxsLedgerUpdatedEvent event) {
         log.info("Received handleLedgerUpdatedEvent event, event: {}", event.getStatusUpdates());
 
-        val txStatusUpdatesMap = event.statusUpdatesMap();
+        Map<String, TxStatusUpdate> txStatusUpdatesMap = event.statusUpdatesMap();
 
         ledgerService.updateTransactionsWithNewStatuses(txStatusUpdatesMap);
         transactionBatchService.updateBatchesPerTransactions(txStatusUpdatesMap);
@@ -49,7 +56,7 @@ public class AccountingCoreEventHandler {
     public void handleReportsLedgerUpdated(ReportsLedgerUpdatedEvent event) {
         log.info("Received handleReportsLedgerUpdated, event: {}", event);
 
-        val reportStatusUpdatesMap = event.statusUpdatesMap();
+        Map<String, ReportStatusUpdate> reportStatusUpdatesMap = event.statusUpdatesMap();
 
         ledgerService.updateReportsWithNewStatuses(reportStatusUpdatesMap);
 
@@ -60,7 +67,7 @@ public class AccountingCoreEventHandler {
     public void handleTransactionBatchFailedEvent(TransactionBatchFailedEvent event) {
         log.info("Received handleTransactionBatchFailedEvent event, event: {}", event);
 
-        val error = event.getError();
+        FatalError error = event.getError();
 
         transactionBatchService.failTransactionBatch(
                 event.getBatchId(),
@@ -92,8 +99,8 @@ public class AccountingCoreEventHandler {
 
         log.info("Received handleTransactionBatchChunkEvent event...., event, batch_id: {}, chunk_size:{}", batchId, transactionBatchChunkEvent.getTransactions().size());
 
-        val txs = transactionBatchChunkEvent.getTransactions();
-        val detachedDbTxs = transactionConverter.convertToDbDetached(txs);
+        Set<Transaction> txs = transactionBatchChunkEvent.getTransactions();
+        Set<TransactionEntity> detachedDbTxs = transactionConverter.convertToDbDetached(txs);
 
         erpIncomingDataProcessor.continueIngestion(
                 transactionBatchChunkEvent.getOrganisationId(),
@@ -134,12 +141,12 @@ public class AccountingCoreEventHandler {
     public void handleReconcilationChunkEvent(ReconcilationChunkEvent event) {
         log.info("Received handleReconcilationChunkEvent, event: {}", event);
 
-        val reconcilationId = event.getReconciliationId();
-        val organisationId = event.getOrganisationId();
-        val fromDate = event.getFrom();
-        val toDate = event.getTo();
-        val transactions = event.getTransactions();
-        val chunkDetachedTxEntities = transactionConverter.convertToDbDetached(transactions);
+        String reconcilationId = event.getReconciliationId();
+        String organisationId = event.getOrganisationId();
+        LocalDate fromDate = event.getFrom();
+        LocalDate toDate = event.getTo();
+        Set<Transaction> transactions = event.getTransactions();
+        Set<TransactionEntity> chunkDetachedTxEntities = transactionConverter.convertToDbDetached(transactions);
 
         erpIncomingDataProcessor.continueReconcilation(
                 reconcilationId,

@@ -49,6 +49,10 @@ public class TransactionItem {
     private Optional<Document> document = Optional.empty(); // initially we allow empty but later as part of business rules we check if document is present
 
     @NotNull
+    @LOBVersionSourceRelevant
+    private OperationType operationType;
+
+    @NotNull
     @PositiveOrZero
     @LOBVersionSourceRelevant
     private BigDecimal fxRate;

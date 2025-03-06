@@ -7,11 +7,10 @@ import static org.cardanofoundation.lob.app.accounting_reporting_core.domain.cor
 import java.math.BigDecimal;
 import java.util.Set;
 
-import lombok.val;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.OperationType;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Transaction;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionItem;
 import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.TransactionType;
@@ -30,18 +29,20 @@ class AmountLcyBalanceZerosOutCheckTaskItemTest {
 
     @Test
     void whenLcyBalanceZerosOut_thenNoViolations() {
-        val txId = Transaction.id("1", "1");
-        val organisationId = "1";
+        String txId = Transaction.id("1", "1");
+        String organisationId = "1";
 
-        val txItem1 = new TransactionItemEntity();
+        TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "0"));
         txItem1.setAmountLcy(new BigDecimal("100"));
+        txItem1.setOperationType(OperationType.DEBIT);
 
-        val txItem2 = new TransactionItemEntity();
+        TransactionItemEntity txItem2 = new TransactionItemEntity();
         txItem2.setId(TransactionItem.id(txId, "1"));
-        txItem2.setAmountLcy(new BigDecimal("-100"));
+        txItem2.setAmountLcy(new BigDecimal("100"));
+        txItem2.setOperationType(OperationType.CREDIT);
 
-        val tx = new TransactionEntity();
+        TransactionEntity tx = new TransactionEntity();
         tx.setId(txId);
         tx.setTransactionInternalNumber("1");
         tx.setOrganisation(Organisation.builder().id(organisationId).build());
@@ -55,14 +56,15 @@ class AmountLcyBalanceZerosOutCheckTaskItemTest {
 
     @Test
     void whenLcyBalanceDoesNotZeroOut_thenViolationGenerated() {
-        val txId = Transaction.id("2", "1");
-        val organisationId = "1";
+        String txId = Transaction.id("2", "1");
+        String organisationId = "1";
 
-        val txItem1 = new TransactionItemEntity();
+        TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "1"));
-        txItem1.setAmountLcy(new BigDecimal("-99"));
+        txItem1.setAmountLcy(new BigDecimal("99"));
+        txItem1.setOperationType(OperationType.CREDIT);
 
-        val tx = new TransactionEntity();
+        TransactionEntity tx = new TransactionEntity();
         tx.setId(txId);
         tx.setTransactionInternalNumber("2");
         tx.setOrganisation(Organisation.builder().id(organisationId).build());
@@ -73,16 +75,16 @@ class AmountLcyBalanceZerosOutCheckTaskItemTest {
 
         assertThat(tx.getAutomatedValidationStatus()).isEqualTo(FAILED);
         assertThat(tx.getViolations()).isNotEmpty();
-        assertThat(tx.getViolations().size()).isEqualTo(1);
+        assertThat(tx.getViolations()).hasSize(1);
         assertThat(tx.getViolations().iterator().next().getCode()).isEqualTo(LCY_BALANCE_MUST_BE_ZERO);
     }
 
     @Test
     void whenNoTransactionItems_thenNoViolations() {
-        val txId = Transaction.id("3", "1");
-        val organisationId = "1";
+        String txId = Transaction.id("3", "1");
+        String organisationId = "1";
 
-        val tx = new TransactionEntity();
+        TransactionEntity tx = new TransactionEntity();
         tx.setId(txId);
         tx.setTransactionInternalNumber("3");
         tx.setOrganisation(Organisation.builder().id(organisationId).build());
@@ -96,14 +98,15 @@ class AmountLcyBalanceZerosOutCheckTaskItemTest {
 
     @Test
     void whenOnlyOneSideOfTransaction_thenViolationGenerated() {
-        val txId = Transaction.id("4", "1");
-        val organisationId = "1";
+        String txId = Transaction.id("4", "1");
+        String organisationId = "1";
 
-        val txItem1 = new TransactionItemEntity();
+        TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "2"));
         txItem1.setAmountLcy(new BigDecimal("100"));
+        txItem1.setOperationType(OperationType.DEBIT);
 
-        val tx = new TransactionEntity();
+        TransactionEntity tx = new TransactionEntity();
         tx.setId(txId);
         tx.setTransactionInternalNumber("4");
         tx.setOrganisation(Organisation.builder().id(organisationId).build());
@@ -119,22 +122,25 @@ class AmountLcyBalanceZerosOutCheckTaskItemTest {
 
     @Test
     void whenLcyBalanceZerosOutWithMultipleItems_thenNoViolations() {
-        val txId = Transaction.id("5", "1");
-        val organisationId = "1";
+        String txId = Transaction.id("5", "1");
+        String organisationId = "1";
 
-        val txItem1 = new TransactionItemEntity();
+        TransactionItemEntity txItem1 = new TransactionItemEntity();
         txItem1.setId(TransactionItem.id(txId, "3"));
         txItem1.setAmountLcy(new BigDecimal("50"));
+        txItem1.setOperationType(OperationType.DEBIT);
 
-        val txItem2 = new TransactionItemEntity();
+        TransactionItemEntity txItem2 = new TransactionItemEntity();
         txItem2.setId(TransactionItem.id(txId, "4"));
         txItem2.setAmountLcy(new BigDecimal("30"));
+        txItem2.setOperationType(OperationType.DEBIT);
 
-        val txItem3 = new TransactionItemEntity();
+        TransactionItemEntity txItem3 = new TransactionItemEntity();
         txItem3.setId(TransactionItem.id(txId, "5"));
-        txItem3.setAmountLcy(new BigDecimal("-80"));
+        txItem3.setAmountLcy(new BigDecimal("80"));
+        txItem3.setOperationType(OperationType.CREDIT);
 
-        val tx = new TransactionEntity();
+        TransactionEntity tx = new TransactionEntity();
         tx.setId(txId);
         tx.setTransactionInternalNumber("5");
         tx.setOrganisation(Organisation.builder().id(organisationId).build());

@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import org.springframework.stereotype.Service;
 
@@ -72,10 +71,10 @@ public class TransactionConverter {
     }
 
     private TransactionEntity convertToDbDetached(Transaction transaction) {
-        val violations = transaction.getViolations()
+        Set<TransactionViolation> violations = transaction.getViolations()
                 .stream()
                 .map(violation -> {
-                    val violationEntity = new TransactionViolation();
+                    TransactionViolation violationEntity = new TransactionViolation();
                     violationEntity.setCode(violation.code());
                     violationEntity.setTxItemId(violation.txItemId());
                     violationEntity.setSeverity(violation.severity());
@@ -87,12 +86,12 @@ public class TransactionConverter {
                 })
                 .collect(Collectors.toSet());
 
-        val txItems = transaction.getItems()
+        Set<TransactionItemEntity> txItems = transaction.getItems()
                 .stream()
                 .map(txItem -> {
-                    val doc = convertToDbDetached(txItem.getDocument());
+                    Optional<Document> doc = convertToDbDetached(txItem.getDocument());
 
-                    val txItemEntity = new TransactionItemEntity();
+                    TransactionItemEntity txItemEntity = new TransactionItemEntity();
                     txItemEntity.setId(txItem.getId());
                     txItemEntity.setDocument(doc);
                     txItemEntity.setAmountLcy(txItem.getAmountLcy());
@@ -100,6 +99,7 @@ public class TransactionConverter {
                     txItemEntity.setCostCenter(convertCostCenter(txItem.getCostCenter()));
                     txItemEntity.setProject(convertProject(txItem.getProject()));
                     txItemEntity.setFxRate(txItem.getFxRate());
+                    txItemEntity.setOperationType(txItem.getOperationType());
                     txItem.getAccountCredit().ifPresent(creditAccount -> {
                         txItemEntity.setAccountCredit(Optional.of(Account.builder()
                                 .code(creditAccount.getCode())
@@ -127,7 +127,7 @@ public class TransactionConverter {
                 })
                 .collect(Collectors.toSet());
 
-        val txEntity = new TransactionEntity();
+        TransactionEntity txEntity = new TransactionEntity();
         txEntity.setId(transaction.getId());
         txEntity.setBatchId(transaction.getBatchId());
         txEntity.setTransactionInternalNumber(transaction.getInternalTransactionNumber());
@@ -188,7 +188,7 @@ public class TransactionConverter {
     }
 
     private Transaction convertToDbDetached(TransactionEntity transactionEntity) {
-        val violations = transactionEntity.getViolations()
+        Set<Violation> violations = transactionEntity.getViolations()
                 .stream()
                 .map(violationEntity -> {
                     return new org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Violation(
@@ -202,7 +202,7 @@ public class TransactionConverter {
                 })
                 .collect(Collectors.toSet());
 
-        val items = transactionEntity.getItems()
+        Set<TransactionItem> items = transactionEntity.getItems()
                 .stream()
                 .map(txItemEntity -> TransactionItem.builder()
                         .id(txItemEntity.getId())
