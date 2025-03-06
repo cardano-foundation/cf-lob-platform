@@ -1,4 +1,4 @@
-package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client;
+package org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
