@@ -29,8 +29,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.responses.ApiResponse;
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.responses.TokenReponse;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -43,6 +41,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.vavr.control.Either;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
+
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.responses.ApiResponse;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.responses.TokenReponse;
 
 @Slf4j
 @RequiredArgsConstructor
