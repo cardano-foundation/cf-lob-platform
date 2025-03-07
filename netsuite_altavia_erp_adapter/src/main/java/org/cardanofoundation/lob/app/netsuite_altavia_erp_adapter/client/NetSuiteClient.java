@@ -20,7 +20,6 @@ import java.time.chrono.ChronoLocalDate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import jakarta.annotation.PostConstruct;
@@ -194,12 +193,9 @@ public class NetSuiteClient {
         String uriString = UriComponentsBuilder.fromHttpUrl(baseUrl)
                 .queryParam("trandate:within", isoFormatDates(from, to)).toUriString();
         log.info("Call to url: {}", uriString);
-        return Objects.requireNonNull(restClient
-                .get()
-                .uri(uriString)
-                .header("Authorization", STR."Bearer \{accessToken.orElse("dummybearer")}")
-                .retrieve()
-                .toEntity(String.class));
+        RestClient.RequestHeadersSpec<?> uri = restClient.get().uri(uriString);
+        accessToken.ifPresent(s -> uri.header("Authorization", STR."Bearer \{s}"));
+        return uri.retrieve().toEntity(String.class);
     }
 
     private String isoFormatDates(LocalDate from, LocalDate to) {
