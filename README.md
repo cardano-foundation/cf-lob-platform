@@ -1,6 +1,6 @@
 <div align="center">
   <hr />
-  <h1 align="center" style="border-bottom: none">Ledger on the Blockchain | Cardano Foundation</h1>
+  <h1 align="center" style="border-bottom: none">Reeve | Cardano Foundation</h1>
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cardano-foundation/cardano-wallet/blob/master/LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
@@ -20,7 +20,7 @@ In a time where trust and transparency hold paramount importance, blockchain eme
 Reeve, also known as Ledger on the Blockchain (LOB), empowers organizations to securely record and share critical financial data on the Cardano blockchain, ensuring its integrity and verifiability for all stakeholders. 
 
 ## Project Overview
-The LOB platform is designed to integrate traditional accounting systems with blockchain technology, ensuring transparency, immutability, and enhanced security for financial records. By leveraging the Cardano blockchain, the platform offers a decentralized approach to financial data management, facilitating trust and efficiency in accounting processes.
+The Reeve platform is designed to integrate traditional accounting systems with blockchain technology, ensuring transparency, immutability, and enhanced security for financial records. By leveraging the Cardano blockchain, the platform offers a decentralized approach to financial data management, facilitating trust and efficiency in accounting processes.
 
 Learn more about Reeve: [Reeve - Ledger on the Blockchain](https://www.cardanofoundation.org/blog/boosting-transparency-on-chain-financial-report)
 ### Key Features
@@ -37,7 +37,7 @@ The repository is organized into several modules, each responsible for specific 
 - **Blockchain Common:** Contains shared utilities and configurations for blockchain interactions. This module provides common interfaces and services that facilitate communication with the Cardano blockchain, ensuring consistency across different components.
 - **Blockchain Publisher:** Responsible for publishing financial transactions and reports to the blockchain. It ensures that all relevant data is accurately and securely recorded on the decentralized ledger.
 - **Blockchain Reader:** Handles the retrieval and reading of data from the blockchain. This module allows other components to access and verify financial records stored on the blockchain, supporting transparency and auditability.
-- **Netsuite Altavia ERP Adapter:** An adapter designed to integrate the LOB platform with NetSuite Altavia ERP systems. It facilitates seamless data exchange between the ERP and the blockchain, ensuring synchronization of financial information.
+- **Netsuite Altavia ERP Adapter:** An adapter designed to integrate the Reeve platform with NetSuite Altavia ERP systems. It facilitates seamless data exchange between the ERP and the blockchain, ensuring synchronization of financial information.
 - **Organisation:** Manages organizational data and structures within the platform. This module handles information related to different entities, departments, and roles, ensuring proper access control and data management.
 - **Support:** Provides support utilities and services for the platform. This includes logging, error handling, and other auxiliary functions that enhance the platform's robustness and maintainability.
 - **_backend-services/cf-lob-ledger-follower-app:** A backend service responsible for monitoring the blockchain ledger. It tracks new transactions and updates, ensuring that the platform remains synchronized with the latest state of the blockchain.
@@ -52,18 +52,18 @@ Through the use of modules it is possible to split the architecture into differe
 ## How to build
 This project uses Gradle as the build tool. To build the project, follow these steps:
 ```
-git clone git@github.com:cardano-foundation/cf-lob-platform.git
-cd cf-lob-platform
+git clone git@github.com:cardano-foundation/cf-reeve-platform.git
+cd cf-reeve-platform
 ./gradlew clean build
 ```
 
 ## How to run
 This project offers the needed components to customize an own application. To run the application, follow these steps:
 - Create your own Spring Boot application and include the needed dependencies from this project
-- Implement for your ERP system the needed adapter to integrate the LOB platform with your system (or if it's NetSuite Altavia ERP, use the provided adapter)
+- Implement for your ERP system the needed adapter to integrate the Reeve platform with your system (or if it's NetSuite Altavia ERP, use the provided adapter)
 - Start your Spring Boot Application
 
-**We will provide a sample application in the near future to demonstrate how to use the LOB platform.**
+**We will provide a sample application in the near future to demonstrate how to use the ReeveLOB platform.**
 
 
 ## Documentation
