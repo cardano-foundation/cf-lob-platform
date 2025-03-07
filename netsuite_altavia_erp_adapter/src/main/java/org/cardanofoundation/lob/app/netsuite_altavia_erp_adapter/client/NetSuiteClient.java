@@ -29,8 +29,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpStatusCode;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,7 +43,6 @@ import io.vavr.control.Either;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
-import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.responses.ApiResponse;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.responses.TokenReponse;
 
 @Slf4j
@@ -50,7 +50,7 @@ import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.client.respons
 public class NetSuiteClient {
 
     private final ObjectMapper objectMapper;
-    private final WebClient webClient;
+    private final RestClient restClient;
 
     @Getter
     private final String baseUrl;
@@ -68,12 +68,7 @@ public class NetSuiteClient {
     public void init() {
         log.info("Initializing NetSuite client...");
         log.info("token url: {}", tokenUrl);
-
-        try {
-            refreshToken();
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-            log.error("Error initializing NetSuite client: {}", e.getMessage());
-        }
+        refreshToken();
     }
 
     private PrivateKey loadPrivateKeyFromFile(String fileName) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -101,28 +96,42 @@ public class NetSuiteClient {
                 .compact();
     }
 
-    private void refreshToken() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private void refreshToken() {
         log.info("Refreshing NetSuite access token...");
-        String jwtToken = getJwtTokenFromCertifikate();
+        String jwtToken = null;
+        try {
+            jwtToken = getJwtTokenFromCertifikate();
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            log.error("Error generating jwt Token: {}", e.getMessage());
+            return;
+        }
         // Encode parameters
-        String requestBody = "grant_type=" + URLEncoder.encode("client_credentials", StandardCharsets.UTF_8)
-                + "&client_assertion_type=" + URLEncoder.encode("urn:ietf:params:oauth:client-assertion-type:jwt-bearer", StandardCharsets.UTF_8)
-                + "&client_assertion=" + URLEncoder.encode(jwtToken, StandardCharsets.UTF_8);
+        String requestBody = STR."grant_type=\{URLEncoder.encode("client_credentials", StandardCharsets.UTF_8)}&client_assertion_type=\{URLEncoder.encode("urn:ietf:params:oauth:client-assertion-type:jwt-bearer", StandardCharsets.UTF_8)}&client_assertion=\{URLEncoder.encode(jwtToken, StandardCharsets.UTF_8)}";
         // Create the request
-        TokenReponse tokenResponse = webClient.post()
+        ResponseEntity<String> entity = restClient.post()
                 .uri(tokenUrl)
                 .header("Content-Type", "application/x-www-form-urlencoded")
-                .contentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED)
-                .bodyValue(requestBody)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(requestBody)
                 .retrieve()
-                .bodyToMono(TokenReponse.class)
-                .block();
-        accessTokenExpiration = LocalDateTime.now().plusSeconds(tokenResponse.getExpiresIn());
-        accessToken = tokenResponse.getAccessToken();
+                .toEntity(String.class);
+        if(entity.getStatusCode().is2xxSuccessful()) {
+            TokenReponse tokenResponse = null;
+            try {
+                tokenResponse = objectMapper.readValue(entity.getBody(), TokenReponse.class);
+            } catch (JsonProcessingException e) {
+                log.error("Error parsing JSON response from NetSuite API: {}", e.getMessage());
+            }
+            accessTokenExpiration = LocalDateTime.now().plusSeconds(tokenResponse.getExpiresIn());
+            accessToken = tokenResponse.getAccessToken();
+            log.info("NetSuite access token refreshed successfully...");
+        } else {
+            log.error("Error refreshing NetSuite access token: {}", entity.getBody());
+        }
     }
 
     public Either<Problem, Optional<String>> retrieveLatestNetsuiteTransactionLines(LocalDate extractionFrom, LocalDate extractionTo) {
-        ApiResponse response;
+        ResponseEntity<String> response;
         try {
             response = callForTransactionLinesData(extractionFrom, extractionTo);
         } catch (IOException e) {
@@ -133,9 +142,9 @@ public class NetSuiteClient {
                     .build());
         }
 
-        if (response.isSuccessful()) {
-            final String body = response.body();
-            log.info("Netsuite response success...customerCode:{}, message:{}", response.status(), body);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            final String body = response.getBody();
+            log.info("Netsuite response success...customerCode:{}, message:{}", response.getStatusCode().value(), body);
 
             try {
                 JsonNode bodyJsonTree = objectMapper.readTree(body);
@@ -151,7 +160,7 @@ public class NetSuiteClient {
                     }
 
                     return Either.left(Problem.builder()
-                            .withStatus(Status.valueOf(response.status()))
+                            .withStatus(Status.valueOf(response.getStatusCode().value()))
                             .withTitle(NETSUITE_API_ERROR)
                             .withDetail(String.format("Error customerCode: %d, message: %s", error, text))
                             .build());
@@ -162,7 +171,7 @@ public class NetSuiteClient {
                 log.error("Error parsing JSON response from NetSuite API: {}", e.getMessage());
 
                 return Either.left(Problem.builder()
-                        .withStatus(Status.valueOf(response.status()))
+                        .withStatus(Status.valueOf(response.getStatusCode().value()))
                         .withTitle(NETSUITE_API_ERROR)
                         .withDetail(e.getMessage())
                         .build());
@@ -170,36 +179,27 @@ public class NetSuiteClient {
         }
 
         return Either.left(Problem.builder()
-                .withStatus(Status.valueOf(response.status()))
+                .withStatus(Status.valueOf(response.getStatusCode().value()))
                 .withTitle(NETSUITE_API_ERROR)
-                .withDetail(response.body())
+                .withDetail(response.getBody())
                 .build());
     }
 
-    private ApiResponse callForTransactionLinesData(LocalDate from, LocalDate to) throws IOException {
+    private ResponseEntity<String> callForTransactionLinesData(LocalDate from, LocalDate to) throws IOException {
         log.info("Retrieving data from NetSuite...");
 
-
         if(LocalDate.now().isAfter(ChronoLocalDate.from(accessTokenExpiration))) {
-            try {
-                refreshToken();
-            } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-                log.error("Error refreshing NetSuite access token: {}", e.getMessage());
-                return new ApiResponse(HttpStatusCode.valueOf(500).value(), e.getMessage());
-            }
+            refreshToken();
         }
         String uriString = UriComponentsBuilder.fromHttpUrl(baseUrl)
                 .queryParam("trandate:within", isoFormatDates(from, to)).toUriString();
         log.info("Call to url: {}", uriString);
-        return Objects.requireNonNull(webClient
+        return Objects.requireNonNull(restClient
                 .get()
                 .uri(uriString)
                 .header("Authorization", "Bearer " + accessToken)
-                .exchangeToMono(clientResponse -> {
-                    int value = clientResponse.statusCode().value();
-                    return clientResponse.bodyToMono(String.class).map(body -> new ApiResponse(value, body));
-                })
-                .block());
+                .retrieve()
+                .toEntity(String.class));
     }
 
     private String isoFormatDates(LocalDate from, LocalDate to) {
