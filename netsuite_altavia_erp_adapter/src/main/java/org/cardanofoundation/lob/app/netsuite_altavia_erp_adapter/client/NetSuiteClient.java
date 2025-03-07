@@ -59,8 +59,8 @@ public class NetSuiteClient {
     private final String certificateId;
     private final String clientId;
 
-    private String accessToken;
-    private LocalDateTime accessTokenExpiration;
+    private Optional<String> accessToken = Optional.empty();
+    private Optional<LocalDateTime> accessTokenExpiration = Optional.empty();
 
     private static final String NETSUITE_API_ERROR = "NETSUITE_API_ERROR";
 
@@ -122,8 +122,8 @@ public class NetSuiteClient {
             } catch (JsonProcessingException e) {
                 log.error("Error parsing JSON response from NetSuite API: {}", e.getMessage());
             }
-            accessTokenExpiration = LocalDateTime.now().plusSeconds(tokenResponse.getExpiresIn());
-            accessToken = tokenResponse.getAccessToken();
+            accessTokenExpiration = Optional.of(LocalDateTime.now().plusSeconds(tokenResponse.getExpiresIn()));
+            accessToken = Optional.of(tokenResponse.getAccessToken());
             log.info("NetSuite access token refreshed successfully...");
         } else {
             log.error("Error refreshing NetSuite access token: {}", entity.getBody());
@@ -188,7 +188,7 @@ public class NetSuiteClient {
     private ResponseEntity<String> callForTransactionLinesData(LocalDate from, LocalDate to) throws IOException {
         log.info("Retrieving data from NetSuite...");
 
-        if(LocalDate.now().isAfter(ChronoLocalDate.from(accessTokenExpiration))) {
+        if(LocalDate.now().isAfter(ChronoLocalDate.from(accessTokenExpiration.orElse(LocalDateTime.MIN)))) {
             refreshToken();
         }
         String uriString = UriComponentsBuilder.fromHttpUrl(baseUrl)
@@ -197,7 +197,7 @@ public class NetSuiteClient {
         return Objects.requireNonNull(restClient
                 .get()
                 .uri(uriString)
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", STR."Bearer \{accessToken.orElse("dummybearer")}")
                 .retrieve()
                 .toEntity(String.class));
     }
