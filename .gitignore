@@ -32,7 +32,7 @@ out/
 ### VS Code ###
 .vscode/
 ### ENV ###
-.env
+.env*
 
 
 ### Jenv ###
