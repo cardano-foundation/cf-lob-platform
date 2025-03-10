@@ -16,7 +16,7 @@ public class RestClientConfig {
     @Value("${rest.client.readTimeout:5000}")
     private int readTimeout;
 
-    @Bean
+    @Bean("blockchainReaderRestClient")
     public RestClient restClient(RestClient.Builder builder, ClientHttpRequestFactory clientHttpRequestFactory) {
         return builder.requestFactory(clientHttpRequestFactory).build();
     }
