@@ -26,6 +26,7 @@ import org.cardanofoundation.lob.app.accounting_reporting_core.domain.core.Curre
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.FinancialPeriodSource;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.Transactions;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.domain.core.TxLine;
+import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreBigDecimal;
 import org.cardanofoundation.lob.app.netsuite_altavia_erp_adapter.util.MoreString;
 import org.cardanofoundation.lob.app.support.collections.Optionals;
 
@@ -129,12 +130,12 @@ public class TransactionConverter {
                 return Either.left(new FatalError(ADAPTER_ERROR, "TRANSACTIONS_VALIDATION_ERROR", Map.of()));
             } else if(txLine.amountDebit() != null) {
                 operationType = OperationType.DEBIT;
-                amountLcy = txLine.amountDebit();
-                amountFcy = txLine.amountDebitForeignCurrency();
+                amountLcy = MoreBigDecimal.zeroForNull(txLine.amountDebit());
+                amountFcy = MoreBigDecimal.zeroForNull(txLine.amountDebitForeignCurrency());
             } else if(txLine.amountCredit() != null) {
                 operationType = OperationType.CREDIT;
-                amountLcy = txLine.amountCredit();
-                amountFcy = txLine.amountCreditForeignCurrency();
+                amountLcy = MoreBigDecimal.zeroForNull(txLine.amountCredit());
+                amountFcy = MoreBigDecimal.zeroForNull(txLine.amountCreditForeignCurrency());
             } else {
                 log.info("Skipping transaction line with zero amounts for transaction: {}", txId);
                 // skipping when both amounts are zero
